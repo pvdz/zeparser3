@@ -11,8 +11,8 @@
 > The test claims it should fail because string keys are not exempted from the double `__proto__` rule
 >
 > I think the test is incorrect because the spec says to ignore early errors while parsing a cover grammer, which we are.
-
-TODO: report error in test262
+>
+> Reported in https://github.com/babel/babel/issues/10435
 
 ## PASS
 
