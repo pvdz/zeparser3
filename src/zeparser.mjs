@@ -193,21 +193,17 @@ const VERSION_OPTIONAL_CATCH = 10; // ES2019
 const VERSION_DYNAMIC_IMPORT = 11; // ES2020
 const VERSION_WHATEVER = Infinity;
 
-const IS_ASYNC_PREFIXED = {};
-let NOT_ASYNC_PREFIXED = {};
-let UNDEF_STATIC = undefined;
-ASSERT(!void (UNDEF_STATIC = {UNDEF_STATIC: 1, get str(){ASSERT(false)}}));
-let UNDEF_ASYNC = undefined;
-ASSERT(!void (UNDEF_ASYNC = {UNDEF_ASYNC: 1, get str(){ASSERT(false)}}));
-let UNDEF_STAR = undefined;
-ASSERT(!void (UNDEF_STAR = {UNDEF_STAR: 1, get str(){ASSERT(false)}}));
-let UNDEF_GET = undefined;
-ASSERT(!void (UNDEF_GET = {UNDEF_GET: 1, get str(){ASSERT(false)}}));
-let UNDEF_SET = undefined;
-ASSERT(!void (UNDEF_SET = {UNDEF_SET: 1, get str(){ASSERT(false)}}));
-const CALLED_FROM_WRAPPER = true;
-const IS_FUNC_DECL = true;
-const NOT_FUNC_DECL = false;
+const IS_ASYNC_PREFIXED = dev() ? {IS_ASYNC_PREFIXED: undefined} : true;
+const NOT_ASYNC_PREFIXED = dev() ? {NOT_ASYNC_PREFIXED: undefined} : false;
+const UNDEF_STATIC = dev() ? {UNDEF_STATIC: undefined, get str(){ASSERT(false)}} : undefined;
+const UNDEF_ASYNC = dev() ? {UNDEF_ASYNC: undefined, get str(){ASSERT(false)}} : undefined;
+const UNDEF_STAR = dev() ? {UNDEF_STAR: undefined, get str(){ASSERT(false)}} : undefined;
+const UNDEF_GET = dev() ? {UNDEF_GET: undefined, get str(){ASSERT(false)}} : undefined;
+const UNDEF_SET = dev() ? {UNDEF_SET: undefined, get str(){ASSERT(false)}} : undefined;
+const IS_CALLED_FROM_WRAPPER = dev() ? {IS_CALLED_FROM_WRAPPER: undefined} : true;
+const NOT_CALLED_FROM_WRAPPER = dev() ? {NOT_CALLED_FROM_WRAPPER: undefined} :false;
+const IS_FUNC_DECL = dev() ? {IS_FUNC_DECL: undefined} : true;
+const NOT_FUNC_DECL = dev() ? {NOT_FUNC_DECL: undefined} : false;
 const IS_FUNC_EXPR = true;
 const NOT_FUNC_EXPR = false;
 const IDENT_OPTIONAL = true;
@@ -321,6 +317,13 @@ const IS_LABELLED = true;
 const NOT_LABELLED = false;
 const NOT_LHSE = false; // not requiring a "LeftHandExpression". This is currently only used for class `extends`.
 const ONLY_LHSE = true; // restrict value to conorm to a "LeftHandExpression" production.
+
+function dev() {
+  let dev = false;
+  // A build will eliminate this ASSERT call. A minifier will inline the `true` and then eliminate it. Hopefully.
+  ASSERT(dev = true);
+  return dev;
+}
 
 function ASSERT_ASSIGN_EXPR(allowAssignment) {
   ASSERT(allowAssignment === ASSIGN_EXPR_IS_OK || allowAssignment === ASSIGN_EXPR_IS_ERROR, 'allowAssignment is enum', allowAssignment);
@@ -486,7 +489,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     options_astRoot.path = _path;
     options_astRoot.pathNames = _pnames;
   }
-  function AST_open(prop, type, token, explictlyOverwrite = false) {
+  function AST_open(prop, type, token, explictlyOverwrite = NOT_CALLED_FROM_WRAPPER) {
     if (traceast) {
       $log('AST_open; write type='+type+' to prop=' + prop, explictlyOverwrite);
       $log('- path (before):', _path.map(o => o.type).join(' - '));
@@ -529,7 +532,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (Array.isArray(node[prop])) {
       node[prop].push(newnode);
     }
-    else if (node[prop] === undefined || explictlyOverwrite) {
+    else if (node[prop] === undefined || explictlyOverwrite === IS_CALLED_FROM_WRAPPER) {
       node[prop] = newnode;
     }
     else {
@@ -763,7 +766,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (traceast) $log(' - child:', child);
     ASSERT(child, 'AST_wrapClosed('+prop+', '+newNodeType+','+newProp+'); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, newNodeType, token, CALLED_FROM_WRAPPER);
+    AST_open(prop, newNodeType, token, IS_CALLED_FROM_WRAPPER);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
@@ -795,7 +798,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (traceast) $log(' - child:', child);
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, value, startToken, CALLED_FROM_WRAPPER);
+    AST_open(prop, value, startToken, IS_CALLED_FROM_WRAPPER);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
     if (traceast) {
@@ -2114,7 +2117,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
     ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
-    ASSERT(!!isFuncDecl === (outerScoop !== DO_NOT_BIND), 'outerScoop is only used for func decl ids and required there', !!isFuncDecl, outerScoop !== DO_NOT_BIND);
+    ASSERT((isFuncDecl === IS_FUNC_DECL) === (outerScoop !== DO_NOT_BIND), 'outerScoop is only used for func decl ids and required there', isFuncDecl === IS_FUNC_DECL, outerScoop !== DO_NOT_BIND);
     ASSERT(typeof firstToken === 'object' && firstToken && typeof firstToken.type === 'number', 'token', firstToken);
     ASSERT_FDS(fdState);
 
@@ -2204,7 +2207,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let identToken = curtok;
       ASSERT_skipAny($IDENT, lexerFlags);
       AST_setIdent('id', identToken);
-    } else if (isFuncDecl === IS_FUNC_DECL && !isIdentOptional) {
+    } else if (isFuncDecl === IS_FUNC_DECL && isIdentOptional === IDENT_REQUIRED) {
       THROW('Function decl missing required ident');
     } else {
       AST_set('id', null);
@@ -3473,6 +3476,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseForHeader(lexerFlags, forToken, scoop, awaitable, astProp) {
     ASSERT(arguments.length === parseForHeader.length, 'arg count');
+    ASSERT(typeof awaitable === 'boolean');
 
     // TODO: confirm we do this;
     // > It is a Syntax Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
@@ -5889,12 +5893,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === parseValueHeadBody.length, 'argcount');
     ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
+    ASSERT(maybe === PARSE_VALUE_MAYBE || maybe === PARSE_VALUE_MUST, 'enum', maybe);
     // - ident (a var, true, false, null, super, new <value>, new.target, this, class, function, async func, generator func)
     // - literal (number, string, regex, object, array, template)
     // - arrow or group (special return flag)
     // - await expression
 
     // do not include the suffix (property, call, etc)
+    let startToken = curtok;
 
     // return whether the value is assignable (only for regular var names)
     if (curtype === $IDENT) {
@@ -5960,9 +5966,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    if (!maybe) THROW('Expected to parse a value');
-    // currently all callsites that have maybe=true will ignore the return value
-    return 'FAIL (remove me)';
+    ASSERT(startToken === curtok, 'anything that consumed something should return in that branch ...');
+    if (maybe === PARSE_VALUE_MUST) THROW('Expected to parse a value');
+    // currently all callsites that have maybe=PARSE_VALUE_MAYBE will ignore the return value if nothing was consumed
+
+    let returnValue = 0;
+    // This return value should be ignored. I want to know when that is not the case.
+    ASSERT(returnValue = new Proxy({}, {getPrototypeOf: () => ASSERT(false, 'poisoned getPrototypeOf'), setPrototypeOf: () => ASSERT(false, 'poisoned setPrototypeOf'), isExtensible: () => ASSERT(false, 'poisoned isExtensible'), preventExtensions: () => ASSERT(false, 'poisoned preventExtensions'), getOwnPropertyDescriptor: () => ASSERT(false, 'poisoned getOwnPropertyDescriptor'), defineProperty: () => ASSERT(false, 'poisoned defineProperty'), has: () => ASSERT(false, 'poisoned has'), get: () => ASSERT(false, 'poisoned get'), set: () => ASSERT(false, 'poisoned set'), deleteProperty: () => ASSERT(false, 'poisoned deleteProperty'), ownKeys: () => ASSERT(false, 'poisoned ownKeys'), apply: () => ASSERT(false, 'poisoned apply'), construct: () => ASSERT(false, 'poisoned construct')}));
+    return returnValue;
   }
   function _parseValueHeadBodyAfterObjArr(wasDestruct) {
     ASSERT(_parseValueHeadBodyAfterObjArr.length === arguments.length, 'argcount');
