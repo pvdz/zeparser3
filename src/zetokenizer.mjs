@@ -1,6 +1,3 @@
-// relevant: https://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-lexical-grammar
-// https://tc39.github.io/ecma262/
-
 import {
   $$A_61,
   $$A_UC_41,
@@ -452,15 +449,6 @@ function ZeTokenizer(
 
     return cache;
   }
-  function peekUnicode() {
-    // returns codePointAt if and only if charCodeAt returned >127 (UNCACHED!)
-    ASSERT(neof(), 'pointer not oob');
-    ASSERT(!arguments.length, 'no args');
-    ASSERT(cache === input.charCodeAt(pointer), 'cache should be up to date');
-
-    if (cache > 127) return input.codePointAt(pointer);
-    return cache;
-  }
   function peekd(delta) {
     ASSERT(delta, 'jump should be at least something otehrwise use peek()');
     ASSERT(pointer + delta >= 0 && pointer + delta < len, 'pointer not oob');
@@ -473,13 +461,6 @@ function ZeTokenizer(
     ASSERT(arguments.length === 1, 'one args');
 
     return peek() === ord;
-  }
-  function peekyd(d, ord) {
-    ASSERT(neofd(d), 'pointer not oob [' + d + '][' + pointer + ']');
-    ASSERT(typeof ord === 'number', 'ord shoud be number');
-    ASSERT(arguments.length === 2, 'two args');
-
-    return peekd(d) === ord;
   }
 
   function slice(from, to) {
@@ -1500,9 +1481,6 @@ function ZeTokenizer(
     while (neof() && isOctal(peek())) skip();
 
     return $NUMBER_OCT;
-  }
-  function isOctal(ord) {
-    return ord >= $$0_30 && ord <= $$7_37;
   }
   function parseBinary() {
     if (eof()) {
@@ -4305,7 +4283,7 @@ function ZeTokenizer(
     return flagState;
   }
   function parseDecimalEscape(c) {
-    let reason = 'Cannot escape \\8 or \\9 in a regex char class with u-flag'
+    let reason = 'Cannot escape \\8 or \\9 in a regex char class with u-flag';
     if (webCompat === WEB_COMPAT_ON) {
       // https://tc39.es/ecma262/#prod-annexB-IdentityEscape
       updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);

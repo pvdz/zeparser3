@@ -734,42 +734,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     _path[_path.length - 1][prop].push(value);
   }
-  function AST_wrapOpened(prop, newNodeType, newProp) {
-    if (traceast) {
-      $log('AST_wrapOpened', prop, newNodeType, newProp);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before:', inspect(_tree, false, null))
-    }
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-
-    // wrap the "current" node (last of _tree) with an extra node
-    // so the parent of node becomes the parent of a new node and
-    // the old node becomes a child of the new node
-    // a(x:b) -> a(x:c(y:b))
-
-    let node = _path.pop();
-    _pnames.pop();
-    let parent = _path[_path.length-1];
-
-    if (traceast) $log(' - node to wrap:', node, ', prop:', prop, ', parent:', parent);
-
-    if (Array.isArray(parent[prop])) {
-      ASSERT(node === parent[prop][parent[prop].length - 1], 'top should be last element of parent[prop]');
-      parent[prop].pop();
-    } else {
-      ASSERT(node === parent[prop], 'top should be parent[prop]');
-    }
-
-    AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
-    // set it as child of new node
-    AST_set(newProp, node);
-    _path.push(node);
-    _pnames.push(newProp);
-    if (traceast) {
-      $log('- tree after:', inspect(_tree, false, null))
-    }
-  }
   function AST_wrapClosed(prop, newNodeType, newProp, token) {
     if (traceast) {
       $log('AST_wrapClosed', prop, newNodeType, newProp);
@@ -806,99 +770,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (traceast) {
       $log('- tree after:', inspect(_tree, false, null))
     }
-  }
-  function AST_replaceOpened(newNodeType, oldNodeType) {
-    if (traceast) {
-      $log('AST_replaceOpened', oldNodeType, '->', newNodeType);
-      $log('- path:', _pnames.join(' - '));
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before:', inspect(_tree, false, null))
-    }
-    ASSERT(arguments.length === 2, 'expecting 2 args');
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-
-    // this is used to replace the current open node with a new node
-    // for example: when parsing an ident at the start of a label it may turn out to be a label rather than
-    // an expression statement.
-
-    let oldNode = _path.pop(); // "NewExpression", the current leaf node to fully replace
-    let parentNode = _path[_path.length - 1];
-    let prevProp = _pnames.pop(); // name where oldNode was stored in parentNode (parentNode[prevProp]===oldNode)
-
-    ASSERT(oldNode.type === oldNodeType, 'expecting to replace a certain node (expected=' + oldNodeType + ', found=' + oldNode.type + ')');
-    ASSERT((Array.isArray(parentNode[prevProp]) ? parentNode[prevProp][parentNode[prevProp].length-1] : parentNode[prevProp]) === oldNode, 'should be the target node');
-    if (Array.isArray(parentNode[prevProp])) parentNode[prevProp].pop(); // the OPEN below will only append if array
-    AST_open(prevProp, newNodeType, CALLED_FROM_WRAPPER);
-
-    if (traceast) {
-      $log('- tree after:', inspect(_tree, false, null))
-    }
-
-    return oldNode;
-  }
-  function AST_replaceClosed(prop, newNodeType, oldNodeType) {
-    if (traceast) {
-      $log('AST_replaceClosed;', prop, ':', oldNodeType, '->', newNodeType);
-      $log('- path:', _pnames.join(' - '));
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before:', inspect(_tree, false, null))
-    }
-    ASSERT(arguments.length === 3, 'expecting 3 args');
-    ASSERT(typeof prop === 'string', 'prop=string');
-    ASSERT(typeof newNodeType === 'string', 'pronewNodeTypep=string');
-    ASSERT(typeof oldNodeType === 'string', 'oldNodeType=string');
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-
-    // this is used to replace the current open node with a new node
-    // for example: when parsing an ident at the start of a label it may turn out to be a label rather than
-    // an expression statement.
-
-    let parentNode = _path[_path.length - 1];
-    let oldNode = parentNode[prop]; // the node to fully replace
-    if (oldNode instanceof Array) oldNode = oldNode.pop();
-
-    ASSERT(oldNode, 'Expected a node on property of top', prop);
-    ASSERT(!(oldNode instanceof Array), 'node should not be an array');
-    ASSERT(oldNode.type !== undefined, 'Nodes should have a type');
-    ASSERT(oldNode.type === oldNodeType, 'expecting to replace a certain node (expected=' + oldNodeType + ', found=' + oldNode.type + ') ' + JSON.stringify(oldNode));
-    AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
-
-    if (traceast) {
-      $log('- tree after:', inspect(_tree, false, null))
-    }
-
-    return oldNode;
-  }
-  function AST_replaceParent(newNodeType, oldNodeType) {
-    if (traceast) {
-      $log('AST_replaceParent', prop, newNodeType, newNodeType);
-      $log('- path:', _pnames.join(' - '));
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before:', inspect(_tree, false, null))
-    }
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-
-    // this is used to replace the parent node with a new node
-    // for example: when parsing `new` a `NewExpression` is pushed but when parsing its `callee` when it encounters
-    // `.target` it must replace the whole `NewExpression` with a `MetaProperty` node. That's what this does.
-
-    let oldNode = _path.pop(); // "NewExpression", the current leaf node to fully replace
-    let parentNode = _path[_path.length - 1];
-    let prevProp = _pnames.pop(); // name where oldNode was stored in parentNode (parentNode[prevProp]===oldNode)
-
-    ASSERT(oldNode.type === oldNodeType, 'expecting to replace a certain node');
-    ASSERT((Array.isArray(parentNode[prevProp]) ? parentNode[prevProp][parentNode[prevProp].length-1] : parentNode[prevProp]) === oldNode, 'should be the target node');
-    if (Array.isArray(parentNode[prevProp])) parentNode[prevProp].pop(); // the OPEN below will only append if array
-    AST_open(prevProp, newNodeType, CALLED_FROM_WRAPPER);
-
-    if (traceast) {
-      $log('- tree after:', inspect(_tree, false, null))
-    }
-
-    return oldNode;
   }
   function AST_wrapClosedIntoArray(prop, value, newProp, startToken) {
     if (traceast) {
@@ -5319,14 +5190,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // valid binding name
     return '';
-  }
-  function fatalBindingAssignableIdentCheck(identToken, bindingType, lexerFlags) {
-    ASSERT(fatalBindingAssignableIdentCheck.length === arguments.length, 'arg count');
-    ASSERT(identToken.type === $IDENT, 'ident check on ident tokens ok');
-    let str = nonFatalBindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-    if (str & IS_ASSIGNABLE || str & NOT_ASSIGNABLE) return str;
-    ASSERT(typeof str === 'string' && str !== '', 'either returns assignable or an error string', str);
-    if (str !== '') THROW(`Cannot assign to this name (${identToken.str}) as a variable name because: ${str}`);
   }
   function nonFatalBindingAssignableIdentCheck(identToken, bindingType, lexerFlags) {
     ASSERT(arguments.length === nonFatalBindingAssignableIdentCheck.length, 'expecting arg count');
@@ -10978,15 +10841,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return destructible;
   }
 
-  // <SCRUB AST>
-  function logPath() {
-    $log('logPath: ' + _path.map(o=>o.type).join(' '))
-  }
-  function logTree() {
-    $log('logTree: ' + inspect(_tree, false, null))
-  }
-  // </SCRUB AST>
-
   let initialLexerFlags = sansFlag(INITIAL_LEXER_FLAGS | ((options_strictMode || goalMode === GOAL_MODULE) ? LF_STRICT_MODE : 0), LF_FOR_REGEX);
   initLexer(initialLexerFlags);
   parseTopLevels(initialLexerFlags);
@@ -11070,7 +10924,7 @@ function D(d) {
   }
 
 
-  d = _P(d, arr);
+  d = P(d, arr);
 
   if (d !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
@@ -11113,7 +10967,7 @@ function A(a) {
     a ^= DESTRUCT_ASSIGN_ONLY;
   }
 
-  a = _P(a, arr);
+  a = P(a, arr);
 
   if (a !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
@@ -11138,7 +10992,6 @@ function B(b) {
 
   ASSERT(false, 'B: unknown binding type: ' + b);
 }
-
 function S(s) {
   ASSERT(typeof s === 'number');
   if (s === SCOPE_LAYER_GLOBAL) return 'SCOPE_LAYER_GLOBAL';
@@ -11157,8 +11010,7 @@ function S(s) {
 
   ASSERT(false, 'B: unknown scope layer type: ' + s);
 }
-
-function _P(f, arr) {
+function P(f, arr) {
   if (f & PIGGY_BACK_WAS_CONSTRUCTOR) {
     arr.push('PIGGY_BACK_WAS_CONSTRUCTOR');
     f ^= PIGGY_BACK_WAS_CONSTRUCTOR;
