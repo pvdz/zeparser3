@@ -1,33 +1,3 @@
-
-// in all cases either; parse a var, let, const, or assignment expression
-// there can be multiple vars and inits
-// for-in and for-of can only have one var without inits (invalidate after)
-
-/*
-if script mode, these should all work:
-- `(yield)`
-- `(yield = x)`
-- `(x = yield)`
-- `(x = yield = x)`
-- `yield`
-- `yield = x`
-- `([yield])`
-- `(x = a + yield)`
-- `([x = yield])`
-- `([x, {y: [yield]}] = z)`
-- `([x, {y: [yield]}])`
-And these should all fail:
-- `(yield) => x`
-- `(yield = x) => x`
-- `(x = yield) => x`
-- `(x = yield = x) => x`
-- `yield => x`
-- `([yield]) => x`
-- `([x = yield]) => x`
-- `([x = yield y]) => x`
-- `([x, {y: [yield]}]) => x`
-*/
-
 import {
   inspect,
 
