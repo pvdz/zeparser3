@@ -4663,6 +4663,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let openParenToken = pees.pop();
       // `delete ((foo).bar)`, parse a tail then continue parsing parens
       if (curc !== $$PAREN_R_29) {
+
+        // After closing a paren, this is no longer an issue
+        assignable = sansFlag(assignable, PIGGY_BACK_WAS_ARROW);
+
         // (this is never toplevel)
         // `delete ((foo).bar)`      -- parse a tail then continue parsing parens
         // `delete ((foo)++)`
@@ -4696,7 +4700,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `delete (foo).foo`
     // - `delete (foo)++`        -- wait is this even legal?
     let prevtok = curtok;
-
     parseValueTail(lexerFlags, outerParenToken, assignable, NOT_NEW_ARG, NOT_LHSE, astProp);
     if (curtok === prevtok && canBeErrorCase && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       ASSERT(possibleIdentToken.type === $IDENT, 'this state is verified through piggies and if it wasnt an ident then this should never be reached', possibleIdentToken);
