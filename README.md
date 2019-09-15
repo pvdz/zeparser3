@@ -18,10 +18,11 @@ The parser itself is currently feature complete but not ready for production. Wh
 - AST
   - Is optional, enabled by default
   - Estree (default)
-  - Babel
-  - Supports location data (matching Babel for reference)
+  - Acorn
+  - Babel (anything stage 4, except comments)
+  - Supports location data (matching Acorn/Babel for reference)
 - Tests
-  - 20k input syntax tests
+  - 30k input syntax tests
   - Passes test262 suite (at least September 2019)
     
 ## ES modules
