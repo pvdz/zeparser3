@@ -8040,6 +8040,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignableYieldAwaitState = ASSIGNABLE_UNDETERMINED; // this is ONLY used to track await/yield state flags so we can propagate them back up
 
     while (curc !== $$SQUARE_R_5D) {
+      let elementStartToken = curtok;
       if (curtype === $IDENT) {
         // - `[x]`
         //     ^
@@ -8138,11 +8139,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // `[x()] = x`             - no
           //    ^
           // `[x().foo] = x`         - yes
-          // `[(x().foo)] = x`       - yes (noop-group edge case)
+          // `[x().foo = x] = x`     - yes
           // `([x()]) => x`          - no
           // `([x().foo]) => x`      - no
-          // `([(x)]) => x`          - no? (noop-group edge case)
-          // `([(x().foo)]) => x`    - no (noop-group edge case)
 
           if (bindingType === BINDING_TYPE_ARG) {
             // [v]: `([x[y]] = z)`
@@ -8240,14 +8239,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `[(a)] = x`           // simple assignment wrapped in parens is still simple, good for assignment destructuring
         // - `[(a) = x] = x`       // still fine
         // - `[(a = x)] = x`       // an assignment is not a simple assignment so this is bad
+        // - `[(x).foo = x] = x`   // yes
+        // - `[(x().foo)] = x`     // yes (noop-group edge case)
+        // - `([(x)]) => x`        // no (noop-group edge case)
+        // - `([(x().foo)]) => x`  // no (noop-group edge case)
 
         // We have a problem;
         // Destructuring assignments allow any "simple assignment targets" as valid patterns
         // However, in this parser an assignable is anything that is a simple assignment OR an assignment operator
         // but: https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-assignmenttargettype
         // This seems to be the only case where this distinction is relevant.
-
-
 
         // This is tricky. We need to know whether this is destructible assignable. The edge case is grouping.
         // However, in our system we only return whether or not the expression is assignable, not whether it is
@@ -8259,6 +8260,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let exprStartToken = curtok;
         let wasParen = curc === $$PAREN_L_28;
         let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_OK, NOT_NEW_ARG, NOT_LHSE, astProp);
+
+        if (curc === $$IS_3D && curtok.str === '=') {
+          // [v]: `[x()[y] = a ] = z`
+          //               ^
+          // [v]: `[x().y = a] = z`
+          //              ^
+          // [v]: `[(x).foo = x] = x`
+          //                ^
+          // [v]: `([(x).foo = x] = x)`
+          //                 ^
+          AST_wrapClosed(astProp, 'AssignmentExpression', 'left', elementStartToken);
+          AST_set('operator', '=');
+          ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a division
+          // pick up the flags from assignable and put them in destructible
+          // - `= await bar`
+          // - `= yield`
+          destructible |= parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right'); // save the piggies!
+          AST_close('AssignmentExpression');
+        }
+
         // This will stop after the tail of the expression. If there was an operator, it will now be
         // the current token. And in that case the expression is NOT destructible in any way. Otherwise it could
         // be an destructuring assignment if it was assignable in the first place.
