@@ -326,7 +326,7 @@ function ASSERT_FDS(fdState) {
   ASSERT([FDS_ILLEGAL, FDS_IFELSE, FDS_LEX, FDS_VAR].includes(fdState), 'FDS enum', fdState);
 }
 function ASSERT_BINDING_TYPE(bindingType) {
-  ASSERT([BINDING_TYPE_NONE,BINDING_TYPE_ARG,BINDING_TYPE_VAR,BINDING_TYPE_LET,BINDING_TYPE_CONST,BINDING_TYPE_CLASS,BINDING_TYPE_FUNC_VAR,BINDING_TYPE_FUNC_LEX,BINDING_TYPE_FUNC_STMT,BINDING_TYPE_CATCH_IDENT,BINDING_TYPE_CATCH_OTHER].includes(bindingType), 'bindingType enum', bindingType);
+  ASSERT([BINDING_TYPE_NONE,BINDING_TYPE_ARG,BINDING_TYPE_VAR,BINDING_TYPE_LET,BINDING_TYPE_CONST,BINDING_TYPE_CLASS,BINDING_TYPE_FUNC_VAR,BINDING_TYPE_FUNC_LEX,BINDING_TYPE_FUNC_STMT,BINDING_TYPE_CATCH_IDENT,BINDING_TYPE_CATCH_OTHER].includes(bindingType), 'bindingType is an enum', bindingType);
 }
 function ASSERT_BINDING_ORIGIN(bindingOrigin) {
   ASSERT([FROM_STATEMENT_START, FROM_FOR_HEADER, FROM_EXPORT_DECL, FROM_CATCH, FROM_ASYNC_ARG, FROM_OTHER_FUNC_ARG].includes(bindingOrigin), 'binding origin enum');
@@ -7129,6 +7129,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === _parseGroupToplevels.length, 'arg count');
     ASSERT(newlineAfterAsync === NOT_ASYNC_PREFIXED || newlineAfterAsync === IS_ASYNC_PREFIXED);
     ASSERT(typeof astProp === 'string');
+    ASSERT(parenToken !== curtok, 'paren should be skipped');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignmentForGroupToBeArrow);
     // = parseGroup(), = parseArrow()
@@ -8266,7 +8267,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = setNotAssignable(assignable);
           destructible |= CANT_DESTRUCT;
         }
-        else if (wasParen && isAssignable(assignable) && bindingType === BINDING_TYPE_NONE) {
+        else if (wasParen && isAssignable(assignable) && (bindingType === BINDING_TYPE_NONE || bindingType === BINDING_TYPE_ARG)) {
           // - `[(x)] = obj`
           destructible |=  DESTRUCT_ASSIGN_ONLY;
         }
@@ -11008,7 +11009,6 @@ function A(a) {
   return 'A='+arr.join(', ');
 }
 function B(b) {
-  ASSERT(ASSERT_BINDING_TYPE(b), 'binding type num', b);
   if (b === BINDING_TYPE_NONE) return 'B=BINDING_TYPE_NONE';
   if (b === BINDING_TYPE_ARG) return 'B=BINDING_TYPE_ARG';
   if (b === BINDING_TYPE_VAR) return 'B=BINDING_TYPE_VAR';
@@ -11021,7 +11021,7 @@ function B(b) {
   if (b === BINDING_TYPE_FUNC_LEX) return 'B=BINDING_TYPE_FUNC_LEX';
   if (b === BINDING_TYPE_FUNC_STMT) return 'B=BINDING_TYPE_FUNC_STMT';
 
-  ASSERT(false, 'B: unknown binding type: ' + b);
+  ASSERT(false, 'B: unknown binding enum type: ' + b);
 }
 function S(s) {
   ASSERT([SCOPE_LAYER_GLOBAL, SCOPE_LAYER_FOR_HEADER, SCOPE_LAYER_BLOCK, SCOPE_LAYER_FUNC_PARAMS, SCOPE_LAYER_ARROW_PARAMS, SCOPE_LAYER_TRY, SCOPE_LAYER_CATCH_HEAD, SCOPE_LAYER_CATCH_BODY, SCOPE_LAYER_FINALLY, SCOPE_LAYER_SWITCH, SCOPE_LAYER_FUNC_ROOT, SCOPE_LAYER_FUNC_BODY, SCOPE_LAYER_FAKE_BLOCK].includes(s), 'scopeType enum', s);
