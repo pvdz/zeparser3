@@ -3388,7 +3388,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExportObject(lexerFlags, tmpExportedNames, tmpExportedBindings) {
     ASSERT(parseExportObject.length === arguments.length, 'arg count');
-    // import {...} from 'x'
+    // - `export {...} from 'x'`
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
     ASSERT_skipAny('{', lexerFlagsNoTemplate);
     while (curtype === $IDENT) {
@@ -4639,6 +4639,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Now parse a group and pass it a special flag that changes the semantics of the return value
     // It's an ugly hack :( all caused by `delete ((((a, b) => c).d))` being hard to custom parse
 
+    let possibleIdentToken = curtok;
+
     let assignableOrJustIdent = _parseGroupToplevels(
       lexerFlags,
       parenToken,
@@ -4697,11 +4699,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     parseValueTail(lexerFlags, outerParenToken, assignable, NOT_NEW_ARG, NOT_LHSE, astProp);
     if (curtok === prevtok && canBeErrorCase && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      ASSERT(possibleIdentToken.type === $IDENT, 'this state is verified through piggies and if it wasnt an ident then this should never be reached', possibleIdentToken);
       // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
       // strict mode only
-      // `delete foo`
-      // `delete (((foo)))`
-      THROW('Bad delete case, can not delete an ident wrapped in parens');
+      // This is the group-wrapped variant, which still holds the above rule
+      // [x]: `delete (foo);`
+      // [v]: `delete (null);`
+      // [v]: `delete (true);`
+      // [v]: `delete (false);`
+      // [v]: `delete (this);`
+      // [x]: `delete (yield);` // (yield expression is not allowed in this position and we're assuming strict mode so can't be a var)
+      // [x]: `delete (await);` // (only auto-keyword in module goal, and if it were a keyword and valid then it would have an argument so curtok!==afterIdentToken)
+      // [x]: `delete (super);` // super can't be referenced without a call or property so would be curtok!==afterIdentToken
+      if (possibleIdentToken.str !== 'null' && possibleIdentToken.str !== 'true' && possibleIdentToken.str !== 'false' && possibleIdentToken.str !== 'this' && possibleIdentToken.str !== 'await') { // super edge case so dont care about the slowness
+        THROW('Bad delete case, can not delete an ident wrapped in parens');
+      }
     }
 
     return assignable;
@@ -4730,33 +4742,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Note: assignable is relevant if it somehow contained an await or yield; TODO: citation needed
     let assignable = parseValueAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, ASSIGN_EXPR_IS_ERROR, 'argument');
 
-    if (identToken.type === $IDENT) {
-      if (curtok === afterIdentToken && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-        // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
-        // - It is a Syntax Error if the UnaryExpression is contained in strict mode code and the derived UnaryExpression is PrimaryExpression:IdentifierReference .
-        //   - Note that IdentifierReference does NOT includes keywords. In particular, that means `null`, `true`, and `false` do not trigger this error.
-        // - It is a Syntax Error if the derived UnaryExpression is PrimaryExpression: CoverParenthesizedExpressionAndArrowParameterList and CoverParenthesizedExpressionAndArrowParameterList ultimately derives a phrase that, if used in place of UnaryExpression, would produce a Syntax Error according to these rules. This rule is recursively applied.
-        // (So in strict mode you can't do `delete foo;` and `delete (foo);` and `delete (((foo)));` etc)
+    if (curtok === afterIdentToken && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
+      // - It is a Syntax Error if the UnaryExpression is contained in strict mode code and the derived UnaryExpression is PrimaryExpression:IdentifierReference .
+      //   - Note that IdentifierReference does NOT includes keywords. In particular, that means `null`, `true`, and `false` do not trigger this error.
+      // - It is a Syntax Error if the derived UnaryExpression is PrimaryExpression: CoverParenthesizedExpressionAndArrowParameterList and CoverParenthesizedExpressionAndArrowParameterList ultimately derives a phrase that, if used in place of UnaryExpression, would produce a Syntax Error according to these rules. This rule is recursively applied.
+      // (So in strict mode you can't do `delete foo;` and `delete (foo);` and `delete (((foo)));` etc)
 
-        // Due to ASI this is a tad difficult to do without AST or even token stream but we can just confirm whether
-        // the object reference to curtok remains the same. In that case only identToken was parsed as the value.
+      // Due to ASI this is a tad difficult to do without AST or even token stream but we can just confirm whether
+      // the object reference to curtok remains the same. In that case only identToken was parsed as the value.
 
-        // [x]: `delete foo;`
-        // [v]: `delete null;`
-        // [v]: `delete true;`
-        // [v]: `delete false;`
-        // [v]: `delete this;`
-        // [x]: `delete yield;` // (yield expression is not allowed in this position and we're assuming strict mode so can't be a var)
-        // [x]: `delete await;` // (yield expression is not allowed in this position and we're assuming strict mode so can't be a var)
-        // [x]: `delete super;` // super can't be referenced without a call or property
-        if (identToken.str !== 'null' && identToken.str !== 'true' && identToken.str !== 'false' && identToken.str !== 'this') { // super edge case so dont care about the slowness
-          THROW('Cannot delete an identifier without tail, in strict mode');
-        }
-      } else if (afterIdentToken.nl > 0 && afterIdentToken.str === '(' && identToken.str === 'async' && curtok.str === '=>' && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-        // - `delete async \n (...) => x`
-        // which is effectively `delete async; () => x;`, which is still an error
+      // [x]: `delete foo;`
+      // [v]: `delete null;`
+      // [v]: `delete true;`
+      // [v]: `delete false;`
+      // [v]: `delete this;`
+      // [x]: `delete yield;` // (yield expression is not allowed in this position and we're assuming strict mode so can't be a var)
+      // [x]: `delete await;` // (only auto-keyword in module goal, and if it were a keyword and valid then it would have an argument so curtok!==afterIdentToken)
+      // [x]: `delete super;` // super can't be referenced without a call or property so would be curtok!==afterIdentToken
+      if (identToken.str !== 'null' && identToken.str !== 'true' && identToken.str !== 'false' && identToken.str !== 'this' && identToken.str !== 'await') { // super edge case so dont care about the slowness
         THROW('Cannot delete an identifier without tail, in strict mode');
       }
+    }
+    else if (afterIdentToken.nl > 0 && afterIdentToken.str === '(' && identToken.str === 'async' && curtok.str === '=>' && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      // - `delete async \n (...) => x`
+      // which is effectively `delete async; () => x;`, which is still an error
+      THROW('Cannot delete an identifier without tail, in strict mode');
     }
 
     return assignable;

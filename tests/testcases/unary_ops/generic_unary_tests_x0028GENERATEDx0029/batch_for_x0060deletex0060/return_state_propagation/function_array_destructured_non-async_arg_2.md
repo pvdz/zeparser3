@@ -36,14 +36,7 @@ async function f(){   function fh([delete await x]) { "use strict"; }   }
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-`````
-throws: Parser error!
-  Cannot delete an identifier without tail, in strict mode
-
-async function f(){   function fh([delete await x]) { "use strict"; }   }
-                                                ^------- error
-`````
-
+_Output same as sloppy mode._
 
 ### Module goal
 

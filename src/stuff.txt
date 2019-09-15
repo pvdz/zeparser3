@@ -1,4 +1,0 @@
-strict mode is a relevant flag that can cause distinct syntax errors from sloppy mode
-
-module vs script mode is a relevant flag that causes distinct parsing modes
-
