@@ -1712,6 +1712,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // The whole expression has already been parsed so we can just close it.
         parseSemiOrAsi(lexerFlags);
         AST_close('ExpressionStatement');
+        break; // end of directives
       }
     }
 
