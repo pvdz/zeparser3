@@ -8263,22 +8263,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_OK, NOT_NEW_ARG, NOT_LHSE, astProp);
 
         if (curc === $$IS_3D && curtok.str === '=') {
-          // [v]: `[x()[y] = a ] = z`
-          //               ^
-          // [v]: `[x().y = a] = z`
-          //              ^
-          // [v]: `[(x).foo = x] = x`
-          //                ^
-          // [v]: `([(x).foo = x] = x)`
-          //                 ^
-          AST_wrapClosed(astProp, 'AssignmentExpression', 'left', elementStartToken);
-          AST_set('operator', '=');
-          ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a division
-          // pick up the flags from assignable and put them in destructible
-          // - `= await bar`
-          // - `= yield`
-          destructible |= parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right'); // save the piggies!
-          AST_close('AssignmentExpression');
+          if (isAssignable(assignable)) {
+            // [v]: `[x()[y] = a ] = z`
+            //               ^
+            // [v]: `[x().y = a] = z`
+            //              ^
+            // [v]: `[(x).foo = x] = x`
+            //                ^
+            // [v]: `([(x).foo = x] = x)`
+            //                 ^
+            AST_wrapClosed(astProp, 'AssignmentExpression', 'left', elementStartToken);
+            AST_set('operator', '=');
+            ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a division
+            // pick up the flags from assignable and put them in destructible
+            // - `= await bar`
+            // - `= yield`
+            destructible |= parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right'); // save the piggies!
+            AST_close('AssignmentExpression');
+          } else {
+            // - `[2=x]`
+            //      ^
+            THROW('Cannot assign to lhs');
+          }
         }
 
         // This will stop after the tail of the expression. If there was an operator, it will now be
