@@ -9,7 +9,7 @@
 ## Input
 
 `````js
-ªfoo();
+@{xaa}@foo();
 `````
 
 ## Output
@@ -38,7 +38,7 @@ ast: {
         callee: {
           type: 'Identifier',
           loc:{start:{line:1,column:0},end:{line:1,column:4},source:''},
-          name: 'ªfoo'
+          name: '@{xaa}@foo'
         },
         arguments: []
       }

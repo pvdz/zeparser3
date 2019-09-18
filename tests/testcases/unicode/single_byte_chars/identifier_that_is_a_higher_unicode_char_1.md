@@ -11,7 +11,7 @@
 ## Input
 
 `````js
-ª();
+@{xaa}@();
 `````
 
 ## Output
@@ -40,7 +40,7 @@ ast: {
         callee: {
           type: 'Identifier',
           loc:{start:{line:1,column:0},end:{line:1,column:1},source:''},
-          name: 'ª'
+          name: '@{xaa}@'
         },
         arguments: []
       }

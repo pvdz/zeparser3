@@ -256,7 +256,7 @@ function parseTestFile(tob) {
 }
 
 function encodeUnicode(str) {
-  return str.replace(/[^\u0000-\u00ff]/ug, m => '@{x'+m.codePointAt(0).toString(16)+'}@');
+  return str.replace(/[^\u0020-\u007e\n]/ug, m => '@{x'+m.codePointAt(0).toString(16)+'}@');
 }
 function decodeUnicode(str) {
   // console.log('decoding', str)

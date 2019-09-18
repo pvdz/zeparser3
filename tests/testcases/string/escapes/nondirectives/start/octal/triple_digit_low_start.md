@@ -79,7 +79,7 @@ ast: {
       expression: {
         type: 'Literal',
         loc:{start:{line:2,column:0},end:{line:2,column:6},source:''},
-        value: 'û',
+        value: '@{xfb}@',
         raw: '"\\373"'
       }
     }

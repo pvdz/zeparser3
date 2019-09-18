@@ -73,7 +73,7 @@ ast: {
       expression: {
         type: 'Literal',
         loc:{start:{line:2,column:0},end:{line:2,column:30},source:''},
-        value: ';7 ª @{xabc}@ \u0000 finish',
+        value: ';7 @{xaa}@ @{xabc}@ \u0000 finish',
         raw: "'\\0737 \\xaa \\u{abc} \\0 finish'"
       }
     }

@@ -9,7 +9,7 @@
 ## Input
 
 `````js
-x+y
+x@{xb}@+@{xb}@y
 `````
 
 ## Output
