@@ -190,7 +190,7 @@ function parseTestFile(tob) {
     ASSERT(oldData.includes(OUTPUT_HEADER_WEB, outputOffset), 'missing web header', file);
 
     let outputSloppyHeaderOffset = oldData.indexOf(OUTPUT_HEADER_SLOPPY, outputOffset);
-    ASSERT(outputSloppyHeaderOffset >= 0);
+    ASSERT(outputSloppyHeaderOffset >= 0, 'should have output sloppy header');
     let outputSloppyOffset = oldData.indexOf(OUTPUT_QUINTICK, outputSloppyHeaderOffset);
     ASSERT(outputSloppyOffset >= 0, 'every test has at least a sloppy output', file);
     outputSloppyOffset += OUTPUT_QUINTICK.length;
@@ -198,18 +198,18 @@ function parseTestFile(tob) {
     tob.oldOutputSloppy = oldData.slice(outputSloppyOffset, oldData.indexOf(OUTPUT_QUINTICK, outputSloppyOffset));
 
     let outputStrictHeaderOffset = oldData.indexOf(OUTPUT_HEADER_STRICT, outputSloppyHeaderOffset);
-    ASSERT(outputStrictHeaderOffset >= 0);
+    ASSERT(outputStrictHeaderOffset >= 0, 'should have output strict header');
     let outputStrictOffset = oldData.indexOf(OUTPUT_QUINTICK, outputStrictHeaderOffset);
     if (outputStrictOffset >= 0) {
       outputStrictOffset += OUTPUT_QUINTICK.length;
-      ASSERT(oldData.includes(OUTPUT_QUINTICK, outputStrictOffset + OUTPUT_QUINTICK.length));
+      ASSERT(oldData.includes(OUTPUT_QUINTICK, outputStrictOffset + OUTPUT_QUINTICK.length), 'output should contain strict output quintick');
       tob.oldOutputStrict = oldData.slice(outputStrictOffset, oldData.indexOf(OUTPUT_QUINTICK, outputStrictOffset));
     } else {
       tob.oldOutputStrict = tob.oldOutputSloppy;
     }
 
     let outputModuleHeaderOffset = oldData.indexOf(OUTPUT_HEADER_MODULE, outputStrictHeaderOffset);
-    ASSERT(outputModuleHeaderOffset >= 0);
+    ASSERT(outputModuleHeaderOffset >= 0, 'should have output module header');
     let outputModuleOffset = oldData.indexOf(OUTPUT_QUINTICK, outputModuleHeaderOffset);
     if (outputModuleOffset >= 0) {
       outputModuleOffset += OUTPUT_QUINTICK.length;
@@ -220,7 +220,7 @@ function parseTestFile(tob) {
     }
 
     let outputWebHeaderOffset = oldData.indexOf(OUTPUT_HEADER_WEB, outputModuleHeaderOffset);
-    ASSERT(outputWebHeaderOffset >= 0);
+    ASSERT(outputWebHeaderOffset >= 0, 'should have output web header');
     let outputWebOffset = oldData.indexOf(OUTPUT_QUINTICK, outputWebHeaderOffset);
     let nextHash = oldData.indexOf('\n##', outputWebHeaderOffset + 5);
     if (outputWebOffset >= 0 && (nextHash < 0 || nextHash > outputWebOffset)) {
