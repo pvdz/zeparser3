@@ -310,7 +310,7 @@ const NOT_GLOBAL_TOPLEVEL = dev() ? {NOT_GLOBAL_TOPLEVEL: 1} : false;
 const IS_LABELLED = dev() ? {IS_LABELLED: 1} : true;
 const NOT_LABELLED = dev() ? {NOT_LABELLED: 1} : false;
 const NOT_LHSE = dev() ? {NOT_LHSE: 1} : false; // not requiring a "LeftHandExpression". This is currently only used for class `extends`.
-const ONLY_LHSE = dev() ? {ONLY_LHSE: 1} : true; // restrict value to conorm to a "LeftHandExpression" production.
+const ONLY_LHSE = dev() ? {ONLY_LHSE: 1} : true; // restrict value to conform to a "LeftHandExpression" production.
 
 function dev() {
   let dev = false;
@@ -379,6 +379,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     exposeScopes: options_exposeScopes = false, // put scopes in the AST under `$scope` property?
     astUids = false, // add an incremental uid to all ast nodes for debugging
     fullErrorContext = false, // do not trunc the input when throwing an error?
+
+    templateNewlineNormalization = true, // normalize \r and \rn to \n in the `.raw` of template nodes? Estree spec says yes, but makes it hard to serialize lossless
 
     // You can override the logging functions
     $log = console.log,
@@ -6751,7 +6753,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // https://github.com/estree/estree/issues/90#issuecomment-109140678
     // The raw value should normalize newlines (\r \r\n) to \n, but not \u000a
     // The cooked value should convert escapes to literals but skip further normalization
-    let quasiValue = tickToken.str.slice(1, (wasTail === IS_QUASI_TAIL) ? -1 : -2).replace(/\r\n?/g, '\n');
+    let quasiValue = tickToken.str.slice(1, (wasTail === IS_QUASI_TAIL) ? -1 : -2);
+    if (acornCompat || babelCompat || templateNewlineNormalization) {
+      // This normalization is almost lossy as you can't (trivially) reconstruct the original template now
+      quasiValue = quasiValue.replace(/\r\n?/g, '\n');
+    }
     let cookedValue = noCooked ? null : tickToken.canon.slice(1, (wasTail === IS_QUASI_TAIL) ? -1 : -2);
 
     AST_open('quasis', 'TemplateElement', tickToken);

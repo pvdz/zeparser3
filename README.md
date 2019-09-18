@@ -55,6 +55,9 @@ const {
     babelCompat = false,
     // Pass on a reference that will be used as the AST root
     astRoot = null,
+    // Should it normalize \r and \r\n to \n in the .raw of template nodes?
+    // Estree spec but makes it hard to serialize template nodes losslessly
+    templateNewlineNormalization = true,
     // Pass on a reference to store the tokens
     tokenStorage = [],
     // Callback to receive the tokenizer instance once its created
