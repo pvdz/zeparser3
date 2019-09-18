@@ -12,11 +12,22 @@ const RESET = '\x1b[0m';
 
 const trimCache = new Map;
 
-export function reduceAndExit(
+function reduceAndExit(
   input/*: string*/,
   parse/*: (input: string) => {e, r, tok}*/,
-  file/*: string*/
+  file/*?: string*/
 ) {
+  reduce(input, parse, file);
+  console.log('exit...');
+  process.exit();
+}
+
+function reduce(
+  input/*: string*/,
+  parse/*: (input: string) => {e, r, tok}*/,
+  file/*?: string*/
+) {
+  console.log(BOLD + '<reduce>' + RESET);
   let org = input;
   let asserts = new Set;
   let inputError = parse(input).e;
@@ -27,6 +38,7 @@ export function reduceAndExit(
   inputError = inputError.message.replace(/\{#.*?#\}/g, '<token>');
   if (inputError && inputError.toLowerCase().includes('assert')) asserts.add(inputError);
   let same = (code, nocache) => {
+    if (!code) return false;
     if (!nocache && trimCache.has(code)) {
       let err = trimCache.get(code);
       console.log('CACHED!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, err || '<no error>');
@@ -35,7 +47,7 @@ export function reduceAndExit(
     let err = parse(code).e;
     if (err) err = err.message.replace(/\{#.*?#\}/g, '<token>');
     if (err && err.toLowerCase().includes('assert')) asserts.add(err);
-    console.log('Tested!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, err || '<no error>');
+    console.log('Tested!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, 'the error:', [err || '<no error>']);
     trimCache.set(code, err);
     return err === inputError;
   };
@@ -161,7 +173,7 @@ export function reduceAndExit(
   asserts.delete(inputError);
   if (asserts.length) {
     console.log(BLINK + 'THERE WERE ASSERTS' + RESET);
-    console.log(assert.forEach(e => ' - ' + s + '\n'));
+    console.log(asserts.forEach(s => ' - ' + s + '\n'));
   }
 
   if (process.argv.includes('--write') && file) {
@@ -169,8 +181,9 @@ export function reduceAndExit(
     fs.writeFileSync(file + '.min', '@Minified from ' + file + '\n###\n' + input);
   }
 
-  console.log('exit...');
-  process.exit();
+  console.log(BOLD + '</reduce>' + RESET);
+
+  return input;
 }
 
 function trimPatten(same, str, pattern, repl) {
@@ -194,3 +207,5 @@ function trimPatten(same, str, pattern, repl) {
   }
   return currentStr;
 }
+
+export {reduceAndExit, reduce, trimPatten};
