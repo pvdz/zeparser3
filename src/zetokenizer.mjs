@@ -1721,11 +1721,6 @@ function ZeTokenizer(
         if (eof()) break;
         c = peek();
       } while (true);
-      // slow path, dont test this inside the super hot loop above
-      if (c === $$BACKSLASH_5C) {
-        ASSERT_skip($$BACKSLASH_5C);
-        return parseRegexIdentFromUnicodeEscape(NON_START, prevStr, uflagStatus);
-      }
     }
     lastParsedIdent = prevStr;
     return uflagStatus;
