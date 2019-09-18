@@ -173,3 +173,13 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+((wrap)({.9:a, 0x84:b, 0b1:c, 0o27:d, 1e234:e}));
+````
+
+Produces same AST

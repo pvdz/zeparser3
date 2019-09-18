@@ -90,3 +90,14 @@ tokens (5x):
        IDENT PUNCTUATOR STRING_DOUBLE ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+debugger;
+("xyz \373");
+````
+
+Produces same AST

@@ -25,6 +25,8 @@ const CONFIRMED_UPDATE = process.argv.includes('-U');
 const AUTO_GENERATE = process.argv.includes('-g');
 const AUTO_GENERATE_CONSERVATIVE = process.argv.includes('-G');
 const REDUCING = process.argv.includes('--min');
+const SKIP_PRINTER = process.argv.includes('--no-printer');
+const REDUCING_PRINTER = process.argv.includes('--min-printer');
 const ALL_VARIANTS = process.argv.includes('--all');
 let [a,b,c,d] = [process.argv.includes('--sloppy'), process.argv.includes('--strict'), process.argv.includes('--module'), process.argv.includes('--web')];
 const DISABLE_VARIANTS_UNLESS_OVERRIDE = SEARCH || INPUT_OVERRIDE || REDUCING;
@@ -47,6 +49,7 @@ const COMPARE_BABEL = process.argv.includes('--test-babel');
 const COMPARE_NODE = process.argv.includes('--test-node');
 const TEST_ACORN = COMPARE_ACORN && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record acorn deltas into test files
 const TEST_BABEL = COMPARE_BABEL && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
+const NO_FATALS = process.argv.includes('--no-fatals'); // asserts should not stop a full auto run (dev tool, rely on git etc for recovery...)
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -86,9 +89,12 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
     --serial      Test all targeted files in serial, verbosely, instead of using parallel phases (which is faster)
                   (Note: -q, -i, -b, and -f implicitly enable --serial)
+    --no-printer  Skip running ZePrinter on input
     --min         Brute-force simplify a test case that throws an error while maintaining the same error message, only with -f, implies --sloppy
       -- write    For reducer only; write result to new file
+    --min-printer Minimize a ZePrinter-failing input case
     --force-write Always write the test cases to disk, even when no change was detected
+    --no-fatals   Do not treat (test) assertion errors as fatals (dev tools only, rely on git etc for recovery)
 `);
   process.exit();
 }
@@ -104,7 +110,7 @@ import {execSync} from 'child_process';
 let prettierFormat = () => { return 'prettier not loaded'; }; // if available, loaded through import() below
 
 import {
-  ASSERT,
+  ASSERT as _ASSERT,
   astToString,
   decodeUnicode,
   encodeUnicode,
@@ -129,6 +135,10 @@ import {
   OUTPUT_QUINTICKJS,
 } from './utils.mjs';
 let LOG = _LOG; // I want to be able to override this and imports are constants
+let ASSERT = (...args) => {
+  if (NO_FATALS) try { _ASSERT(...args); } catch (e) { console.error('Assertion error (squashed by NO_FATALS):', e.stack); }
+  else _ASSERT(...args);
+};
 
 import ZeParser, {
   COLLECT_TOKENS_NONE,
@@ -162,11 +172,14 @@ import {
   processAcornResult,
 } from './parse_acorn.mjs';
 
+import {testZePrinter} from "./run_zeprinter.mjs";
+
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
 let dirname = path.dirname(filePath);
 
 const BOLD = '\x1b[;1;1m';
+const OVER = '\x1b[32;53m';
 const DIM = '\x1b[30;1m';
 const BLINK = '\x1b[;5;1m';
 const RED = '\x1b[31m';
@@ -178,7 +191,8 @@ const TEST_STRICT = 'strict';
 const TEST_MODULE = 'module';
 const TEST_WEB = 'web';
 
-if (REDUCING && !TARGET_FILE && !INPUT_OVERRIDE) THROW('Can only use `--min` together with `-f` or `-i`');
+if ((REDUCING || REDUCING_PRINTER) && !TARGET_FILE && !INPUT_OVERRIDE) THROW('Can only use `--min` and `--min-parser` together with `-f` or `-i`');
+if (NO_FATALS) console.log(BLINK + 'NO_FATALS enabled. Do not blindly commit result!!' + RESET);
 
 let stopAsap = false;
 
@@ -236,6 +250,22 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
     if (tob.shouldFail) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed';
     }
+
+    // Test the ast printer
+    // We only really need to test it once for whatever run passes
+    if (!SKIP_PRINTER && !tob.printerOutput) {
+      tob.printerOutput = testZePrinter(
+        code,
+        testVariant,
+        r.ast,
+        !INPUT_OVERRIDE && !TARGET_FILE && (AUTO_UPDATE && !CONFIRMED_UPDATE),
+        REDUCING_PRINTER,
+        !REDUCING_PRINTER
+      );
+      if (tob.printerOutput[2] !== 'same' && tob.printerOutput[2] !== 'diff-same') {
+        tob.continuePrint = 'ZePrinter output needs attention [' + tob.printerOutput[2] + ']';
+      }
+    }
   } catch (_e) {
     e = _e;
     if (tob.shouldPass) {
@@ -244,12 +274,12 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   }
 
   if (tob.continuePrint) {
-    if (AUTO_UPDATE && tob.continuePrint && !CONFIRMED_UPDATE && !INPUT_OVERRIDE && !TARGET_FILE) {
+    if (!NO_FATALS && AUTO_UPDATE && tob.continuePrint && !CONFIRMED_UPDATE && !INPUT_OVERRIDE && !TARGET_FILE) {
       console.error(BOLD + 'Test Assertion fail' + RESET + ': test ' + BOLD + tob.file + RESET + ' was explicitly marked to pass, but it failed somehow;');
       process.exit();
+    } else {
+      console.error(tob.continuePrint);
     }
-
-    console.error(tob.continuePrint);
   }
 
   let babelOk, babelFail, zasb;
@@ -292,8 +322,10 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
       console.error(errorMessage);
       console.error('####');
       console.error(e.stack);
-      hardExit(tob, 'postProcessResult assertion error');
-      throw new Error('Assertion error. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
+      if (!NO_FATALS) {
+        hardExit(tob, 'postProcessResult assertion error');
+        throw new Error('Assertion error. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
+      }
     }
     else if (errorMessage.startsWith('Parser error!')) {
       errorMessage = errorMessage.slice(0, 'Parser error!'.length) + '\n  ' + errorMessage.slice('Parser error!'.length + 1);
@@ -309,8 +341,10 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
       console.error(errorMessage);
       console.error(e.stack);
       console.error('####');
-      hardExit(tob, 'postProcessResult unknown error');
-      throw new Error('Non-graceful error, fixme. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
+      if (!NO_FATALS) {
+        hardExit(tob, 'postProcessResult unknown error');
+        throw new Error('Non-graceful error, fixme. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
+      }
     }
 
     if (tok) {
@@ -470,8 +504,10 @@ function hardExit(tob, msg) {
   stopAsap = true;
   if (!msg) FIXME
   if (tob) console.log(RED + 'FAIL' + RESET + ' ' + DIM + tob.fileShort + RESET);
-  console.log('Hard exit() node now because: ' + msg);
-  process.exit();
+  if (!NO_FATALS) {
+    console.log('Hard exit() node now because: ' + msg);
+    process.exit();
+  }
 }
 
 async function runTests(list, zeparser) {
@@ -574,7 +610,7 @@ async function writeNewOutput(list) {
       }
     }));
 
-    if (updated && (STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL)) {
+    if (!NO_FATALS && updated && (STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL)) {
       stopAsap = true;
       hardExit(undefined, 'updated at least one file in writeNewOutput()');
     }
@@ -649,6 +685,7 @@ async function cli() {
       else console.log(list[0].newOutputWeb);
       console.log('=============================================\n');
     }
+    if (tob.printerOutput) console.log(tob.printerOutput[1]);
   }
 }
 
@@ -657,7 +694,6 @@ async function main() {
 
   if (TARGET_FILE) {
     console.log('Using explicit file:', TARGET_FILE);
-    if (REDUCING) console.log('And only reducing this test case to a minimal set with the same error, then exiting');
     files = [TARGET_FILE];
   } else {
     files = files.filter(f => !f.endsWith('autogen.md'));
@@ -908,6 +944,7 @@ function generateOutputBlock(tob) {
     generateOutputStrict(strict, sloppy, tob.newOutputStrictBabel, tob.newOutputStrictNode) +
     generateOutputModule(module, strict, sloppy, tob.newOutputModuleBabel, tob.newOutputModuleAcorn) +
     generateOutputWeb(web, sloppy, tob.newOutputWebBabel) +
+    (tob.printerOutput ? tob.printerOutput[1] : '') +
   '';
 }
 function ifNotFalse(a, b) {

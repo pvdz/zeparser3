@@ -109,3 +109,13 @@ tokens (15x):
        PUNCTUATOR IDENT IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+try {} catch (e) {var e = x;}
+````
+
+Produces same AST

@@ -100,3 +100,14 @@ tokens (11x):
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [module]:
+
+````js
+var foo;
+export {foo as new}
+````
+
+Produces same AST

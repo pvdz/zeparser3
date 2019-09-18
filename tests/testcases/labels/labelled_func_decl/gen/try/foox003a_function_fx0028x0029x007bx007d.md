@@ -106,3 +106,13 @@ tokens (15x):
        PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+try {foo: function f() {}} finally {}
+````
+
+Produces same AST

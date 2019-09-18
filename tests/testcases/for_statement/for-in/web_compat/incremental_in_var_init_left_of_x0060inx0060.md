@@ -116,3 +116,13 @@ tokens (12x):
        IDENT PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+for (var a = ++b in c) ;
+````
+
+Produces same AST

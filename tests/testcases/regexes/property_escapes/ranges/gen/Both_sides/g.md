@@ -73,3 +73,13 @@ tokens (3x):
        REGEX ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+/[\p{Bidi_Mirrored}-\p{Hex}]/g;
+````
+
+Produces same AST

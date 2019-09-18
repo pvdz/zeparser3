@@ -93,3 +93,13 @@ tokens (7x):
        IDENT PUNCTUATOR REGEX PUNCTUATOR IDENT ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+((middleDashMatch = /[\-]/.exec));
+````
+
+Produces same AST

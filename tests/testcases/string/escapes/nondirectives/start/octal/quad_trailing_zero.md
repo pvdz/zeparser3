@@ -86,3 +86,14 @@ tokens (5x):
        IDENT PUNCTUATOR STRING_DOUBLE ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+debugger;
+("\1230");
+````
+
+Produces same AST

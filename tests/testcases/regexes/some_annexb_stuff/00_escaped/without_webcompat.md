@@ -71,3 +71,13 @@ tokens (3x):
        REGEX ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+/\00/;
+````
+
+Produces same AST

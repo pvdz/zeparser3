@@ -129,3 +129,13 @@ tokens (18x):
        PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+function w(casecase) {y: j: function casecase() {}}
+````
+
+Produces same AST

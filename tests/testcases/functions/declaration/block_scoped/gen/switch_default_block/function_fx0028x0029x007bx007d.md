@@ -116,3 +116,15 @@ tokens (21x):
        IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+switch (x) {default:
+function f() {}
+function f() {}}
+````
+
+Produces same AST

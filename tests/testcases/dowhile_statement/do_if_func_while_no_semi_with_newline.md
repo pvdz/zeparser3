@@ -111,3 +111,13 @@ tokens (17x):
        IDENT PUNCTUATOR ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+do if (8) function s() {} while (y);
+````
+
+Produces same AST

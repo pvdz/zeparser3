@@ -34,10 +34,13 @@ ZeParser test runner help:
  --strict      Enable strict script mode, do not auto-enable other modes
  --module      Enable module goal mode, do not auto-enable other modes
  --min         Only for f and i, for invalid input; minify the test case while keeping same error
+ --min-printer Only for f and i, for inputs that cause bad printer behavior; minify the test case while keeping same error
+ --no-printer  Do not run the zeprinter-step (helps with debugging in certain cases)
  --acorn       Run in Acorn compat mode
  --test-acorn  Also compare AST of test cases to Acorn output
  --babel       Run in Babel compat mode
  --test-babel  Also compare AST of test cases to Babel output
+ --no-fatals   Do not abort test run for (test) any assertion errors
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -123,6 +126,9 @@ ZeParser test runner help:
     --babel)        BABEL='--babel'       ;;
     --test-babel)   BABEL='--test-babel'  ;;
     --min)          EXTRA='--min'         ;;
+    --min-printer)  EXTRA='--min-printer' ;;
+    --no-printer)   EXTRA='--no-printer'  ;;
+    --no-fatals)    EXTRA='--no-fatals'   ;;
 
     6)  ES='--es6'  ;;
     7)  ES='--es7'  ;;

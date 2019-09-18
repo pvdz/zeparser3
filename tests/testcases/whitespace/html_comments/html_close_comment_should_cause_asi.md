@@ -89,3 +89,14 @@ tokens (5x):
        IDENT ASI IDENT ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+a;
+b;
+````
+
+Produces same AST

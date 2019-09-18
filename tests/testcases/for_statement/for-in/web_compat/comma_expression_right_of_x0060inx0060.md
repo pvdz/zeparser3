@@ -180,3 +180,13 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+for (var a in ((stored = a), {a:0, b:1, c:2})) ;
+````
+
+Produces same AST

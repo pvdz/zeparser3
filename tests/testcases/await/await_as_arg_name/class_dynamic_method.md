@@ -110,3 +110,13 @@ class x{[x](await){}}
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+class x{[x](await){};}
+````
+
+Produces same AST

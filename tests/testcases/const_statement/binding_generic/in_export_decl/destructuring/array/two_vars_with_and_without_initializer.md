@@ -108,3 +108,13 @@ tokens (13x):
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [module]:
+
+````js
+export const [foo = a, bar,] = arr;
+````
+
+Produces same AST

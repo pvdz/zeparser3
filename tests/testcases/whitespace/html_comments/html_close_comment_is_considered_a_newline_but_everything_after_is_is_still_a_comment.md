@@ -67,3 +67,13 @@ tokens (1x):
 
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+
+````
+
+Produces same AST

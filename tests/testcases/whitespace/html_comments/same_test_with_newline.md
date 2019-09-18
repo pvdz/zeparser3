@@ -84,3 +84,13 @@ tokens (5x):
        IDENT PUNCTUATOR PUNCTUATOR ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+((foo)());
+````
+
+Produces same AST

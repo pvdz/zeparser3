@@ -124,3 +124,14 @@ tokens (17x):
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [module]:
+
+````js
+var x, y;
+export {x as a, y as b}
+````
+
+Produces same AST

@@ -92,3 +92,13 @@ tokens (8x):
        IDENT IDENT PUNCTUATOR PUNCTUATOR NUMBER_DEC PUNCTUATOR ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+var foo = [23,];
+````
+
+Produces same AST

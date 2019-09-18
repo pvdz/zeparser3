@@ -72,3 +72,13 @@ tokens (3x):
        REGEX ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+/(?<42a>a)/;
+````
+
+Produces same AST

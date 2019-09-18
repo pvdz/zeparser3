@@ -91,3 +91,13 @@ tokens (13x):
        PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+if (x) ; else function f() {}
+````
+
+Produces same AST

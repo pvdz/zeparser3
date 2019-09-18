@@ -77,3 +77,13 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+((x = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g));
+````
+
+Produces same AST

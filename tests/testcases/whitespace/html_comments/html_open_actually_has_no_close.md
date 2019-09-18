@@ -100,3 +100,14 @@ tokens (9x):
        PUNCTUATOR ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+((call)());
+((f)());
+````
+
+Produces same AST

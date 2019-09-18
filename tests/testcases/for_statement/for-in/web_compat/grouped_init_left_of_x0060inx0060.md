@@ -135,3 +135,13 @@ tokens (17x):
        PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+for (var a = (++effects, - (1)) in x) ;
+````
+
+Produces same AST

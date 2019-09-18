@@ -124,3 +124,13 @@ tokens (20x):
        PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+try {} catch (e) {foo: bar: function f() {}}
+````
+
+Produces same AST

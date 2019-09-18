@@ -113,3 +113,16 @@ tokens (9x):
        PUNCTUATOR STRING_SINGLE PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+debugger;
+('xyz \1');
+('xyz \x01');
+('xyz \\1');
+````
+
+Produces same AST

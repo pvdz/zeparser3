@@ -152,3 +152,14 @@ tokens (9x):
        PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+((((call)()) < (! (--foo))));
+((more)());
+````
+
+Produces same AST

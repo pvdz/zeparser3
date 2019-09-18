@@ -79,3 +79,13 @@ tokens (3x):
        REGEXU ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+/(?<@{x1d7d0}@>foo)/u;
+````
+
+Produces same AST

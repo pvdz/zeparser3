@@ -82,3 +82,13 @@ tokens (3x):
        STRING_DOUBLE ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+"You \077 ok";
+````
+
+Produces same AST

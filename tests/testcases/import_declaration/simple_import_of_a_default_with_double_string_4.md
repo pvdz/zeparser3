@@ -86,3 +86,13 @@ tokens (8x):
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [module]:
+
+````js
+import {x as x} from "y";
+````
+
+Produces same AST

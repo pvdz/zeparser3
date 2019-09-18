@@ -109,3 +109,13 @@ tokens (9x):
        PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+function f() {"You \077 ok";}
+````
+
+Produces same AST

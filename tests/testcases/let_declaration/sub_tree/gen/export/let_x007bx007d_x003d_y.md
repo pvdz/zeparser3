@@ -93,3 +93,13 @@ tokens (8x):
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [module]:
+
+````js
+export let {} = y;
+````
+
+Produces same AST

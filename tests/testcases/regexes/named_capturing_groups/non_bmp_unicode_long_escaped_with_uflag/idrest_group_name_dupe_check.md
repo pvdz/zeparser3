@@ -73,3 +73,13 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+/(?<abc\u{1D7D0}def>foo\k<abc\uD835\uDFD0def>)/u;
+````
+
+Produces same AST

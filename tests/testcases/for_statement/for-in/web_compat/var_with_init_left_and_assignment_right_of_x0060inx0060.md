@@ -133,3 +133,13 @@ tokens (16x):
        PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+for (var a = 0 in ((stored = a), {})) ;
+````
+
+Produces same AST

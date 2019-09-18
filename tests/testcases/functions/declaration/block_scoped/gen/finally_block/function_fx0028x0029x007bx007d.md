@@ -114,3 +114,14 @@ tokens (19x):
        PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+try {} finally {function f() {}
+function f() {}}
+````
+
+Produces same AST

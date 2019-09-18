@@ -214,3 +214,13 @@ tokens (33x):
        IDENT PUNCTUATOR NUMBER_DEC PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+for (var a = (++effects, - (1)) in ((stored = a), {a:0, b:1, c:2})) ;
+````
+
+Produces same AST

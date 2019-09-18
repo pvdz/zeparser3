@@ -121,3 +121,15 @@ tokens (22x):
        PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+switch (x) {case c:
+function f() {}
+function f() {}}
+````
+
+Produces same AST

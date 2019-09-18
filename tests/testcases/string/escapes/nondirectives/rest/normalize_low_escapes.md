@@ -84,3 +84,14 @@ tokens (5x):
        IDENT PUNCTUATOR STRING_SINGLE PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+debugger;
+('start \0137 \x18 \u{05} \0 finish');
+````
+
+Produces same AST

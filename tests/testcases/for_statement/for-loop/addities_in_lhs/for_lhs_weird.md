@@ -235,3 +235,16 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+for ((([].w ^= s));;) x;
+for ((([][y] <<= p));;) x;
+for ((([].u |= c));;) x;
+for (((({})[y] ^= x));;) x;
+````
+
+Produces same AST

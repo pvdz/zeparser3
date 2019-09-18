@@ -112,3 +112,13 @@ tokens (11x):
        PUNCTUATOR PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+for (var a = b in c) ;
+````
+
+Produces same AST

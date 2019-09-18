@@ -115,3 +115,14 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+switch (a) {default:
+let {x} = y;}
+````
+
+Produces same AST

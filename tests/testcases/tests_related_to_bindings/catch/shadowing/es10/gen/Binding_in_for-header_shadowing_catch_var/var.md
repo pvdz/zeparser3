@@ -123,3 +123,13 @@ tokens (21x):
        PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+try {} catch (e) {for (var e = 1;;) {}}
+````
+
+Produces same AST

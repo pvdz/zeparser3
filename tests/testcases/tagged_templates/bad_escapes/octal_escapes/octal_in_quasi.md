@@ -106,3 +106,13 @@ tokens (6x):
        IDENT TICK_HEAD STRING_SINGLE TICK_TAIL PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+(tag)`${'\07'}`;
+````
+
+Produces same AST

@@ -121,3 +121,13 @@ tokens (5x):
        IDENT PUNCTUATOR PUNCTUATOR ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [sloppy]:
+
+````js
+((((call)()) < (! (--foo))));
+````
+
+Produces same AST

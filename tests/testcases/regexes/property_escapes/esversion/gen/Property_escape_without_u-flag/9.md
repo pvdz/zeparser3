@@ -74,3 +74,13 @@ tokens (3x):
        REGEX ASI
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+/\p{Hex}/;
+````
+
+Produces same AST

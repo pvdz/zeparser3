@@ -25,6 +25,7 @@ import {
   ignoreTest262Babel,
   processBabelResult,
 } from './parse_babel.mjs';
+import {testZePrinter} from "./run_zeprinter.mjs";
 
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//, '');
@@ -149,6 +150,7 @@ read(PATH262, '', (file, content) => {
     return console.log(BOLD, 'SKIP', RESET, '(Stage 3: top-level-await)');
   }
 
+  let printedOnce = false;
   let webstr = webcompat ? 'web' : 'sloppy';
   if (!flags.includes('onlyStrict') && !flags.includes('module')) {
     // This is the sloppy or web run
@@ -176,6 +178,10 @@ read(PATH262, '', (file, content) => {
       console.log('e:', failed);
       console.log('flags:', flags);
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + webstr + RESET);
+    }
+    if (!failed && !printedOnce) {
+      testZePrinter(content, 'web', z.ast);
+      printedOnce = true;
     }
     if (!!failed !== negative) {
       console.log('\nUnrolling output;\n');
@@ -255,6 +261,10 @@ read(PATH262, '', (file, content) => {
       console.log('e:', failed);
       console.log('flags:', flags);
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + modstr + RESET);
+    }
+    if (!failed && !printedOnce) {
+      testZePrinter(content, 'web', z.ast);
+      printedOnce = true;
     }
     if (!!failed !== negative) {
       stdout.forEach(a => console.log.apply(console, a));

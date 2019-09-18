@@ -86,3 +86,14 @@ tokens (5x):
        IDENT PUNCTUATOR STRING_SINGLE PUNCTUATOR
 `````
 
+
+## AST Printer
+
+Printer output different from input [web]:
+
+````js
+debugger;
+('a \9 b');
+````
+
+Produces same AST
