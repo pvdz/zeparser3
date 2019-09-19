@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/for_statement/for-await/lhs_edge_cases/pattern_compound_assign.md
+- Path: tests/testcases/for_statement/for-loop/lhs_edge_cases/pattern_compound_assign_obj.md
 
-> :: for statement : for-await : lhs edge cases
+> :: for statement : for-loop : lhs edge cases
 >
-> ::> pattern compound assign
+> ::> pattern compound assign obj
 >
 > Can't have destructuring assignment with compound assignment.
 
@@ -13,9 +13,7 @@
 ## Input
 
 `````js
-async function f() {
-  for await ({}/=y of a)x
-}
+for({}/=y;;)x
 `````
 
 ## Output
@@ -34,11 +32,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Cannot compound assign to an object or array pattern
 
-async function f() {
-  for await ({}/=y of a)x
-               ^------- error
-
-}
+for({}/=y;;)x
+      ^------- error
 `````
 
 ### Strict mode

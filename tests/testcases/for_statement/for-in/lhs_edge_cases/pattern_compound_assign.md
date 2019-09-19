@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unknown input followed the left side of a for loop header: {# PUNCTUATOR : nl=N ws=N pos=14:15 loc=14:1 curc=41 `)`#}
+  Cannot compound assign to an object or array pattern
 
 for({}/=y in y)x
-              ^------- error
+      ^------- error
 `````
 
 ### Strict mode

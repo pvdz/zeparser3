@@ -3906,6 +3906,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
 
+    // Have to make sure this is not a compound assignment to a pattern. And have to do it before the tail (`[].x+=y`)
+    if (isAssignBinOp()) {
+      if (curtok.str !== '=') {
+        // - `for ([] += x;;);`
+        // - `for ([] /= x in y);`
+        THROW('Cannot compound assign to an object or array pattern');
+      }
+      // - `for ([] = x;;);`
+      // - `for ([] = x in y);`
+      // TODO: optimize this branch. Prevent redundant checks.
+    }
+
     // - `for ({}`
     //           ^
     // - `for ([]`
