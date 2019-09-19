@@ -9494,12 +9494,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // export class x {}
     // export class {}
 
+    let originalOuterLexerFlags = lexerFlags; // We'll need this for, for example: `class x{} 01`
+
     if (isLabelled === IS_LABELLED || fdState === FDS_ILLEGAL || fdState === FDS_IFELSE) {
       THROW('Cannot parse a class declaration here, only expecting statements here');
     }
 
     // _all_ bits of a class decl/expr are strict
-    let insideTemplate = hasAnyFlag(lexerFlags, LF_IN_TEMPLATE); // need this to properly consume closing curly
     lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_FOR_LHS | LF_IN_TEMPLATE | LF_NO_ASI);
 
     let classToken = curtok;
@@ -9509,7 +9510,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let name = parseClassId(lexerFlags, optionalIdent, scoop);
 
     // TODO: I'm prety sure scoop should be DO_NOT_BIND here (and can be folded inward)
-    _parseClass(lexerFlags, insideTemplate, scoop, IS_STATEMENT);
+    _parseClass(lexerFlags, originalOuterLexerFlags, scoop, IS_STATEMENT);
 
     AST_close('ClassDeclaration');
 
@@ -9525,8 +9526,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // x = class x {;}
     // x = class x {[static] <method>[]}
 
+    let originalOuterLexerFlags = lexerFlags; // We'll need this for, for example: `class x{} 01`
+
     // _all_ bits of a class decl/expr are strict
-    let insideTemplate = hasAnyFlag(lexerFlags, LF_IN_TEMPLATE); // need this to properly consume closing curly
     lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_FOR_LHS | LF_IN_TEMPLATE | LF_NO_ASI);
 
     AST_open(astProp, 'ClassExpression', classToken);
@@ -9534,7 +9536,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: can extends and computed prop keys access the class id? is there any way that is relevant for parsers?
     parseClassId(lexerFlags, IDENT_OPTIONAL, DO_NOT_BIND);
 
-    let assignable = _parseClass(lexerFlags, insideTemplate, DO_NOT_BIND, IS_EXPRESSION);
+    let assignable = _parseClass(lexerFlags, originalOuterLexerFlags, DO_NOT_BIND, IS_EXPRESSION);
     AST_close('ClassExpression');
 
     // The `await/yield` flags only describe the `extends` part. Additionally the class as a whole is not assignable.
@@ -9579,9 +9581,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return bindingName;
   }
-  function _parseClass(outerLexerFlags, insideTemplate, scoop, isExpression) {
+  function _parseClass(outerLexerFlags, originalOuterLexerFlags, scoop, isExpression) {
     ASSERT(arguments.length === _parseClass.length, 'expecting all args');
     ASSERT(hasAllFlags(outerLexerFlags, LF_STRICT_MODE), 'should be set by caller');
+    ASSERT(typeof originalOuterLexerFlags === 'number', 'originalOuterLexerFlags number');
+
     // Note: all class code is always strict mode implicitly (explicitly mentioned by 10.2.1, this includes extends)
     // Note: methods inside classes can access super properties
     // Note: `super()` is only valid in the constructor a class that uses `extends` (resets when nesting but after `extends`)
@@ -9621,28 +9625,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // note: generator and async state is not reset because computed method names still use the outer state
     // Note: this `assignable` is relevant for passing back await/yield flags
-    assignable |= parseClassBody(innerLexerFlags, outerLexerFlags, insideTemplate, scoop, BINDING_TYPE_NONE, isExpression, 'body');
+    assignable |= parseClassBody(innerLexerFlags, outerLexerFlags, originalOuterLexerFlags, scoop, BINDING_TYPE_NONE, isExpression, 'body');
 
     return assignable;
   }
-  function parseClassBody(lexerFlags, outerLexerFlags, insideTemplate, scoop, bindingType, isExpression, astProp) {
+  function parseClassBody(lexerFlags, outerLexerFlags, originalOuterLexerFlags, scoop, bindingType, isExpression, astProp) {
     ASSERT(parseClassBody.length === arguments.length, 'expecting all args');
     ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE), 'should be set by caller');
     ASSERT(hasNoFlag(lexerFlags, LF_IN_CONSTRUCTOR), 'should be unset by caller');
+    ASSERT(typeof originalOuterLexerFlags === 'number', 'originalOuterLexerFlags number');
     ASSERT_BINDING_TYPE(bindingType);
 
     AST_open(astProp, 'ClassBody', curtok);
     AST_set('body', []);
-    let assignable = _parseClassBody(lexerFlags, outerLexerFlags, insideTemplate, scoop, bindingType, isExpression, UNDEF_EXPORTS, UNDEF_EXPORTS, 'body');
+    let assignable = _parseClassBody(lexerFlags, outerLexerFlags, originalOuterLexerFlags, scoop, bindingType, isExpression, UNDEF_EXPORTS, UNDEF_EXPORTS, 'body');
     AST_close('ClassBody');
     // Note: returning `assignable` is relevant for passing back await/yield flags that could occur in computed key exprs
     return assignable;
   }
-  function _parseClassBody(lexerFlags, outerLexerFlags, insideTemplate, scoop, bindingType, isExpression, exportedNames, exportedBindings, astProp) {
+  function _parseClassBody(lexerFlags, outerLexerFlags, originalOuterLexerFlags, scoop, bindingType, isExpression, exportedNames, exportedBindings, astProp) {
     ASSERT(_parseClassBody.length === arguments.length, 'arg count');
     ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE), 'should be set by caller');
     ASSERT(hasNoFlag(lexerFlags, LF_IN_CONSTRUCTOR), 'should be unset by caller');
-    ASSERT(typeof insideTemplate === 'boolean');
+    ASSERT(typeof originalOuterLexerFlags === 'number', 'originalOuterLexerFlags number');
     // parse one method of a class body
 
     let destructibleForPiggies = CANT_DESTRUCT; // relevant for computed key exprs
@@ -9677,17 +9682,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    // TODO: not sure whether this is really relevant... Suppose it can't hurt..?
-    lexerFlags = outerLexerFlags;
-    // Restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
-    if (insideTemplate) lexerFlags |= LF_IN_TEMPLATE;
-
+    // Note: this uses the lexerFlags as they were when parsing the `class` keyword. This keeps `no-in`, `strict-mode`,
+    // and `template` flags in tact without further concern. We must parse them as such when parsing the closing `}`.
     if (isExpression === IS_EXPRESSION) {
       // - `(class x {} / foo)`
-      skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+      // - `${class x{}}`
+      skipDivOrDieSingleChar($$CURLY_R_7D, originalOuterLexerFlags);
     } else {
       // - `class x {} /foo/`
-      skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+      // - `class x {} 06`
+      skipRexOrDieSingleChar($$CURLY_R_7D, originalOuterLexerFlags);
     }
 
     // note: generator and async state is not reset because computed method names still use the outer state
