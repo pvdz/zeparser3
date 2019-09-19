@@ -5660,6 +5660,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       first = false;
     }
+    if (isAssignBinOp()) {
+      // [x]: `[]=n/f>>=v`
+      THROW('Can not have an assignment after a non-assignment operator');
+    }
     return assignable;
   }
   function parseExpressionFromBinaryOpOnlyStronger(lexerFlags, exprStartToken, astProp) {
