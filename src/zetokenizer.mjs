@@ -1367,6 +1367,18 @@ function ZeTokenizer(
         if (!lastReportableTokenizerError) lastReportableTokenizerError = '"Illegal" octal escape in strict mode';
         return $ERROR;
       }
+      if (neof()) {
+        let e = peek();
+        if (e === $$E_UC_45 || e === $$E_65) {
+          if (!lastReportableTokenizerError) lastReportableTokenizerError = 'An exponent is not allowed after a legacy octal number and an ident after number must be separated by some whitespace so this is an error';
+          return $ERROR;
+        }
+        // The dot may still lead to valid (though obscure) code: `01.foo` is the same as `1..foo`
+        // if (e === $$DOT_2E) {
+        //   if (!lastReportableTokenizerError) lastReportableTokenizerError = 'A dot fraction is not allowed after a legacy number octal';
+        //   return $ERROR;
+        // }
+      }
       return $NUMBER_OLD;
     } else if (c === $$DOT_2E) {
       parseFromFractionDot();
