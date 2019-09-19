@@ -956,7 +956,6 @@ function ZeTokenizer(
         lastCanonizedString += '\\';
         return GOOD_ESCAPE;
 
-      // A line continuation does not contribute to the string value
       case $$LF_0A:
       case $$PS_2028:
       case $$LS_2029:
@@ -2975,8 +2974,10 @@ function ZeTokenizer(
       case $$LF_0A:
       case $$PS_2028:
       case $$LS_2029:
+        // Line continuation is not supported in regex and the escape is explicitly disallowed
+        // https://tc39.es/ecma262/#prod-RegularExpressionNonTerminator
         ASSERT_skip(c);
-        return regexSyntaxError('Regexes can not have newlines'); // regex has no line continuation
+        return regexSyntaxError('Regular expressions do not support line continuations (escaped newline)');
 
       default:
         // this is, probably;
@@ -3862,6 +3863,16 @@ function ZeTokenizer(
           return $$DASH_2D | REGEX_CHARCLASS_BAD_SANS_U_FLAG;
         }
       }
+
+      case $$CR_0D:
+      case $$LF_0A:
+      case $$PS_2028:
+      case $$LS_2029:
+        // Line continuation is not supported in regex char class and the escape is explicitly disallowed
+        // https://tc39.es/ecma262/#prod-RegularExpressionNonTerminator
+        ASSERT_skip(c);
+        regexSyntaxError('Regular expressions do not support line continuations (escaped newline)');
+        return REGEX_CHARCLASS_BAD;
 
       default:
         // IdentityEscape
