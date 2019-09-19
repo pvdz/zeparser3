@@ -99,6 +99,7 @@ function $(node, _, __, fromFor) {
         node.expression.type === 'ClassExpression' ||
         node.expression.type === 'BinaryExpression' ||
         node.expression.type === 'MemberExpression' ||
+        node.expression.type === 'Identifier' ||
         node.expression.type === 'UnaryExpression' ||
         node.expression.type === 'CallExpression' ||
         (!node.directive && node.expression.type === 'Literal' && typeof node.expression.value === 'string') || // Prevent grouped strings of being promoted to directives
@@ -161,8 +162,10 @@ function $(node, _, __, fromFor) {
         node.object.type === 'SequenceExpression' ||
         node.object.type === 'FunctionExpression' ||
         node.object.type === 'ClassExpression' ||
+        node.object.type === 'Identifier' ||
         node.object.type === 'BinaryExpression' ||
         node.object.type === 'MemberExpression' ||
+        node.object.type === 'Identifier' ||
         node.object.type === 'CallExpression' ||
         node.object.type === 'UnaryExpression' || // `(!t).y`
         node.object.type === 'ArrowFunctionExpression' ||

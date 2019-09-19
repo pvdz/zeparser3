@@ -91,7 +91,7 @@ _Output same as sloppy mode._
 Printer output different from input [sloppy]:
 
 ````js
-(delete (await.foo));
+(delete ((await).foo));
 ````
 
 Produces same AST

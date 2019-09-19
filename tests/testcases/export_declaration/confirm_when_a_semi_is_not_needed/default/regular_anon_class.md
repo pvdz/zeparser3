@@ -91,7 +91,7 @@ Printer output different from input [module]:
 
 ````js
 export default class{}
-foo;
+(foo);
 ````
 
 Produces same AST

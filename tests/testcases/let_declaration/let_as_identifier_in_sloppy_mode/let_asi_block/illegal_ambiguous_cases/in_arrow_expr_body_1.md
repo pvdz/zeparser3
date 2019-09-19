@@ -131,7 +131,7 @@ Printer output different from input [sloppy]:
 
 ````js
 _ => (let);
-{foo;}
+{(foo);}
 ;
 ````
 

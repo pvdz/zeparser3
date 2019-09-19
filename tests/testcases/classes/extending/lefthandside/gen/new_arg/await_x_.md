@@ -95,7 +95,7 @@ Printer output different from input [sloppy]:
 
 ````js
 new (await)();
-x;
+(x);
 ````
 
 Produces same AST

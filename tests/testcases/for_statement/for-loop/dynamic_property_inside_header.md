@@ -98,7 +98,7 @@ _Output same as sloppy mode._
 Printer output different from input [sloppy]:
 
 ````js
-for ((x[((a) in (b))]);;) ;
+for (((x)[((a) in (b))]);;) ;
 ````
 
 Produces same AST

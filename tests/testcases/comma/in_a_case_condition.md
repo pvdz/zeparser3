@@ -103,7 +103,7 @@ Printer output different from input [sloppy]:
 
 ````js
 switch (a) {case (b, c):
-d;}
+(d);}
 ````
 
 Produces same AST

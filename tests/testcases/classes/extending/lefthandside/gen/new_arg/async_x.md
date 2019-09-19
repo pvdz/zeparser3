@@ -87,7 +87,7 @@ Printer output different from input [sloppy]:
 
 ````js
 new (async)();
-x;
+(x);
 ````
 
 Produces same AST

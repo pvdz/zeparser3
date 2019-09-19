@@ -75,4 +75,10 @@ _Output same as sloppy mode._
 
 ## AST Printer
 
-Printer output was same as input [sloppy]
+Printer output different from input [sloppy]:
+
+````js
+if (foo) (bar);
+````
+
+Produces same AST

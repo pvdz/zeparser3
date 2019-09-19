@@ -88,7 +88,7 @@ Printer output different from input [sloppy]:
 
 ````js
 switch (A) {default:
-B;}
+(B);}
 ````
 
 Produces same AST

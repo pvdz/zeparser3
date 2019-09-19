@@ -106,7 +106,7 @@ tokens (14x):
 Printer output different from input [web]:
 
 ````js
-if (x) x; else function f() {}
+if (x) (x); else function f() {}
 ````
 
 Produces same AST

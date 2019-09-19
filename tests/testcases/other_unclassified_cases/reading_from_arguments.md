@@ -188,12 +188,12 @@ _Output same as sloppy mode._
 Printer output different from input [sloppy]:
 
 ````js
-arguments;
+(arguments);
 ((log)(arguments));
-(arguments.foo);
-(arguments[foo]);
-((arguments.foo = bar));
-((arguments[foo] = bar));
+((arguments).foo);
+((arguments)[foo]);
+(((arguments).foo = bar));
+(((arguments)[foo] = bar));
 ````
 
 Produces same AST

@@ -1,15 +1,41 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/tagged_templates/on_an_object_method.md
+- Path: tests/testcases/zeprinter/let_ident_start.md
 
-> :: tagged templates
+> :: zeprinter
 >
-> ::> on an object method
+> ::> let ident start
+>
+> This input broke zeprinter [diff-fail]
+>
+> 
+>
+> Original input:
+>
+> 
+>
+> ```
+>
+> "xxx";
+>
+> "xxxg"
+>
+> "xxxx$"@{xd}@"xxxR-";
+>
+> do debugger@{xd}@ while ((new (() => ((class {})))(...(static))))@{xd}@{}
+>
+> while (((/(())+|[^\&-[\xAEZc-]|(?=\uf668\b)|(?![--])|()*/gm))) l: break l
+>
+> ;((((let)[(((true)))] --)));
+>
+> implements: for (var let of (((((this)))()))) while (((this))) break
+>
+> ```
 
 ## Input
 
 `````js
-a.foo`bar`
+(let)[y]--
 `````
 
 ## Output
@@ -33,56 +59,53 @@ ast: {
       type: 'ExpressionStatement',
       loc:{start:{line:1,column:0},end:{line:1,column:10},source:''},
       expression: {
-        type: 'TaggedTemplateExpression',
+        type: 'UpdateExpression',
         loc:{start:{line:1,column:0},end:{line:1,column:10},source:''},
-        tag: {
+        argument: {
           type: 'MemberExpression',
-          loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
           object: {
             type: 'Identifier',
-            loc:{start:{line:1,column:0},end:{line:1,column:1},source:''},
-            name: 'a'
+            loc:{start:{line:1,column:1},end:{line:1,column:4},source:''},
+            name: 'let'
           },
           property: {
             type: 'Identifier',
-            loc:{start:{line:1,column:2},end:{line:1,column:5},source:''},
-            name: 'foo'
+            loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
+            name: 'y'
           },
-          computed: false
+          computed: true
         },
-        quasi: {
-          type: 'TemplateLiteral',
-          loc:{start:{line:1,column:5},end:{line:1,column:10},source:''},
-          expressions: [],
-          quasis: [
-            {
-              type: 'TemplateElement',
-              loc:{start:{line:1,column:6},end:{line:1,column:9},source:''},
-              tail: true,
-              value: { raw: 'bar', cooked: 'bar' }
-            }
-          ]
-        }
+        operator: '--',
+        prefix: false
       }
     }
   ]
 }
 
-tokens (6x):
-       IDENT PUNCTUATOR IDENT TICK_PURE ASI
+tokens (9x):
+       PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR
+       PUNCTUATOR ASI
 `````
 
 ### Strict mode
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Can not use `let` as variable name in strict mode
+
+(let)[y]--
+    ^------- error
+`````
+
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as sloppy mode._
+_Output same as strict mode._
 
 ### Web compat mode
 
@@ -95,7 +118,7 @@ _Output same as sloppy mode._
 Printer output different from input [sloppy]:
 
 ````js
-((a).foo)`bar`;
+(let)[y]--;
 ````
 
 Produces same AST

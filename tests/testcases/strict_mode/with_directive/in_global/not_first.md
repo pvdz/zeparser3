@@ -114,7 +114,7 @@ Printer output different from input [sloppy]:
 ````js
 var x;
 ("use strict");
-with (x) y;
+with (x) (y);
 ````
 
 Produces same AST

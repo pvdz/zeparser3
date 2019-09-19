@@ -93,7 +93,7 @@ Printer output different from input [sloppy]:
 
 ````js
 (delete (x));
-foo;
+(foo);
 ````
 
 Produces same AST

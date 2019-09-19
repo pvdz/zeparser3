@@ -22,6 +22,7 @@ ZeParser test runner help:
  g             Regenerate _all_ auto generated files
  G             Autogenerate only files that don't already exist
  u             Run all test files and just write output
+ U             Run all test files and force write output
  m             Run all tests and ask for update one-by-one
  s             Search for needles (call HIT() to place a needle and find all tests that hit them)
  t             Run test262 suite (only)
@@ -75,6 +76,10 @@ ZeParser test runner help:
     u)
       # Update all test files with their current output (fast)
       ACTION='-u'
+      ;;
+    U)
+      # Force update all test files with their current output
+      ACTION='-u --force-write'
       ;;
     m)
       # Run all files and ask for any test case that needs updating (slower)
