@@ -3092,6 +3092,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'DebuggerStatement', curtok);
     ASSERT_skipRex('debugger', lexerFlags);
     if (hasAllFlags(curtype, $REGEX)) {
+      if (curtok.nl === 0) THROW('Missing semi-colon after debugger keyword');
       // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
       // - `debugger \n /foo/`
       // - `debugger \n /foo/x`
@@ -4401,7 +4402,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ReturnStatement', curtok);
     ASSERT_skipRex('return', lexerFlags); // rex because even on next line a div can never be division with keyword
 
-    if (hasAllFlags(curtype, $REGEX)) {
+    if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
       // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
       // - `return \n /foo/`
       // - `return \n /foo/x`
@@ -6578,7 +6579,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_open(astProp, 'YieldExpression', yieldToken);
-    if (curtok.nl && hasAllFlags(curtype, $REGEX)) {
+    if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
       // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
       // - `continue \n /foo/`
       // - `continue \n /foo/x`
