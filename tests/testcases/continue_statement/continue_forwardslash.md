@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The token after `continue` can not start with a forward slash, without being preceded by a newline
+  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N pos=19:20 loc=19:1 curc=47 `/`#}
 
 for(x of 3)continue/
                    ^------- error

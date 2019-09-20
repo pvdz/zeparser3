@@ -8,6 +8,7 @@
 >
 > `yield * x` not have a newline before the star
 
+## FAIL
 
 ## Input
 

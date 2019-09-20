@@ -312,6 +312,8 @@ const NOT_LABELLED = dev() ? {NOT_LABELLED: 1} : false;
 const NOT_LHSE = dev() ? {NOT_LHSE: 1} : false; // not requiring a "LeftHandExpression". This is currently only used for class `extends`.
 const ONLY_LHSE = dev() ? {ONLY_LHSE: 1} : true; // restrict value to conform to a "LeftHandExpression" production.
 
+let ASSERT_YIELD_NL_REGEX = false; // When set, do not throw assertion error in the semi/asi parser for seeing a regex
+
 function dev() {
   let dev = false;
   // A build will eliminate this ASSERT call. A minifier will inline the `true` and then eliminate it. Hopefully.
@@ -1803,11 +1805,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - the semi would be part of a for-header
     // TODO: should check whether the next token would be "an error"; especially the newline case makes no such effort :(
 
+    // "no asi if next line forward slash" is described here:
+    // https://tc39.es/ecma262/#sec-ecmascript-language-lexical-grammar
+    // > where the first non-whitespace, non-comment code point after a LineTerminator is U+002F (SOLIDUS) and the
+    // > syntactic context allows division or division-assignment, no semicolon is inserted at the LineTerminator.
+
     if (curc === $$FWDSLASH_2F) {
-      // [x]: `for(;;)continue/`
-      // [x]: `debugger\n/foo/`   // (asi does not apply when a line starts with a regular expression)
-      // [x]: `let x/`
-      THROW('The next token starts with a forward slash but neither a division nor a regular expression is legal here');
+      // [v]: `x \n /foo`                // NO ASI because it can be a division (x/foo)
+      // [x]: `x \n /foo/`               // NO ASI because the first slash can be a division. Misisng value after second
+      // [v]: `x \n /foo/g`              // NO ASI because it can be a division (x/foo/g)
+      // [v]: `debugger \n /foo/`        // ASI because it cannot be a division (regex /foo/)
+      // [v]: `debugger \n /foo/g`       // ASI because it cannot be a division (regex /foo/g)
+      ASSERT_VALID(ASSERT_YIELD_NL_REGEX, 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
+      ASSERT_YIELD_NL_REGEX = false;
     }
 
     if (curc === $$SEMI_3B) {
@@ -1837,6 +1847,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'token type should not have $error or $eof at this point');
     ASSERT(isLabelled === IS_LABELLED || isLabelled === NOT_LABELLED, 'isLabelled enum');
+
+    ASSERT(!void(ASSERT_YIELD_NL_REGEX = false));
 
     switch (getGenericTokenType(curtype)) { // TODO: convert to flag index to have perfect hash in the switch
       case $IDENT:
@@ -2968,26 +2980,40 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'BreakStatement', curtok);
     ASSERT_skipRex('break', lexerFlags);
-    // a break may be followed by another identifier which must then be a valid label.
-    // otherwise it's just a break to the nearest breakable (most likely).
 
-    // break without label is only valid inside an iteration or switch statement, fenced by functions
-    // break with label is only valid if the label exists in the current statement tree
+    // A `break` may be followed by another identifier which must then be a valid label.
+    // Otherwise it's just a `break` to the nearest breakable (most likely).
 
-    // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
+    // `break` without label is only valid inside an iteration or switch statement, fenced by functions
+    // `break` with label is only valid if the label exists in the current statement tree
+
+    // Note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
     if (curtype === $IDENT && curtok.nl === 0) {
-      // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
-      if (!findLabel(labelSet, curtok.str, FROM_BREAK)) THROW('The label for this `break` was not defined in the current label set, which is illegal');
+      if (!findLabel(labelSet, curtok.str, FROM_BREAK)) {
+        THROW('The label for this `break` was not defined in the current label set, which is illegal');
+      }
       let labelToken = curtok;
       ASSERT_skipRex($IDENT, lexerFlags);
       AST_setIdent('label', labelToken);
-    } else {
+      parseSemiOrAsi(lexerFlags);
+    } else if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) {
+      // This is a `break` that is not inside a loop or switch
+      // [v]: `if (x) break`
+      THROW('Can only `break` inside a `switch` or loop');
+    } else if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
+      // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+      // We have already asserted to be inside a loop/switch so that's fine
+      // - `for(;;) break \n /foo/`
+      // - `for(;;) break \n /foo/x`
       AST_set('label', null);
-
-      if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) THROW('Can only `break` inside a `switch` or loop');
+      tok.asi();
+    } else {
+      // This is a `break` inside a loop/switch
+      // [v]: `for (;;) break`
+      AST_set('label', null);
+      parseSemiOrAsi(lexerFlags);
     }
 
-    parseSemiOrAsi(lexerFlags);
     AST_close('BreakStatement');
   }
   function findLabel(inputLabelSet, labelName, checkIteration) {
@@ -3038,33 +3064,42 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // otherwise it's just a continue to the nearest loop (most likely).
 
     // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    if (curtype === $IDENT && !(curtok.nl > 0 || curtype === $EOF || curtok.value === ';')) {
-      // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
-
-      if (!findLabel(labelSet, curtok.str, FROM_CONTINUE)) THROW('The label for this `continue` was not defined in the current label set, which is illegal');
+    if (curtype === $IDENT && curtok.nl === 0) {
+      if (!findLabel(labelSet, curtok.str, FROM_CONTINUE)) {
+        THROW('The label for this `continue` was not defined in the current label set, which is illegal');
+      }
       let labelToken = curtok;
       ASSERT_skipRex($IDENT, lexerFlags);
       AST_setIdent('label', labelToken);
-    } else {
+      parseSemiOrAsi(lexerFlags);
+    } else if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
+      // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+      // Must be in loop, we checked this at the beginning
+      // - `for (;;) continue \n /foo/`
+      // - `for (;;) continue \n /foo/x`
+      tok.asi();
       AST_set('label', null);
+    } else {
+      // Must be in loop, we checked this at the beginning
+      AST_set('label', null);
+      parseSemiOrAsi(lexerFlags);
     }
 
-    if (curc === $$FWDSLASH_2F) {
-      if (!curtok.nl) {
-        // Note: it wouldn't be a comment (no whitespace tokens) so this is a div or a regex, both are an error
-        THROW('The token after `continue` can not start with a forward slash, without being preceded by a newline');
-      }
-      THROW('ASI does not apply when the next token starts with a forward slash on the next line, so this is an error');
-    }
-
-    parseSemiOrAsi(lexerFlags);
     AST_close('ContinueStatement');
   }
 
   function parseDebuggerStatement(lexerFlags, astProp) {
     AST_open(astProp, 'DebuggerStatement', curtok);
     ASSERT_skipRex('debugger', lexerFlags);
-    parseSemiOrAsi(lexerFlags);
+    if (hasAllFlags(curtype, $REGEX)) {
+      // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+      // - `debugger \n /foo/`
+      // - `debugger \n /foo/x`
+      tok.asi();
+      AST_set('argument', null);
+    } else {
+      parseSemiOrAsi(lexerFlags);
+    }
     AST_close('DebuggerStatement');
   }
 
@@ -4364,15 +4399,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!allowGlobalReturn && hasAllFlags(lexerFlags, LF_IN_GLOBAL)) THROW('Not configured to parse `return` statement in global, bailing');
 
     AST_open(astProp, 'ReturnStatement', curtok);
-    ASSERT_skipRex('return', lexerFlags);
+    ASSERT_skipRex('return', lexerFlags); // rex because even on next line a div can never be division with keyword
 
-    if (curtok.nl === 0 && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
-      parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'argument');
-    } else {
+    if (hasAllFlags(curtype, $REGEX)) {
+      // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+      // - `return \n /foo/`
+      // - `return \n /foo/x`
+      tok.asi();
       AST_set('argument', null);
+    } else {
+      if (curtok.nl === 0 && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
+        parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'argument');
+      }
+      else {
+        AST_set('argument', null);
+      }
+      parseSemiOrAsi(lexerFlags);
     }
 
-    parseSemiOrAsi(lexerFlags);
     AST_close('ReturnStatement');
   }
 
@@ -6523,13 +6567,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('The `yield` keyword in arg default must be a var name but that is not allowed inside a generator');
     }
 
-    if (curc === $$FWDSLASH_2F && curtok.nl > 0) {
-      // [x]: `function* f(){ yield↵/foo }`
-      // [x]: `function* f(){ yield↵/foo/ }`
-      // [x]: `function* f(){ yield↵/foo/g }`
-      THROW('Yield keyword can not be followed by a regular expression on the next line');
-    }
-
     if (allowAssignment === ASSIGN_EXPR_IS_ERROR) {
       // note: yield is a recursive AssignmentExpression (its optional argument can be an assignment or another yield)
       // Since `yield` is an AssignmentExpression it cannot appear after a non-assignment operator. (`5+yield x` fails)
@@ -6541,10 +6578,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_open(astProp, 'YieldExpression', yieldToken);
-    if (curc === $$STAR_2A) {
+    if (curtok.nl && hasAllFlags(curtype, $REGEX)) {
+      // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+      // - `continue \n /foo/`
+      // - `continue \n /foo/x`
+      // tok.asi();
+      AST_set('delegate', false);
+      AST_set('argument', null);
+      ASSERT(ASSERT_YIELD_NL_REGEX = true); // This should be picked up at semi/asi parser and prevent an assertion error
+    }
+    else if (curc === $$STAR_2A) {
       AST_set('delegate', true);
       parseYieldStarArgument(lexerFlags, allowAssignment, 'argument');
-    } else {
+    }
+    else {
       AST_set('delegate', false);
       parseYieldArgument(lexerFlags, 'argument'); // optional, takes care of newline check
     }
@@ -6554,6 +6601,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curtok.str === '?', 'just in case more tokens can start with `?`');
       THROW('Can not have a `yield` expression on the left side of a ternary');
     }
+
     return NOT_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_KEYWORD;
   }
   function parseYieldStarArgument(lexerFlags, allowAssignment, astProp) {
@@ -6579,6 +6627,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (curtok.nl > 0) {
+      // [x]: `function *f() { yield \n * x }`
       THROW('A newline after `yield` is illegal for `yield *`');
     }
 

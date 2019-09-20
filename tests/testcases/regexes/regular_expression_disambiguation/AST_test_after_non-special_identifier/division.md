@@ -6,7 +6,7 @@
 >
 > ::> division
 >
-> ASI explicitly does not apply if the next line starts with a forward slash so this is a division
+> ASI does not apply when the forward slash can be a division
 
 ## Input
 

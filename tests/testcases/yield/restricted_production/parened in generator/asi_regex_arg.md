@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Yield keyword can not be followed by a regular expression on the next line
+  Next ord should be 41 (`)`) but was 47 (curc: `/`, token: `/x/`)
 
 function *f() {
   (

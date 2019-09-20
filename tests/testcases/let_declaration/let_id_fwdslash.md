@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The next token starts with a forward slash but neither a division nor a regular expression is legal here
+  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N pos=5:6 loc=5:1 curc=47 `/`#}
 
 let p/
      ^------- error

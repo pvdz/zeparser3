@@ -6,10 +6,9 @@
 >
 > ::> sans flag
 >
-> ASI explicitly does not apply if the next line starts with a forward slash so this is a division and it is missing the last value
+> ASI does not apply when the forward slash can be a division, so this is `foo/bar` and fails when it can't find another value after the last forward slash
 
 ## Input
-
 
 `````js
 foo

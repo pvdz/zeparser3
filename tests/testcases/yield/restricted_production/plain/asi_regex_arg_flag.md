@@ -6,8 +6,9 @@
 >
 > ::> asi regex arg flag
 >
-> `: `yield` with arg may not have a newline before the arg but regex on newline can not have asi...
-
+> In sloppy mode, `yield` is an identifier so this ends up a division.
+>
+> In strict mode, `yield`is considered a keyword and illegal outside of a generator.
 
 ## Input
 

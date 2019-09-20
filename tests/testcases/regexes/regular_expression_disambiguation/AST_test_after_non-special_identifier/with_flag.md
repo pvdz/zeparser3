@@ -6,7 +6,7 @@
 >
 > ::> with flag
 >
-> ASI explicitly does not apply if the next line starts with a forward slash so this is a division
+> The forward slash can be a division so this is a `foo/bar/g` double division
 
 ## Input
 
