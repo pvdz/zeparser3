@@ -9670,6 +9670,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `class x extends ()=>{} 1`          error because the extends cannot be an arrow
 
       // See testcases/classes/extending/lefthandside/autogen.md for details. Or follow the leftHandSideExpression trail
+      ASSERT(hasAllFlags(outerLexerFlags, LF_STRICT_MODE), 'make sure extends expr is parsed in strict mode');
       assignable = parseValue(outerLexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, ONLY_LHSE,'superClass');
       // don't set LF_SUPER_CALL before parsing the extending value
       // Note that computed props will not get this state from the current class (but potentially from an outer class)
