@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Octal escapes are only allowed in sloppy mode with web compat enabled
+    Illegal legacy octal escape in strict mode
 
 "use strict";
 "You \077 ok";
@@ -54,12 +54,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Octal in directive with strict mode directive or in strict mode is always illegal
-
-"use strict";
-"You \077 ok";
-             ^------- error
-`````
-
+_Output same as sloppy mode._

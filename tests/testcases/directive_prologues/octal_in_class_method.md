@@ -1,21 +1,27 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/directive_prologues/octals/function/preceded_by_use_strict.md
+- Path: tests/testcases/directive_prologues/octal_in_class_method.md
 
-> :: directive prologues : octals : function
+> :: directive prologues
 >
-> ::> preceded by use strict
+> ::> octal in class method
 >
-> Octal escapes are (retroactively?) illegal in directives if they're preceded by a "use strict" directive
+> Regression was not flagging octal escape inside a class method when it appeared in the second (not first) directive
+>
+> The reason is that we don't apply strict mode while parsing directives and did not check the octal flag with the previous state restored
+>
+> Additionally, the octal scanner was invalid...
 
 ## FAIL
 
 ## Input
 
 `````js
-function f() {
-    "use strict";
-    "You \077 ok";
+class x {
+  y(){
+    "";
+    "\5";
+  }
 }
 `````
 
@@ -35,11 +41,13 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Tokenizer error!
     Illegal legacy octal escape in strict mode
 
-function f() {
-    "use strict";
-    "You \077 ok";
+class x {
+  y(){
+    "";
+    "\5";
     ^------- error
 
+  }
 }
 `````
 

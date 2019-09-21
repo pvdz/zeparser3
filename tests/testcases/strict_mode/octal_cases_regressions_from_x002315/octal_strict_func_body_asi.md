@@ -51,13 +51,24 @@ function f() {
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    "Illegal" octal escape in strict mode
+
+function f() {
+  "use strict"
+  0777
+  ^------- error
+
+}
+`````
+
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as sloppy mode._
+_Output same as strict mode._
 
 ### Web compat mode
 

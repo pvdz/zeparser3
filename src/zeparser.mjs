@@ -1643,6 +1643,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseDirectivePrologues(lexerFlags, astProp) {
     ASSERT(arguments.length === parseDirectivePrologues.length, 'arg count');
 
+    let hadUseStrict = false;
+    let isStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE);
     let hadOctal = false; // Edge case to guard against: `"x\077";"use strict";` is an error
     // note: there may be multiple (bogus or valid) directives...
     while (hasAllFlags(curtype, $STRING)) {
@@ -1680,13 +1682,55 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // This is a directive. It may be nonsense, but it's a string in the head so it's a directive.
 
         let dir = stringToken.str.slice(1, -1);
-        if (!hadOctal && /(^|[^\\])\\0\d/.test(dir)) {
-          // (We have to use regex because an `.includes` would not (easily) be able to validate `\0` vs `\\0`
+
+        // Check all directives for octals because strict mode may be enabled by a directive later in the same block
+        // and that would still cause a previous sibling directive with octal escape to be an error.
+        if (!isStrict && /(^|[^\\])\\(?:0\d|[1-9])/.test(dir)) {
+          // We can't really validate this with a regex. And yet, here we are :'(
           // [v]: `"x\\0"`
           // [x]: `"x\\0"; "use strict";`
           // [v]: `"x\\\\0"; "use strict";`
-          hadOctal = curtok;
+          hadOctal = true;
         }
+
+        if (dir === 'use strict') {
+          hadUseStrict = true;
+          lexerFlags = lexerFlags | LF_STRICT_MODE;
+
+          // There is one problem now; our newfound knowledge about strict mode was not applied while parsing what is
+          // the current token. We couldn't, yet, because the directive would not have been a directive if it was not
+          // followed by a semi or asi.
+          // This means that token that is strict mode sensitive may have been parsed without strict mode flag, even
+          // though this should have been set.
+          // I've identified three cases:
+          // - legacy octal literals
+          //    - this can be caught now by checking the curtype
+          // - octal escapes in string literals
+          //    - the string literal can be scanned ... this is kind of dirty. ideally we'd pass a new flag but that's a
+          //      can of worms I'd rather not open here.
+          // - octal escapes in templates
+          //    - ok this is actually not strict mode sensitive because templates never allow them
+          // Since we don't have other cases (at the time of writing...), we can catch every one of these and don't have
+          // to backtrack for it.
+
+          // Note: the next two checks are not needed if we already were strict because the lexer would have done that
+          if (!isStrict) {
+            if (hasAllFlags(curtype, $NUMBER_OLD)) {
+              // - `"use strict" \n 0123`
+              THROW('Illegal legacy octal literal in strict mode');
+            }
+            if (!hadOctal && /(^|[^\\])\\(?:0\d|[1-9])/.test(dir)) {
+              // We can't really validate this with a regex. And yet, here we are :'(
+              // [v]: `"x\\0"`
+              // [x]: `"x\\0"; "use strict";`
+              // [v]: `"x\\\\0"; "use strict";`
+              THROW_TOKEN('Octal in directive with strict mode directive or in strict mode is always illegal');
+            }
+          }
+
+          isStrict = true;
+        }
+
 
         if (AST_directiveNodes && !babelCompat) {
           AST_wrapClosed(astProp, 'Directive', 'directive', stringToken);
@@ -1701,16 +1745,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           parseSemiOrAsi(lexerFlags);
           AST_close('ExpressionStatement');
         }
-
-        if (dir === 'use strict') {
-          lexerFlags = lexerFlags | LF_STRICT_MODE;
-          if (hasAllFlags(curtype, $NUMBER_OLD)) {
-            // This is a rare edge case where an octal escape follows a use strict directive with ASI
-            // Probably just a testing framework at this point ;) But it works.
-            // - `"use strict" \n 0123`
-            THROW('Illegal legacy octal literal in strict mode');
-          }
-        }
       } else {
         AST_wrapClosed(astProp, 'ExpressionStatement', 'expression', stringToken);
         // The whole expression has already been parsed so we can just close it.
@@ -1720,11 +1754,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    if (hadOctal && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+    if (hadOctal && isStrict) {
+      // This throws for any directive with an octal if use strict was enabled before or by any directive
       THROW_TOKEN('Octal in directive with strict mode directive or in strict mode is always illegal');
     }
 
-    return lexerFlags;
+    return hadUseStrict;
   }
 
   function parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, paramsSimple, dupeParamErrorToken, functionNameTokenToVerify, isGlobalToplevel, fdState, astProp) {
@@ -1732,10 +1767,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT([PARAMS_SOME_COMPLEX, PARAMS_SOME_NONSTRICT, PARAMS_ALL_SIMPLE].includes(paramsSimple), 'paramsSimple enum', paramsSimple);
 
-    let wasStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE); // unique param check
     // (I hope not passing on isGlobalToplevel to this parse step isnt going to come bite me later...)
-    let addedLexerFlags = parseDirectivePrologues(sansFlag(lexerFlags, LF_STRICT_MODE), 'body');
-    if (hasAnyFlag(addedLexerFlags, LF_STRICT_MODE)) {
+    // We remove the strict flag otherwise we won't know whether we parsed it, which we need to know for an edge case
+    let wasStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE);
+    let isStrict = wasStrict;
+    let hasUseStrict = parseDirectivePrologues(lexerFlags, 'body');
+    if (hasUseStrict) {
+      isStrict = true;
       if (paramsSimple === PARAMS_SOME_NONSTRICT || paramsSimple === PARAMS_SOME_COMPLEX) {
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
         // "It is a Syntax Error if ContainsUseStrict of FunctionBody is true and IsSimpleParameterList of FormalParameters is false."
@@ -1766,11 +1804,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         SCOPE_verifyArgs(scoop, paramsSimple);
       }
 
-      ASSERT(addedLexerFlags === (lexerFlags | LF_STRICT_MODE), 'Not sure what other flags could be added at this point?');
       lexerFlags |= LF_STRICT_MODE;
     }
 
-    if (dupeParamErrorToken !== NO_DUPE_PARAMS && (paramsSimple === PARAMS_SOME_COMPLEX || hasAllFlags(lexerFlags, LF_STRICT_MODE))) {
+    if (dupeParamErrorToken !== NO_DUPE_PARAMS && (paramsSimple === PARAMS_SOME_COMPLEX || isStrict)) {
       THROW_TOKEN('Function had duplicate params', dupeParamErrorToken);
     }
 
@@ -9772,6 +9809,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseClassMethod.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop string');
     ASSERT_BINDING_TYPE(bindingType);
+    ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE), 'right?');
 
     let destructible = bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
     let assignable = ASSIGNABLE_UNDETERMINED; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
