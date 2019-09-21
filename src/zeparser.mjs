@@ -312,7 +312,7 @@ const NOT_LABELLED = dev() ? {NOT_LABELLED: 1} : false;
 const NOT_LHSE = dev() ? {NOT_LHSE: 1} : false; // not requiring a "LeftHandExpression". This is currently only used for class `extends`.
 const ONLY_LHSE = dev() ? {ONLY_LHSE: 1} : true; // restrict value to conform to a "LeftHandExpression" production.
 
-let ASSERT_YIELD_NL_REGEX = false; // When set, do not throw assertion error in the semi/asi parser for seeing a regex
+let ASSERT_ASI_REGEX_NEXT = false; // When set, do not throw assertion error in the semi/asi parser for seeing a regex
 
 function dev() {
   let dev = false;
@@ -1853,8 +1853,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [v]: `x \n /foo/g`              // NO ASI because it can be a division (x/foo/g)
       // [v]: `debugger \n /foo/`        // ASI because it cannot be a division (regex /foo/)
       // [v]: `debugger \n /foo/g`       // ASI because it cannot be a division (regex /foo/g)
-      ASSERT_VALID(ASSERT_YIELD_NL_REGEX, 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
-      ASSERT_YIELD_NL_REGEX = false;
+      ASSERT_VALID(ASSERT_ASI_REGEX_NEXT, 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
+      ASSERT_ASI_REGEX_NEXT = false;
     }
 
     if (curc === $$SEMI_3B) {
@@ -1885,7 +1885,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'token type should not have $error or $eof at this point');
     ASSERT(isLabelled === IS_LABELLED || isLabelled === NOT_LABELLED, 'isLabelled enum');
 
-    ASSERT(!void(ASSERT_YIELD_NL_REGEX = false));
+    ASSERT(!void(ASSERT_ASI_REGEX_NEXT = false));
 
     switch (getGenericTokenType(curtype)) { // TODO: convert to flag index to have perfect hash in the switch
       case $IDENT:
@@ -5129,7 +5129,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         mustHaveInit = true;
       }
     }
-
     else if (curc === $$DOT_2E && curtok.str === '...') {
       ASSERT(bindingType === BINDING_TYPE_ARG, 'other binding types should catch this sooner?');
       let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
@@ -5168,6 +5167,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Constants must be initialized');
     }
     else if (defaultsOption === ASSIGNMENT_IS_INIT) {
+      if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
+        if (bindingOrigin === FROM_FOR_HEADER) {
+          // [x] `for (var x \n /foo/;;);`
+          THROW('Illegal regex after binding declaration in `for` header');
+        }
+        // [v] `var x \n /foo/`
+        ASSERT_ASI_REGEX_NEXT = true;
+      }
       AST_wrapClosed('declarations', 'VariableDeclarator', 'id', bindingStartToken);
       AST_set('init', null);
       AST_close('VariableDeclarator');
@@ -6623,7 +6630,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // tok.asi();
       AST_set('delegate', false);
       AST_set('argument', null);
-      ASSERT(ASSERT_YIELD_NL_REGEX = true); // This should be picked up at semi/asi parser and prevent an assertion error
+      ASSERT(ASSERT_ASI_REGEX_NEXT = true); // This should be picked up at semi/asi parser and prevent an assertion error
     }
     else if (curc === $$STAR_2A) {
       AST_set('delegate', true);
