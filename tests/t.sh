@@ -157,7 +157,7 @@ if [[ "${ACTION}" = "test262" ]]; then
   set +x
 elif [[ "${ACTION}" = "fuzz" ]]; then
   set -x
-  node --experimental-modules tests/fuzz/zefuzz.mjs
+  node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA}
   set +x
 else
   set -x
