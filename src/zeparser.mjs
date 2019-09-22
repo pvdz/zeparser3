@@ -1627,18 +1627,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     scoop[hashed] = bindingType;
   }
-  function SCOPE_verifyArgs(scoop, wereSimpleArgs) {
-    // should be in the body of a function/scope where the args have just been parsed into another layer
-    for (let key in scoop) {
-      if (key[0] === '#' && lex[key] > 1) {
-        if (wereSimpleArgs === PARAMS_SOME_COMPLEX) {
-          THROW('Same param name was bound twice and the args are not simple, this is not allowed');
-        } else {
-          THROW('Same param name `' + key.slice(1) + '` was bound twice, this is not allowed in strict mode');
-        }
-      }
-    }
-  }
 
   function parseDirectivePrologues(lexerFlags, astProp) {
     ASSERT(arguments.length === parseDirectivePrologues.length, 'arg count');
@@ -1799,10 +1787,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         functionNameTokenToVerify.canon === 'yield'
       )) {
         THROW('Can not use reserved keyword `' + functionNameTokenToVerify.canon + '` in strict mode as id for function that has a use strict directive');
-      }
-
-      if (!wasStrict && hasNoFlag(lexerFlags, LF_IN_GLOBAL)) {
-        SCOPE_verifyArgs(scoop, paramsSimple);
       }
 
       lexerFlags |= LF_STRICT_MODE;
