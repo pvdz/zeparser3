@@ -3153,7 +3153,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
     // > semicolon is missing. This change aligns the specification with the actual behaviour of most existing implementations.
-    parseSemiOrAsi(lexerFlags);
+    if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
+      // Edge case
+      // - `do ; while(x) \n /foo/`
+      tok.asi();
+    } else {
+      parseSemiOrAsi(lexerFlags);
+    }
     AST_close('DoWhileStatement');
   }
 
