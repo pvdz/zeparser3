@@ -5,6 +5,8 @@
 > :: objects : duplicate keys : obj expr : dunderproto proto : exceptions : not async
 >
 > ::> arr plain group
+>
+> Should fail in web compat because double __proto__ is not allowed in obj expression
 
 ## Input
 
@@ -125,7 +127,14 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Found a part that cant destruct and a part that must destruct so it is not destructible
+
+([{web: false, __proto__: a, __proto__: b}]);
+                                          ^------- error
+`````
+
 
 ## AST Printer
 

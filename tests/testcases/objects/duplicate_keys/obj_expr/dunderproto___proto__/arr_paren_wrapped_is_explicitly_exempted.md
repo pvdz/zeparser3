@@ -133,7 +133,14 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Found a part that cant destruct and a part that must destruct so it is not destructible
+
+([{web: true,  __proto__: x, __proto__: y}]);
+                                          ^------- error
+`````
+
 
 ## AST Printer
 

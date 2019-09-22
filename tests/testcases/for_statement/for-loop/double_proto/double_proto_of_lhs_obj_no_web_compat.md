@@ -110,7 +110,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Parser error!
-  Found an object with double `__proto__` which is not allowed here in webcompat
+  Cannot use lhs as regular for-loop because it must destruct
 
 for ({__proto__: 1, __proto__: 2};;);
                                  ^------- error

@@ -11,6 +11,12 @@
 > When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
 >
 > In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+>
+> However, that doesn't prevent the error if the cover grammar does not end in a pattern
+>
+> In this case it's a destructuring pattern, so no error expected.
+
+## PASS
 
 ## Input
 

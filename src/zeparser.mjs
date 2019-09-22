@@ -255,8 +255,7 @@ const PIGGY_BACK_SAW_YIELD_VARNAME = 1 << 12; // parsed an expression containing
 const PIGGY_BACK_SAW_YIELD_KEYWORD = 1 << 13  ; // parsed an expression containing a YieldExpression
 const PIGGY_BACK_WAS_CONSTRUCTOR = 1 << 14; // signal having found a constructor (special case)
 const PIGGY_BACK_WAS_PROTO = 1 << 15; // signal that a `__proto__: x` was parsed (do detect double occurrence)
-const PIGGY_BACK_WAS_DOUBLE_PROTO = 1 << 16; // signal that double proto was found on object; error in web compat outside of arrow headers
-const PIGGY_BACK_WAS_ARROW = 1 << 17; // signal that double proto was found on object; error in web compat outside of arrow headers
+const PIGGY_BACK_WAS_ARROW = 1 << 16; // signal that double proto was found on object; error in web compat outside of arrow headers
 const NO_SPREAD = dev() ? {NO_SPREAD: 1} : 0;
 const LAST_SPREAD = dev() ? {LAST_SPREAD: 1} : 1;
 const MID_SPREAD = dev() ? {MID_SPREAD: 1} : 2;
@@ -341,7 +340,6 @@ const PIGGIES = (0
   | PIGGY_BACK_SAW_YIELD_KEYWORD
   | PIGGY_BACK_WAS_CONSTRUCTOR
   | PIGGY_BACK_WAS_PROTO
-  | PIGGY_BACK_WAS_DOUBLE_PROTO
   | PIGGY_BACK_WAS_ARROW
 );
 function copyPiggies(output, input) {
@@ -3770,13 +3768,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, DO_NOT_BIND, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
 
-      if (options_webCompat === WEB_COMPAT_ON) {
-        if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
-          ASSERT(curtok.str !== '=' && curtok.str !== 'in' && curtok.str !== 'of', 'an init should be parsed already and have reset the flag');
-          // - `for ({__proto__: 1, __proto__: 2};;);`
-          THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
-        }
-      }
       if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
         // [x]: `for ({x=y} = b in x) ;`
         // [x]: `async function f(){ for await ({x=y}=x of x) ; }`
@@ -3806,14 +3797,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, DO_NOT_BIND, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       ASSERT(!hasAllFlags(destructible, MUST_DESTRUCT | CANT_DESTRUCT), 'parseArrayOuter should throw for must/cant destruct state');
-
-      if (options_webCompat === WEB_COMPAT_ON) {
-        if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
-          ASSERT(curtok.str !== '=', 'an init should be parsed already and have reset the flag');
-          // - `for ([{__proto__: 1, __proto__: 2}];;);`
-          THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
-        }
-      }
 
       if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
         // - `for ([{x=y}]=x in x) ;`
@@ -5107,7 +5090,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curc === $$CURLY_L_7B) {
       ASSERT(bindingType !== BINDING_TYPE_NONE, 'must bind as something'); // TODO: why only this branch?
       let destructible = parseObjectOuter(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
-      destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
       paramSimple = PARAM_WAS_COMPLEX;
@@ -5122,7 +5104,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc === $$SQUARE_L_5B) {
       let destructible = parseArrayOuter(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
-      destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
       paramSimple = PARAM_WAS_COMPLEX;
@@ -6113,16 +6094,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseValueHeadBodyAfterObjArr(wasDestruct) {
     ASSERT(_parseValueHeadBodyAfterObjArr.length === arguments.length, 'argcount');
-
-    if (options_webCompat === WEB_COMPAT_ON) {
-      if (hasAllFlags(wasDestruct, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
-        // [x]: `x = {__proto__: 1, __proto__: 2}`
-        // [x]: `x = {'__proto__': 1, "__proto__": 2}`
-        // [x]: `x = [{__proto__: 1, __proto__: 2}]`
-        // [x]: `x = [{'__proto__': 1, "__proto__": 2}]`
-        THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
-      }
-    }
 
     if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
       // [x]: `x = {x=y};`
@@ -7477,7 +7448,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let startOfPattern = curtok;
         destructible |= parseObjectOuter(lexerFlags, paramScoop, BINDING_TYPE_ARG, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         // - `({web: true,  __proto__: x, __proto__: y});`
-        destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error in potential arrow header
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
           // Note: this is NOT destructible because we're in a group toplevel so an assignment would just be an
           // assignment, not a destructuring. And any tail would not lead to any kind of pattern. And destructuring
@@ -7500,7 +7470,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let startOfPattern = curtok;
         destructible |= parseArrayOuter(lexerFlags, paramScoop, BINDING_TYPE_ARG, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         // - `([{web: true,  __proto__: x, __proto__: y}]);`
-        destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error in potential arrow header
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
           // Note: this is NOT destructible because we're in a group toplevel so an assignment would just be an
           // assignment, not a destructuring. And any tail would not lead to any kind of pattern. And destructuring
@@ -8545,15 +8514,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAnyFlag(currentDestruct, PIGGY_BACK_WAS_PROTO)) {
           // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
           // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
-          // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
-          // so; the __proto__ dupe check does not apply when inside a group or when the object is a destructuring assignment
+          // As per https://github.com/tc39/test262/issues/2344 this is only the case if it actually is a pattern.
           if (hasThunderProto) {
             // [x]: `x = {__proto__: 1, __proto__: 2}`
             // [x]: `x = {'__proto__': 1, "__proto__": 2}`
             // [x]: `x = [{__proto__: 1, __proto__: 2}]`
             // [x]: `x = [{'__proto__': 1, "__proto__": 2}]`
-            // Note: This is NOT an error if this object is toplevel of a group or async call (both potential arrow pattern)
-            destructible |= PIGGY_BACK_WAS_DOUBLE_PROTO;
+            // TODO: I don't like this because the final error is very obscure. However it's a bit too complex to have
+            // that propagated through the system right now. So maybe later. For now it'll throw generic destruct errors.
+            destructible |= MUST_DESTRUCT; // Double proto rule is ignored if it occurs in a pattern
           }
           hasThunderProto = true;
         }
@@ -8900,7 +8869,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [v]: `({...[].x} = x);`
       // [x]: `x = {__proto__: a, __proto__: b} = y`
       // TODO: not sure about PIGGY_BACK_WAS_PROTO (but "free" so not wasting time for a test case right now)
-      destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO | PIGGY_BACK_WAS_DOUBLE_PROTO);
+      destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
 
       // the array MUST now be a pattern. Does not need to be an arrow.
       // the outer-most assignment is an expression, the inner assignments become patterns too.
@@ -11205,10 +11174,6 @@ function P(f, arr) {
   if (f & PIGGY_BACK_WAS_PROTO) {
     arr.push('PIGGY_BACK_WAS_PROTO');
     f ^= PIGGY_BACK_WAS_PROTO;
-  }
-  if (f & PIGGY_BACK_WAS_DOUBLE_PROTO) {
-    arr.push('PIGGY_BACK_WAS_DOUBLE_PROTO');
-    f ^= PIGGY_BACK_WAS_DOUBLE_PROTO;
   }
   if (f & PIGGY_BACK_SAW_AWAIT_KEYWORD) {
     arr.push('PIGGY_BACK_SAW_AWAIT_KEYWORD');

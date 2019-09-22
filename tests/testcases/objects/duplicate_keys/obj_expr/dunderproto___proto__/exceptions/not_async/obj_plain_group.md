@@ -5,6 +5,10 @@
 > :: objects : duplicate keys : obj expr : dunderproto proto : exceptions : not async
 >
 > ::> obj plain group
+>
+> Should fail in web compat
+>
+> https://github.com/tc39/test262/issues/2344
 
 ## Input
 
@@ -119,7 +123,14 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Found a part that cant destruct and a part that must destruct so it is not destructible
+
+({web: false, __proto__: a, __proto__: b});
+                                         ^------- error
+`````
+
 
 ## AST Printer
 

@@ -11,6 +11,8 @@
 > When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
 >
 > In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+>
+> However, that doesn't prevent the error if the cover grammar does not end in a pattern
 
 ## Input
 
@@ -105,7 +107,14 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Group contained a value that must destruct but this was not an arrow so it is invalid
+
+({__proto__: a, __proto__: b});
+                              ^------- error
+`````
+
 
 ## AST Printer
 

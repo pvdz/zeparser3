@@ -126,7 +126,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Parser error!
-  Found an object with double `__proto__` which is not allowed here in webcompat
+  Found a part that cant destruct and a part that must destruct so it is not destructible
 
 x = [{__proto__: 1, __proto__: 2}]
                                  ^------- error

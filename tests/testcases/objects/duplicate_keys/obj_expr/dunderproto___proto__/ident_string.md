@@ -8,13 +8,11 @@
 >
 > Regression caught by test262/test/annexB/language/expressions/object/__proto__-duplicate.js
 >
-> The test claims it should fail because string keys are not exempted from the double `__proto__` rule
+> https://github.com/tc39/test262/issues/2344
 >
-> I think the test is incorrect because the spec says to ignore early errors while parsing a cover grammer, which we are.
+> The cover rule exception does not prevent the error if the end result is not a pattern.
 >
-> Reported in https://github.com/babel/babel/issues/10435
-
-## PASS
+> So this is an error in web compat mode.
 
 ## Input
 
@@ -136,7 +134,18 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Found a part that cant destruct and a part that must destruct so it is not destructible
+
+({
+  __proto__: null,
+  other: null,
+  '__proto__': null
+});
+ ^------- error
+`````
+
 
 ## AST Printer
 

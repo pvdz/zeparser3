@@ -116,7 +116,14 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Group contained a value that must destruct but this was not an arrow so it is invalid
+
+async ({__proto__: a, __proto__: b});
+                                    ^------- error
+`````
+
 
 ## AST Printer
 
