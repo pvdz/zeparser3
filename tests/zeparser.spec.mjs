@@ -1001,6 +1001,9 @@ let files = [];
 if (INPUT_OVERRIDE) {
   LOG('Using override input and only testing that...');
   if (!a && !b && !c && !d) LOG('Sloppy mode implied (override with --strict --module or --web)');
+  if (b && !a && !c && !d) LOG('Testing in strict mode only');
+  if (c && !a && !b && !d) LOG('Testing in module goal only');
+  if (d && !a && !b && !c) LOG('Testing in web compat mode only');
   LOG('=============================================\n');
 } else {
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test search discovery time');
