@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The label for this `continue` was not defined in the current label set, which is illegal
+  This `continue` had a label (`y`) that was not defined in the current label set as the direct parent of a loop, which would be required
 
 function f(){ do        if (x) continue y   ; while(true);}
                                         ^------- error

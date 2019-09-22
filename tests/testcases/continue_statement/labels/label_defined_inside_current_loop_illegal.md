@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot `continue` to label `x` because it was defined inside the current inner-most loop
+  This `continue` had a label (`x`) that was not defined in the current label set as the direct parent of a loop, which would be required
 
 while (true) x: continue x;
                          ^------- error
