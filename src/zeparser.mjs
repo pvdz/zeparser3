@@ -449,7 +449,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     $log('\n');
     $log('Error in parser:', desc, 'remaining throw args;', args);
     $log('Error token: ' + token);
-    tok.throw('Parser error! ' + desc, token, undefined, fullErrorContext);
+    // The "at eof" suffix also helps for reducing fuzz cases
+    tok.throw('Parser error! ' + desc + (curtype === $EOF ? ' (at EOF)' : ''), token, undefined, fullErrorContext);
   }
 
   let uid_counter = 0;
@@ -5687,7 +5688,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (isAssignBinOp()) {
       if (notAssignable(assignable)) {
-        THROW('Cannot assign to lhs because it is not a valid assignment target');
+        THROW('Cannot assign to lhs (starting with `'+firstExprToken.str+'`) because it is not a valid assignment target');
       }
       assignable = parseExpressionFromAssignmentOp(lexerFlags, firstExprToken, assignable, astProp);
     } else {
@@ -8374,7 +8375,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           } else {
             // - `[2=x]`
             //      ^
-            THROW('Cannot assign to lhs');
+            THROW('Cannot assign to lhs (starting with `'+elementStartToken.str+'`)');
           }
         }
 

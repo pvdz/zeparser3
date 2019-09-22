@@ -80,7 +80,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Cannot assign to lhs because it is not a valid assignment target
+  Cannot assign to lhs (starting with `(`) because it is not a valid assignment target
 
 async x => (eval) = 1
                   ^------- error

@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [default]
+  Illegal keyword encountered; is not a value [default] (at EOF)
 
 delete default
        ^------- error

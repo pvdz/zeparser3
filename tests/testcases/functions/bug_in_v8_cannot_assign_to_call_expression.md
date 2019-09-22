@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot assign to lhs because it is not a valid assignment target
+  Cannot assign to lhs (starting with `x`) because it is not a valid assignment target
 
 function f([x=x()=x]){},({x:{1:y()=x},x:{7:3}})>x
                  ^------- error

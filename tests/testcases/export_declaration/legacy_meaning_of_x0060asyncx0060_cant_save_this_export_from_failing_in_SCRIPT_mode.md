@@ -44,7 +44,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Can only export async functions (not arrows), did not find a function
+  Can only export async functions (not arrows), did not find a function (at EOF)
 
 export async
        ^------- error

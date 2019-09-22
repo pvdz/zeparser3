@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can only read `new.target`, no other "properties" from `new`
+  Can only read `new.target`, no other "properties" from `new` (at EOF)
 
 function d(){new.
                 ^------- error

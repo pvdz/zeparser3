@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [extends]
+  Illegal keyword encountered; is not a value [extends] (at EOF)
 
 delete extends
        ^------- error

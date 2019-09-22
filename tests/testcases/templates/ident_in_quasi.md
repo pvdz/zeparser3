@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The first token after the template expression should be a continuation of the template
+  The first token after the template expression should be a continuation of the template (at EOF)
 
 `${n
    ^------- error

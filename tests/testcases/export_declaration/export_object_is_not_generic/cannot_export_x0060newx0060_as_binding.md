@@ -44,7 +44,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Exporting a name that was not bound in global: `new`
+  Exporting a name that was not bound in global: `new` (at EOF)
 
 export {new}
            ^------- error

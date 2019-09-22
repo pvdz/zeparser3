@@ -66,7 +66,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Parser error!
-  Octal in directive with strict mode directive or in strict mode is always illegal
+  Octal in directive with strict mode directive or in strict mode is always illegal (at EOF)
 
 "You \077 ok";
 "use strict"

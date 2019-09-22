@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 0 (curc: `@{x0}@`, token: ``)
+  Next ord should be 123 (`{`) but was 0 (curc: `@{x0}@`, token: ``) (at EOF)
 
 new class extends{}
                   ^------- error

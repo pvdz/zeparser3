@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Encountered invalid input after spread/rest argument
+  Encountered invalid input after spread/rest argument (at EOF)
 
 +{...x
      ^------- error

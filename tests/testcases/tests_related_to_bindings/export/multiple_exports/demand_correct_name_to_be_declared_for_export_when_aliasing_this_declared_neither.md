@@ -54,7 +54,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Exporting a name that was not bound in global: `mustExist`
+  Exporting a name that was not bound in global: `mustExist` (at EOF)
 
 export {mustExist as canBeUndeclared};
                                      ^------- error

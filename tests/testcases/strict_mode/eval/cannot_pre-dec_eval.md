@@ -57,7 +57,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Cannot inc/dec a non-assignable value as prefix
+  Cannot inc/dec a non-assignable value as prefix (at EOF)
 
 --eval
   ^------- error

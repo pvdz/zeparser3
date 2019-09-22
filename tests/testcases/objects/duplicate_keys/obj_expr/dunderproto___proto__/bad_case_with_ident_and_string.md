@@ -120,7 +120,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Parser error!
-  Found a part that cant destruct and a part that must destruct so it is not destructible
+  Found a part that cant destruct and a part that must destruct so it is not destructible (at EOF)
 
 x = {__proto__: 1, "__proto__": 2}
                                  ^------- error

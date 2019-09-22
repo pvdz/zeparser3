@@ -44,7 +44,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Constants must be initialized
+  Constants must be initialized (at EOF)
 
 export const x
              ^------- error

@@ -58,7 +58,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Cannot use `yield` outside of generator functions when in strict mode
+  Cannot use `yield` outside of generator functions when in strict mode (at EOF)
 
 new yield
     ^------- error

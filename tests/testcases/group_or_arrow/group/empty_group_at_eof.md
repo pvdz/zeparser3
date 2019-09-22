@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Empty group must indicate an arrow, async(), or call()
+  Empty group must indicate an arrow, async(), or call() (at EOF)
 
 ()
  ^------- error

@@ -50,7 +50,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Declaration destructuring must have init
+  Declaration destructuring must have init (at EOF)
 
 export let
 []

@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Constants must be initialized
+  Constants must be initialized (at EOF)
 
 const x = async () => x, y
                          ^------- error
