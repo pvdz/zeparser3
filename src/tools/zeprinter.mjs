@@ -2,6 +2,8 @@
 // The resulting string may be different than the original input but should parse into an equivalent AST
 // The output of this printer is in particular overly saturated with parentheses.
 
+// IT SEEMS THIS IS A PRETTY SLOW PRINTER. Seems to its job but consider yourself warned. I didn't write this for perf.
+
 function $w(node) {
   return '(' + $(node) + ')';
 }
