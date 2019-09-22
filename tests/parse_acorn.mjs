@@ -150,10 +150,6 @@ function ignoreZeparserTestForAcorn(file) {
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/obj_paren_wrapped_is_explicitly_exempted.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/paren_wrapped.md',
 
-    // I think this test is test262's origin
-    //    https://github.com/tc39/test262/issues/2344
-    'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/ident_string.md',
-
     // Bug: typeof statement, newline, regex is actual division but acorn (like Babel) tries to parse a regex
     //    https://github.com/acornjs/acorn/issues/875
     //    (Babel issue: https://github.com/babel/babel/issues/10410 )
