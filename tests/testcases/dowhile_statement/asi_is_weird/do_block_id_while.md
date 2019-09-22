@@ -1,19 +1,20 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/asi_problem_case_that_almost_all_parsers_seem_to_accept/do_arrow_while.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/do_block_id_while.md
 
-> :: dowhile statement : asi problem case that almost all parsers seem to accept
+> :: dowhile statement : asi is weird
 >
-> ::> do arrow while
+> ::> do block id while
 >
-> An ASI does not happen between arrow and while when there is no newline, but it is required so this is an error
+> Confirm that it won't apply ASI after skipping ASI for block
 
 ## FAIL
 
 ## Input
 
 `````js
-do ()=>x while(c)
+do {} a
+while (b);
 `````
 
 ## Output
@@ -30,10 +31,12 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N ws=N pos=9:14 loc=9:1 curc=119 `while`#}
+  Next char should be [while] but was [a]
 
-do ()=>x while(c)
-         ^------- error
+do {} a
+      ^------- error
+
+while (b);
 `````
 
 ### Strict mode

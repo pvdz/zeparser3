@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/asi_problem_case_that_almost_all_parsers_seem_to_accept/try_catch_finally.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/debugger_without_semi.md
 
-> :: dowhile statement : asi problem case that almost all parsers seem to accept
+> :: dowhile statement : asi is weird
 >
-> ::> try catch finally
+> ::> debugger without semi
 >
 > <3 fuzzing
 > 
@@ -17,7 +17,7 @@
 ## Input
 
 `````js
-do try {} catch {} while(x) x
+do debugger while(x) x
 `````
 
 ## Output
@@ -34,10 +34,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N ws=N pos=28:29 loc=28:1 curc=120 `x`#}
+  Unable to ASI, token: {# IDENT : nl=N ws=N pos=12:17 loc=12:1 curc=119 `while`#}
 
-do try {} catch {} while(x) x
-                            ^------- error
+do debugger while(x) x
+            ^------- error
 `````
 
 ### Strict mode

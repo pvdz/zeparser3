@@ -1,19 +1,19 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/do_missing_semi.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/switch.md
 
-> :: dowhile statement
+> :: dowhile statement : asi is weird
 >
-> ::> do missing semi
+> ::> switch
 >
-> The semi after `do-while` can trigger an ASI even without newline
+> The ASI for `do-while` does not require a newline since ES6
 
 ## PASS
 
 ## Input
 
 `````js
-do;while(j)try{}finally{}
+do switch(x){} while(x) x
 `````
 
 ## Output
@@ -35,38 +35,38 @@ ast: {
   body: [
     {
       type: 'DoWhileStatement',
-      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
       body: {
-        type: 'EmptyStatement',
-        loc:{start:{line:1,column:2},end:{line:1,column:3},source:''}
+        type: 'SwitchStatement',
+        loc:{start:{line:1,column:3},end:{line:1,column:14},source:''},
+        discriminant: {
+          type: 'Identifier',
+          loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
+          name: 'x'
+        },
+        cases: []
       },
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
-        name: 'j'
+        loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
+        name: 'x'
       }
     },
     {
-      type: 'TryStatement',
-      loc:{start:{line:1,column:11},end:{line:1,column:25},source:''},
-      block: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,column:14},end:{line:1,column:16},source:''},
-        body: []
-      },
-      handler: null,
-      finalizer: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,column:23},end:{line:1,column:25},source:''},
-        body: []
+      type: 'ExpressionStatement',
+      loc:{start:{line:1,column:24},end:{line:1,column:25},source:''},
+      expression: {
+        type: 'Identifier',
+        loc:{start:{line:1,column:24},end:{line:1,column:25},source:''},
+        name: 'x'
       }
     }
   ]
 }
 
-tokens (14x):
-       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR ASI IDENT
-       PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
+tokens (15x):
+       IDENT IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR
+       IDENT PUNCTUATOR IDENT PUNCTUATOR ASI IDENT ASI
 `````
 
 ### Strict mode
@@ -92,8 +92,8 @@ _Output same as sloppy mode._
 Printer output different from input [sloppy]:
 
 ````js
-do ; while (j);
-try {} finally {}
+do switch (x) {} while (x);
+(x);
 ````
 
 Produces same AST

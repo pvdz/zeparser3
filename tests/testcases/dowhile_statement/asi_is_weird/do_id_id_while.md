@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/asi_problem_case_that_almost_all_parsers_seem_to_accept/do_id_id_while.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/do_id_id_while.md
 
-> :: dowhile statement : asi problem case that almost all parsers seem to accept
+> :: dowhile statement : asi is weird
 >
 > ::> do id id while
 >

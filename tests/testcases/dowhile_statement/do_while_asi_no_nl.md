@@ -1,19 +1,23 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/do_missing_semi.md
+- Path: tests/testcases/dowhile_statement/do_while_asi_no_nl.md
 
 > :: dowhile statement
 >
-> ::> do missing semi
+> ::> do while asi no nl
 >
-> The semi after `do-while` can trigger an ASI even without newline
-
-## PASS
+> The ASI after a `do-while` does not require a newline
+>
+> https://tc39.es/ecma262/#sec-rules-of-automatic-semicolon-insertion
+>
+> > The previous token is ) and the inserted semicolon would then be parsed as the terminating semicolon of a do-while statement (13.7.2).
+>
+> Similar to blocks and certain declarations
 
 ## Input
 
 `````js
-do;while(j)try{}finally{}
+do;while(x)y
 `````
 
 ## Output
@@ -31,7 +35,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
   body: [
     {
       type: 'DoWhileStatement',
@@ -43,30 +47,24 @@ ast: {
       test: {
         type: 'Identifier',
         loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
-        name: 'j'
+        name: 'x'
       }
     },
     {
-      type: 'TryStatement',
-      loc:{start:{line:1,column:11},end:{line:1,column:25},source:''},
-      block: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,column:14},end:{line:1,column:16},source:''},
-        body: []
-      },
-      handler: null,
-      finalizer: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,column:23},end:{line:1,column:25},source:''},
-        body: []
+      type: 'ExpressionStatement',
+      loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
+      expression: {
+        type: 'Identifier',
+        loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
+        name: 'y'
       }
     }
   ]
 }
 
-tokens (14x):
+tokens (10x):
        IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR ASI IDENT
-       PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
+       ASI
 `````
 
 ### Strict mode
@@ -92,8 +90,8 @@ _Output same as sloppy mode._
 Printer output different from input [sloppy]:
 
 ````js
-do ; while (j);
-try {} finally {}
+do ; while (x);
+(y);
 ````
 
 Produces same AST

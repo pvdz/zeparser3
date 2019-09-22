@@ -3152,8 +3152,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
     // > semicolon is missing. This change aligns the specification with the actual behaviour of most existing implementations.
-    if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
-      // Edge case
+    // Note: no line terminator is required for this to proc. So `do;while(x)y` is valid (!)
+    if (curc !== $$SEMI_3B) {
+      // Since ES6 the last semi (`;`) of a do-while is suseptible to ASI rules
+      // These apply even without a newline, similar to blocks or function declarations
+      // - `do ; while (x) y`
       // - `do ; while(x) \n /foo/`
       tok.asi();
     } else {

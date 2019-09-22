@@ -1,23 +1,19 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/asi_problem_case_that_almost_all_parsers_seem_to_accept/debugger_with_semi.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/do_arrow_while.md
 
-> :: dowhile statement : asi problem case that almost all parsers seem to accept
+> :: dowhile statement : asi is weird
 >
-> ::> debugger with semi
+> ::> do arrow while
 >
-> <3 fuzzing
-> 
-> This case is (currently) accepted by all parsers except traceur.
-> 
-> And only for sub-statements that don't require ASI (like block, switch, try). It's almost as if that's universally stopping ASI in its tracks..? Even v8 suffers from this at the time of writing.
-> 
-> I found it with a fuzzer.
+> An ASI does not happen between arrow and while when there is no newline, but it is required so this is an error
+
+## FAIL
 
 ## Input
 
 `````js
-do debugger; while(x) x
+do ()=>x while(c)
 `````
 
 ## Output
@@ -34,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N ws=N pos=22:23 loc=22:1 curc=120 `x`#}
+  Unable to ASI, token: {# IDENT : nl=N ws=N pos=9:14 loc=9:1 curc=119 `while`#}
 
-do debugger; while(x) x
-                      ^------- error
+do ()=>x while(c)
+         ^------- error
 `````
 
 ### Strict mode

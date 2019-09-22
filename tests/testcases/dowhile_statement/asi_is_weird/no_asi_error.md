@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/no_asi_error.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/no_asi_error.md
 
-> :: dowhile statement
+> :: dowhile statement : asi is weird
 >
 > ::> no asi error
 >

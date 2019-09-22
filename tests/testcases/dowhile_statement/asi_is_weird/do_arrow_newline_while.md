@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/dowhile_statement/asi_problem_case_that_almost_all_parsers_seem_to_accept/do_arrow_newline_while.md
+- Path: tests/testcases/dowhile_statement/asi_is_weird/do_arrow_newline_while.md
 
-> :: dowhile statement : asi problem case that almost all parsers seem to accept
+> :: dowhile statement : asi is weird
 >
 > ::> do arrow newline while
 >
