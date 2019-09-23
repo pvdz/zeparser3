@@ -3,7 +3,6 @@ import {
   ASSERT,
   astToString,
   encodeUnicode,
-  normalizeAst,
   PROJECT_ROOT_DIR,
 } from "./utils.mjs";
 import {execSync} from 'child_process';
@@ -66,6 +65,47 @@ function compareAcorn(code, zeparserPassed, testVariant, file, version) {
   return [acornOk, acornFail, zasa];
 }
 
+function normalizeAst(ast, parentProp) {
+  // Given an object model, re-assign properties in lexicographical order except put `type` first
+
+  let names = Object.getOwnPropertyNames(ast);
+  names = names.sort((a,b) => a === 'type' ? -1 : b === 'type' ? b : a > b ? -1 : a < b ? 1 : 0);
+  names.forEach(prop => {
+    // Drop meta data I'm not adding atm
+    if (parentProp === 'program') {
+      if ([
+        'range',
+        'typeAnnotation',
+      ].includes(prop)) {
+        delete ast[prop];
+        return;
+      }
+    }
+    if (parentProp === 'loc') {
+      if (prop === 'source') { // this just needs some regex fu
+        delete ast[prop];
+        return;
+      }
+    } else if (prop === 'start' || prop === 'end') {
+      delete ast[prop];
+      return;
+    }
+    // Work around a poisoned getter/setter on .canon in non-ident tokens in dev mode
+    let opd = Object.getOwnPropertyDescriptor(ast, prop);
+    if (opd && 'value' in opd) {
+      if (ast[prop] && typeof ast[prop] === 'object') {
+        normalizeAst(ast[prop], prop);
+      }
+      let v = ast[prop];
+      // Have to delete the prop in some cases, or re-ordering won't work
+      // Need to trap because deleting array.length will throw an error
+      try { delete ast[prop]; } catch (e) {}
+      ast[prop] = v;
+    }
+  });
+  return ast;
+}
+
 function acornScrub(ast) {
   return (
     astToString(
@@ -104,8 +144,8 @@ function processAcornResult(acornOk, acornFail, zeparserFail, zasa, INPUT_OVERRI
   } else if (!acornFail && zeparserFail) {
     // outputAcorn += '\nAcorn did not throw an error\n' + [acornOk, acornFail];
   } else if (acornFail && !zeparserFail) {
-    outputAcorn += '\nAcorn threw an error (and zeparser did not): ' + acornFail + '\n';
-    if (INPUT_OVERRIDE) console.log('=>', acornFail);
+    outputAcorn += '\nAcorn threw an error (and zeparser did not): ' + acornFail.message + '\n';
+    if (INPUT_OVERRIDE) console.log('=>', acornFail.message);
   } else {
     // outputAcorn = '\n(Acorn did not run)\n';
   }
@@ -122,6 +162,8 @@ function ignoreZeparserTestForAcorn(file) {
     //    https://github.com/acornjs/acorn/issues/872
     'tests/testcases/assigns/destruct_assign_of_obj/gen/case/x0028x007bx002ex002ex002ex0028objx0029x007d_x003d_foox0029.md',
     'tests/testcases/assigns/good_destruct_assign_of_obj_case.md',
+    'tests/testcases/assigns/destruct/good_destruct_assign_of_obj_case.md',
+    'tests/testcases/assigns/obj_destruct_rest/gen/case/x0028x007bx002ex002ex002ex0028objx0029x007d_x003d_foox0029.md',
 
     // Bug: Same `extends` multi-line group loc bug as Babel
     //   https://github.com/acornjs/acorn/issues/873
@@ -149,6 +191,7 @@ function ignoreZeparserTestForAcorn(file) {
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/with_async/plain_group.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/obj_paren_wrapped_is_explicitly_exempted.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/paren_wrapped.md',
+    'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/ident_string.md',
 
     // Bug: typeof statement, newline, regex is actual division but acorn (like Babel) tries to parse a regex
     //    https://github.com/acornjs/acorn/issues/875
@@ -184,12 +227,15 @@ function ignoreZeparserTestForAcorn(file) {
     'tests/testcases/templates/escapes/2028.md',
     'tests/testcases/templates/escapes/2029.md',
 
-    // TOFIX: value should be null for trying to escape \8 and \9
+    // Bug: value should be null for trying to escape \8 and \9
     //     https://github.com/acornjs/acorn/issues/880
     //     Babel issue: https://github.com/babel/babel/issues/10437
     'tests/testcases/tagged_templates/escapes/octal/escape_8.md',
     'tests/testcases/tagged_templates/escapes/octal/escape_9.md',
+    'tests/testcases/directive_prologues/octals/strict_mode_directive_as_tag.md',
 
+    // Ignore: templates where I don't normalize the newlines
+    'tests/testcases/zeprinter/template_with_cr.md',
   ].includes(file.slice(PROJECT_ROOT_DIR.length + 1));
 }
 

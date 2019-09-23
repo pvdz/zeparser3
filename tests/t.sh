@@ -7,6 +7,7 @@ ACORN=''
 BABEL=''
 EXTRA=''
 ES=''
+NODE=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -42,6 +43,7 @@ ZeParser test runner help:
  --babel       Run in Babel compat mode
  --test-babel  Also compare AST of test cases to Babel output
  --no-fatals   Do not abort test run for (test) any assertion errors
+ --node        Fuzzer: compare pass/fail to node by creating a new function and checking if it throws
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -142,6 +144,10 @@ ZeParser test runner help:
     10) ES='--es10' ;;
     11) ES='--es11' ;;
 
+    # special flags for fuzzer
+
+    --node)         NODE='--node'         ;;
+
     *)
       echo "t: Unsupported action or option... \`$1\` Use --help for options"
       exit 1
@@ -157,7 +163,7 @@ if [[ "${ACTION}" = "test262" ]]; then
   set +x
 elif [[ "${ACTION}" = "fuzz" ]]; then
   set -x
-  node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA}
+  node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE}
   set +x
 else
   set -x

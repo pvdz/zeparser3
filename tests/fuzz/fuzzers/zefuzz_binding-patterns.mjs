@@ -9,7 +9,7 @@ import {
   repeat,
   rngpeat,
   rng,
-} from './fuzzutils.mjs';
+} from '../fuzzutils.mjs';
 
 const MODE_ARG_PATTERN = true;
 const ALLOW_PATTERN_SPREAD = true;

@@ -3,7 +3,6 @@ import {
   ASSERT,
   astToString,
   encodeUnicode,
-  normalizeAst,
   PROJECT_ROOT_DIR,
 } from "./utils.mjs";
 import {execSync} from 'child_process';
@@ -59,6 +58,47 @@ function compareBabel(code, zeparserPassed, testVariant, file) {
   return [babelOk, babelFail, zasb];
 }
 
+function normalizeAst(ast, parentProp) {
+  // Given an object model, re-assign properties in lexicographical order except put `type` first
+
+  let names = Object.getOwnPropertyNames(ast);
+  names = names.sort((a,b) => a === 'type' ? -1 : b === 'type' ? b : a > b ? -1 : a < b ? 1 : 0);
+  names.forEach(prop => {
+    // Drop meta data I'm not adding atm
+    if (parentProp === 'program') {
+      if ([
+        'range',
+        'typeAnnotation',
+      ].includes(prop)) {
+        delete ast[prop];
+        return;
+      }
+    }
+    if (parentProp === 'loc') {
+      if (prop === 'source') { // this just needs some regex fu
+        delete ast[prop];
+        return;
+      }
+    } else if (prop === 'start' || prop === 'end') {
+      delete ast[prop];
+      return;
+    }
+    // Work around a poisoned getter/setter on .canon in non-ident tokens in dev mode
+    let opd = Object.getOwnPropertyDescriptor(ast, prop);
+    if (opd && 'value' in opd) {
+      if (ast[prop] && typeof ast[prop] === 'object') {
+        normalizeAst(ast[prop], prop);
+      }
+      let v = ast[prop];
+      // Have to delete the prop in some cases, or re-ordering won't work
+      // Need to trap because deleting array.length will throw an error
+      try { delete ast[prop]; } catch (e) {}
+      ast[prop] = v;
+    }
+  });
+  return ast;
+}
+
 function babelScrub(ast) {
   return (
     astToString(
@@ -97,8 +137,8 @@ function processBabelResult(babelOk, babelFail, zeparserFail, zasb, INPUT_OVERRI
   } else if (!babelFail && zeparserFail) {
     // outputBabel += '\nBabel did not throw an error\n' + [babelOk, babelFail];
   } else if (babelFail && !zeparserFail) {
-    outputBabel += '\nBabel threw an error (and zeparser did not): ' + babelFail + '\n';
-    if (INPUT_OVERRIDE) console.log('=>', babelFail);
+    outputBabel += '\nBabel threw an error (and zeparser did not): ' + babelFail.message + '\n';
+    if (INPUT_OVERRIDE) console.log('=>', babelFail.message);
   } else {
     // outputBabel = '\n(Babel did not run)\n';
   }
@@ -172,6 +212,9 @@ function ignoreZeparserTestForBabel(file) {
     'tests/testcases/whitespace/html_comments/html_open_without_close_2.md',
     'tests/testcases/whitespace/html_comments/same_test_with_newline.md',
 
+    // Bug: Babel getting tricked by "use strict" as a tagged template
+    'tests/testcases/directive_prologues/octals/strict_mode_directive_as_tag_directive_test.md',
+
     // Bug in Babel is generating invalid location
     //    https://github.com/babel/babel/issues/10435
     'tests/testcases/string/2028_is_ok.md',
@@ -200,7 +243,6 @@ function ignoreZeparserTestForBabel(file) {
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/not_async/as_an_arrow.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/not_async/destructuring_assignment.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/not_async/grouped_destructuring_assignment.md',
-    // I think this is a different error because this is an actual error
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/not_async/inside_a_complex_destruct_in_an_arrow_1.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/not_async/obj_plain_group.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/not_async/plain_group.md',
@@ -209,9 +251,6 @@ function ignoreZeparserTestForBabel(file) {
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/exceptions/with_async/plain_group.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/obj_paren_wrapped_is_explicitly_exempted.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/paren_wrapped.md',
-
-    // Bug: I think this is a bug in test262 that was copied as fact by Babel (proto in grouped object should be ignored as potential pattern in arrow)
-    //    https://github.com/tc39/test262/issues/2344
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/ident_string.md',
 
     // To investigate: These only occur in the async version of the test. Babel applying non-annexb rules to lexical bindings
@@ -261,6 +300,14 @@ function ignoreZeparserTestForBabel(file) {
     //    https://github.com/babel/babel/issues/10437
     'tests/testcases/tagged_templates/escapes/octal/escape_8.md',
     'tests/testcases/tagged_templates/escapes/octal/escape_9.md',
+
+    // Ignore: Babel applies strict mode octal exception (is it incorectly?)
+    'tests/testcases/classes/class_octal.md',
+    'tests/testcases/lexer_cases/numbers/legacy_octal/class_02.md',
+
+    // Ignore: template encoding where I don't normalize newlines.
+    'tests/testcases/directive_prologues/octals/strict_mode_directive_as_tag.md',
+    'tests/testcases/zeprinter/template_with_cr.md',
 
   ].includes(file.slice(PROJECT_ROOT_DIR.length + 1));
 }

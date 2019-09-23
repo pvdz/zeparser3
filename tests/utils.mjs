@@ -116,6 +116,7 @@ export class Tob {
     this.inputCode = '';
 
     this.parserRawOutput = {sloppy: {}, strict: {}, module: {}, web: {}}; // {r, e, tok, stdout}
+    this.skippedForParser = false;
 
     this.oldOutputSloppy = false;
     this.newOutputSloppy = false;
@@ -311,47 +312,6 @@ async function yn(msg = 'Answer?') {
   return true;
 }
 
-function normalizeAst(ast, parentProp) {
-  // Given an object model, re-assign properties in lexicographical order except put `type` first
-
-  let names = Object.getOwnPropertyNames(ast);
-  names = names.sort((a,b) => a === 'type' ? -1 : b === 'type' ? b : a > b ? -1 : a < b ? 1 : 0);
-  names.forEach(prop => {
-    // Drop meta data I'm not adding atm
-    if (parentProp === 'program') {
-      if ([].includes(prop)) {
-        delete ast[prop];
-        return;
-      }
-    }
-    if (parentProp === 'loc') {
-      if (prop === 'source') { // this just needs some regex fu
-        delete ast[prop];
-        return;
-      }
-    } else if (prop === 'start' || prop === 'end') {
-      delete ast[prop];
-      return;
-    }
-    // if (prop === 'extra') {
-    //   delete ast[prop];
-    //   return;
-    // }
-    // Work around a poisoned getter/setter on .canon in non-ident tokens in dev mode
-    let opd = Object.getOwnPropertyDescriptor(ast, prop);
-    if (opd && 'value' in opd) {
-      if (ast[prop] && typeof ast[prop] === 'object') {
-        normalizeAst(ast[prop], prop);
-      }
-      let v = ast[prop];
-      // Have to delete the prop in some cases, or re-ordering won't work
-      // Need to trap because deleting array.length will throw an error
-      try { delete ast[prop]; } catch (e) {}
-      ast[prop] = v;
-    }
-  });
-  return ast;
-}
 function astToString(ast) {
   return util
   .inspect(ast, false, null)
@@ -401,7 +361,6 @@ export {
   getTestFiles,
   _LOG,
   LOG,
-  normalizeAst,
   parseTestFile,
   PROJECT_ROOT_DIR,
   promiseToReadFile,

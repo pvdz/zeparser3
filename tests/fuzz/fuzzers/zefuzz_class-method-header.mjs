@@ -4,7 +4,7 @@ import {
   errorify,
   pick,
   rng,
-} from './fuzzutils.mjs';
+} from '../fuzzutils.mjs';
 
 function createLhs() {
   return pick(

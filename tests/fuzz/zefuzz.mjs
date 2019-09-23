@@ -2,22 +2,34 @@
 
 console.log('\n---------------\n');
 
-import fs from 'fs';
 import {performance} from 'perf_hooks';
 
 import {GOAL_MODULE, GOAL_SCRIPT} from "../../src/zetokenizer.mjs";
 import Par from "../../src/zeparser.mjs";
 
-import ESLump from 'eslump/src/index.js'; // can only import cjs as default
-import ESFuzz from 'esfuzz/lib/index.js';
-import bindingPatterns from './binding-patterns.mjs';
-import classMethodHeaders from './class-method-header.mjs';
+import {
+  dumpFuzzOutput,
+  warnOsd,
+} from './fuzzutils.mjs';
+import {generateEsFuzzCode} from './fuzzers/esfuzz.mjs';
+import {generateEslumpCode} from './fuzzers/eslump.mjs';
+import {
+  generateZefuzzCode_classMethods,
+  generateZefuzzCode_arrows,
+  generateZefuzzCode_bindingPatterns,
+} from './fuzzers/zefuzz.mjs';
 
 import {testZePrinter} from "../run_zeprinter.mjs";
+import {fuzzAgainstNode} from "./fuzz_against_node.mjs";
+
+console.log('ZeFuzz - a ZeParser fuzzing tool');
 
 let VERBOSE = true;
-let CONCISE = true;
-const REDUCE = process.argv.includes('-r') ? process.argv[process.argv.indexOf('-r') + 1] : '';
+const NO_PRINTER = process.argv.includes('--no-printer');
+if (NO_PRINTER) console.log('-- Not testing ZePrinter');
+const TEST_NODE = process.argv.includes('--node');
+if (TEST_NODE) console.log('-- Comparing pass/fail to node by compiling a function');
+console.log('');
 
 const BOLD = '\x1b[;1;1m';
 const DIM = '\x1b[30;1m';
@@ -26,12 +38,42 @@ const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
 
+const FUZZERS = [
+  // These functions should be callable without args and return randomly generated source code to test
+  generateEsFuzzCode,
+  generateEslumpCode,
+  generateZefuzzCode_classMethods,
+  generateZefuzzCode_arrows,
+  generateZefuzzCode_bindingPatterns,
+];
+const INJECTS = [
+  // Newline checks for ASI
+  '\n',
+  // // Newline-forward-slash does regex vs division assertion checks
+  // '\n/',
+  // // Newline-regex does regex vs division assertion checks
+  // '\n/x/',
+  // // Newline-regex-flag does regex vs division assertion checks
+  // '\n/x/g',
+  // Forward slash also does regex assertion checks
+  '/',
+  // Equals does assignability / destructuring assertion checks
+  '=',
+  // Whitespace does general weirdness checks
+  ' ',
+  // // An odd duck being right-associative but a regular op otherwise (unlike `yield`)
+  // '**',
+];
+
+let startTick = performance.now();
 let lastCounter = 0;
 let lastTick = performance.now();
 let lastSpeed = 0;
+let lastTotalSpeed = 0;
 
 let buffer = [];
 let p = (input, trimming) => {
+  ++counts.zeparserParsed;
   let z = Par(input, GOAL_SCRIPT, true, {
     strictMode: false,
     webCompat: true,
@@ -40,7 +82,7 @@ let p = (input, trimming) => {
     // getTokenizer: tok => tokenizer = tok,
     // targetEsVersion: ES || Infinity,
     fullErrorContext: true,
-    templateNewlineNormalization: false,
+    templateNewlineNormalization: false, // Fine for fuzzing. This way we can re-use the AST for a zeprinter test
 
     // Collect output but don't print it in case the retry fails
     $log: (...args) => trimming || buffer.push(args), // shhh
@@ -48,340 +90,80 @@ let p = (input, trimming) => {
     $error: (...args) => trimming || buffer.push(args), // shhh
   });
 
-  try {
-    testZePrinter(input, 'web', z.ast, false, false, false);
-  } catch (e) {
-    console.log('````');
-    console.log(input);
-    console.log('````');
-    console.log(e);
-    process.exit();
-  }
-
   return z;
 };
-
-let attempts = 0;
-let stopNext = false;
-
-const { generateRandomJS: eslumpGen } = ESLump;
-let fuzzEslump = () => eslumpGen({
-  sourceType: "script", // module or script
-  maxDepth: 4, // ast size
-  comments: false, // generate comments?
-  whitespace: false, // generate whitespace?
-});
-let fuzzEsfuzz = () => {
-  // ESFuzz quality tends to generate some poor inputs, while others are rich
-  // This test will scrub out some scrappy inputs like semi's only, or `xxx;`
-  let input = '';
-  do {
-    input = ESFuzz.render(ESFuzz.generate());
-  } while (input.replace(/[;:\w{}]+/g, '').trim() === '');
-  return input;
-};
-let fuzzZefuzz_classMethods = () => {
-  return classMethodHeaders();
-};
-let fuzzZefuzz_bindingPatterns = () => {
-  return bindingPatterns();
-};
-
-function scrubError(msg) {
-  return msg.replace(/\{#.*?#\}/g, '<token>');
-}
-let diffCache = new Map;
-function different(originalError, input) {
-  if (diffCache.has(input)) {
-    let c = diffCache.get(input);
-    buffer.push([
-      'CACHED [' + input.length + ']:',
-      input.replace(/[\n\r]/g, '\\n'),
-      [
-        'z=' + (c.zeparserfailed?'fail':'pass'),
-        'n='+(c.nodefailed?'fail':'pass'),
-      ],
-      c.zeparserfailed || c.nodefailed ? (c.originalError === c.errorMessage ? 'same err:' +  c.originalError + '===' + c.errorMessage: ('different error: ' + c.errorMessage)) : 'both passed'
-    ]);
-    return c.errorMessage === c.originalError && (c.zeparserfailed !== c.nodefailed);
-  }
-  originalError = scrubError(originalError);
-
-  let nodefailed = false;
-  let errorMessage = '';
-  try {
-    Function(input);
-  } catch (e) {
-    errorMessage = scrubError(e.message);
-    nodefailed = true;
-  }
-
-  let zeparserfailed = false;
-  let zepe;
-  try {
-    p(input, true);
-  } catch (e) {
-    zeparserfailed = true;
-    errorMessage = scrubError(e.message);
-    zepe = e;
-  }
-
-  let c = {
-    zeparserfailed,
-    nodefailed,
-    originalError,
-    errorMessage,
-  };
-  diffCache.set(input, c);
-
-  buffer.push([
-    'Tested [' + input.length + ']:',
-    input.replace(/[\n\r]/g, '\\n'),
-    [
-      'z=' + (zeparserfailed?'fail':'pass'),
-      'n='+(nodefailed?'fail':'pass'),
-    ],
-    zeparserfailed || nodefailed ? (originalError === errorMessage ? 'same err' : ('different error: ' + errorMessage)) : 'both passed'
-  ]);
-
-  if (zeparserfailed && (!errorMessage.includes('Parser error!') && !errorMessage.includes('Tokenizer error!')) || errorMessage.toLowerCase().includes('assert')) {
-    log('### output buffer:');
-    buffer.forEach(args => typeof args === 'string' ? log(args) : log(...args));
-
-    console.log('\n\n\n\n####################################');
-    console.log(errorMessage.toLowerCase().includes('assert') ? BLINK + 'ASSERTION error!' + RESET : BOLD + 'Non graceful error:' + RESET);
-    console.log(errorMessage);
-    console.log('```');
-    console.log(input);
-    console.log('```');
-    console.log('\n####################################\n\n\n');
-
-    console.log(zepe.stack);
-
-    fs.writeFileSync('tests/testcases/todo/fuzz-min.md', '@By fuzzer semi-reduced, zeparser assertion failed\nError: '+errorMessage+'\n###\n'+input+'\n');
-    console.log('Written to tests/testcases/todo/fuzz-min.md');
-    process.exit();
-  }
-
-  return errorMessage === originalError && (zeparserfailed !== nodefailed);
-}
 
 const vlog = console.log;
 const log = VERBOSE ? console.log : (...args) => VERBOSE && vlog(...args);
 if (VERBOSE) console.log = console.warn = console.error = (...args) => VERBOSE && vlog(...args);
 
-function trimPatten(different, str, pattern, repl) {
-  let lastOffset = -1;
-  let found = true;
-  let currentStr = str;
-  while (found) {
-    found = false;
-    currentStr = currentStr.replace(pattern, (match, offset) => {
-      if (offset <= lastOffset) return match;
-      if (found) return match;
-      found = true;
-      lastOffset = offset;
-      let lastEffort = currentStr.slice(0, offset) + repl + str.slice(offset + match.length);
-      if (lastEffort !== currentStr && different(lastEffort)) {
-        currentStr = lastEffort;
-        return repl;
+let counts = {
+  fuzzedTests: 0, // How many fuzzed inputs were fuzzed?
+  fuzzedBytes: 0, // How many input bytes were fuzzed?
+  injectedTests: 0, // How many inputs were generated in total (includes derivatives / partials)
+  injectionMode: 0, // How often did injection mode run? (should be 1%)
+  zeparserParsed: 0, // How often has ZeParser parsed input? (How often has the `p` function been called)
+  bytesParsed: 0, // How many bytes has ZeParser parsed?
+  zeparserPassedFuzz: 0,
+  nodePassedFuzz: 0,
+  reduced: 0, // How many cases did we reduce (but not fatal)? This is an expensive step so we need to keep this low
+};
+
+let injectionMode = false; // Global: currently parsing input that was deliberately broken? (Only affects stats)
+(function(){
+  while (true) {
+    let from = Math.floor(Math.random() * 3);
+    let input = FUZZERS[from]();
+    ++counts.fuzzedTests;
+    counts.fuzzedBytes += input.length; // sure, "characters", call off the dogs.
+
+    if (cycle(input)) return;
+
+    // In 1% of inputs do brute force breakage tests with chars that are likely to trip the parser (like `/`)
+    if (Math.random() < 0.005) {
+      injectionMode = true;
+      ++counts.injectionMode;
+      ++counts.injectedTests;
+      for (let i=0; i<input.length; ++i) {
+        ++counts.injectedTests;
+        let chr = INJECTS[Math.floor(Math.random() * INJECTS.length)];
+        let brokenInput = input.slice(0, i) + chr + input.slice(i);
+        if (cycle(brokenInput)) return;
       }
-      return match;
-    });
-  }
-  return currentStr;
-}
-
-let trimCache = new Map;
-function trim(input, _different, inputError) {
-  let org = input;
-  attempts = 0;
-  let different = (...args) => (++attempts, _different(inputError, ...args));
-  buffer.push('<trim>');
-  buffer.push(['Input error:', BOLD + inputError + RESET]);
-  if (trimCache.has(org)) {
-    buffer.push('Trim cached!');
-    buffer.push('Result was:', trimCache.get(input));
-  }
-  if (!different(input)) return buffer.push('Untrimmable because v8 and zeparser already agree\n</trim>'); // this is not trimmable
-  buffer.push(['Normalizing:', input.replace(/[\n\r]/g, '\\n')]);
-  // Normalize newlines
-  if (different(input.replace(/\r/g, '\n'))) input = input.replace(/\r/g, '\n');
-  // Replace newlines with semis
-  if (different(input.replace(/\n/g, ';'))) input = input.replace(/\n/g, ';');
-
-  buffer.push('Trimming');
-  let lastInput = '';
-  while (lastInput !== input) {
-    buffer.push('Outer repeat!');
-    different(input);
-    lastInput = input;
-
-    for (let i=input.length; i>=0; --i) {
-      let testingInput = input.slice(0, i) + input.slice(i + 1);
-      if (different(testingInput)) {
-        input = testingInput;
-      }
-    }
-
-    for (let i=input.length-1; i>=0; --i) {
-      if (input[i] !== 'x' && input[i] !== ' ') {
-        let testingInput = input.slice(0, i) + input.slice(i + 2);
-        if (different(testingInput)) {
-          input = testingInput;
-        }
-      }
-    }
-
-    for (let i=input.length-1; i>=0; --i) {
-      if (input[i] !== 'x' && input[i] !== ' ') {
-        let testingInput = input.slice(0, i) + ' x ' + input.slice(i + 2);
-        if (different(testingInput)) {
-          input = testingInput;
-        }
-      }
-    }
-
-    for (let i=input.length-2; i>=0; --i) {
-      if (input[i] !== 'x' && input[i] !== ' ') {
-        let testingInput = input.slice(0, i) + input.slice(i + 3);
-        if (different(testingInput)) {
-          input = testingInput;
-        }
-      }
-    }
-
-    for (let i=input.length-2; i>=0; --i) {
-      if (input[i] !== 'x' && input[i] !== ' ') {
-        let testingInput = input.slice(0, i) + ' y ' + input.slice(i + 3);
-        if (different(testingInput)) {
-          input = testingInput;
-        }
-      }
-    }
-
-    input = trimPatten(different, input, /try\{\}(?:catch(?:\(\w\))?\{\})?(?:finally\{\})?/g, ';')
-    input = trimPatten(different, input, /for\([\w\d] (?:of|in) [\w\d]\)/g, ';');
-    input = trimPatten(different, input, /for\(;;\)/g, ';');
-    input = trimPatten(different, input, /class(?: +[\w\d$_]*)?(?: extends [\w\d$_]*)?\s*\{\s*\}/g, ' x\n ');
-    input = trimPatten(different, input, /while\([\w\d]\)/g, ';');
-    input = trimPatten(different, input, /do(?:\s\w\s|;)while\([\w\d]\)/g, ';');
-    input = trimPatten(different, input, /with\([\w\d]\)/g, ';');
-    input = trimPatten(different, input, /if\(\w\)/g, ';');
-    input = trimPatten(different, input, /else(?: \w)?/g, ';');
-    input = trimPatten(different, input, /default:?/g, '');
-    input = trimPatten(different, input, /case [\w\d$_]+:/g, '');
-    input = trimPatten(different, input, /function(?: \w)?\(\)\{\s*\w?\s*\}/g, '');
-    input = trimPatten(different, input, /function(?: \w)?\(\)\{\s*\w?\s*\}/g, ' x\n ');
-    input = trimPatten(different, input, /switch\([\w\d]\)\{(?:case [\w\d]:)*\}/g, ';');
-    input = trimPatten(different, input, /[\w\d]\?[\w\d]:[\w\d]/g, ' x ');
-    input = trimPatten(different, input, /\w in(?:stanceof)? \w/g, ' x ');
-    input = trimPatten(different, input, /\d+:[\w\d]+/g, '');
-    input = trimPatten(different, input, /[\w\d$_]*\([\w\d$_]*\)\{\}[;,]?/g, '');
-    input = trimPatten(different, input, /['"]use strict['"];/g, '');
-
-    if (lastInput === input) {
-      // RC. Now check for wrappers
-      let t = input.replace(/try\{([\s\S]+)\}(?:finally|catch(?:\(\w\))?)\{\}/, '$1');
-      if (t !== input && different(t)) input = t;
-
-      t = input.replace(/try\{\}(?:finally|catch(?:\(\w\))?)\{([\s\S]+)\}/, '$1');
-      if (t !== input && different(t)) input = t;
-
-      t = input.replace(/switch\([\w\d]\){case [\w\d]:([\s\S]+)}/, '$1');
-      if (t !== input && different(t)) input = t;
-
-      t = input.replace(/\((.*)\)/, '$1');
-      if (t !== input && different(t)) input = t;
-
-      t = input.replace(/for\((.*);;\)/, '$1;');
-      if (t !== input && different(t)) input = t;
-
-      t = input.replace(/for\(;(.*);\)/, '$1;');
-      if (t !== input && different(t)) input = t;
-
-      t = input.replace(/for\(;;(.*)\)/, '$1;');
-      if (t !== input && different(t)) input = t;
+      injectionMode = false;
     }
   }
-
-  different(input);
-
-  trimCache.set(org, input);
-
-  buffer.push('</trim>');
-  return input;
-}
-
-if (REDUCE) {
-  let err = getError(REDUCE);
-  let r = trim(REDUCE, different, err);
-  buffer.push('Reduced output:', [r]);
-  process.exit();
-}
-
-let counter = 0;
-let passed = 0;
-let end = false;
-while (!end) {
-  if (stopNext) break;
-  let from = Math.floor(Math.random() * 3);
-  let input = [
-    fuzzEslump,
-    fuzzEsfuzz,
-    fuzzZefuzz_classMethods,
-    fuzzZefuzz_bindingPatterns,
-  ][from]();
-
-  if (cycle(input)) {
-    end = true;
-    break;
-  }
-
-  // In 1% of inputs do brute force breakage tests with chars that are likely to trip the parser (like `/`)
-  if (Math.random() < 0.01) {
-    if (cycle(input)) {
-      end = true;
-      break;
-    }
-    for (let i=0; i<input.length; ++i) {
-      let chr = [
-        // Newline checks for ASI
-        '\n',
-        // Newline-forward-slash does regex assertion checks
-        '\n/',
-        // Forward slash also does regex assertion checks
-        '/',
-        // Equals does assignability / destructuring assertion checks
-        '=',
-        // Whitespace does general weirdness checks
-        ' ',
-      ][Math.floor(Math.random() * 5)];
-      let brokenInput = input.slice(0, i) + chr + input.slice(i);
-      if (cycle(brokenInput)) {
-        end = true;
-        break;
-      }
-    }
-  }
-}
+})();
+warnOsd('end of fuzzer');
 console.log('Test failed. End of fuzzer.');
 
-function getError(input) {
-  let errorMessage = '';
+function parseZeParser(input, counts, trimming) {
+  let zefailed = false;
+  let z;
   try {
-    Function(input);
+    counts.bytesParsed += input.length;
+    z = p(input, trimming);
+    if (!injectionMode) ++counts.zeparserPassedFuzz;
   } catch (e) {
-    errorMessage = e.message;
+    zefailed = e.message;
   }
 
-  try {
-    p(input);
-  } catch (e) {
-    errorMessage = e.message;
+  let zeparserAsserted = zefailed && zefailed.toLowerCase().includes('assert');
+  let zeparserCrashed = !zeparserAsserted && zefailed && !(zefailed.includes('Parser error!') || zefailed.includes('Tokenizer error!'));
+
+  if (zeparserAsserted) {
+    dumpFuzzOutput(input, input, zefailed, 'zeparser assertion failed');
+    warnOsd('zeparser assertion');
+    console.log(BOLD + BLINK + 'ASSERTION FAIL' + RESET);
+    process.exit();
+  } else if (zeparserCrashed) {
+    dumpFuzzOutput(input, input, zefailed, 'zeparser had non-graceful exit');
+    warnOsd('zeparser assertion');
+    console.log(BOLD + BLINK + 'ZeParser CRASHED HARD' + RESET);
+    process.exit();
   }
 
-  return errorMessage;
+  return {z, e: zefailed};
 }
 
 function cycle(input) {
@@ -390,185 +172,67 @@ function cycle(input) {
   .replace(/[\x09\x0b\x0c\xa0\uFEFF]/g, ' ')
   // https://www.compart.com/en/unicode/category/Zs
   .replace(/[\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
-  // replace other unicode gunk to an x for printing (we can do separate unicode runs later, I'm not expecting serious problems here)
+  // replace other unicode gunk to an x for printing (we can do separate unicode runs later)
   .replace(/([^\x20-\x7f\n\r])/ug, 'x');
   buffer = [];
 
-  let errorMessage = '';
-  let nodefailed = false;
-  try {
-    let f = Function(input);
-    // log('-->', f.toString())
-  } catch (e) {
-    errorMessage = e.message;
-    nodefailed = e.message;
+  let {z, e: zefailed} = parseZeParser(input, counts, false);
+
+  if (TEST_NODE) {
+    fuzzAgainstNode(input, zefailed, counts, injectionMode, parseZeParser);
   }
 
-  let zefailed = false;
-  let zeparserAsserted = false;
-  try {
-    p(input);
-  } catch (e) {
-    errorMessage = e.message;
-    zefailed = e.message;
-    zeparserAsserted = zefailed.toLowerCase().includes('assert');
-    if (zeparserAsserted) {
-      const BLINK = '\x1b[;5;1m';
-      const BOLD = '\x1b[;1;1m';
-      const RESET = '\x1b[0m';
-      console.log(BOLD + BLINK + 'ASSERTION FAIL' + RESET);
-      console.log('Base64 of initial test case:', Buffer.from(input).toString('base64'))
-      fs.writeFileSync('tests/testcases/todo/fuzz-assert-original.md', '@By fuzzer original, because assertion failed\nError: '+zefailed+'\n###\n'+input+'\n');
-      console.log('Written to tests/testcases/todo/fuzz-assert-original.md');
+  if (z && !NO_PRINTER) {
+    // Note: this is a very slow test. Easily cuts down efficiency to a third.
+    try {
+      testZePrinter(input, 'web', z.ast, false, false, false);
+    } catch (e) {
+      dumpFuzzOutput(input, input, zefailed, 'zeprinter failed');
+      warnOsd('zeparser assertion');
+      process.exit();
     }
   }
 
-  stopNext = stopNext || (zefailed && (zeparserAsserted || (!zefailed.includes('Parser error!') && !zefailed.includes('Tokenizer error!'))));
-
-  if (!nodefailed !== !zefailed || stopNext) {
-    if (nodefailed) {
-      buffer.push('Thrown by v8:', nodefailed);
-    } else {
-      buffer.push('Not thrown by v8');
-    }
-
-    if (zefailed) {
-      buffer.push('Thrown by zeparser:', zefailed);
-    } else {
-      buffer.push('Not thrown by zeparser');
-    }
-
-    if (!stopNext && nodefailed && (undefined
-      || nodefailed.includes('has already been declared') // `switch(y){case y:function*d(){}function*d(){}}`
-      || nodefailed.includes('Unexpected eval or arguments in strict mode') // (eval = a => { "use strict"})
-      || nodefailed.includes('Unexpected strict mode reserved word') // (interface = a => { "use strict"})
-    )) {
-      buffer.push('Skipping case that is likely a false positive because v8 does not verify regexes in lazy parsed functions atm');
-    }
-    else if (!stopNext && zefailed && (undefined || ((undefined
-      // // Binding patterns:
-      // // v8 is allowing `([y()=0])`, patterns with assignments to calls, which lead to false positives
-      // || ((input.includes('()=') || input.includes('))=')) && zefailed.includes('Cannot assign to lhs'))
-
-      // Regexes
-      // v8 is lazy parsing regexes and I'm not sure zeparser is spec compliant, especially in web compat
-      || zefailed.includes('Tokenizer error! Regex:')
-
-      // Delete
-      // v8 doesn't seem to statically detect the delete-on-ident case
-      || zefailed.includes('Bad delete case')
-      // || zefailed.includes('delete an identifier')
-
-      // Labels
-      || zefailed.includes('same label twice')
-
-      // `let \n keyword` case is not covered by v8, I guess (`let \n while (x);`)
-      || zefailed.includes('must be a declaration in strict mode but the next ident is a reserved keyword')
-    )))) {
-      // ignore (based on original input)
-    }
-    else {
-      fs.writeFileSync('tests/testcases/todo/fuzz-assert-original.md', '@By fuzzer original\nError: '+(zefailed||nodefailed)+'\n###\n'+input+'\n');
-
-      let beforeLen = input.length;
-      if (VERBOSE) log('Trimming input (len was ' + input.length +')');
-      input = trim(input, different, errorMessage);
-      if (VERBOSE) log('Finished trimming (len now ' + input.length +', down from ' + beforeLen + ' in ' + attempts + ' attempts)');
-
-      if (0
-        // Class methods:
-        // Node is allowing `class x {y}` which leads to a bunch of false positives in the fuzzer
-        || /class\s*\w*\s*extends\s*\w*\s*\{\s*\w+;?\s*\}/.test(input)
-        || /class\s*\w*\{\w+;?\s*\}/.test(input)
-      ) {
-        // ignore (based on trimmed input)
-      } else {
-        const BLINK = '\x1b[;5;1m';
-        const BOLD = '\x1b[;1;1m';
-        const RESET = '\x1b[0m';
-
-        VERBOSE = true;
-        log('FAIL');
-        log('### <error>');
-        // Flush buffer
-        if (VERBOSE && buffer.length > 0) {
-          log('### output buffer:');
-          buffer.forEach(args => typeof args === 'string' ? log(args) : log(...args));
-        }
-        console.log('Thrown error (pre-scrubbed):', BOLD, errorMessage, RESET);
-        let newError = getError(input);
-        if (errorMessage !== newError) {
-          console.log('Thrown erorr (post-scrubss):', BLINK, newError, RESET);
-        }
-        log('### </error>');
-
-        if (zeparserAsserted) {
-          console.log(BOLD + BLINK + 'ASSERTION FAIL' + RESET);
-          fs.writeFileSync('tests/testcases/todo/fuzz-min.md', '@By fuzzer reduced, zeparser assertion failed\nError: '+zefailed+'\n###\n'+input+'\n');
-          console.log('Written to tests/testcases/todo/fuzz-min.md');
-        } else if (zefailed) {
-          fs.writeFileSync('tests/testcases/todo/fuzz-min.md', '@By fuzzer, zeparser only\nError: '+zefailed+'\n###\n'+input+'\n');
-          console.log('Failed in zeparser only. Written to tests/testcases/todo/fuzz-min.md');
-        } else if (nodefailed) {
-          fs.writeFileSync('tests/testcases/todo/fuzz-min.md', '@By fuzzer, v8 only\nError: '+nodefailed+'\n###\n'+input+'\n');
-          console.log('Failed in node only. Written to tests/testcases/todo/fuzz-min.md');
-        }
-        // console.log('Base64 of reduced test case:', Buffer.from(input).toString('base64'));
-
-        log('scrubbed testcase:');
-        log('oneliner:', BOLD, '`' + input + '`', RESET);
-
-        console.log(/class\s*\w*\{\w+\s*\}/.test(input))
-
-        return true;
-      }
-    }
-  }
-
-  if (!CONCISE) {
-    log('input : ```\n'+input+'\n```');
-    log((nodefailed ? 'Failed' : 'Passed') + ' in both envs');
-  }
-  if (!nodefailed) ++passed;
-
-  ++counter;
-  let stats = counter + ', pass rate ' + ((passed/counter)*100).toPrecision(2) + '% ' + lastSpeed + ' tests/s';
-  if (counter % 1000) {
+  if (!(counts.zeparserParsed % 88)) {
     let t = performance.now();
     let d = t - lastTick;
     if (d >= 1000) {
-      let n = counter - lastCounter;
+      let n = counts.fuzzedTests - lastCounter;
       lastSpeed = Math.round(n / (d/1000));
-      stats = counter + ', pass rate ' + ((passed/counter)*100).toPrecision(2) + '% ' + lastSpeed + ' tests/s (' + d + ' ms for ' + n + ' cases)';
-      lastCounter = counter;
+      lastTotalSpeed = Math.round(counts.fuzzedTests / ((t - startTick) / 1000));
+      lastCounter = counts.fuzzedTests;
       lastTick = t;
     }
+
+    let totalTime = Math.round((t-startTick)/1000);
+
+    let stats = `
+      time: ${totalTime} s,
+      fuzzed: ${counts.fuzzedTests} being ${dotted(counts.fuzzedBytes)} bytes (${dotted(Math.round(counts.fuzzedBytes/totalTime))} b/s),
+      ${counts.zeparserPassedFuzz} passed,
+      pass rate: ${(counts.zeparserPassedFuzz/counts.fuzzedTests*100).toPrecision(2)}%,
+      injection mode: ${counts.injectionMode},
+      injected: ${counts.injectedTests},
+      total bytes parsed: ${dotted(counts.bytesParsed)} (${dotted(Math.round(counts.bytesParsed/totalTime))} b/s),
+      currently at ${lastSpeed} tests/s,
+      total at ${lastTotalSpeed} tests/s,
+      reduced ${counts.reduced} cases
+    `.replace(/[\n ]+/g, ' ');
+
+    process.stdout.write('\x1b[0G' + stats);
   }
 
-
-  if (CONCISE){
-    if (counter % 1000) {
-      process.stdout.write('\x1b[0G' + stats);
-    }
-  } else {
-    log('');
-    log('################################################# ' + stats);
-    log('');
-  }
   return false;
 }
-
-if (stopNext) console.log('\n########\nNONGRACEFUL ERROR FOUND\n########');
-
-function enc(s) {
-  return s.replace(/\\/g, '\\\\').replace(
-    /([^\n\r\x20-\x7f])/ug,
-    (_, s) => {
-      let p = s.codePointAt(0);
-      s = p.toString(16);
-      if (p<=0xff) return '\\x'+(''+s).padStart(2, '0');
-      if (p<=0xffff) return '\\u'+s;
-      return '\\u{' + s + '}';
+function dotted(ns) {
+  ns = ''+ns;
+  let o = '';
+  for (let i = ns.length - 1, j = 0; i>=0; --i) {
+    o = ns[i] + o;
+    if (i && ++j === 3) {
+      o = '.' + o;
+      j = 0;
     }
-  );
+  }
+  return o;
 }

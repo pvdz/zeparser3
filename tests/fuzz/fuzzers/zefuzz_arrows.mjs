@@ -4,15 +4,15 @@ import {
   errorify,
   pick,
   rng,
-} from './fuzzutils.mjs';
+} from '../fuzzutils.mjs';
 
-function rng(max) {
-  return Math.floor(max * Math.random());
-}
+// function rng(max) {
+//   return Math.floor(max * Math.random());
+// }
 
-function pick() {
-  return arguments[rng(arguments.length)]();
-}
+// function pick() {
+//   return arguments[rng(arguments.length)]();
+// }
 
 function createLhs() {
   return pick(

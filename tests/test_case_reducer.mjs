@@ -3,14 +3,17 @@
 
 import fs from 'fs';
 
+import {
+  dumpFuzzOutput,
+  warnOsd,
+} from './fuzz/fuzzutils.mjs'
+
 const BOLD = '\x1b[;1;1m';
 const DIM = '\x1b[30;1m';
 const BLINK = '\x1b[;5;1m';
 const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
-
-const trimCache = new Map;
 
 function reduceAndExit(
   input/*: string*/,
@@ -25,14 +28,19 @@ function reduceAndExit(
 function reduce(
   input/*: string*/,
   parse/*: (input: string) => {e, r, tok}*/,
-  file/*?: string*/
+  file,/*?: string*/
+  verbose/*?: boolean*/ = true,
 ) {
-  console.log(BOLD + '<reduce>' + RESET);
+  if (verbose) console.log(BOLD + '<reduce>' + RESET);
   let org = input;
+  let trimCache = new Map;
   let asserts = new Set;
   let inputError = parse(input).e;
   if (!inputError) {
-    console.error('Cannot use the test case reducer if the input does not throw. This input does not throw. Exit().');
+    dumpFuzzOutput(input, input, 'Cannot use the test case reducer if the input does not throw. This input does not throw.', 'test case reducer');
+
+    console.log(parse(input))
+
     process.exit();
   }
   inputError = inputError.message.replace(/\{#.*?#\}/g, '<token>');
@@ -41,20 +49,20 @@ function reduce(
     if (!code) return false;
     if (!nocache && trimCache.has(code)) {
       let err = trimCache.get(code);
-      console.log('CACHED!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, err || '<no error>');
+      if (verbose) console.log('CACHED!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, err || '<no error>');
       return err === inputError;
     }
     let err = parse(code).e;
     if (err) err = err.message.replace(/\{#.*?#\}/g, '<token>');
     if (err && err.toLowerCase().includes('assert')) asserts.add(err);
-    console.log('Tested!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, 'the error:', [err || '<no error>']);
+    if (verbose) console.log('Tested!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, 'the error:', [err || '<no error>']);
     trimCache.set(code, err);
     return err === inputError;
   };
-  console.log('<test case reducer>');
-  console.log('Input error:', BOLD + inputError + RESET);
+  if (verbose) console.log('<test case reducer>');
+  if (verbose) console.log('Input error:', BOLD + inputError + RESET);
   trimCache.set(input, inputError);
-  console.log('Normalizing:', input.replace(/[\n\r]/g, '\\n'));
+  if (verbose) console.log('Normalizing:', input.replace(/[\n\r]/g, '\\n'));
   // Normalize newlines
   if (same(input.replace(/\r/g, '\n'))) input = input.replace(/\r/g, '\n');
   // Replace newlines with semis
@@ -63,10 +71,10 @@ function reduce(
   if (same(input.replace(/[\t ]+/g, ' '))) input = input.replace(/[\t ]+/g, ' ');
 
 
-  console.log('Trimming');
+  if (verbose) console.log('Trimming');
   let lastInput = '';
   while (lastInput !== input) {
-    console.log('Outer repeat!');
+    if (verbose) console.log('Outer repeat!');
     lastInput = input;
 
     // Slice out single chars
@@ -166,22 +174,28 @@ function reduce(
     }
   }
 
-  console.log('</trim>');
-  console.log('Reduced input:');
+  if (verbose) console.log('</trim>');
+  if (verbose) console.log('Reduced input:');
   same(input, true);
 
   asserts.delete(inputError);
   if (asserts.length) {
-    console.log(BLINK + 'THERE WERE ASSERTS' + RESET);
-    console.log(asserts.forEach(s => ' - ' + s + '\n'));
+    if (verbose) console.log(BLINK + 'THERE WERE ASSERTS' + RESET);
+    if (verbose) console.log(asserts.forEach(s => ' - ' + s + '\n'));
   }
 
   if (process.argv.includes('--write') && file) {
-    console.log('Writing new test case to', file + '.min');
+    if (verbose) console.log('Writing new test case to', file + '.min');
     fs.writeFileSync(file + '.min', '@Minified from ' + file + '\n###\n' + input);
   }
 
-  console.log(BOLD + '</reduce>' + RESET);
+  if (verbose) {
+    console.log(BOLD + '</reduce>' + RESET);
+    console.log('Input:');
+    console.log('```');
+    console.log(input);
+    console.log('```');
+  }
 
   return input;
 }
