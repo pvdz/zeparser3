@@ -44,11 +44,14 @@ const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || (!SEARCH && (
 const FORCE_WRITE = process.argv.includes('--force-write');
 const ACORN_COMPAT = process.argv.includes('--acorn');
 const BABEL_COMPAT = process.argv.includes('--babel');
+const HERMES_COMPAT = process.argv.includes('--hermes');
 const COMPARE_ACORN = process.argv.includes('--test-acorn');
 const COMPARE_BABEL = process.argv.includes('--test-babel');
 const COMPARE_NODE = process.argv.includes('--test-node');
+const COMPARE_HERMES = process.argv.includes('--test-hermes');
 const TEST_ACORN = COMPARE_ACORN && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record acorn deltas into test files
 const TEST_BABEL = COMPARE_BABEL && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
+const TEST_HERMES = COMPARE_HERMES && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
 const NO_FATALS = process.argv.includes('--no-fatals'); // asserts should not stop a full auto run (dev tool, rely on git etc for recovery...)
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
@@ -170,6 +173,11 @@ import {
   ignoreZeparserTestForAcorn,
   processAcornResult,
 } from './parse_acorn.mjs';
+import {
+  compareHermes,
+  ignoreZeparserTestForHermes,
+  processHermesResult,
+} from './parse_hermes.mjs';
 
 import {testZePrinter} from "./run_zeprinter.mjs";
 
@@ -238,8 +246,9 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         strictMode: testVariant === TEST_STRICT,
         webCompat: testVariant === TEST_WEB,
         targetEsVersion: tob.inputOptions.es,
-        babelCompat: BABEL_COMPAT,
         acornCompat: ACORN_COMPAT,
+        babelCompat: BABEL_COMPAT,
+        hermesCompat: HERMES_COMPAT,
 
         getTokenizer: tokenizer => tok = tokenizer,
         $log: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
@@ -292,6 +301,10 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   if (TEST_ACORN && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
     [acornOk, acornFail, zasa] = compareAcorn(code, !e, testVariant, tob.file, tob.inputOptions.es);
   }
+  let hermesOk, hermesFail, zash;
+  if (TEST_HERMES && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
+    [hermesOk, hermesFail, zash] = compareHermes(code, !e, testVariant, tob.file, tob.inputOptions.es);
+  }
 
   let nodeFail = undefined;
   if (COMPARE_NODE) {
@@ -305,10 +318,10 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
     }
   }
 
-  return {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail, acornOk, acornFail, zasa};
+  return {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail, acornOk, acornFail, zasa, hermesOk, hermesFail, zash};
 }
 async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
-  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail, acornOk, acornFail, zasa}}, file} = tob;
+  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail, acornOk, acornFail, zasa, hermesOk, hermesFail, zash}}, file} = tob;
   if (!r && !e) return; // no output for this variant
 
   let errorMessage = '';
@@ -388,6 +401,16 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
       }
     }
   }
+  let outputHermes = '';
+  if (hermesOk !== false) { // false means it didnt run at all
+    if (TEST_HERMES && !Number.isFinite(tob.inputOptions.es)) {
+      outputHermes = processHermesResult(hermesOk, hermesFail, !!e, zash, tob, TEST_HERMES, INPUT_OVERRIDE);
+      if (outputHermes && !INPUT_OVERRIDE && !TARGET_FILE && ignoreZeparserTestForHermes(tob.file)) {
+        outputHermes = '';
+        tob.skippedForParser = true;
+      }
+    }
+  }
 
   let nodeOutput = (
     nodeFail === undefined ? '' :
@@ -404,22 +427,26 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
       tob.newOutputSloppyBabel = outputBabel;
       tob.newOutputSloppyNode = nodeOutput;
       tob.newOutputSloppyAcorn = outputAcorn;
+      tob.newOutputSloppyHermes = '';
       break;
     case TEST_STRICT:
       tob.newOutputStrict = outputTestString;
       tob.newOutputStrictBabel = outputBabel;
       tob.newOutputStrictNode = nodeOutput;
       tob.newOutputStrictAcorn = '';
+      tob.newOutputStrictHermes = outputHermes;
       break;
     case TEST_MODULE:
       tob.newOutputModule = outputTestString;
       tob.newOutputModuleBabel = outputBabel;
       tob.newOutputModuleAcorn = outputAcorn;
+      tob.newOutputModuleHermes = outputHermes;
       break;
     case TEST_WEB:
       tob.newOutputWeb = outputTestString;
       tob.newOutputWebBabel = outputBabel;
       tob.newOutputWebAcorn = outputAcorn;
+      tob.newOutputWebHermes = outputHermes;
       break;
     default: FIXME;
   }
@@ -557,7 +584,7 @@ async function runTests(list, zeparser) {
         }
 
         console.log('\n' + DIM + tob.fileShort + RESET);
-        console.log(BOLD + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n');
+        console.log(BOLD + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+(TEST_HERMES ? ' --test-hermes' : '')+'\n');
 
         if (!TARGET_FILE && !INPUT_OVERRIDE) {
           if (tob.continuePrint) console.error(tob.continuePrint);
@@ -588,7 +615,7 @@ async function writeNewOutput(list) {
       if (newData !== oldData || FORCE_WRITE) {
         if (tob.continuePrint) console.error(tob.continuePrint);
         console.log('\n' + DIM + tob.fileShort + RESET);
-        console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
+        console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+(TEST_HERMES ? ' --test-hermes' : '')+'\n' + RESET);
         let cont = await yn('Continue to overwrite test output?');
         if (cont) {
           ++updated;
@@ -597,7 +624,7 @@ async function writeNewOutput(list) {
       } else {
         if (tob.continuePrint) {
           console.log('\n' + DIM + tob.fileShort + RESET);
-          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
+          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+(TEST_HERMES ? ' --test-hermes' : '')+'\n' + RESET);
           if (!await yn('File was not changed, invariant was broken and written anyways. Continue testing?')) process.exit();
         }
       }
@@ -612,7 +639,7 @@ async function writeNewOutput(list) {
           return promiseToWriteFile(file, newData);
         } else {
           console.log('\n' + DIM + tob.fileShort + RESET);
-          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
+          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+(TEST_HERMES ? ' --test-hermes' : '')+'\n' + RESET);
           console.error('Output mismatch for', file);
           return Promise.resolve();
         }
@@ -709,6 +736,7 @@ async function main() {
   }
   if (ACORN_COMPAT) console.log('Forcing Acorn compat AST');
   if (BABEL_COMPAT) console.log('Forcing Babel compat AST');
+  if (HERMES_COMPAT) console.log('Forcing Hermes compat AST');
 
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test file read time');
   let list = await readFiles(files);
@@ -966,7 +994,7 @@ function generateOutputBlock(tob) {
     generateInput(tob) +
     generateOutputHeader() +
     generateOutputSloppy(sloppy, tob.newOutputSloppyBabel, tob.newOutputSloppyNode, tob.newOutputSloppyAcorn) +
-    generateOutputStrict(strict, sloppy, tob.newOutputStrictBabel, tob.newOutputStrictNode) +
+    generateOutputStrict(strict, sloppy, tob.newOutputStrictBabel, tob.newOutputStrictNode, tob.newOutputStrictHermes) +
     generateOutputModule(module, strict, sloppy, tob.newOutputModuleBabel, tob.newOutputModuleAcorn) +
     generateOutputWeb(web, sloppy, tob.newOutputWebBabel) +
     (tob.printerOutput ? tob.printerOutput[1] : '') +
@@ -995,12 +1023,13 @@ function generateOutputSloppy(sloppyOutput, babelOutput, nodeOutput, acornOutput
     acornOutput +
     '';
 }
-function generateOutputStrict(strictOutput, sloppyOutput, babelOutput, nodeOutput) {
+function generateOutputStrict(strictOutput, sloppyOutput, babelOutput, nodeOutput, hermesOutput) {
   return OUTPUT_HEADER_STRICT + '\n' +
     'Parsed with script goal but as if it was starting with `"use strict"` at the top.\n' +
     (strictOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_QUINTICK + strictOutput + OUTPUT_QUINTICK)) + '\n' +
     babelOutput +
     nodeOutput +
+    hermesOutput +
     '';
 }
 function generateOutputModule(moduleOutput, strictOutput, sloppyOutput, babelOutput, acornOutput) {

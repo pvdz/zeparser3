@@ -5,6 +5,7 @@ ARG=''
 MODE=''
 ACORN=''
 BABEL=''
+HERMES=''
 EXTRA=''
 ES=''
 NODE=''
@@ -29,6 +30,7 @@ ZeParser test runner help:
  t             Run test262 suite (only)
  a             Alias for ./t m --test-acorn, to verify ZeParser output against the Acorn AST
  b             Alias for ./t m --test-babel, to verify ZeParser output against the Babel AST
+ h             Alias for ./t m --test-hermes, to verify ZeParser output against the Hermes AST
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
@@ -42,6 +44,8 @@ ZeParser test runner help:
  --test-acorn  Also compare AST of test cases to Acorn output
  --babel       Run in Babel compat mode
  --test-babel  Also compare AST of test cases to Babel output
+ --hermes      Run in Hermes compat mode
+ --test-hermes Also compare AST of test cases to Hermes output
  --no-fatals   Do not abort test run for (test) any assertion errors
  --node        Fuzzer: compare pass/fail to node by creating a new function and checking if it throws
  6 ... 11      Parse according to the rules of this particular version of the spec
@@ -123,6 +127,13 @@ ZeParser test runner help:
       fi
       BABEL='--test-babel'
       ;;
+    h)
+      # Alias for `m --test-hermes` because I'm lazy
+      if [[ "${ACTION}" = "" ]]; then
+          ACTION='-q -U'
+      fi
+      HERMES='--test-hermes'
+      ;;
 
     --sloppy)       MODE='--sloppy'       ;;
     --web)          MODE='--web'          ;;
@@ -132,6 +143,8 @@ ZeParser test runner help:
     --test-acorn)   ACORN='--test-acorn'  ;;
     --babel)        BABEL='--babel'       ;;
     --test-babel)   BABEL='--test-babel'  ;;
+    --hermes)       HERMES='--hermes'     ;;
+    --test-hermes)  HERMES='--test-hermes' ;;
     --min)          EXTRA='--min'         ;;
     --min-printer)  EXTRA='--min-printer' ;;
     --no-printer)   EXTRA='--no-printer'  ;;
@@ -159,7 +172,7 @@ done
 
 if [[ "${ACTION}" = "test262" ]]; then
   set -x
-  node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL}
+  node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${HERMES}
   set +x
 elif [[ "${ACTION}" = "fuzz" ]]; then
   set -x
@@ -167,6 +180,6 @@ elif [[ "${ACTION}" = "fuzz" ]]; then
   set +x
 else
   set -x
-  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES}
+  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${HERMES} ${EXTRA} ${ES}
   set +x
 fi

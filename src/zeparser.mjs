@@ -393,6 +393,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // ast compatibility stuff?
     babelCompat = false,
     acornCompat = false,
+    hermesCompat = false,
 
     // Should we parse directives as their own AST nodes? (Other parsers do not, they just use ExpressionStatement)
     // I'm super confused since I read https://github.com/estree/estree/pull/99 as that directives get their own node
@@ -465,7 +466,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     loc: {
       start: {
         line: 1,
-        column: 0,
+        column: hermesCompat ? 1 : 0,
       },
       end: { // Initialized here but properly updated at the end
         line: 1,
@@ -571,7 +572,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       was.loc.end.line = tok.currLine();
     } else {
 
-      // The column offsets at 0
+      // The column offsets at 0 (or 1 for hermes)
       let colEnd = tok.prevEndColumn();
       if (isTemplateElement) {
         // For template elements the backticks, `${`, and `}` characters are ignored in the location ranges...
@@ -584,6 +585,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       was.loc.end.column = colEnd;
       was.loc.end.line = tok.prevEndLine();
+    }
+
+    if (hermesCompat) {
+      // Hack: Hermes uses 1-offset for column
+      ++was.loc.start.column;
+      ++was.loc.end.column;
+      if (was.loc.identifierName) delete was.loc.identifierName;
     }
 
     ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
@@ -646,14 +654,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let node; // for assert
     if (hasAllFlags(token.type, $STRING)) {
       let str = token.str.slice(1, -1);
-      if (babelCompat) {
+      if (babelCompat || hermesCompat) {
         // Babel does not canonize the string if it's for a directive ...
         AST_open(astProp, 'StringLiteral', token);
-        AST_set('value', fromDirective ? str : token.canon.slice(1, -1));
+        AST_set('value', fromDirective && !hermesCompat ? str : token.canon.slice(1, -1));
         AST_set('extra', {
           raw: token.str,
           rawValue: fromDirective ? str : token.canon.slice(1, -1)
-        });
+        }, undefined, hermesCompat);
         node = AST_close('StringLiteral');
       } else {
         AST_open(astProp, 'Literal', token);
@@ -675,13 +683,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ) :
         (ASSERT(hasAllFlags(token.type, $NUMBER)) && ASSERT(false, 'number enum') && FIXME);
 
-      if (babelCompat) {
+      if (babelCompat || hermesCompat) {
         // TODO: locally babel seems to make this null but in astexplorer it (properly?) uses Infinity ... dunno
         if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
 
         AST_open(astProp, 'NumericLiteral', token);
         AST_set('value', value);
-        AST_set('extra', {raw: token.str, rawValue: value});
+        AST_set('extra', {raw: token.str, rawValue: value}, undefined, hermesCompat);
         // AST_set('raw', token.str);
         node = AST_close('NumericLiteral');
       } else {
@@ -699,11 +707,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let pos = token.str.lastIndexOf('/');
       let body = token.str.slice(1, pos);
       let tail = token.str.slice(pos + 1);
-      if (babelCompat) {
+      if (babelCompat || hermesCompat) {
         AST_open(astProp, 'RegExpLiteral', token);
         AST_set('pattern', body);
         AST_set('flags', tail);
-        AST_set('extra', {raw: token.str});
+        AST_set('extra', {raw: token.str}, undefined, hermesCompat);
         node = AST_close('RegExpLiteral');
       } else {
         // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
@@ -846,6 +854,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     switch (node.type) {
       case 'ArrayExpression':
         node.type = 'ArrayPattern';
+        if (hermesCompat) delete node.trailingComma;
         let elements = node.elements;
         for (let i = 0, n = elements.length; i < n; ++i) {
           let element = elements[i];
@@ -2223,7 +2232,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_set('generator', starToken !== UNDEF_STAR);
-    AST_set('async', asyncToken !== UNDEF_ASYNC);
+    AST_set('async', asyncToken !== UNDEF_ASYNC, undefined, hermesCompat);
 
     let innerScoop = SCOPE_createGlobal('parseFunctionAfterKeyword_main_func_scope');
     ASSERT(innerScoop._ = 'func scope');
@@ -3905,7 +3914,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `for (a of b=c) ..`
         // Note that this rhs is an AssignmentExpression, _not_ a SequenceExpression
         parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
-        AST_set('await', !!awaitable); // as per https://github.com/estree/estree/pull/138
+        AST_set('await', !!awaitable, undefined, hermesCompat); // as per https://github.com/estree/estree/pull/138
         return;
       }
       if (awaitable) THROW('`for await` only accepts the `for-of` type');
@@ -6386,7 +6395,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseTrueKeyword(trueToken, astProp) {
-    if (babelCompat) {
+    if (babelCompat || hermesCompat) {
       AST_open(astProp, 'BooleanLiteral', trueToken);
       AST_set('value', true);
       AST_close('BooleanLiteral');
@@ -6399,7 +6408,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseFalseKeyword(falseToken, astProp) {
-    if (babelCompat) {
+    if (babelCompat || hermesCompat) {
       AST_open(astProp, 'BooleanLiteral', falseToken);
       AST_set('value', false);
       AST_close('BooleanLiteral');
@@ -6412,7 +6421,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseNullKeyword(nullToken, astProp) {
-    if (babelCompat) {
+    if (babelCompat || hermesCompat) {
       AST_open(astProp, 'NullLiteral', nullToken);
       AST_close('NullLiteral');
     } else {
@@ -6938,10 +6947,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open('quasis', 'TemplateElement', tickToken);
     AST_set('tail', wasTail === IS_QUASI_TAIL);
-    AST_set('value', {
-      raw: quasiValue,
-      cooked: cookedValue,
-    });
+    if (hermesCompat) {
+      AST_set('raw', quasiValue);
+      AST_set('cooked', cookedValue);
+    } else {
+      AST_set('value', {
+        raw: quasiValue,
+        cooked: cookedValue,
+      });
+    }
     AST_close('TemplateElement', undefined, true, hasAllFlags(tickToken.type, $TICK_HEAD) || hasAllFlags(tickToken.type, $TICK_BODY));
   }
 
@@ -7233,8 +7247,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (options_exposeScopes) AST_set('$scope', paramScoop);
     AST_set('id', null);
-    AST_set('generator', false);
-    AST_set('async', asyncToken !== UNDEF_ASYNC);
+    AST_set('generator', false, undefined, hermesCompat);
+    AST_set('async', asyncToken !== UNDEF_ASYNC, undefined, hermesCompat);
 
     if (paramScoop.dupeParamErrorToken !== NO_DUPE_PARAMS) {
       // Dupe params are never allowed in arrows (only in some cases for functions)
@@ -8213,17 +8227,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let astProp = 'elements';
 
     let destructible = MIGHT_DESTRUCT;
+    let trailingComma = false;
 
     // skip leading commas
     while (curc === $$COMMA_2C) {
       ASSERT_skipRex(',', lexerFlags); // forward slash after comma has to be a regex
-      AST_add(astProp, null);
+      if (hermesCompat) {
+        AST_add(astProp, {type: 'Empty'});
+      } else {
+        AST_add(astProp, null);
+      }
+      trailingComma = true;
     }
 
     let spreadStage = NO_SPREAD;
     let assignableYieldAwaitState = ASSIGNABLE_UNDETERMINED; // this is ONLY used to track await/yield state flags so we can propagate them back up
 
     while (curc !== $$SQUARE_R_5D) {
+      trailingComma = false;
       let elementStartToken = curtok;
       if (curtype === $IDENT) {
         // - `[x]`
@@ -8506,6 +8527,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc !== $$COMMA_2C) break; // end of the array
       // skip one because a trailing comma does not add a `null` to the ast
       ASSERT_skipRex(',', lexerFlags); // forward slash after comma has to be a regex
+      trailingComma = true;
 
       if (spreadStage === LAST_SPREAD) {
         spreadStage = MID_SPREAD;
@@ -8515,10 +8537,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       while (curc === $$COMMA_2C) {
         ASSERT_skipRex(',', lexerFlags); // forward slash after comma has to be a regex
-        AST_add(astProp, null);
+        if (hermesCompat) {
+          AST_add(astProp, {type: 'Empty'});
+        } else {
+          AST_add(astProp, null);
+        }
       }
     }
     lexerFlags = lexerFlagsBeforeParen;
+
+    if (hermesCompat) AST_set('trailingComma', trailingComma);
 
     skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // a forward slash after ] has to be a division
     AST_close('ArrayExpression');
@@ -8805,10 +8833,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_wrapClosed(astProp, NODE_NAME_PROPERTY, 'key', startOfKeyToken);
         ASSERT_skipRex(':', lexerFlags); // skip after so the end-column is correct
         AST_set('kind', 'init', undefined, babelCompat); // only getters/setters get special value here
-        AST_set('method', false);
+        AST_set('method', false, undefined, hermesCompat);
         AST_set('computed', true);
         destructible = _parseObjectPropertyValueAfterColon(lexerFlags, undefined, bindingType, IS_ASSIGNABLE, destructible, scoop, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-        AST_set('shorthand', false);
+        AST_set('shorthand', false, undefined, hermesCompat);
         AST_close(NODE_NAME_PROPERTY);
       }
       else if (curc === $$PAREN_L_28) {
@@ -9010,12 +9038,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT_skipRex(':', lexerFlags); // next is expression
     AST_set('kind', 'init', undefined, babelCompat); // only getters/setters get special value here
-    AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
+    AST_set('method', false, undefined, hermesCompat); // only the {x(){}} shorthand gets true here, this is {x}
     AST_set('computed', false);
 
     destructible = _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp);
 
-    AST_set('shorthand', false);
+    AST_set('shorthand', false, undefined, hermesCompat);
     AST_close(NODE_NAME_PROPERTY);
 
     return destructible;
@@ -9355,7 +9383,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open(astProp, NODE_NAME_PROPERTY, startOfPropToken);
       AST_setIdent('key', propLeadingIdentToken);
       AST_set('kind', 'init', undefined, babelCompat); // only getters/setters get special value here
-      AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
+      AST_set('method', false, undefined, hermesCompat); // only the {x(){}} shorthand gets true here, this is {x}
       AST_set('computed', false);
       AST_setIdent('value', propLeadingIdentToken);
       if (curc === $$IS_3D && curtok.str === '=') {
@@ -9372,7 +9400,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         assignable = mergeAssignable(nowAssignable, assignable);
         AST_close('AssignmentExpression');
       }
-      AST_set('shorthand', true);
+      AST_set('shorthand', true, undefined, hermesCompat);
       AST_set('extra', {shorthand: true}, undefined, !babelCompat);
       AST_close(NODE_NAME_PROPERTY);
 
@@ -9624,7 +9652,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Acorn uses the parenthesis open as start of method while zeparser/babel uses the start of the first modifier and otherwise the id
     AST_wrapClosed(astProp, NODE_NAME_METHOD_OBJECT, 'key', methodStartToken);
     AST_set('kind', getToken !== UNDEF_GET ? 'get' : setToken !== UNDEF_SET ? 'set' : (babelCompat ? 'method' : 'init')); // only getters/setters get special value here, "init" for the others. In the Babel AST the "other" kind is "method" instead.
-    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
+    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET, undefined, hermesCompat); // getters and setters are not methods but properties
     AST_set('computed', keyToken === undefined);
 
     verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, false);
@@ -9649,7 +9677,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       FDS_ILLEGAL,
       'value',
     );
-    AST_set('shorthand', false, undefined, babelCompat);
+    AST_set('shorthand', false, undefined, babelCompat || hermesCompat);
     AST_close(NODE_NAME_METHOD_OBJECT);
     ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
   }
@@ -11037,7 +11065,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `let o = {async await(){}}`
       AST_set('kind', babelCompat ? 'method' : 'init'); // In objects, non-getset get "init". In Babel ast it's still "method".
     }
-    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
+    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET, undefined, hermesCompat); // getters and setters are not methods but properties
     AST_set('computed', keyToken === undefined);
 
     if (curc !== $$PAREN_L_28) {
@@ -11084,7 +11112,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       'value'
     );
 
-    AST_set('shorthand', false, undefined, babelCompat);
+    AST_set('shorthand', false, undefined, babelCompat || hermesCompat);
     AST_close(NODE_NAME_METHOD_OBJECT);
 
     return destructible;
@@ -11109,6 +11137,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   // <SCRUB AST>
   _tree.loc.end.line = curtok.line;
   _tree.loc.end.column = curtok.column;
+  if (hermesCompat) {
+    ++_tree.loc.end.column;
+  }
   // </SCRUB AST>
 
   return {

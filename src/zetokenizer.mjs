@@ -1379,6 +1379,7 @@ function ZeTokenizer(
         //   return $ERROR;
         // }
       }
+      // TODO: if this number is followed by a dot, it could very well lead to a syntax error, since octals dont support fractions
       return $NUMBER_OLD;
     } else if (c === $$DOT_2E) {
       parseFromFractionDot();
