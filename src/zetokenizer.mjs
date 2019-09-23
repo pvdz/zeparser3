@@ -1671,7 +1671,7 @@ function ZeTokenizer(
   function parseRegexIdentifierRest(prevStr, uflagStatus) {
     // Returns a uflagStatus enum. See parseIdentifierRest for non-regex idents.
     ASSERT(parseRegexIdentifierRest.length === arguments.length, 'arg count');
-    ASSERT(typeof prevStr === 'string', 'prev should be string so far or empty');
+    ASSERT(typeof prevStr === 'string', 'prev should be string so far or empty', prevStr);
 
     if (neof()) {
       let c = peek();
@@ -1783,17 +1783,17 @@ function ZeTokenizer(
 
   function readNextCodepointAsStringExpensive(c, offset, forError) {
     ASSERT(readNextCodepointAsStringExpensive.length === arguments.length, 'arg count');
+    ASSERT(typeof c === 'number', 'cnum', c);
     // 0xDC00–0xDFFF is the surrogate pair range and means the next character is required to form the full unicode
     // character (hence, "pair"). In that case we defer to more expensive codePointAt/fromCodePoint calls.
-    if (c <= 0xD7FF || (c >= 0xE000 && c <= 0xFFFF)) {
-      ASSERT(offset === CODEPOINT_FROM_ESCAPE || String.fromCodePoint(input.codePointAt(offset)) === input[offset], 'single char should still yield the same result in slow path');
-      return input[offset];
-    }
     if (offset === CODEPOINT_FROM_ESCAPE) {
-      ASSERT(c > 0xffff || forError, 'escaped longs should be large here');
       return String.fromCodePoint(c);
     }
-    ASSERT(c <= 0xffff, 'I think the surrogate pair chars 0xD800~0xDFFF should not validate to reach this point, not even escaped', offset, CODEPOINT_FROM_ESCAPE, c);
+    if (c <= 0xD7FF || (c >= 0xE000 && c <= 0xFFFF)) {
+      ASSERT(String.fromCodePoint(input.codePointAt(offset)) === input[offset], 'single char should still yield the same result in slow path');
+      return input[offset];
+    }
+    ASSERT(c <= 0xffff, 'I think the surrogate pair chars 0xD800~0xDFFF should not validate to reach this point, not even escaped', offset, c);
     return String.fromCodePoint(input.codePointAt(offset));
   }
 
@@ -2683,6 +2683,7 @@ function ZeTokenizer(
       }
 
       let firstCharStr = readNextCodepointAsStringExpensive(c, CODEPOINT_FROM_ESCAPE, false);
+      ASSERT(typeof firstCharStr === 'string', 'readNextCodepointAsStringExpensive should return a string', firstCharStr, c, CODEPOINT_FROM_ESCAPE, false);
 
       if (peeky($$GT_3E)) {
         // name is one character
