@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/directive_prologues/default_expression_statement_behavior/function_variations/check_node_with_asyc_function.md
+- Path: tests/testcases/directive_prologues/default_expression_statement_behavior/function_variations/check_node_with_async_function.md
 
 > :: directive prologues : default expression statement behavior : function variations
 >
-> ::> check node with asyc function
+> ::> check node with async function
 
 ## Input
 

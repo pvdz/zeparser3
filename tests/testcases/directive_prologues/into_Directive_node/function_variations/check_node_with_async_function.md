@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/directive_prologues/into_Directive_node/function_variations/check_node_with_asyc_function.md
+- Path: tests/testcases/directive_prologues/into_Directive_node/function_variations/check_node_with_async_function.md
 
 > :: directive prologues : into Directive node : function variations
 >
-> ::> check node with asyc function
+> ::> check node with async function
 
 ## Input
 
