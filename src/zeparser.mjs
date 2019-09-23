@@ -4840,7 +4840,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = sansFlag(lexerFlags, LF_NO_ASI); // TODO: `(delete (((x))) \n x)` can still not ASI
 
     ASSERT(parens === 0 && pees.length === 1, 'should unwind all the parens', parens, pees.length, pees);
-    ASSERT(curtok.str !== '=>', 'we checked this in the loop');
+    if (curtok.str === '=>') {
+      // This means the code is deleting an arrow that is NOT wrapped in parentheses
+      // `delete (x) => b)`
+      // `delete (0) => x)`
+      THROW('Arrow is illegal as arg of `delete`');
+    }
 
     // this is after the outer most rhs paren. we still have to check whether we can parse a tail (but no op)
     // - `delete (foo).foo`
