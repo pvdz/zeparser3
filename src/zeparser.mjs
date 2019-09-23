@@ -6953,7 +6953,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipAny('.', lexerFlags); // TODO: optimize; next must be identifier
       if (curtype !== $IDENT) {
         // [x] `y.)`
-        THROW('Dot property must be an identifier, was `' + curtok.str + '`');
+        THROW('Dot property on `' + valueFirstToken.str + '` must be an identifier, was `' + curtok.str + '`');
       }
       AST_wrapClosed(astProp, 'MemberExpression', 'object', valueFirstToken);
       let identToken = curtok;
