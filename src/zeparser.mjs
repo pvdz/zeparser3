@@ -3177,7 +3177,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `debugger \n /foo/`
       // - `debugger \n /foo/x`
       tok.asi();
-      AST_set('argument', null);
     } else {
       parseSemiOrAsi(lexerFlags);
     }
