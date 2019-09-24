@@ -48,6 +48,8 @@ function fuzzAgainstNode(input, zefailed, counts, injectionMode, parseZeParser) 
       || zefailed.includes('octal escape in strict mode')
       // Pretty sure this is a bug in v8
       || zefailed.includes('exponent is not allowed after a legacy octal')
+      // This is a case like `var x=1 \n 01.1` which gets reduced to `x x`
+      || zefailed.includes('Unable to ASI, token: {# NUMBER_DEC')
 
       // Classes
       // v8 allows members that aren't methods (I guess stage<4 stuff?) or is just lazy
