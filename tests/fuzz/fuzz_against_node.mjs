@@ -37,9 +37,6 @@ function fuzzAgainstNode(input, zefailed, counts, injectionMode, parseZeParser) 
       // v8 doesn't seem to statically detect the delete-on-ident case
       || zefailed.includes('Bad delete case')
 
-      // No lexical validation for occurrence of `break` or `continue`
-      || zefailed.includes('inside a `switch` or loop')
-
       // `let \n keyword` case is not covered by v8, I guess (`let \n while (x);`)
       || zefailed.includes('must be a declaration in strict mode but the next ident is a reserved keyword')
 
@@ -58,8 +55,11 @@ function fuzzAgainstNode(input, zefailed, counts, injectionMode, parseZeParser) 
       || zefailed.includes('Async methods are a restricted production')
 
       // Break Continue
-      // It seems v8 is not thoroughly checking their scope at parse time
+      // No lexical validation for occurrence of `break` or `continue`
       || zefailed.includes('only `continue` inside a loop')
+      || zefailed.includes('inside a `switch` or loop')
+      // Labels are not verified (?)
+      || zefailed.includes('not defined in the current label set')
 
       // Assignments to crap
       // Getting too many false positives for something like `y()=x` so going to disable the whole range :(

@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The label for this `break` was not defined in the current label set, which is illegal
+  The label (`LABEL`) for this `break` was not defined in the current label set, which is illegal
 
 while(x) {
   LABEL: x;

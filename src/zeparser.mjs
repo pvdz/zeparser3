@@ -3039,7 +3039,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
     if (curtype === $IDENT && curtok.nl === 0) {
       if (!findLabel(labelSet, curtok.str, FROM_BREAK)) {
-        THROW('The label for this `break` was not defined in the current label set, which is illegal');
+        THROW('The label (`' + curtok.str + '`) for this `break` was not defined in the current label set, which is illegal');
       }
       let labelToken = curtok;
       ASSERT_skipRex($IDENT, lexerFlags);

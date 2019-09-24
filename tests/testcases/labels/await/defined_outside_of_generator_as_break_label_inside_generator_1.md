@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The label for this `break` was not defined in the current label set, which is illegal
+  The label (`await`) for this `break` was not defined in the current label set, which is illegal
 
 await: { function *f(){ break await; } }
                               ^------- error
