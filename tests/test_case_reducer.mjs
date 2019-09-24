@@ -24,7 +24,11 @@ function reduceAndExit(
   console.log('exit...');
   process.exit();
 }
-
+function tokenToStringPart(str) {
+  // Change `{# NUMBER_DEC : nl=N ws=N pos=11:13 loc=2:2 curc=46 `.2`#}` to `.2`
+  // This prevents the location data from preventing test case reduction while avoiding false positives
+  return str.replace(/\{#(.*?)#\}/g, (_, m) => m.replace(/[\s\S]*(`[\s\S]*`)[\s\S]*/, (m, g) => g));
+}
 function reduceErrorInput(
   input/*: string*/,
   parse/*: (input: string) => {e, r, tok}*/,
@@ -38,13 +42,11 @@ function reduceErrorInput(
   let inputError = parse(input).e;
   if (!inputError) {
     dumpFuzzOutput(input, input, 'Cannot use the test case reducer if the input does not throw. This input does not throw.', 'test case reducer');
-
-    console.log(parse(input))
-
+    // console.log(parse(input))
     process.exit();
   }
   if (inputError.message) inputError = inputError.message;
-  inputError = inputError.replace(/\{#.*?#\}/g, '<token>');
+  inputError = tokenToStringPart(inputError);
   if (inputError && inputError.toLowerCase().includes('assert')) asserts.add(inputError);
   let same = (code, nocache) => {
     if (!code) return false;
@@ -56,7 +58,7 @@ function reduceErrorInput(
     let err = parse(code).e;
     if (err) {
       if (err.message) err = err.message;
-      err = err.replace(/\{#.*?#\}/g, '<token>');
+      err = tokenToStringPart(err);
     }
     if (err && err.toLowerCase().includes('assert')) asserts.add(err);
     if (verbose) console.log('Tested!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, 'the error:', [err || '<no error>']);
