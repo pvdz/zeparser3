@@ -3044,7 +3044,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let labelToken = curtok;
       ASSERT_skipRex($IDENT, lexerFlags);
       AST_setIdent('label', labelToken);
-      parseSemiOrAsi(lexerFlags);
+
+      if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
+        // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+        // We have already asserted to be inside a loop/switch so that's fine
+        // - `label: for(;;) break label \n /foo/`
+        // - `label: for(;;) break label \n /foo/x`
+        tok.asi();
+      } else {
+        parseSemiOrAsi(lexerFlags);
+      }
     } else if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) {
       // This is a `break` that is not inside a loop or switch
       // [v]: `if (x) break`
@@ -3151,7 +3160,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       ASSERT_skipRex($IDENT, lexerFlags);
       AST_setIdent('label', labelToken);
-      parseSemiOrAsi(lexerFlags);
+      if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
+        // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+        // Must be in loop, we checked this at the beginning
+        // - `label: for (;;) continue label \n /foo/`
+        // - `label: for (;;) continue label \n /foo/x`
+        tok.asi();
+      } else {
+        parseSemiOrAsi(lexerFlags);
+      }
     } else if (curtok.nl > 0 && hasAllFlags(curtype, $REGEX)) {
       // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
       // Must be in loop, we checked this at the beginning

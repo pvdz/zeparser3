@@ -1,15 +1,15 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/continue_statement/continue_at_eof_x0028without_label_without_semix0029.md
+- Path: tests/testcases/continue_statement/continue_semi.md
 
 > :: continue statement
 >
-> ::> continue at eof x0028without label without semix0029
+> ::> continue semi
 
 ## Input
 
 `````js
-continue
+continue;
 `````
 
 ## Output
@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can only `continue` inside a loop
 
-continue
+continue;
 ^------- error
 `````
 

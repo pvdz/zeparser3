@@ -1,15 +1,20 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/continue_statement/continue_at_eof_x0028without_label_with_semix0029.md
+- Path: tests/testcases/break_statement/regex/break_asi_forwardslash.md
 
-> :: continue statement
+> :: break statement : regex
 >
-> ::> continue at eof x0028without label with semix0029
+> ::> break asi forwardslash
+>
+> The div can't be a division so it should try to parse a regex
+
+## FAIL
 
 ## Input
 
 `````js
-continue;
+for (x of 3) break
+/
 `````
 
 ## Output
@@ -26,9 +31,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can only `continue` inside a loop
+  Expected to parse a value
 
-continue;
+for (x of 3) break
+/
 ^------- error
 `````
 
