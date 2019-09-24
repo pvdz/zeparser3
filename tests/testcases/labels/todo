@@ -1,3 +1,0 @@
-    // TODO: label:functiondecl is explicitly considered a syntax error
-    // TODO: labels must be "identifiers", which may not be reserved
-    // async, let, etc special keywords that once were valid labels (because sloppy mode)

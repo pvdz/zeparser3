@@ -1,2 +1,0 @@
-(make sure the arg is mandatory)
-async function f(){ await; }   

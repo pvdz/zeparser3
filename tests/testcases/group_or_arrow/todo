@@ -1,5 +1,0 @@
-// arrow params and arrow can not have newline (asi breaks an arrow into group and syntax error)
-// cannot have yield or await in the params
-// cannot destructure when body contains "use strict"
-// cant redeclare existing vars
-// TODO: let not allowed in `let`, `const`, `for`-binding of any kind, and class name. But others are fine in sloppy
