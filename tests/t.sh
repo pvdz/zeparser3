@@ -31,6 +31,7 @@ ZeParser test runner help:
  b             Alias for ./t m --test-babel, to verify ZeParser output against the Babel AST
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
+ z             Create build
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --web         Enable sloppy script with web compat / AnnexB mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
@@ -123,6 +124,10 @@ ZeParser test runner help:
       fi
       BABEL='--test-babel'
       ;;
+    z)
+      # Calls the build script
+      ACTION='build'
+      ;;
 
     --sloppy)       MODE='--sloppy'       ;;
     --web)          MODE='--web'          ;;
@@ -157,16 +162,22 @@ ZeParser test runner help:
 done
 
 
-if [[ "${ACTION}" = "test262" ]]; then
-  set -x
-  node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL}
-  set +x
-elif [[ "${ACTION}" = "fuzz" ]]; then
-  set -x
-  node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE}
-  set +x
-else
-  set -x
-  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES}
-  set +x
-fi
+set -x
+case "${ACTION}" in
+    test262)
+        node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL}
+    ;;
+
+    fuzz)
+        node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE}
+    ;;
+
+    build)
+        node --experimental-modules cli/build.mjs
+    ;;
+
+    *)
+        node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES}
+    ;;
+esac
+set +x
