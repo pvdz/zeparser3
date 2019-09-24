@@ -208,11 +208,11 @@ function cycle(input) {
 
     let stats = `
       time: ${totalTime} s,
-      fuzzed: ${counts.fuzzedTests} being ${dotted(counts.fuzzedBytes)} bytes (${dotted(Math.round(counts.fuzzedBytes/totalTime))} b/s),
-      ${counts.zeparserPassedFuzz} passed,
+      fuzzed: ${dotted(counts.fuzzedTests)} being ${dotted(counts.fuzzedBytes)} bytes (${dotted(Math.round(counts.fuzzedBytes/totalTime))} b/s),
+      ${dotted(counts.zeparserPassedFuzz)} passed,
       pass rate: ${(counts.zeparserPassedFuzz/counts.fuzzedTests*100).toPrecision(2)}%,
-      injection mode: ${counts.injectionMode},
-      injected: ${counts.injectedTests},
+      injection mode: ${dotted(counts.injectionMode)},
+      injected: ${dotted(counts.injectedTests)},
       total bytes parsed: ${dotted(counts.bytesParsed)} (${dotted(Math.round(counts.bytesParsed/totalTime))} b/s),
       currently at ${lastSpeed} tests/s,
       total at ${lastTotalSpeed} tests/s,
