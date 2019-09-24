@@ -3,7 +3,7 @@ import {COLLECT_TOKENS_SOLID, GOAL_MODULE, GOAL_SCRIPT} from "../src/zetokenizer
 import {astToString, encodeUnicode} from "./utils.mjs";
 import ZeParser from "../src/zeparser.mjs";
 import {execSync} from 'child_process';
-import {reduce} from "./test_case_reducer.mjs";
+import {reduceErrorInput} from "./test_case_reducer.mjs";
 import {ASSERT} from "../src/utils.mjs";
 import fs from 'fs';
 
@@ -56,7 +56,7 @@ function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, 
       console.log('`````');
       console.log(code);
       console.log('`````');
-      reducedInput = reduce(code, sameFunc.bind(undefined, testVariant, forTestFile));
+      reducedInput = reduceErrorInput(code, sameFunc.bind(undefined, testVariant, forTestFile));
       console.log('Reduced!');
       console.log('-->', [reducedInput]);
 

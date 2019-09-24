@@ -20,12 +20,12 @@ function reduceAndExit(
   parse/*: (input: string) => {e, r, tok}*/,
   file/*?: string*/
 ) {
-  reduce(input, parse, file);
+  reduceErrorInput(input, parse, file);
   console.log('exit...');
   process.exit();
 }
 
-function reduce(
+function reduceErrorInput(
   input/*: string*/,
   parse/*: (input: string) => {e, r, tok}*/,
   file,/*?: string*/
@@ -43,7 +43,8 @@ function reduce(
 
     process.exit();
   }
-  inputError = inputError.message.replace(/\{#.*?#\}/g, '<token>');
+  if (inputError.message) inputError = inputError.message;
+  inputError = inputError.replace(/\{#.*?#\}/g, '<token>');
   if (inputError && inputError.toLowerCase().includes('assert')) asserts.add(inputError);
   let same = (code, nocache) => {
     if (!code) return false;
@@ -53,7 +54,10 @@ function reduce(
       return err === inputError;
     }
     let err = parse(code).e;
-    if (err) err = err.message.replace(/\{#.*?#\}/g, '<token>');
+    if (err) {
+      if (err.message) err = err.message;
+      err = err.replace(/\{#.*?#\}/g, '<token>');
+    }
     if (err && err.toLowerCase().includes('assert')) asserts.add(err);
     if (verbose) console.log('Tested!', code.replace(/\n/g, '\\n').replace(/\s/g, ' '), err === inputError, 'the error:', [err || '<no error>']);
     trimCache.set(code, err);
@@ -222,4 +226,4 @@ function trimPatten(same, str, pattern, repl) {
   return currentStr;
 }
 
-export {reduceAndExit, reduce, trimPatten};
+export {reduceAndExit, reduceErrorInput, trimPatten};

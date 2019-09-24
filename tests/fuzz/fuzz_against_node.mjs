@@ -1,4 +1,4 @@
-import {reduce} from "../test_case_reducer.mjs";
+import {reduceErrorInput} from "../test_case_reducer.mjs";
 import {
   dumpFuzzOutput,
   warnOsd,
@@ -68,8 +68,12 @@ function fuzzAgainstNode(input, zefailed, counts, injectionMode, parseZeParser) 
     }
     else {
       let beforeLen = input.length;
+      let checker = zefailed
+        ? input => parseZeParser(input, counts, true)
+        : input => {try { return {e: undefined, n: Function(input)}; } catch (e) { return {e} }};
+
       if (VERBOSE) buffer.push(['Trimming input (len was ' + input.length +')']);
-      input = reduce(input, input => parseZeParser(input, counts, true), undefined, true);
+      input = reduceErrorInput(input, checker, undefined, true);
       ++counts.reduced;
       if (VERBOSE) buffer.push(['Finished trimming (len now ' + input.length +', down from ' + beforeLen + ')']);
 
@@ -78,19 +82,16 @@ function fuzzAgainstNode(input, zefailed, counts, injectionMode, parseZeParser) 
 
         // Class methods:
         // Node is allowing `class x {y}` which leads to a bunch of false positives in the fuzzer
-        || /class\s*\w*\s*extends\s*\w*\s*\{\s*\w+;?\s*\}/.test(input)
-        || /class\s*\w*\{\w+;?\s*\}/.test(input)
+        | /class\s*[\w\d$_]*(?:\s*extends\s*[\w\d$_]*)?\s*\{\s*\[?[\w\d$_]*\]?\s*([;}]|$)/.test(input)
         // Node/v8 seems to accept legacy octals that end in 8 or 9 and have an exponent or dot-fraction
         // I don't think that's a possible goal with the grammar
-        || /\b0\d*[89][.eE]/.test(input)
+        || /\b0\d+[.eE]/.test(input) // 03.12  04e1  03E9
+        || /[\w$_]+\.\d/.test(input) // Stems from octal with dot tail
         // This may be legacy but node/v8 will accept `y()=x` even though that's a parse error now (wasn't in es5...)
-        || /\(\)=[^>]/.test(input)
+        || /\(\)(?:=[^>]|\s*of|\s*in)/.test(input)
         // Same for ++y() and other updates
         || /[-+]{2}\w+\(\)/.test(input)
         || /\w+\(\)[-+]{2}/.test(input)
-        // v8 allows members that are not methods
-        || /class [\w$_]? ?(extends [\w$_])?\s*\{\s*\[?\w+\]?\s*\}/.test(input)
-        || /class [\w$_]? ?(extends [\w$_])?\s*\{\s*w+\s*(?:\}|;|$)/.test(input)
       ) {
         // ignore (based on trimmed input)
         if (VERBOSE) buffer.push('Ignoring outcome after trimming because it probably is a false positive');

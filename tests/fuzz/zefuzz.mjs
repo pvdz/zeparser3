@@ -49,12 +49,12 @@ const FUZZERS = [
 const INJECTS = [
   // Newline checks for ASI
   '\n',
-  // // Newline-forward-slash does regex vs division assertion checks
-  // '\n/',
-  // // Newline-regex does regex vs division assertion checks
-  // '\n/x/',
-  // // Newline-regex-flag does regex vs division assertion checks
-  // '\n/x/g',
+  // Newline-forward-slash does regex vs division assertion checks
+  '\n/',
+  // Newline-regex does regex vs division assertion checks
+  '\n/x/',
+  // Newline-regex-flag does regex vs division assertion checks
+  '\n/x/g',
   // Forward slash also does regex assertion checks
   '/',
   // Equals does assignability / destructuring assertion checks
