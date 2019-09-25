@@ -3517,13 +3517,13 @@ function ZeTokenizer(
       let wasDoubleQuad = false;
       if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
+        wasEscape = true;
         // `c` may be >0xffff by variable unicode escape or double quad unicode escape (only...)
         c = parseRegexCharClassEscape();
         // It matters explicitly for this function due to unicode range ambiguity. For double quad the second quad may
         // be part of a new range which may be relevant in case there is no u-flag.
         wasDoubleQuad = c & REGEX_CHARCLASS_DOUBLE_QUAD;
         if (wasDoubleQuad) c ^= REGEX_CHARCLASS_DOUBLE_QUAD;
-
         if (c === REGEX_CHARCLASS_BAD) {
           // `/[\N]/`
           ASSERT(lastPotentialRegexError, 'error should be set');
@@ -3534,6 +3534,9 @@ function ZeTokenizer(
           ASSERT(lastPotentialRegexError, 'error should be set');
           flagState = regexSyntaxError(lastPotentialRegexError);
           c = REGEX_CHARCLASS_CLASS_ESCAPE;
+        } else if (c === REGEX_CHARCLASS_CLASS_ESCAPE) {
+          // For example: escaped dash
+
         } else if (c === INVALID_IDENT_CHAR) {
           ASSERT(lastPotentialRegexError, 'error should be set');
           flagState = regexSyntaxError(lastPotentialRegexError);
@@ -3574,8 +3577,9 @@ function ZeTokenizer(
       if (wasEscape) {
         // Even if `c` is a surrogate tail, this won't lead to a pair with a previous code unit
         // But if the current codepoint is >0xffff then we still mark it as such
+        // Also stops escaped dashes from being interpreted as ranges
         isSurrogate = c > 0xffff;
-        ASSERT(!isSurrogate || (c & 0x1fffff) === c, 'non-bmp ranges should be explicitly bounded when they come from escapes');
+        ASSERT(!isSurrogate || c === REGEX_CHARCLASS_CLASS_ESCAPE || (c & 0x1fffff) === c, 'non-bmp ranges should be explicitly bounded when they come from escapes', c, isSurrogate, (c & 0x1fffff) === c, c.toString(16), (c & 0x1fffff));
         if (isSurrogate) surrogate = c;
         isSurrogateHead = false;
       } else if (c === REGEX_CHARCLASS_CLASS_ESCAPE || c === REGEX_CHARCLASS_ESCAPED_UC_B) {
@@ -3625,8 +3629,9 @@ function ZeTokenizer(
         } else {
           // range remains open because this was a surrogate head and the next character may still be part of the range
         }
-      } else if (c === $$DASH_2D && urangeLeft !== -1) {
+      } else if (c === $$DASH_2D && !wasEscape && urangeLeft !== -1) {
         ASSERT(urangeLeft !== -1, 'U: if we are opening a range here then we should have parsed and set the left codepoint value by now');
+        // If the dash was escaped, it should not cause a range
         urangeOpen = true;
       } else {
         ASSERT(urangeOpen === false, 'U: we should only be updating left codepoint if we are not inside a range');
@@ -3703,8 +3708,9 @@ function ZeTokenizer(
           }
           nrangeLeft = -1;
           nrangeOpen = false;
-        } else if (cTmp === $$DASH_2D && nrangeLeft !== -1) {
+        } else if (cTmp === $$DASH_2D && !wasEscape && nrangeLeft !== -1) {
           ASSERT(nrangeLeft !== -1, 'N if we are opening a range here then we should have parsed and set the left codepoint value by now');
+          // If the dash was escaped, it should not cause a range
           nrangeOpen = true;
         } else {
           // ASSERT(nrangeLeft === -1, 'N apparently we werent in a range so this should be the start of a left side of a codepoint and the var should be cleared');
@@ -4063,7 +4069,6 @@ function ZeTokenizer(
         // without-u-flag: SourceCharacter but not UnicodeIDContinue
         // without-u-flag in webcompat: SourceCharacter but not `c`, and not `k` iif there is a regex groupname
         ASSERT(![$$BACKSLASH_5C, $$XOR_5E, $$$_24, $$DOT_2E, $$STAR_2A, $$PLUS_2B, $$QMARK_3F, $$PAREN_L_28, $$PAREN_R_29, $$SQUARE_L_5B, $$SQUARE_R_5D, $$CURLY_L_7B, $$CURLY_R_7D, $$OR_7C].includes(c), 'all these u-flag chars should be checked above');
-
         if (webCompat === WEB_COMPAT_ON) {
           // https://tc39.es/ecma262/#prod-annexB-IdentityEscape
           if (c === $$C_63) {
