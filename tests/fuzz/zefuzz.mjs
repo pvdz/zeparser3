@@ -207,16 +207,16 @@ function cycle(input) {
     let totalTime = Math.round((t-startTick)/1000);
 
     let stats = `
-      time: ${totalTime} s,
-      fuzzed: ${dotted(counts.fuzzedTests)} being ${dotted(counts.fuzzedBytes)} bytes (${dotted(Math.round(counts.fuzzedBytes/totalTime))} b/s),
+      time: ${totalTime},
+      fuzz: ${dotted(counts.fuzzedTests)} being ${dotted(counts.fuzzedBytes)} bytes (${dotted(Math.round(counts.fuzzedBytes/totalTime))} b/s),
       ${dotted(counts.zeparserPassedFuzz)} passed,
-      pass rate: ${(counts.zeparserPassedFuzz/counts.fuzzedTests*100).toPrecision(2)}%,
-      injection mode: ${dotted(counts.injectionMode)},
+      passrate: ${(counts.zeparserPassedFuzz/counts.fuzzedTests*100).toPrecision(2)}%,
+      inj-mode: ${dotted(counts.injectionMode)},
       injected: ${dotted(counts.injectedTests)},
       total bytes parsed: ${dotted(counts.bytesParsed)} (${dotted(Math.round(counts.bytesParsed/totalTime))} b/s),
-      currently at ${lastSpeed} tests/s,
-      total at ${lastTotalSpeed} tests/s,
-      reduced ${counts.reduced} cases
+      current: ${lastSpeed} tests/s,
+      total: ${lastTotalSpeed} tests/s,
+      reduced ${counts.reduced}
     `.replace(/[\n ]+/g, ' ');
 
     process.stdout.write('\x1b[0G' + stats);
