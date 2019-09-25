@@ -121,7 +121,7 @@ let $_leaf = 0;
 let $_group = 4;
 
 // Groups get their own bit. This makes it easier to quickly check for a set of token types (string, string | number)
-// Additionally, modifiers get their own bit. Like bad escapes. Generally these should apply to more
+// Additionally, modifiers get their own bit. Like bigint suffix or bad escapes. Generally these should apply to more
 // than one token, otherwise it can just go below as their own leaf type.
 
 const $G_WHITE = (1 << ++$_group);
@@ -129,6 +129,7 @@ const $G_NEWLINE = (1 << ++$_group);
 const $G_COMMENT = (1 << ++$_group);
 const $G_IDENT = (1 << ++$_group);
 const $G_NUMBER = (1 << ++$_group);
+const $G_NUMBER_BIG_INT = (1 << ++$_group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
 const $G_PUNCTUATOR = (1 << ++$_group);
 const $G_STRING = (1 << ++$_group);
 const $G_REGEX = (1 << ++$_group);
@@ -185,6 +186,10 @@ const $NUMBER_DEC = $L_NUMBER_DEC | $G_NUMBER;
 const $NUMBER_BIN = $L_NUMBER_BIN | $G_NUMBER;
 const $NUMBER_OCT = $L_NUMBER_OCT | $G_NUMBER;
 const $NUMBER_OLD = $L_NUMBER_OLD | $G_NUMBER;
+const $NUMBER_BIG_HEX = $L_NUMBER_HEX | $G_NUMBER | $G_NUMBER_BIG_INT;
+const $NUMBER_BIG_DEC = $L_NUMBER_DEC | $G_NUMBER | $G_NUMBER_BIG_INT;
+const $NUMBER_BIG_BIN = $L_NUMBER_BIN | $G_NUMBER | $G_NUMBER_BIG_INT;
+const $NUMBER_BIG_OCT = $L_NUMBER_OCT | $G_NUMBER | $G_NUMBER_BIG_INT;
 const $PUNCTUATOR = $L_PUNCTUATOR | $G_PUNCTUATOR;
 const $REGEXN = $L_REGEXN | $G_REGEX; // No u-flag
 const $REGEXU = $L_REGEXU | $G_REGEX; // With u-flag ("strict mode" for regular expressions)
@@ -217,6 +222,9 @@ function isIdentToken(type) {
 function isNumberToken(type) {
   return (type & $G_NUMBER) === $G_NUMBER;
 }
+function isBigintToken(type) {
+  return (type & $G_NUMBER_BIG_INT) === $G_NUMBER_BIG_INT;
+}
 function isStringToken(type) {
   return (type & $G_STRING) === $G_STRING;
 }
@@ -246,6 +254,7 @@ const ALL_TOKEN_GROUPS = [
   $G_COMMENT,
   $G_IDENT,
   $G_NUMBER,
+  $G_NUMBER_BIG_INT,
   $G_PUNCTUATOR,
   $G_STRING,
   $G_REGEX,
@@ -266,6 +275,10 @@ const ALL_TOKEN_TYPES = [
   $NUMBER_BIN,
   $NUMBER_OCT,
   $NUMBER_OLD,
+  $NUMBER_BIG_HEX,
+  $NUMBER_BIG_DEC,
+  $NUMBER_BIG_BIN,
+  $NUMBER_BIG_OCT,
   $PUNCTUATOR,
   $REGEXN,
   $REGEXU,
@@ -476,6 +489,7 @@ function ZeTokenizer(
   const supportRegexLookbehinds = targetEsVersion >= 9 || targetEsVersion === Infinity;
   const supportRegexDotallFlag = targetEsVersion >= 9 || targetEsVersion === Infinity;
   const supportRegexNamedGroups = targetEsVersion >= 9 || targetEsVersion === Infinity;
+  const supportBigInt = targetEsVersion === 11 || targetEsVersion === Infinity;
 
   let pointer = 0;
   let len = input.length;
@@ -1454,6 +1468,11 @@ function ZeTokenizer(
           if (!lastReportableTokenizerError) lastReportableTokenizerError = 'An exponent is not allowed after a legacy octal number and an ident after number must be separated by some whitespace so this is an error';
           return $ERROR;
         }
+        if (e === $$N_6E) {
+          if (!supportBigInt) {
+            THROW('BigInt suffix is not supported on legacy octals; use the `0o` prefix notation for that');
+          }
+        }
         // The dot may still lead to valid (though obscure) code: `01.foo` is the same as `1..foo`
         // if (e === $$DOT_2E) {
         //   if (!lastReportableTokenizerError) lastReportableTokenizerError = 'A dot fraction is not allowed after a legacy number octal';
@@ -1474,11 +1493,19 @@ function ZeTokenizer(
       return parseBinary();
     } else if (c === $$E_65|| c === $$E_UC_45) {
       parseExponentMaybe(c);
+    } else if (c === $$N_6E) {
+      // [v] `0n`
+      if (!supportBigInt) {
+        THROW('The BigInt syntax is supported in ES11+ / ES2020 (currently parsing ES' + targetEsVersion + ')');
+      }
+      ASSERT_skip($$N_6E);
+      return $NUMBER_BIG_DEC;
     }
 
     return $NUMBER_DEC;
   }
   function parseDecimal() {
+    // Start parsing from 1-9 (so cannot have started with a dot or zero)
     if (neof()) {
       // optionally skip digits now. we dont care if that actually happens (we already know there was at least one)
       let c = skipDigits();
@@ -1487,6 +1514,15 @@ function ZeTokenizer(
       // optional fraction
       if (c === $$DOT_2E) {
         parseFromFractionDot();
+      } else if (c === $$N_6E) {
+        // BigInt (ES2020 / ES11)
+        // [v] `5464354354353n`
+        if (!supportBigInt) {
+          THROW('The BigInt syntax is supported in ES11+ / ES2020 (currently parsing ES' + targetEsVersion + ')');
+        }
+        ASSERT_skip($$N_6E);
+        verifyCharAfterNumber();
+        return $NUMBER_BIG_DEC;
       } else {
         parseExponentMaybe(c);
       }
@@ -1546,12 +1582,29 @@ function ZeTokenizer(
     }
 
     // at least one digit is required
-    if (!isHex(peek())) {
+    let c = peek();
+    if (!isHex(c)) {
       if (!lastReportableTokenizerError) lastReportableTokenizerError = '`0x` is illegal without a digit';
       return $ERROR;
     }
+    ASSERT_skip(c);
 
-    while (neof() && isHex(peek())) skip();
+    do {
+      if (eof()) return $NUMBER_HEX;
+      c = peek();
+      if (!isHex(c)) break;
+      ASSERT_skip(c);
+    } while (true);
+
+    if (c === $$N_6E) {
+      // BigInt (ES2020 / ES11)
+      // [v] `0x54a643D54354353n`
+      if (!supportBigInt) {
+        THROW('The BigInt syntax is supported in ES11+ / ES2020 (currently parsing ES' + targetEsVersion + ')');
+      }
+      ASSERT_skip($$N_6E);
+      return $NUMBER_BIG_HEX;
+    }
 
     return $NUMBER_HEX;
   }
@@ -1568,12 +1621,29 @@ function ZeTokenizer(
     }
 
     // at least one digit is required
-    if (!isOctal(peek())) {
+    let c = peek();
+    if (!isOctal(c)) {
       if (!lastReportableTokenizerError) lastReportableTokenizerError = '`0o` is illegal without a digit';
       return $ERROR;
     }
+    ASSERT_skip(c);
 
-    while (neof() && isOctal(peek())) skip();
+    do {
+      if (eof()) return $NUMBER_OCT;
+      c = peek();
+      if (!isOctal(c)) break;
+      ASSERT_skip(c);
+    } while (true);
+
+    if (c === $$N_6E) {
+      // BigInt (ES2020 / ES11)
+      // [v] `0o0043175346024n`
+      if (!supportBigInt) {
+        THROW('The BigInt syntax is supported in ES11+ / ES2020 (currently parsing ES' + targetEsVersion + ')');
+      }
+      ASSERT_skip($$N_6E);
+      return $NUMBER_BIG_OCT;
+    }
 
     return $NUMBER_OCT;
   }
@@ -1584,12 +1654,29 @@ function ZeTokenizer(
     }
 
     // at least one digit is required
-    if (!isBinary(peek())) {
+    let c = peek();
+    if (!isBinary(c)) {
       if (!lastReportableTokenizerError) lastReportableTokenizerError = '`0b` is illegal without a digit';
       return $ERROR;
     }
+    ASSERT_skip(c);
 
-    while (neof() && isBinary(peek())) skip();
+    do {
+      if (eof()) return $NUMBER_BIN;
+      c = peek();
+      if (!isBinary(c)) break;
+      ASSERT_skip(c);
+    } while (true);
+
+    if (c === $$N_6E) {
+      // BigInt (ES2020 / ES11)
+      // [v] `0b10100110101011010101001010110100001101n`
+      if (!supportBigInt) {
+        THROW('The BigInt syntax is supported in ES11+ / ES2020 (currently parsing ES' + targetEsVersion + ')');
+      }
+      ASSERT_skip($$N_6E);
+      return $NUMBER_BIG_DEC;
+    }
 
     return $NUMBER_BIN;
   }
@@ -4787,6 +4874,10 @@ function toktypeToString(type, _, ignoreUnknown) {
     case $NUMBER_BIN: return 'NUMBER_BIN';
     case $NUMBER_OCT: return 'NUMBER_OCT';
     case $NUMBER_OLD: return 'NUMBER_OLD';
+    case $NUMBER_BIG_HEX: return 'NUMBER_BIG_HEX';
+    case $NUMBER_BIG_DEC: return 'NUMBER_BIG_DEC';
+    case $NUMBER_BIG_BIN: return 'NUMBER_BIG_BIN';
+    case $NUMBER_BIG_OCT: return 'NUMBER_BIG_OCT';
     case $PUNCTUATOR: return 'PUNCTUATOR';
     case $REGEXN: return 'REGEXN';
     case $REGEXU: return 'REGEXU';
@@ -4825,6 +4916,7 @@ export {
   $G_COMMENT,
   $G_IDENT,
   $G_NUMBER,
+  $G_NUMBER_BIG_INT,
   $G_PUNCTUATOR,
   $G_STRING,
   $G_REGEX,
@@ -4836,6 +4928,7 @@ export {
   isCommentToken,
   isIdentToken,
   isNumberToken,
+  isBigintToken,
   isStringToken,
   isPunctuatorToken,
   isRegexToken,
@@ -4857,6 +4950,10 @@ export {
   $NUMBER_BIN,
   $NUMBER_OCT,
   $NUMBER_OLD,
+  $NUMBER_BIG_HEX,
+  $NUMBER_BIG_DEC,
+  $NUMBER_BIG_BIN,
+  $NUMBER_BIG_OCT,
   $PUNCTUATOR,
   $REGEXN,
   $REGEXU,

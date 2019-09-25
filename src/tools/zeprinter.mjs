@@ -31,6 +31,8 @@ function $(node, _, __, fromFor) {
       return $(node.left) + ' = ' + $(node.right);
     case 'AwaitExpression':
       return 'await (' + $(node.argument) + ')';
+    case 'BigIntLiteral':
+      return node.bigint + 'n';
     case 'BinaryExpression':
       return '((' + $(node.left) + ') ' + node.operator + ' (' + $(node.right) + '))';
     case 'BlockStatement':

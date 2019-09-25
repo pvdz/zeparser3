@@ -7,8 +7,7 @@ REPL: https://pvdz.github.io/zeparser3/tests/web/repl.html
 The parser itself is currently feature complete but not ready for production. While I'm confident that it works, I haven't spent any time profiling / optimizing size and runtime yet.
 
 - Supports:
-  - Anything stage 4 up to ES10 / ES2019
-  - ES11 / ES2020 support in progress as it unfolds
+  - Anything stage 4 up to ES11 / ES2020
   - Regex syntax (deep)
   - Parsing modes:
     - Sloppy / non-strict
@@ -197,8 +196,7 @@ To create a new test simply add a new file, start it with `@`, a description, a 
 The parser itself supports ES5-ES11 but is not production ready;
 
 - Verify and remove pending TODO roadblocks by creating test cases to cover their branches
-- Compare against Babel while running test262, too
-- Compare against other active parsers (acorn, meriyah, flow, typescript)
+- Compare against other active parsers (meriyah, flow, typescript)
 - Continue work on the fuzzer
 - Make build dir automatically
 - Work on perf, the fun stuff

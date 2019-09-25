@@ -119,6 +119,7 @@ import ZeTokenizer, {
   isCommentToken,
   isIdentToken,
   isNumberToken,
+  isBigintToken,
   isStringToken,
   isPunctuatorToken,
   isRegexToken,
@@ -132,6 +133,7 @@ import ZeTokenizer, {
   $G_COMMENT,
   $G_IDENT,
   $G_NUMBER,
+  $G_NUMBER_BIG_INT,
   $G_PUNCTUATOR,
   $G_STRING,
   $G_REGEX,
@@ -151,6 +153,10 @@ import ZeTokenizer, {
   $NUMBER_BIN,
   $NUMBER_OCT,
   $NUMBER_OLD,
+  $NUMBER_BIG_HEX,
+  $NUMBER_BIG_DEC,
+  $NUMBER_BIG_BIN,
+  $NUMBER_BIG_OCT,
   $PUNCTUATOR,
   $REGEXN,
   $REGEXU,
@@ -688,6 +694,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('raw', token.str);
         node = AST_close('Literal');
       }
+    }
+    else if (isBigintToken(token.type)) {
+      // [v] `45n`
+      // [v] `0b100n`
+      // [v] `0o533n`
+      // [v] `0xabcn`
+      // https://github.com/estree/estree/pull/198/files
+      AST_open(astProp, 'BigIntLiteral', token);
+      AST_set('value', null);
+      AST_set('bigint', token.str.slice(0, -1)); // TODO: Normalize? Pending https://github.com/estree/estree/issues/200
+      node = AST_close('BigIntLiteral');
     }
     else if (isNumberToken(token.type)) {
       let value =

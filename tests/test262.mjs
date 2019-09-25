@@ -122,10 +122,7 @@ read(PATH262, '', (file, content) => {
   let negative = /\n\s*negative:/.test(header) && !/\n\s*phase:\s*runtime/.test(header) && !header.includes('phase: resolution');
   let webcompat = file.includes('annexB');
 
-  if (features.includes('BigInt')) {
-    return  console.log(BOLD, 'SKIP', RESET, '(Stage 3: BigInt)');
-  } else
-    if (features.includes('class-fields-public')) {
+  if (features.includes('class-fields-public')) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage ?: class-fields-public)');
   } else if (features.includes('class-fields-private')) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage ?: class-fields-private)');
