@@ -67,7 +67,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT TICK_PURE+$TICK_BAD_ESCAPE ASI
+       IDENT TICK_BAD_PURE ASI
 `````
 
 ### Strict mode

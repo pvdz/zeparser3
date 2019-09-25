@@ -114,106 +114,177 @@ import {
 
 // <BODY>
 
-// note: cannot use more than 32 flags...
+// First 5 bits are not flags (!), they are "leaf" token types (decimal number, template tail).
+// Other bits are flags, used to augment for super groups (string, number, template)
+// (If the number of leafs exceeds 5 bits then it'll be 6 bits which reduces the number of avaliable flags)
+let $_leaf = 0;
+let $_group = 4;
 
-// TODO: collapse the dynamic initializations to static numbers
-// flags for token types
+// Groups get their own bit. This makes it easier to quickly check for a set of token types (string, string | number)
+// Additionally, modifiers get their own bit. Like bad escapes. Generally these should apply to more
+// than one token, otherwise it can just go below as their own leaf type.
+
+const $G_WHITE = (1 << ++$_group);
+const $G_NEWLINE = (1 << ++$_group);
+const $G_COMMENT = (1 << ++$_group);
+const $G_IDENT = (1 << ++$_group);
+const $G_NUMBER = (1 << ++$_group);
+const $G_PUNCTUATOR = (1 << ++$_group);
+const $G_STRING = (1 << ++$_group);
+const $G_REGEX = (1 << ++$_group);
+const $G_TICK = (1 << ++$_group);
+const $G_TICK_BAD_ESCAPE = (1 << ++$_group);
+ASSERT($_group < 32, 'cannot use more than 32 flags but have ' + $_group);
+
+// Token types that are mutually exclusive can be encoded as as a unique id within a few bits of sequential space
+// You can still have group bits to complement these but it's far more space efficient this way
+// I don't think you should ever need the $L constants outside of defining the concrete token type constants below...
+const $L_SPACE = ++$_leaf;
+const $L_TAB = ++$_leaf;
+const $L_NL_SINGLE = ++$_leaf;
+const $L_NL_CRLF = ++$_leaf;
+const $L_COMMENT_SINGLE = ++$_leaf;
+const $L_COMMENT_MULTI = ++$_leaf;
+const $L_COMMENT_HTML = ++$_leaf;
+const $L_IDENT = ++$_leaf;
+const $L_NUMBER_HEX = ++$_leaf;
+const $L_NUMBER_DEC = ++$_leaf;
+const $L_NUMBER_BIN = ++$_leaf;
+const $L_NUMBER_OCT = ++$_leaf;
+const $L_NUMBER_OLD = ++$_leaf;
+const $L_PUNCTUATOR = ++$_leaf;
+const $L_REGEXN = ++$_leaf;
+const $L_REGEXU = ++$_leaf;
+const $L_STRING_SINGLE = ++$_leaf;
+const $L_STRING_DOUBLE = ++$_leaf;
+const $L_TICK_HEAD = ++$_leaf;
+const $L_TICK_BODY = ++$_leaf;
+const $L_TICK_TAIL = ++$_leaf;
+const $L_TICK_PURE = ++$_leaf;
+const $L_EOF = ++$_leaf;
+const $L_ASI = ++$_leaf;
+const $L_ERROR = ++$_leaf;
+ASSERT($_leaf < 32, 'cannot use more than 32 leafs but have ' + $_leaf);
+
+// These are the token types and you should be able to do strict comparison against specific token types with
+// `curtok` or `token.type`. Every constant maps to a single number which is a combination of a bitwise field and
+// a range of numbers, all within a 32bit space (which is a hard limitation due to bitwise ops in JS being 32bit)
+// TODO: A future expansion, space permitting, would mark certain tokens as a particular string, like `in` or `=>`.
+// TODO: For this we can reserve more flags as continuous space. How much depends on how many groups we really need.
+// TODO: These token value constants would need their own continuous space to still be able to treat them generically.
+const $SPACE = $L_SPACE | $G_WHITE;
+const $TAB = $L_TAB | $G_WHITE;
+const $NL_SOLO = $L_NL_SINGLE | $G_WHITE | $G_NEWLINE; // Any specced line terminator that is not the combination of crlf
+const $NL_CRLF = $L_NL_CRLF | $G_WHITE | $G_NEWLINE;
+const $COMMENT_SINGLE = $L_COMMENT_SINGLE | $G_COMMENT;
+const $COMMENT_MULTI = $L_COMMENT_MULTI | $G_COMMENT;
+const $COMMENT_HTML = $L_COMMENT_HTML | $G_COMMENT;
+const $IDENT = $L_IDENT | $G_IDENT;
+const $NUMBER_HEX = $L_NUMBER_HEX | $G_NUMBER;
+const $NUMBER_DEC = $L_NUMBER_DEC | $G_NUMBER;
+const $NUMBER_BIN = $L_NUMBER_BIN | $G_NUMBER;
+const $NUMBER_OCT = $L_NUMBER_OCT | $G_NUMBER;
+const $NUMBER_OLD = $L_NUMBER_OLD | $G_NUMBER;
+const $PUNCTUATOR = $L_PUNCTUATOR | $G_PUNCTUATOR;
+const $REGEXN = $L_REGEXN | $G_REGEX; // No u-flag
+const $REGEXU = $L_REGEXU | $G_REGEX; // With u-flag ("strict mode" for regular expressions)
+const $STRING_SINGLE = $L_STRING_SINGLE | $G_STRING;
+const $STRING_DOUBLE = $L_STRING_DOUBLE | $G_STRING;
+const $TICK_HEAD = $L_TICK_HEAD | $G_TICK;
+const $TICK_BODY = $L_TICK_BODY | $G_TICK;
+const $TICK_TAIL = $L_TICK_TAIL | $G_TICK;
+const $TICK_PURE = $L_TICK_PURE | $G_TICK;
+const $TICK_BAD_HEAD = $L_TICK_HEAD | $G_TICK | $G_TICK_BAD_ESCAPE;
+const $TICK_BAD_BODY = $L_TICK_BODY | $G_TICK | $G_TICK_BAD_ESCAPE;
+const $TICK_BAD_TAIL = $L_TICK_TAIL | $G_TICK | $G_TICK_BAD_ESCAPE;
+const $TICK_BAD_PURE = $L_TICK_PURE | $G_TICK | $G_TICK_BAD_ESCAPE;
+const $EOF = $L_EOF;
+const $ASI = $L_ASI;
+const $ERROR = $L_ERROR;
+
+function isWhiteToken(type) {
+  return (type & $G_WHITE) === $G_WHITE;
+}
+function isNewlineToken(type) {
+  return (type & $G_NEWLINE) === $G_NEWLINE;
+}
+function isCommentToken(type) {
+  return (type & $G_COMMENT) === $G_COMMENT;
+}
+function isIdentToken(type) {
+  return type === $IDENT;
+}
+function isNumberToken(type) {
+  return (type & $G_NUMBER) === $G_NUMBER;
+}
+function isStringToken(type) {
+  return (type & $G_STRING) === $G_STRING;
+}
+function isPunctuatorToken(type) {
+  return type === $PUNCTUATOR;
+}
+function isRegexToken(type) {
+  return (type & $G_REGEX) === $G_REGEX;
+}
+function isTickToken(type) {
+  return (type & $G_TICK) === $G_TICK;
+}
+function isBadTickToken(type) {
+  return (type & $G_TICK_BAD_ESCAPE) === $G_TICK_BAD_ESCAPE;
+}
+function isNumberStringToken(type) {
+  return (type & ($G_NUMBER | $G_STRING)) !== 0;
+}
+function isNumberStringRegex(type) {
+  return (type & ($G_NUMBER | $G_STRING | $G_REGEX)) !== 0;
+}
+
+// At runtime, any value of token.type / curtype should be in this set
+const ALL_TOKEN_GROUPS = [
+  $G_WHITE,
+  $G_NEWLINE,
+  $G_COMMENT,
+  $G_IDENT,
+  $G_NUMBER,
+  $G_PUNCTUATOR,
+  $G_STRING,
+  $G_REGEX,
+  $G_TICK,
+  $G_TICK_BAD_ESCAPE,
+];
+const ALL_TOKEN_TYPES = [
+  $SPACE,
+  $TAB,
+  $NL_SOLO,
+  $NL_CRLF,
+  $COMMENT_SINGLE,
+  $COMMENT_MULTI,
+  $COMMENT_HTML,
+  $IDENT,
+  $NUMBER_HEX,
+  $NUMBER_DEC,
+  $NUMBER_BIN,
+  $NUMBER_OCT,
+  $NUMBER_OLD,
+  $PUNCTUATOR,
+  $REGEXN,
+  $REGEXU,
+  $STRING_SINGLE,
+  $STRING_DOUBLE,
+  $TICK_HEAD,
+  $TICK_BODY,
+  $TICK_TAIL,
+  $TICK_PURE,
+  $TICK_BAD_HEAD,
+  $TICK_BAD_BODY,
+  $TICK_BAD_TAIL,
+  $TICK_BAD_PURE,
+  $EOF,
+  $ASI,
+  $ERROR,
+];
+
 let $flag = 0;
-const $WHITE = 1 << ++$flag;
-const $SPACE = (1 << ++$flag) | $WHITE;
-const $TAB = (1 << ++$flag) | $WHITE;
-const $NL = (1 << ++$flag) | $WHITE;
-const $CRLF = (1 << ++$flag) | $NL;
-const $COMMENT = (1 << ++$flag) | $WHITE;
-const $COMMENT_SINGLE = (1 << ++$flag) | $COMMENT;
-const $COMMENT_MULTI = (1 << ++$flag) | $COMMENT;
-const $COMMENT_HTML = (1 << ++$flag) | $COMMENT;
-const $NUMBER = 1 << ++$flag;
-const $NUMBER_HEX = (1 << ++$flag) | $NUMBER;
-const $NUMBER_DEC = (1 << ++$flag) | $NUMBER;
-const $NUMBER_BIN = (1 << ++$flag) | $NUMBER;
-const $NUMBER_OCT = (1 << ++$flag) | $NUMBER;
-const $NUMBER_OLD = (1 << ++$flag) | $NUMBER;
-const $STRING = 1 << ++$flag;
-const $STRING_SINGLE = (1 << ++$flag) | $STRING;
-const $STRING_DOUBLE = (1 << ++$flag) | $STRING;
-const $IDENT = 1 << ++$flag;
-const $PUNCTUATOR = 1 << ++$flag;
-const $REGEX = 1 << ++$flag;
-const $REGEXU = (1 << ++$flag) | $REGEX; // with /u flag
-const $TICK = 1 << ++$flag;
-const $TICK_HEAD = (1 << ++$flag) | $TICK;
-const $TICK_BODY = (1 << ++$flag) | $TICK;
-const $TICK_TAIL = (1 << ++$flag) | $TICK;
-const $TICK_PURE = (1 << ++$flag) | $TICK;
-const $TICK_BAD_ESCAPE = 1 << ++$flag; // these are only valid in tagged templates from es9 onward...
-const $ASI = 1 << ++$flag;
-const $EOF = 1 << ++$flag;
-const $ERROR = 1 << ++$flag;
-ASSERT($flag < 32, 'cannot use more than 32 flags but have ' + $flag);
-
-// flags for operators/punctuators
-//let $_flag = 0;
-//const $_PARENL = 1 << ++$_flag;
-////const $_PARENR = 1 << ++$_flag;
-//const $_CURLYL = 1 << ++$_flag;
-////const $_CURLYR = 1 << ++$_flag;
-//const $_SQUAREL = 1 << ++$_flag;
-////const $_SQUARER = 1 << ++$_flag;
-//const $_DOT = 1 << ++$_flag;
-//const $_INC = 1 << ++$_flag; // ++
-//const $_DEC = 1 << ++$_flag; // --
-//const $_EXCL = 1 << ++$_flag;
-//const $_TILDE = 1 << ++$_flag;
-//const $_PLUS = 1 << ++$_flag;
-//const $_MIN = 1 << ++$_flag;
-//const $_MUL = 1 << ++$_flag;
-//const $_POW = 1 << ++$_flag;
-//const $_DIV = 1 << ++$_flag;
-//const $_MOD = 1 << ++$_flag;
-//const $_SHL = 1 << ++$_flag;
-//const $_SHR = 1 << ++$_flag;
-//const $_USHR = 1 << ++$_flag;
-//const $_LT = 1 << ++$_flag;
-//const $_LTE = 1 << ++$_flag;
-//const $_GT = 1 << ++$_flag;
-//const $_GTE = 1 << ++$_flag;
-//const $_AND = 1 << ++$_flag;
-//const $_XOR = 1 << ++$_flag;
-//const $_OR = 1 << ++$_flag;
-//const $_EQEQ = 1 << ++$_flag;
-//const $_EQEQEQ = 1 << ++$_flag;
-//const $_NEQ = 1 << ++$_flag;
-//const $_NEQEQ = 1 << ++$_flag;
-//const $_ANDAND = 1 << ++$_flag;
-//const $_OROR = 1 << ++$_flag;
-//const $_QMARK = 1 << ++$_flag;
-//const $_SEMI = 1 << ++$_flag;
-//const $_COLON = 1 << ++$_flag;
-//const $_COMMA = 1 << ++$_flag;
-//// assignment ops
-//const $_EQ = 1 << ++$_flag;
-//const $_EQPLUS = $_EQ | $_PLUS;
-//const $_EQMIN = $_EQ | $_MIN;
-//const $_EQPOW = $_EQ | $_POW;
-//const $_EQMUL = $_EQ | $_MUL;
-//const $_EQDIV = $_EQ | $_DIV;
-//const $_EQMOD = $_EQ | $_MOD;
-//const $_EQSHL = $_EQ | $_SHL;
-//const $_EQSHR = $_EQ | $_SHR;
-//const $_EQUSHR = $_EQ | $_USHR;
-//const $_EQAND = $_EQ | $_AND;
-//const $_EQXOR = $_EQ | $_XOR;
-//const $_EQOR = $_EQ | $_OR;
-//ASSERT($_flag < 32, 'cannot use more than 32 flags');
-
-// flags for identifiers
-//let __flag = 0;
-//const __IF = 1 << ++__flag;
-//... etc
-//ASSERT(__flag < 32, 'cannot use more than 32 flags');
-
-$flag = 0;
 const LF_NO_FLAGS = 0;
 const LF_CAN_NEW_DOT_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
 const LF_FOR_REGEX = 1 << ++$flag;
@@ -614,26 +685,36 @@ function ZeTokenizer(
 
   function createToken(type, start, stop, column, line, nl, ws, c) {
     ASSERT(createToken.length === arguments.length);
-
+    ASSERT(
+      ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext())
+      , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
     let str = slice(start, stop);
 
     let canon = '';
     if (type === $IDENT) canon = lastParsedIdent;
-    else if ((type & $STRING) === $STRING) {
-      // TODO: mostly necessary for AST output. There are `constructor` and `__proto__` checks that use it, though.
+    else if (isStringToken(type)) {
       canon = str[0] + lastCanonizedString + str[0];
     }
-    else if ((type & $TICK) === $TICK) {
-      // TODO: mostly necessary for AST output. There are `constructor` and `__proto__` checks that use it, though.
-      if ((type & $TICK_PURE) === $TICK_PURE) {
+    else if (isTickToken(type)) {
+      // Mostly necessary for AST output.
+      // There are some `constructor` and `__proto__` checks that use it
+      if (type === $TICK_PURE) {
         canon = '`' + lastCanonizedString + '`';
-      } else if ((type & $TICK_HEAD) === $TICK_HEAD) {
+      } else if (type === $TICK_HEAD) {
         canon = '`' + lastCanonizedString + '${';
-      } else if ((type & $TICK_BODY) === $TICK_BODY) {
+      } else if (type === $TICK_BODY) {
         canon = '}' + lastCanonizedString + '${';
-      } else if ((type & $TICK_TAIL) === $TICK_TAIL) {
+      } else if (type === $TICK_TAIL) {
+        canon = '}' + lastCanonizedString + '`';
+      } else if (type === $TICK_BAD_PURE) {
+        canon = '`' + lastCanonizedString + '`';
+      } else if (type === $TICK_BAD_HEAD) {
+        canon = '`' + lastCanonizedString + '${';
+      } else if (type === $TICK_BAD_BODY) {
+        canon = '}' + lastCanonizedString + '${';
+      } else if (type === $TICK_BAD_TAIL) {
         canon = '}' + lastCanonizedString + '`';
       } else {
         ASSERT(false, 'tick should be enum');
@@ -664,7 +745,7 @@ function ZeTokenizer(
       },
       // </SCRUB DEV>
     };
-    ASSERT(disableCanonPoison || type === $IDENT || (type & $STRING) === $STRING || (type & $TICK) === $TICK || !void Object.defineProperty(token, 'canon', {get: ASSERT.bind(undefined, false, 'do not read .canon on non-ident tokens'), set: ASSERT.bind(undefined, false, 'do not write to .canon on non-ident tokens')}), 'debugging');
+    ASSERT(disableCanonPoison || type === $IDENT || isStringToken(type) || isTickToken(type) || !void Object.defineProperty(token, 'canon', {get: ASSERT.bind(undefined, false, 'do not read .canon on non-ident tokens'), set: ASSERT.bind(undefined, false, 'do not write to .canon on non-ident tokens')}), 'debugging');
     return token;
   }
 
@@ -690,7 +771,7 @@ function ZeTokenizer(
       case $$CR_0D:
         return parseCR(); // cr crlf
       case $$LF_0A:
-        return parseNewline();
+        return parseNewlineSolo();
       case $$COMMA_2C:
         return $PUNCTUATOR;
       case $$TAB_09:
@@ -743,10 +824,10 @@ function ZeTokenizer(
         return parseCompoundAssignment(); // % %=
       case $$FF_0C:
         wasWhite = true;
-        return $WHITE;
+        return $SPACE;
       case $$VTAB_0B:
         wasWhite = true;
-        return $WHITE;
+        return $SPACE;
       case $$SEMI_3B:
         return $PUNCTUATOR;
       case $$IS_3D:
@@ -783,7 +864,7 @@ function ZeTokenizer(
         return parseBackslash();
       case $$NBSP_A0:
         wasWhite = true;
-        return $WHITE;
+        return $SPACE;
       default:
         return parseOtherUnicode(c);
     }
@@ -827,10 +908,10 @@ function ZeTokenizer(
     if (neof() && peeky($$LF_0A)) {
       ASSERT_skip($$LF_0A);
       incrementLine();
-      return $CRLF;
+      return $NL_CRLF;
     }
     incrementLine();
-    return $NL;
+    return $NL_SOLO;
   }
 
   function parseSingleString(lexerFlags) {
@@ -1266,12 +1347,12 @@ function ZeTokenizer(
     // https://tc39.github.io/ecma262/#prod-CodePoint
     // "A conforming implementation must not use the extended definition of EscapeSequence described in B.1.2 when parsing a TemplateCharacter."
 
-    // Since ES9 a _tagged_ tick literal can contain illegal escapes. Regular template strings must still conform. So
-    // we just add the $TICK_BAD_ESCAPE flag in the token type indicating whether or not the token contains a bad escape.
+    // Since ES9 a _tagged_ tick literal can contain illegal escapes. Regular template strings must still conform.
+    // The $G_TICK_BAD_ESCAPE type bit is set for template tokens that have such a bad escape (`isBadTickToken(type)`)
 
-    // `...`
-    // `...${expr}...`
-    // `...${expr}...${expr}...`
+    // - `...`                         // "pure", no expression components
+    // - `...${expr}...`               // tick_head and tick_tail, no body
+    // - `...${expr}...${expr}...`     // tick_head, tick_body (the middle part), and tick_tail
 
     let badEscapes = false;
     let c;
@@ -1291,7 +1372,7 @@ function ZeTokenizer(
 
         if (c === $$CURLY_L_7B) {
           ASSERT_skip($$CURLY_L_7B);
-          return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
+          return badEscapes ? (fromTick ? $TICK_BAD_HEAD : $TICK_BAD_BODY) : (fromTick ? $TICK_HEAD : $TICK_BODY);
         }
 
         lastCanonizedString += '$';
@@ -1299,7 +1380,7 @@ function ZeTokenizer(
 
       if (c === $$TICK_60) {
         ASSERT_skip($$TICK_60);
-        return (fromTick ? $TICK_PURE : $TICK_TAIL) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
+        return badEscapes ? (fromTick ? $TICK_BAD_PURE : $TICK_BAD_TAIL) : (fromTick ? $TICK_PURE : $TICK_TAIL);
       }
 
       if (c === $$CR_0D) {
@@ -1404,8 +1485,11 @@ function ZeTokenizer(
       if (eof()) return $NUMBER_DEC;
 
       // optional fraction
-      if (c === $$DOT_2E) parseFromFractionDot();
-      else parseExponentMaybe(c);
+      if (c === $$DOT_2E) {
+        parseFromFractionDot();
+      } else {
+        parseExponentMaybe(c);
+      }
     }
     verifyCharAfterNumber();
     return $NUMBER_DEC;
@@ -2022,10 +2106,11 @@ function ZeTokenizer(
     return $PUNCTUATOR;
   }
 
-  function parseNewline() {
+  function parseNewlineSolo() {
+    // One character, not crlf
     incrementLine();
     wasWhite = true;
-    return $NL;
+    return $NL_SOLO;
   }
 
   function parseBackslash() {
@@ -2169,7 +2254,7 @@ function ZeTokenizer(
 
     if (ustatusBody === REGEX_GOOD_SANS_U_FLAG) {
       // body had an escape or char class range that is invalid with a u flag
-      if (ustatusFlags !== REGEX_GOOD_WITH_U_FLAG) return $REGEX;
+      if (ustatusFlags !== REGEX_GOOD_WITH_U_FLAG) return $REGEXN;
       // in this case the body had syntax that's invalid with a u flag and the flag was present anyways
       if (!lastReportableTokenizerError) regexSyntaxError('Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag');
       regexSyntaxError('Regex had syntax that is invalid with u-flag and u-flag was in fact present');
@@ -2177,7 +2262,7 @@ function ZeTokenizer(
     }
     ASSERT(ustatusBody === REGEX_ALWAYS_GOOD, 'u-flag-status is enum and we checked all options here', ustatusBody);
     if (ustatusFlags === REGEX_GOOD_WITH_U_FLAG) return $REGEXU;
-    return $REGEX;
+    return $REGEXN;
   }
   function parseRegexBody(c) {
     ASSERT(c !== $$STAR_2A && c !== $$FWDSLASH_2F, 'earlier checks should already have peeked for a comment token');
@@ -4590,11 +4675,11 @@ function ZeTokenizer(
   function parseOtherUnicode(c) {
     switch (c) {
       case $$BOM_FEFF:
-        return $WHITE;
+        return $SPACE;
       case $$PS_2028:
-        return parseNewline();
+        return parseNewlineSolo();
       case $$LS_2029:
-        return parseNewline();
+        return parseNewlineSolo();
 
       default:
 
@@ -4614,13 +4699,11 @@ function ZeTokenizer(
         // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
         // >  In ECMAScript source text <ZWNBSP> code points are treated as white space characters (see 11.2).
         if (c === $$BOM_FEFF) {
-          return $WHITE;
+          return $SPACE;
         }
 
         if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unexpected unicode character: ' + c + ' (' + String.fromCharCode(c) + ')';
         return $ERROR;
-        // --pointer;
-        // THROW('fixme, c=0x'+ c.toString(16));
     }
   }
 
@@ -4688,130 +4771,110 @@ function isPsLs(c) {
 }
 
 function toktypeToString(type, _, ignoreUnknown) {
-  ASSERT(typeof type === 'number', 'expecting valid type', type, ignoreUnknown);
-  if (type & $TICK_BAD_ESCAPE) return toktypeToString(type ^ $TICK_BAD_ESCAPE, undefined, ignoreUnknown) + '+$TICK_BAD_ESCAPE';
+  ASSERT(ALL_TOKEN_TYPES.includes(type), 'should be known type', type);
 
   switch (type) {
-    case $ASI: return 'ASI';
-    case $COMMENT: return 'COMMENT';
+    case $SPACE: return 'SPACE';
+    case $TAB: return 'TAB';
+    case $NL_SOLO: return 'NL_SOLO';
+    case $NL_CRLF: return 'NL_CRLF';
     case $COMMENT_SINGLE: return 'COMMENT_SINGLE';
     case $COMMENT_MULTI: return 'COMMENT_MULTI';
     case $COMMENT_HTML: return 'COMMENT_HTML';
-    case $CRLF: return 'CRLF';
-    case $EOF: return 'EOF';
-    case $ERROR: return 'ERROR';
     case $IDENT: return 'IDENT';
-    case $NL: return 'NL';
-    case $NUMBER: return 'NUMBER';
-    case $NUMBER_DEC: return 'NUMBER_DEC';
     case $NUMBER_HEX: return 'NUMBER_HEX';
-    case $NUMBER_OCT: return 'NUMBER_OCT';
+    case $NUMBER_DEC: return 'NUMBER_DEC';
     case $NUMBER_BIN: return 'NUMBER_BIN';
+    case $NUMBER_OCT: return 'NUMBER_OCT';
     case $NUMBER_OLD: return 'NUMBER_OLD';
     case $PUNCTUATOR: return 'PUNCTUATOR';
-    case $REGEX: return 'REGEX';
+    case $REGEXN: return 'REGEXN';
     case $REGEXU: return 'REGEXU';
-    case $SPACE: return 'SPACE';
-    case $STRING: return 'STRING';
-    case $STRING_DOUBLE: return 'STRING_DOUBLE';
     case $STRING_SINGLE: return 'STRING_SINGLE';
-    case $TAB: return 'TAB';
-    case $TICK: return 'TICK';
-    case $TICK_BODY: return 'TICK_BODY';
+    case $STRING_DOUBLE: return 'STRING_DOUBLE';
     case $TICK_HEAD: return 'TICK_HEAD';
-    case $TICK_PURE: return 'TICK_PURE';
+    case $TICK_BODY: return 'TICK_BODY';
     case $TICK_TAIL: return 'TICK_TAIL';
-    case $TICK_BAD_ESCAPE: return 'TICK_BAD_ESCAPE';
-    case $WHITE: return 'WHITE';
-    default:
-      if (ignoreUnknown) return 'UNKNOWN[' + type + ']';
-      throw new Error('toktypeToString: UNKNOWN[' + JSON.stringify(type) + ']')
+    case $TICK_PURE: return 'TICK_PURE';
+    case $TICK_BAD_HEAD: return 'TICK_BAD_HEAD';
+    case $TICK_BAD_BODY: return 'TICK_BAD_BODY';
+    case $TICK_BAD_TAIL: return 'TICK_BAD_TAIL';
+    case $TICK_BAD_PURE: return 'TICK_BAD_PURE';
+    case $EOF: return 'EOF';
+    case $ASI: return 'ASI';
+    case $ERROR: return 'ERROR';
   }
+
+  if (ignoreUnknown) return 'UNKNOWN[' + type + ']';
+  throw new Error('toktypeToString: UNKNOWN[' + JSON.stringify(type) + ']')
 }
 
 function DEBUG_T(type) {
   ASSERT(typeof type === 'number', 'expecting valid type', type);
   ASSERT(type !== 0, 'token type is an enum that is not zero');
 
-  let out = [];
-  if ((type & $ASI) === $ASI) out.push('$ASI');
-  if ((type & $COMMENT) === $COMMENT) out.push('$COMMENT');
-  if ((type & $COMMENT_SINGLE) === $COMMENT_SINGLE) out.push('$COMMENT_SINGLE');
-  if ((type & $COMMENT_MULTI) === $COMMENT_MULTI) out.push('$COMMENT_MULTI');
-  if ((type & $COMMENT_HTML) === $COMMENT_HTML) out.push('$COMMENT_HTML');
-  if ((type & $CRLF) === $CRLF) out.push('$CRLF');
-  if ((type & $EOF) === $EOF) out.push('$EOF');
-  if ((type & $ERROR) === $ERROR) out.push('$ERROR');
-  if ((type & $IDENT) === $IDENT) out.push('$IDENT');
-  if ((type & $NL) === $NL) out.push('$NL');
-  if ((type & $NUMBER) === $NUMBER) out.push('$NUMBER');
-  if ((type & $NUMBER_DEC) === $NUMBER_DEC) out.push('$NUMBER_DEC');
-  if ((type & $NUMBER_HEX) === $NUMBER_HEX) out.push('$NUMBER_HEX');
-  if ((type & $NUMBER_OCT) === $NUMBER_OCT) out.push('$NUMBER_OCT');
-  if ((type & $NUMBER_BIN) === $NUMBER_BIN) out.push('$NUMBER_BIN');
-  if ((type & $NUMBER_OLD) === $NUMBER_OLD) out.push('$NUMBER_OLD');
-  if ((type & $PUNCTUATOR) === $PUNCTUATOR) out.push('$PUNCTUATOR');
-  if ((type & $REGEX) === $REGEX) out.push('$REGEX');
-  if ((type & $REGEXU) === $REGEXU) out.push('$REGEXU');
-  if ((type & $SPACE) === $SPACE) out.push('$SPACE');
-  if ((type & $STRING) === $STRING) out.push('$STRING');
-  if ((type & $STRING_DOUBLE) === $STRING_DOUBLE) out.push('$STRING_DOUBLE');
-  if ((type & $STRING_SINGLE) === $STRING_SINGLE) out.push('$STRING_SINGLE');
-  if ((type & $TAB) === $TAB) out.push('$TAB');
-  if ((type & $TICK) === $TICK) out.push('$TICK');
-  if ((type & $TICK_HEAD) === $TICK_HEAD) out.push('$TICK_HEAD');
-  if ((type & $TICK_BODY) === $TICK_BODY) out.push('$TICK_BODY');
-  if ((type & $TICK_TAIL) === $TICK_TAIL) out.push('$TICK_TAIL');
-  if ((type & $TICK_PURE) === $TICK_PURE) out.push('$TICK_PURE');
-  if ((type & $TICK_BAD_ESCAPE) === $TICK_BAD_ESCAPE) out.push('$TICK_BAD_ESCAPE');
-  if ((type & $WHITE) === $WHITE) out.push('$WHITE');
-
-  if (out.length === 0) {
-    if ((type & $TICK_BAD_ESCAPE) === $TICK_BAD_ESCAPE) {
-      out.push('$TICK_BAD_ESCAPE');
-    } else {
-      throw new Error('DEBUG_T: UNKNOWN[' + JSON.stringify(type) + ']')
-    }
-  }
-
-  return 'T<' + out.join(',') + '>';
+  return 'T<' + toktypeToString(type) + '>';
 }
 
 // </BODY>
 
 export default ZeTokenizer;
 export {
-  $ASI,
-  $COMMENT,
-  $COMMENT_HTML,
+  $G_WHITE,
+  $G_NEWLINE,
+  $G_COMMENT,
+  $G_IDENT,
+  $G_NUMBER,
+  $G_PUNCTUATOR,
+  $G_STRING,
+  $G_REGEX,
+  $G_TICK,
+  $G_TICK_BAD_ESCAPE,
+
+  isWhiteToken,
+  isNewlineToken,
+  isCommentToken,
+  isIdentToken,
+  isNumberToken,
+  isStringToken,
+  isPunctuatorToken,
+  isRegexToken,
+  isTickToken,
+  isBadTickToken,
+  isNumberStringRegex,
+  isNumberStringToken,
+
+  $SPACE,
+  $TAB,
+  $NL_SOLO,
+  $NL_CRLF,
   $COMMENT_SINGLE,
   $COMMENT_MULTI,
-  $CRLF,
-  $EOF,
-  $ERROR,
+  $COMMENT_HTML,
   $IDENT,
-  $NL,
-  $NUMBER,
   $NUMBER_HEX,
   $NUMBER_DEC,
   $NUMBER_BIN,
   $NUMBER_OCT,
   $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
+  $REGEXN,
   $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
   $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BAD_ESCAPE,
-  $TICK_BODY,
+  $STRING_DOUBLE,
   $TICK_HEAD,
-  $TICK_PURE,
+  $TICK_BODY,
   $TICK_TAIL,
-  $WHITE,
+  $TICK_PURE,
+  $TICK_BAD_HEAD,
+  $TICK_BAD_BODY,
+  $TICK_BAD_TAIL,
+  $TICK_BAD_PURE,
+  $EOF,
+  $ASI,
+  $ERROR,
+  ALL_TOKEN_GROUPS,
+  ALL_TOKEN_TYPES,
 
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,

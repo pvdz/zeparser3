@@ -68,7 +68,7 @@ ast: {
 }
 
 tokens (3x):
-       REGEX ASI
+       REGEXN ASI
 `````
 
 

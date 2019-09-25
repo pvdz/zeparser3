@@ -44,7 +44,7 @@ ast: {
 }
 
 tokens (3x):
-       REGEX PUNCTUATOR
+       REGEXN PUNCTUATOR
 `````
 
 ### Strict mode

@@ -68,7 +68,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT REGEX ASI
+       IDENT IDENT REGEXN ASI
 `````
 
 

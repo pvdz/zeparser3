@@ -56,7 +56,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT IDENT IDENT REGEX PUNCTUATOR PUNCTUATOR
+       IDENT IDENT IDENT REGEXN PUNCTUATOR PUNCTUATOR
 `````
 
 ### Strict mode

@@ -8,7 +8,7 @@ import {
   GOAL_SCRIPT,
   COLLECT_TOKENS_ALL,
 
-  $COMMENT,
+  isCommentToken,
 } from "../src/zetokenizer.mjs";
 import {
   ASSERT,
@@ -85,7 +85,7 @@ function read(path, file, onContent) {
 let counter = 0;
 read(PATH262, '', (file, content) => {
   ++counter;
-  // if (counter < 12200) return;
+  // if (counter < 22000) return;
 
   let displayFile = file.slice(path.resolve(dirname, '../ignore').length + 1);
   if (displayFile.includes('FIXTURE')) return;
@@ -124,7 +124,8 @@ read(PATH262, '', (file, content) => {
 
   if (features.includes('BigInt')) {
     return  console.log(BOLD, 'SKIP', RESET, '(Stage 3: BigInt)');
-  } else if (features.includes('class-fields-public')) {
+  } else
+    if (features.includes('class-fields-public')) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage ?: class-fields-public)');
   } else if (features.includes('class-fields-private')) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage ?: class-fields-private)');
@@ -218,7 +219,7 @@ read(PATH262, '', (file, content) => {
       let noCommentContent = content;
       if (z) {
         // Strip comment nodes because that's the only expected difference between the two ASTs
-        noCommentContent = z.tokens.map(token => (token.type & $COMMENT) !== $COMMENT ? token.str : token.str.includes('\n') ? '\n' : '').join('');
+        noCommentContent = z.tokens.map(token => !isCommentToken(token.type) ? token.str : token.str.includes('\n') ? '\n' : '').join('');
       }
 
       let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'web', file);
@@ -263,7 +264,7 @@ read(PATH262, '', (file, content) => {
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + modstr + RESET);
     }
     if (!failed && !printedOnce) {
-      testZePrinter(content, 'web', z.ast);
+      testZePrinter(content, 'module', z.ast);
       printedOnce = true;
     }
     if (!!failed !== negative) {

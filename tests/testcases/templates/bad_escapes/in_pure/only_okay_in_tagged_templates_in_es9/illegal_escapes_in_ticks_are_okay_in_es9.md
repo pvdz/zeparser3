@@ -61,7 +61,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT TICK_PURE+$TICK_BAD_ESCAPE PUNCTUATOR
+       IDENT TICK_BAD_PURE PUNCTUATOR
 `````
 
 ### Strict mode

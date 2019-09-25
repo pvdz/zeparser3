@@ -36,7 +36,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Template contained an illegal escape
+  Template contained an illegal escape, illegal in a statement
 
 `\00`
 ^------- error

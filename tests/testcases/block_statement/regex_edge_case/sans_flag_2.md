@@ -52,7 +52,7 @@ ast: {
 }
 
 tokens (5x):
-       PUNCTUATOR PUNCTUATOR REGEX ASI
+       PUNCTUATOR PUNCTUATOR REGEXN ASI
 `````
 
 ### Strict mode

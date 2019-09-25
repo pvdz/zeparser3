@@ -73,7 +73,7 @@ ast: {
 }
 
 tokens (3x):
-       REGEX PUNCTUATOR
+       REGEXN PUNCTUATOR
 `````
 
 

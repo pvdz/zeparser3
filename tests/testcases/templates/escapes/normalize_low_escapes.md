@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Template contained an illegal escape
+  Template contained an illegal escape, illegal in a statement
 
 `start \0137 \x18 \u{05} \0 finish`;
 ^------- error

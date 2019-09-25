@@ -71,7 +71,7 @@ ast: {
 
 tokens (11x):
        IDENT PUNCTUATOR IDENT IDENT NUMBER_DEC PUNCTUATOR IDENT ASI
-       REGEX ASI
+       REGEXN ASI
 `````
 
 ### Strict mode
