@@ -2122,8 +2122,6 @@ function ZeTokenizer(
     // parseHtmlComment
     // This is the starting html comment `<!--`
     // the spec defines it as the start of a single line JS comment
-    // TODO: hide this under the web compat flag
-    // TODO: and clean the check up already
     parseCommentSingle();
     wasWhite = true;
     return $COMMENT_HTML;
