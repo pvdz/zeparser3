@@ -974,18 +974,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Add comment if it does.
     if (!_path[_path.length - 1].innerComments) _path[_path.length - 1].innerComments = [];
 
-    AST_open('innerComments', isLeaf(commentToken.type, $L_COMMENT_MULTI) ? 'CommentBlock' : 'CommentLine', commentToken);
+    AST_open('innerComments', commentToken.type === $COMMENT_MULTI ? 'CommentBlock' : 'CommentLine', commentToken);
     AST_set('value',
-      isLeaf(commentToken.type, $L_COMMENT_SINGLE) ? commentToken.str.slice(2) :
-      isLeaf(commentToken.type, $L_COMMENT_MULTI) ? commentToken.str.slice(2, -2) : (
-        ASSERT(isLeaf(commentToken.type, $L_COMMENT_HTML), 'comment is enum so this must be html'),
+      commentToken.type === $COMMENT_SINGLE ? commentToken.str.slice(2) :
+      commentToken.type === $COMMENT_MULTI ? commentToken.str.slice(2, -2) : (
+        ASSERT(commentToken.type === $COMMENT_HTML, 'comment is enum so this must be html'),
         commentToken.str.slice(0, 3) === '-->' ? commentToken.str.slice(3) : (
           ASSERT(commentToken.str.slice(0, 4) === '<!--', 'should be html open now'),
           commentToken.str.slice(4)
         )
       )
     );
-    AST_close(isLeaf(commentToken.type, $L_COMMENT_MULTI) ? 'CommentBlock' : 'CommentLine');
+    AST_close(commentToken.type === $COMMENT_MULTI ? 'CommentBlock' : 'CommentLine');
   }
 
   function initLexer(lexerFlags) {
