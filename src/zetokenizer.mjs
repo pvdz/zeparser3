@@ -472,10 +472,10 @@ function ZeTokenizer(
   ASSERT(typeof targetEsVersion === 'number', 'targetEsVersion should be a number', typeof targetEsVersion);
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 11) || targetEsVersion === Infinity, 'only support v6~11 right now [' + targetEsVersion + ','+(typeof targetEsVersion)+']');
 
-  const supportRegexPropertyEscapes = targetEsVersion === 9 || targetEsVersion === Infinity;
-  const supportRegexLookbehinds = targetEsVersion === 9 || targetEsVersion === Infinity;
-  const supportRegexDotallFlag = targetEsVersion === 9 || targetEsVersion === Infinity;
-  const supportRegexNamedGroups = targetEsVersion === 9 || targetEsVersion === Infinity;
+  const supportRegexPropertyEscapes = targetEsVersion >= 9 || targetEsVersion === Infinity;
+  const supportRegexLookbehinds = targetEsVersion >= 9 || targetEsVersion === Infinity;
+  const supportRegexDotallFlag = targetEsVersion >= 9 || targetEsVersion === Infinity;
+  const supportRegexNamedGroups = targetEsVersion >= 9 || targetEsVersion === Infinity;
 
   let pointer = 0;
   let len = input.length;
