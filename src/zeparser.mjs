@@ -7828,7 +7828,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       if (hasAllFlags(destructible, CANT_DESTRUCT)) {
         // - `([...{a = b} = c]) => d;`
-        if (asyncToken) THROW('The left hand side of the async arrow is not destructible so arrow is illegal');
+        if (asyncToken !== UNDEF_ASYNC) THROW('The left hand side of the async arrow is not destructible so arrow is illegal');
         else THROW('The left hand side of the arrow is not destructible so arrow is illegal');
       }
       if (hasAllFlags(destructible, DESTRUCT_ASSIGN_ONLY)) {
