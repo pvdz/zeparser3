@@ -185,7 +185,7 @@ function cycle(input) {
   if (z && !NO_PRINTER) {
     // Note: this is a very slow test. Easily cuts down efficiency to a third.
     try {
-      testZePrinter(input, 'web', z.ast, false, false, false);
+      testZePrinter(input, 'web', true, z.ast, false, false, false);
     } catch (e) {
       dumpFuzzOutput(input, input, zefailed, 'zeprinter failed');
       warnOsd('zeparser assertion');

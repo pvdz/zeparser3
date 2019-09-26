@@ -267,6 +267,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
       tob.printerOutput = testZePrinter(
         code,
         testVariant,
+        ENABLE_ANNEXB, // testVariant web will auto-enable this
         r.ast,
         !INPUT_OVERRIDE && !TARGET_FILE && (AUTO_UPDATE && !CONFIRMED_UPDATE),
         REDUCING_PRINTER,

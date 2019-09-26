@@ -20,16 +20,18 @@ const TEST_STRICT = 'strict';
 const TEST_MODULE = 'module';
 const TEST_WEB = 'web';
 
-function sameFunc(testVariant, forTestFile, code) {
+function sameFunc(testVariant, enableAnnexb, forTestFile, code) {
+  ASSERT(sameFunc.length === arguments.length, 'arg count');
+
   // Get updated AST for new input (it might crash. In fact, is very likely to be illegal)
   let inputAst;
   try {
-    inputAst = zepSpecial(code, testVariant, TEST_MODULE, COLLECT_TOKENS_SOLID)
+    inputAst = zepSpecial(code, testVariant, enableAnnexb, TEST_MODULE, COLLECT_TOKENS_SOLID)
   } catch (e) {
     return {e: {message: '(zeparser rejected input)'}};
   }
   // Now confirm this with the printed output of this ast.
-  let [printerStatus, msg] = _testZePrinter(code, testVariant, inputAst.ast, forTestFile);
+  let [printerStatus, msg] = _testZePrinter(code, testVariant, enableAnnexb, inputAst.ast, forTestFile, false);
   if (printerStatus === 'fail-crash') {
     console.log('status was fail :\'(');
     console.log(msg);
@@ -38,8 +40,10 @@ function sameFunc(testVariant, forTestFile, code) {
   return {e: {message: printerStatus}, printerStatus};
 }
 
-function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, ignoreProblems, logTime) {
-  let [printerStatus, msg] = _testZePrinter(code, testVariant, ast, forTestFile, logTime);
+function testZePrinter(code, testVariant, enableAnnexb, ast, forTestFile, reducePrinterError, ignoreProblems, logTime) {
+  ASSERT(testZePrinter.length === arguments.length, 'arg count');
+
+  let [printerStatus, msg] = _testZePrinter(code, testVariant, enableAnnexb, ast, forTestFile, logTime);
 
   if (!ignoreProblems && printerStatus !== 'same' && printerStatus !== 'diff-same') {
     let reducedInput;
@@ -56,7 +60,7 @@ function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, 
       console.log('`````');
       console.log(code);
       console.log('`````');
-      reducedInput = reduceErrorInput(code, sameFunc.bind(undefined, testVariant, forTestFile));
+      reducedInput = reduceErrorInput(code, sameFunc.bind(undefined, testVariant, enableAnnexb, forTestFile));
       console.log('Reduced!');
       console.log('-->', [reducedInput]);
 
@@ -87,7 +91,9 @@ function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, 
   return [code, msg, printerStatus];
 }
 
-function _testZePrinter(code, testVariant, ast, forTestFile, logTime = false) {
+function _testZePrinter(code, testVariant, enableAnnexb, ast, forTestFile, logTime) {
+  ASSERT(_testZePrinter.length === arguments.length, 'arg count');
+
   // Test the ast printer
   // We only really need to test it once for whatever run passes
   let printedCode;
@@ -112,7 +118,7 @@ function _testZePrinter(code, testVariant, ast, forTestFile, logTime = false) {
 
     let printedAst;
     try {
-      printedAst = zepSpecial(printedCode, testVariant, TEST_MODULE, COLLECT_TOKENS_SOLID)
+      printedAst = zepSpecial(printedCode, testVariant, enableAnnexb, TEST_MODULE, COLLECT_TOKENS_SOLID)
     } catch (e) {}
 
     if (!printedAst) {
@@ -133,7 +139,7 @@ ${printedCode}
 ZeParser failed to parse printed code (with same parameters as original)
 `];
     } else {
-      let templateFriendlyInputAst = zepSpecial(printedCode, testVariant, TEST_MODULE, COLLECT_TOKENS_SOLID);
+      let templateFriendlyInputAst = zepSpecial(printedCode, testVariant, enableAnnexb, TEST_MODULE, COLLECT_TOKENS_SOLID);
 
       let A = astToString(templateFriendlyInputAst.ast).replace(/^\s*loc:.*$\n/gm, '');
       let B = astToString(printedAst.ast).replace(/^\s*loc:.*$\n/gm, '');
@@ -193,14 +199,16 @@ ${d}
   throw new Error('unreachable');
 }
 
-function zepSpecial(code, testVariant, TEST_MODULE, COLLECT_TOKENS_SOLID) {
+function zepSpecial(code, testVariant, enableAnnexb, TEST_MODULE, COLLECT_TOKENS_SOLID) {
+  ASSERT(zepSpecial.length === arguments.length, 'arg count');
+
   return ZeParser(
     code,
     testVariant === TEST_MODULE ? GOAL_MODULE : GOAL_SCRIPT,
     COLLECT_TOKENS_SOLID,
     {
       strictMode: testVariant === TEST_STRICT,
-      webCompat: testVariant === TEST_WEB,
+      webCompat: enableAnnexb || testVariant === TEST_WEB,
 
       templateNewlineNormalization: false, // (!!)
 

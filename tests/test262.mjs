@@ -178,7 +178,7 @@ read(PATH262, '', (file, content) => {
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + webstr + RESET);
     }
     if (!failed && !printedOnce) {
-      testZePrinter(content, 'web', z.ast);
+      testZePrinter(content, 'web', true, z.ast);
       printedOnce = true;
     }
     if (!!failed !== negative) {
@@ -261,7 +261,7 @@ read(PATH262, '', (file, content) => {
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + modstr + RESET);
     }
     if (!failed && !printedOnce) {
-      testZePrinter(content, 'module', z.ast);
+      testZePrinter(content, 'module', false, z.ast);
       printedOnce = true;
     }
     if (!!failed !== negative) {
