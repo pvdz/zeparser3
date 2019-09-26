@@ -236,6 +236,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   try {
     if (INPUT_OVERRIDE || TARGET_FILE) {
       console.time('Pure parse time');
+      console.log('Input size:', code.length, 'bytes');
     }
     r = zeparser(
       code,
