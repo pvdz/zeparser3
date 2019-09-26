@@ -34,6 +34,7 @@ const RUN_SLOPPY = ALL_VARIANTS || (a || (!b && !c && !d));
 const RUN_STRICT = ALL_VARIANTS || b || (!DISABLE_VARIANTS_UNLESS_OVERRIDE && !a && !c && !d);
 const RUN_MODULE = ALL_VARIANTS || c || (!DISABLE_VARIANTS_UNLESS_OVERRIDE && !a && !b && !d);
 const RUN_WEB = ALL_VARIANTS || d || (!DISABLE_VARIANTS_UNLESS_OVERRIDE && !a && !b && !c);
+const ENABLE_ANNEXB = process.argv.includes('--annexb');
 const TARGET_ES6 = process.argv.includes('--es6');
 const TARGET_ES7 = process.argv.includes('--es7');
 const TARGET_ES8 = process.argv.includes('--es8');
@@ -80,7 +81,8 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --sloppy      Only run tests in sloppy mode (can be combined with other modes like --strict)
     --strict      Only run tests in strict mode (can be combined with other modes like --module)
     --module      Only run tests with module goal (can be combined with other modes like --strict)
-    --web         Only run tests in sloppy mode with web compat mode on (can be combined with other modes like --strict)
+    --annexb      Enable web compatibility extensions listed in Annex B in the specification
+    --web         Only run tests in sloppy mode with web compat mode on (alias for \`--sloppy --annexb\`)
     --acorn       Run in Acorn compat mode (\`acornCompat=true\`)
     --babel       Run in Babel compat mode (\`babelCompat=true\`)
     --test-acorn  Also show diff with Acorn AST / pass/fail with test cases (not the same as --acorn !)
@@ -230,13 +232,16 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   let r, e = '';
   let stdout = [];
   try {
+    if (INPUT_OVERRIDE || TARGET_FILE) {
+      console.time('Pure parse time');
+    }
     r = zeparser(
       code,
       testVariant === TEST_MODULE ? GOAL_MODULE : GOAL_SCRIPT,
       COLLECT_TOKENS_SOLID,
       {
         strictMode: testVariant === TEST_STRICT,
-        webCompat: testVariant === TEST_WEB,
+        webCompat: ENABLE_ANNEXB || testVariant === TEST_WEB,
         targetEsVersion: tob.inputOptions.es,
         babelCompat: BABEL_COMPAT,
         acornCompat: ACORN_COMPAT,
@@ -247,6 +252,9 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         $error: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
       },
     );
+    if (INPUT_OVERRIDE || TARGET_FILE) {
+      console.timeEnd('Pure parse time');
+    }
     if (tob.shouldFail) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed';
     }
@@ -1029,6 +1037,7 @@ if (INPUT_OVERRIDE) {
   if (b && !a && !c && !d) LOG('Testing in strict mode only');
   if (c && !a && !b && !d) LOG('Testing in module goal only');
   if (d && !a && !b && !c) LOG('Testing in web compat mode only');
+  if (ENABLE_ANNEXB) LOG('Testing with Annex B syntax extensions enabled');
   LOG('=============================================\n');
 } else {
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test search discovery time');

@@ -8,6 +8,7 @@ BABEL=''
 EXTRA=''
 ES=''
 NODE=''
+ANNEXB=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -33,9 +34,10 @@ ZeParser test runner help:
  fuzz          Run fuzzer
  z             Create build
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
- --web         Enable sloppy script with web compat / AnnexB mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
  --module      Enable module goal mode, do not auto-enable other modes
+ --annexb      Enable the syntax extensions under Annex B
+ --web         Alias for --sloppy and --web
  --min         Only for f and i, for invalid input; minify the test case while keeping same error
  --min-printer Only for f and i, for inputs that cause bad printer behavior; minify the test case while keeping same error
  --no-printer  Do not run the zeprinter-step (helps with debugging in certain cases)
@@ -130,9 +132,10 @@ ZeParser test runner help:
       ;;
 
     --sloppy)       MODE='--sloppy'       ;;
-    --web)          MODE='--web'          ;;
     --strict)       MODE='--strict'       ;;
     --module)       MODE='--module'       ;;
+    --annexb)       ANNEXB='--annexb'     ;;
+    --web)          MODE='--web'          ;;
     --acorn)        ACORN='--acorn'       ;;
     --test-acorn)   ACORN='--test-acorn'  ;;
     --babel)        BABEL='--babel'       ;;
@@ -165,11 +168,11 @@ done
 set -x
 case "${ACTION}" in
     test262)
-        node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL}
+        node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB}
     ;;
 
     fuzz)
-        node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE}
+        node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB}
     ;;
 
     build)
@@ -177,7 +180,7 @@ case "${ACTION}" in
     ;;
 
     *)
-        node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES}
+        node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB}
     ;;
 esac
 set +x
