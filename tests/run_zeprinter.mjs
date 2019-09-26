@@ -38,8 +38,8 @@ function sameFunc(testVariant, forTestFile, code) {
   return {e: {message: printerStatus}, printerStatus};
 }
 
-function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, ignoreProblems) {
-  let [printerStatus, msg] = _testZePrinter(code, testVariant, ast, forTestFile);
+function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, ignoreProblems, logTime) {
+  let [printerStatus, msg] = _testZePrinter(code, testVariant, ast, forTestFile, logTime);
 
   if (!ignoreProblems && printerStatus !== 'same' && printerStatus !== 'diff-same') {
     let reducedInput;
@@ -87,15 +87,21 @@ function testZePrinter(code, testVariant, ast, forTestFile, reducePrinterError, 
   return [code, msg, printerStatus];
 }
 
-function _testZePrinter(code, testVariant, ast, forTestFile) {
+function _testZePrinter(code, testVariant, ast, forTestFile, logTime = false) {
   // Test the ast printer
   // We only really need to test it once for whatever run passes
   let printedCode;
   let printedFail;
+  if (logTime) {
+    console.time('Pure print time');
+  }
   try {
     printedCode = zeprinter(ast);
   } catch (e) {
     printedFail = e.stack;
+  }
+  if (logTime) {
+    console.timeEnd('Pure print time');
   }
   if (printedFail) {
     return ['fail-crash', '\n## AST Printer\n\n'+'Printer failed ['+testVariant+'][fail-crash]:'+'\n\n' + printedFail + '\n\n Input:\n\n'+code];

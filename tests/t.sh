@@ -32,6 +32,7 @@ ZeParser test runner help:
  b             Alias for ./t m --test-babel, to verify ZeParser output against the Babel AST
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
+ p             Run on two large js files (1mb) tucked away in ./ignore to get tentative parse times on them
  z             Create build
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
@@ -47,6 +48,7 @@ ZeParser test runner help:
  --test-babel  Also compare AST of test cases to Babel output
  --no-fatals   Do not abort test run for (test) any assertion errors
  --node        Fuzzer: compare pass/fail to node by creating a new function and checking if it throws
+ --consise     Do not dump AST and printer output to stdout. Only works with -i or -f (or anything that uses those)
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -130,6 +132,11 @@ ZeParser test runner help:
       # Calls the build script
       ACTION='build'
       ;;
+    p)
+      ./t F ignore/perf/es6.material-ui-core.js --annexb --concise
+      ./t F ignore/perf/es6.angular-compiler.js --annexb --module --concise
+      exit 0;
+      ;;
 
     --sloppy)       MODE='--sloppy'       ;;
     --strict)       MODE='--strict'       ;;
@@ -144,6 +151,7 @@ ZeParser test runner help:
     --min-printer)  EXTRA='--min-printer' ;;
     --no-printer)   EXTRA='--no-printer'  ;;
     --no-fatals)    EXTRA='--no-fatals'   ;;
+    --concise)      EXTRA='--concise'     ;;
 
     6)  ES='--es6'  ;;
     7)  ES='--es7'  ;;

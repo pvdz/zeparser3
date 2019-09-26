@@ -51,6 +51,7 @@ const COMPARE_NODE = process.argv.includes('--test-node');
 const TEST_ACORN = COMPARE_ACORN && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record acorn deltas into test files
 const TEST_BABEL = COMPARE_BABEL && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
 const NO_FATALS = process.argv.includes('--no-fatals'); // asserts should not stop a full auto run (dev tool, rely on git etc for recovery...)
+const CONCISE = process.argv.includes('--concise');
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -97,6 +98,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --min-printer Minimize a ZePrinter-failing input case
     --force-write Always write the test cases to disk, even when no change was detected
     --no-fatals   Do not treat (test) assertion errors as fatals (dev tools only, rely on git etc for recovery)
+    --concise     Do not dump AST and printer output to stdout. Only works with -i or -f
 `);
   process.exit();
 }
@@ -268,7 +270,8 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         r.ast,
         !INPUT_OVERRIDE && !TARGET_FILE && (AUTO_UPDATE && !CONFIRMED_UPDATE),
         REDUCING_PRINTER,
-        !REDUCING_PRINTER
+        !REDUCING_PRINTER,
+        INPUT_OVERRIDE || TARGET_FILE
       );
       if (tob.printerOutput[2] !== 'same' && tob.printerOutput[2] !== 'diff-same') {
         tob.continuePrint = 'ZePrinter output needs attention [' + tob.printerOutput[2] + ']';
@@ -672,7 +675,7 @@ async function cli() {
   let list = [tob];
   await runTests(list, zeparser);
 
-  if (!SEARCH) {
+  if (!SEARCH && !CONCISE) {
     console.log('=============================================');
     if (RUN_SLOPPY) {
       ASSERT(list[0].newOutputSloppy !== false, 'should update');
