@@ -105,6 +105,9 @@ See [`tests/testcases/README.md`](./tests/parser/README.md) for details on test 
 # Use entire contents of given file as input
 ./t F "test262/test/annexB/built-ins/foo.js"
 
+# Generate prod builds
+./t z                Generate a build which strips ASSERT* stuff etc (dramatically improves parse time) and minifies it
+
 # Run test262 tests (requires some setup)
 ./t t
 
@@ -120,6 +123,7 @@ See [`tests/testcases/README.md`](./tests/parser/README.md) for details on test 
 # Find out which tests execute a particular code branch in the parser
 # Add `HIT()` to any part of the code in src
 ./t s                Optionally combinable with `-i` or `-f`. Reports all inputs that trigger a `HIT()` call in zeparser
+
 
 Most flags can be modified:
 
@@ -141,6 +145,7 @@ Most flags can be modified:
 --test-acorn         Compare the `--acorn` output to the actual output of Acorn on same input
 --test-babel         Compare the `--babel` output to the actual output of Babel on same input
 --test-node          Compile input in a `Function()` and report whether that throws when zeparser throws
+--build              Use a prod build (from standard output location), instead of dev sources, for all actions that support it
 ```
 
 You can find the REPL in [`tests/web/repl.html`](./tests/web/repl.js), github link: https://pvdz.github.io/zeparser3/tests/web/repl.html
@@ -152,8 +157,7 @@ _The REPL needs a very new browser due to es module syntax._
 While the parser runs perfectly fine in dev mode it will be a bit slow. To generate a build run this in the project root:
 
 ```
-mkdir build
-./cli/build.js
+./t z
 ```
 
 (For now you'll need `node --experimental-modules cli/build.mjs`)

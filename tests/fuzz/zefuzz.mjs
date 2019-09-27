@@ -5,7 +5,6 @@ console.log('\n---------------\n');
 import {performance} from 'perf_hooks';
 
 import {GOAL_MODULE, GOAL_SCRIPT} from "../../src/zetokenizer.mjs";
-import Par from "../../src/zeparser.mjs";
 
 import {
   dumpFuzzOutput,
@@ -25,7 +24,9 @@ import {fuzzAgainstNode} from "./fuzz_against_node.mjs";
 console.log('ZeFuzz - a ZeParser fuzzing tool');
 
 let VERBOSE = true;
-const NO_PRINTER = process.argv.includes('--no-printer');
+const USE_BUILD = process.argv.includes('-b');
+if (USE_BUILD) console.log('-- Using prod build of ZeParser');
+const NO_PRINTER = USE_BUILD || process.argv.includes('--no-printer');
 if (NO_PRINTER) console.log('-- Not testing ZePrinter');
 const TEST_NODE = process.argv.includes('--node');
 if (TEST_NODE) console.log('-- Comparing pass/fail to node by compiling a function');
@@ -37,6 +38,9 @@ const BLINK = '\x1b[;5;1m';
 const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
+
+const ZEPARSER_DEV_FILE = '../../src/zeparser.mjs';
+const ZEPARSER_PROD_FILE = '../../build/build_w_ast.mjs';
 
 const FUZZERS = [
   // These functions should be callable without args and return randomly generated source code to test
@@ -71,10 +75,13 @@ let lastTick = performance.now();
 let lastSpeed = 0;
 let lastTotalSpeed = 0;
 
+// Placeholder...
+let ZeParser = function(){ throw new Error('not yet loaded through import...'); };
+
 let buffer = [];
 let p = (input, trimming) => {
   ++counts.zeparserParsed;
-  let z = Par(input, GOAL_SCRIPT, true, {
+  let z = ZeParser(input, GOAL_SCRIPT, true, {
     strictMode: false,
     webCompat: true,
     // astRoot: ast,
@@ -110,7 +117,9 @@ let counts = {
 };
 
 let injectionMode = false; // Global: currently parsing input that was deliberately broken? (Only affects stats)
-(function(){
+(async function(){
+  ZeParser = (await import(USE_BUILD ? ZEPARSER_PROD_FILE : ZEPARSER_DEV_FILE)).default;
+
   while (true) {
     let from = Math.floor(Math.random() * 3);
     let input = FUZZERS[from]();

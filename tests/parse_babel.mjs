@@ -26,13 +26,15 @@ function testBabel(code, mode) {
   });
 }
 
-function compareBabel(code, zeparserPassed, testVariant, file) {
+function compareBabel(code, zeparserPassed, testVariant, enableAnnexb, file, timePerf) {
   let babelOk, babelFail, zasb;
+  if (timePerf) console.time('Pure Babel parse time');
   try {
     babelOk = testBabel(code, testVariant);
   } catch (e) {
     babelFail = e;
   }
+  if (timePerf) console.timeEnd('Pure Babel parse time');
 
   if (zeparserPassed && babelOk) {
     try {
@@ -42,7 +44,7 @@ function compareBabel(code, zeparserPassed, testVariant, file) {
         COLLECT_TOKENS_SOLID,
         {
           strictMode: testVariant === TEST_STRICT,
-          webCompat: testVariant === TEST_WEB,
+          webCompat: enableAnnexb || testVariant === TEST_WEB,
           babelCompat: true,
 
           $log: () => {},

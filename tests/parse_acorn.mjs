@@ -33,13 +33,15 @@ function testAcorn(code, mode, version) {
   });
 }
 
-function compareAcorn(code, zeparserPassed, testVariant, file, version) {
+function compareAcorn(code, zeparserPassed, testVariant, enableAnnexb, file, version, timePerf) {
   let acornOk, acornFail, zasa;
+  if (timePerf) console.time('Pure Acorn parse time');
   try {
     acornOk = testAcorn(code, testVariant, version);
   } catch (e) {
     acornFail = e;
   }
+  if (timePerf) console.timeEnd('Pure Acorn parse time');
 
   if (zeparserPassed && acornOk) {
     try {
@@ -49,7 +51,7 @@ function compareAcorn(code, zeparserPassed, testVariant, file, version) {
         COLLECT_TOKENS_SOLID,
         {
           strictMode: testVariant === TEST_STRICT,
-          webCompat: testVariant === TEST_WEB,
+          webCompat: enableAnnexb || testVariant === TEST_WEB,
           acornCompat: true,
 
           $log: () => {},

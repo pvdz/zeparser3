@@ -9,6 +9,7 @@ EXTRA=''
 ES=''
 NODE=''
 ANNEXB=''
+BUILD=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -49,6 +50,7 @@ ZeParser test runner help:
  --no-fatals   Do not abort test run for (test) any assertion errors
  --node        Fuzzer: compare pass/fail to node by creating a new function and checking if it throws
  --consise     Do not dump AST and printer output to stdout. Only works with -i or -f (or anything that uses those)
+ --build       Use the build (./t z) instead of dev sources for ZeParser in this call
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -133,9 +135,7 @@ ZeParser test runner help:
       ACTION='build'
       ;;
     p)
-      ./t F ignore/perf/es6.material-ui-core.js --annexb --concise
-      ./t F ignore/perf/es6.angular-compiler.js --annexb --module --concise
-      exit 0;
+      ACTION='perf'
       ;;
 
     --sloppy)       MODE='--sloppy'       ;;
@@ -152,6 +152,9 @@ ZeParser test runner help:
     --no-printer)   EXTRA='--no-printer'  ;;
     --no-fatals)    EXTRA='--no-fatals'   ;;
     --concise)      EXTRA='--concise'     ;;
+    -b);&
+    --build)        BUILD='-b'            ;;
+
 
     6)  ES='--es6'  ;;
     7)  ES='--es7'  ;;
@@ -172,23 +175,28 @@ ZeParser test runner help:
   shift
 done
 
-
 set -x
 case "${ACTION}" in
     test262)
-        node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB}
+        node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB} ${BUILD}
     ;;
 
     fuzz)
-        node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB}
+        node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD}
     ;;
 
     build)
         node --experimental-modules cli/build.mjs
     ;;
 
+    perf)
+      #./t F ignore/perf/es6.material-ui-core.js --annexb --concise ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
+      #./t F ignore/perf/es6.angular-compiler.js --annexb --module --concise ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
+      node --experimental-modules tests/perf.mjs ${BUILD}
+    ;;
+
     *)
-        node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB}
+        node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
     ;;
 esac
 set +x

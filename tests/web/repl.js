@@ -48,6 +48,7 @@ if (localStorage.getItem('ZeParser3.repl.options')) {
 function pret(s, isjson) {
   // Note: this is prettier 0.4 or something... it's good enough for our purpose
   try {
+    // Note: `prettier` is exposed as global in the repl.html as a script tag...
     let r = prettier.format(isjson ? '+' + s : s, {
       tabWidth: 2,
       printWidth: 100,

@@ -14,7 +14,6 @@ console.log('Start of ZeParser3 test suite');
 const INPUT_OVERRIDE = process.argv.includes('-F') ? fs.readFileSync(process.argv[process.argv.indexOf('-F') + 1], 'utf8') : process.argv.includes('-i') ? process.argv[process.argv.indexOf('-i') + 1] : '';
 const TARGET_FILE = process.argv.includes('-f') ? process.argv[process.argv.indexOf('-f') + 1] : '';
 const SEARCH = process.argv.includes('-s');
-const SKIP_BUILDS = process.argv.includes('-b') || SEARCH;
 const TEST262 = process.argv.includes('-t');
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_TEST_FAIL = process.argv.includes('-q');
@@ -41,7 +40,7 @@ const TARGET_ES8 = process.argv.includes('--es8');
 const TARGET_ES9 = process.argv.includes('--es9');
 const TARGET_ES10 = process.argv.includes('--es10');
 const TARGET_ES11 = process.argv.includes('--es11');
-const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || (!SEARCH && (INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL));
+const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || (!SEARCH && (INPUT_OVERRIDE || TARGET_FILE || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL));
 const FORCE_WRITE = process.argv.includes('--force-write');
 const ACORN_COMPAT = process.argv.includes('--acorn');
 const BABEL_COMPAT = process.argv.includes('--babel');
@@ -52,6 +51,10 @@ const TEST_ACORN = COMPARE_ACORN && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignor
 const TEST_BABEL = COMPARE_BABEL && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
 const NO_FATALS = process.argv.includes('--no-fatals'); // asserts should not stop a full auto run (dev tool, rely on git etc for recovery...)
 const CONCISE = process.argv.includes('--concise');
+const USE_BUILD = process.argv.includes('-b');
+
+const ZEPARSER_DEV_FILE = '../src/zeparser.mjs';
+const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -67,7 +70,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     \`node --experimental-modules cli/build.mjs; node --experimental-modules tests/zeparser.spec.mjs\` [options]
 
   Options:
-    -b            Quick: don't run builds as well (implied if the files don't exist)
+    -b            Use prod build instead of dev source for ZeParser in this call (assumes built in \`/build/...\`; \`./t z\`)
     -f "path"     Only test this file / dir
     -F "path"     Use file contents as input
     -i "input"    Test input only (sloppy, strict, module), implies --sloppy unless at least one mode explicitly given
@@ -91,7 +94,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --all         Force to run all four modes (on input)
     --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
     --serial      Test all targeted files in serial, verbosely, instead of using parallel phases (which is faster)
-                  (Note: -q, -i, -b, and -f implicitly enable --serial)
+                  (Note: -q, -i, and -f implicitly enable --serial)
     --no-printer  Skip running ZePrinter on input
     --min         Brute-force simplify a test case that throws an error while maintaining the same error message, only with -f, implies --sloppy
       -- write    For reducer only; write result to new file
@@ -110,8 +113,6 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import {execSync} from 'child_process';
-
-let prettierFormat = () => { return 'prettier not loaded'; }; // if available, loaded through import() below
 
 import {
   ASSERT as _ASSERT,
@@ -196,6 +197,7 @@ const TEST_WEB = 'web';
 
 if ((REDUCING || REDUCING_PRINTER) && !TARGET_FILE && !INPUT_OVERRIDE) THROW('Can only use `--min` and `--min-parser` together with `-f` or `-i`');
 if (NO_FATALS) console.log(BLINK + 'NO_FATALS enabled. Do not blindly commit result!!' + RESET);
+if (USE_BUILD) console.log('Using PROD build of ZeParser');
 
 let stopAsap = false;
 let skippedOtherParserDelta = 0;
@@ -235,7 +237,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   let stdout = [];
   try {
     if (INPUT_OVERRIDE || TARGET_FILE) {
-      console.time('Pure parse time');
+      console.time('Pure ZeParser parse time');
       console.log('Input size:', code.length, 'bytes');
     }
     r = zeparser(
@@ -256,7 +258,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
       },
     );
     if (INPUT_OVERRIDE || TARGET_FILE) {
-      console.timeEnd('Pure parse time');
+      console.timeEnd('Pure ZeParser parse time');
     }
     if (tob.shouldFail) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed';
@@ -272,7 +274,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         r.ast,
         !INPUT_OVERRIDE && !TARGET_FILE && (AUTO_UPDATE && !CONFIRMED_UPDATE),
         REDUCING_PRINTER,
-        !REDUCING_PRINTER,
+        !REDUCING_PRINTER || BABEL_COMPAT || ACORN_COMPAT,
         INPUT_OVERRIDE || TARGET_FILE
       );
       if (tob.printerOutput[2] !== 'same' && tob.printerOutput[2] !== 'diff-same') {
@@ -280,6 +282,9 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
       }
     }
   } catch (_e) {
+    if (INPUT_OVERRIDE || TARGET_FILE) {
+      console.timeEnd('Pure ZeParser parse time');
+    }
     e = _e;
     if (tob.shouldPass) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO PASS' + RESET + ', but it failed';
@@ -299,11 +304,11 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   // Tests with specific versions should also have non-specific counter parts. Since Babel does not support targeting
   // specific spec versions, we should just skip those variants because they lead to false positives.
   if (TEST_BABEL && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
-    [babelOk, babelFail, zasb] = compareBabel(code, !e, testVariant, tob.file);
+    [babelOk, babelFail, zasb] = compareBabel(code, !e, testVariant, ENABLE_ANNEXB, tob.file, INPUT_OVERRIDE || TARGET_FILE);
   }
   let acornOk, acornFail, zasa;
   if (TEST_ACORN && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
-    [acornOk, acornFail, zasa] = compareAcorn(code, !e, testVariant, tob.file, tob.inputOptions.es);
+    [acornOk, acornFail, zasa] = compareAcorn(code, !e, testVariant, ENABLE_ANNEXB, tob.file, tob.inputOptions.es, INPUT_OVERRIDE || TARGET_FILE);
   }
 
   let nodeFail = undefined;
@@ -373,11 +378,10 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
     // throws: Parser error!
     // throws: Tokenizer error!
     (errorMessage ? 'throws: ' + errorMessage : '') +
-    // (r ? 'ast: ' + formatAst(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
     // (r ? 'ast: ' + JSON.stringify(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
     // Using util.inspect makes the output formatting highly tightly bound to node's formatting rules
     // At the same time, the same could be said for Prettier (although we can lock that down by package version,
-    // independent from node version). However, using prettier takes roughly 23 secods, inspect half a second. Meh.
+    // independent from node version). However, using prettier takes roughly 23 seconds, inspect half a second. Meh.
     (r ? 'ast: ' + astToString(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
   );
 
@@ -545,7 +549,9 @@ async function runTests(list, zeparser) {
   if (RUN_VERBOSE_IN_SERIAL && !AUTO_UPDATE && !INPUT_OVERRIDE) {
     for (let i=0; i<list.length; ++i) {
       let tob = list[i];
-      if (generateOutputBlock(tob) !== tob.oldData) {
+      let oldOutput = tob.oldData;
+      let newOutput = generateOutputBlock(tob);
+      if (newOutput !== oldOutput) {
         console.log('\nTest output change detected!\n');
         // dump outputs
         if (RUN_SLOPPY) {
@@ -603,9 +609,12 @@ async function writeNewOutput(list) {
         console.log('\n' + DIM + tob.fileShort + RESET);
         console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
         let cont = await yn('Continue to overwrite test output?');
-        if (cont) {
+        if (cont && !USE_BUILD) {
           ++updated;
           await promiseToWriteFile(file, newData);
+        } else if (USE_BUILD) {
+          // Never write build output to test files ...
+          console.log('Did NOT write to file because using prod builds to test');
         }
       } else {
         if (tob.continuePrint) {
@@ -642,17 +651,15 @@ async function writeNewOutput(list) {
   if (!RUN_VERBOSE_IN_SERIAL) console.log('Updated', updated, 'files');
 }
 
-async function loadParserAndPrettier() {
+async function loadZeParserAsync() {
   let zeparser;
-  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Parser and Prettier load');
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Parser load');
   [
     {default: zeparser},
-    {default: {format: prettierFormat}}
   ] = await Promise.all([
-    await import(path.join(dirname, '../src/zeparser.mjs')),
-    await import('prettier'),
+    await import(path.join(dirname, USE_BUILD ? ZEPARSER_PROD_FILE : ZEPARSER_DEV_FILE)),
   ]);
-  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Parser and Prettier load');
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Parser load');
 
   return zeparser;
 }
@@ -660,13 +667,24 @@ async function runAndRegenerateList(list, zeparser) {
   await runTests(list, zeparser);
   if (!SEARCH) {
     constructNewOutput(list);
-    if (RUN_VERBOSE_IN_SERIAL && list[0].oldData !== list[0].newData) showDiff(list[0]);
+    if (USE_BUILD) {
+      // The prod build does not include a tostring for tokens so they get printed as plain objects do
+      // So when running with USE_BUILD we replace those token strings with the prod build output to cut down on the
+      // false positives with test mis-matches. Just don't commit them and you should be fine :)
+      list[0].oldData = list[0].oldData.replace(/\{#.*#\}/g, '[object Object]');
+      // Some false positives could be caused if the token string appears in the comments (like fuzzer output would do)
+      list[0].newData = list[0].newData.replace(/\{#.*#\}/g, '[object Object]');
+    }
+    if (RUN_VERBOSE_IN_SERIAL && list[0].oldData !== list[0].newData) {
+      showDiff(list[0]);
+    }
+
     await writeNewOutput(list);
   }
 }
 
 async function cli() {
-  let zeparser = await loadParserAndPrettier();
+  let zeparser = await loadZeParserAsync();
 
   let forcedTarget = TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10  : TARGET_ES11 ? 11 : undefined;
   if (forcedTarget) console.log('Forcing target version: ES' + forcedTarget);
@@ -712,7 +730,7 @@ async function cli() {
 }
 
 async function main() {
-  let zeparser = await loadParserAndPrettier();
+  let zeparser = await loadZeParserAsync();
 
   if (TARGET_FILE) {
     console.log('Using explicit file:', TARGET_FILE);
@@ -913,22 +931,6 @@ function formatTokens(tokens) {
   }
   s += line;
   return s;
-}
-function formatAst(ast) {
-  // If you have no prettier installed then ignore this step. It's not crucial.
-  // node_modules/.bin/prettier --no-bracket-spacing  --print-width 180 --single-quote --trailing-comma all --write <dir>
-
-  // Note: inspect is faster than JSON.stringify, though the prettier step itself is dreadfully slow
-  return prettierFormat('(' + util.inspect(ast, false, null) + ')', {
-    parser:'babel',
-    printWidth: 180,
-    tabWidth: 2,
-    useTabs: false,
-    semi: false,
-    singleQuote: true,
-    trailingComma: 'all',
-    bracketSpacing: false,
-  }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
 
 function updateAboveTheFold(tob) {

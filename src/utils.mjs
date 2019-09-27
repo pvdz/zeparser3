@@ -1,5 +1,3 @@
-// <BODY>
-
 const $$A_61 = 0x61;
 const $$A_UC_41 = 0x41;
 const $$B_62 = 0x62;
@@ -125,8 +123,6 @@ function THROW(str, ...rest) {
   // console.log('error args:', rest.length ? rest : '<none>');
   throw new Error(`Parser error! ${str} ${rest.length ? rest : ''}`);
 }
-
-// </BODY>
 
 export {
   inspect,

@@ -14,7 +14,6 @@ import {
   ASSERT,
   astToString,
 } from "./utils.mjs";
-import Par from "../src/zeparser.mjs";
 import {
   compareAcorn,
   ignoreTest262Acorn,
@@ -31,16 +30,24 @@ import {testZePrinter} from "./run_zeprinter.mjs";
 let filePath = import.meta.url.replace(/^file:\/\//, '');
 let dirname = path.dirname(filePath);
 
+const USE_BUILD = process.argv.includes('-b');
+if (USE_BUILD) console.log('-- Using prod build of ZeParser');
 const BABEL_AST = process.argv.includes('--babel'); // run zeparser with babelCompat=true?
 const COMPARE_BABEL = process.argv.includes('--test-babel'); // compare zeparser output for each test with babel output?
 const ACORN_AST = process.argv.includes('--acorn'); // run zeparser with babelCompat=true?
 const COMPARE_ACORN = process.argv.includes('--test-acorn'); // compare zeparser output for each test with babel output?
+
+const ZEPARSER_DEV_FILE = '../src/zeparser.mjs';
+const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
 
 const BOLD = '\x1b[;1;1m';
 const BLINK = '\x1b[;5;1m';
 const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
+
+// Placeholder...
+let ZeParser = function(){ throw new Error('not yet loaded through import...'); };
 
 // cd zeparser3/ignore
 // git clone https://github.com/tc39/test262.git
@@ -49,7 +56,7 @@ const PATH262 = path.join(dirname, './../ignore/test262/test');
 let stdout = [];
 function parse(input, strict, module, web) {
   stdout = [];
-  return Par(
+  return ZeParser(
     input,
     module ? GOAL_MODULE : GOAL_SCRIPT,
     COLLECT_TOKENS_ALL,
@@ -83,7 +90,7 @@ function read(path, file, onContent) {
   }
 }
 let counter = 0;
-read(PATH262, '', (file, content) => {
+function onRead(file, content) {
   ++counter;
   // if (counter < 22000) return;
 
@@ -178,7 +185,7 @@ read(PATH262, '', (file, content) => {
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + webstr + RESET);
     }
     if (!failed && !printedOnce) {
-      testZePrinter(content, 'web', true, z.ast);
+      testZePrinter(content, 'web', true, z.ast, false, false, false, false);
       printedOnce = true;
     }
     if (!!failed !== negative) {
@@ -197,7 +204,7 @@ read(PATH262, '', (file, content) => {
       // Parse and hope for the best. AnnexB is applied by default, no opt-out
       // Acorn doesn't spam comments so we don't have to scrub the input
 
-      let [acornOk, acornFail, zasa] = compareAcorn(content, !failed, 'web', file);
+      let [acornOk, acornFail, zasa] = compareAcorn(content, !failed, 'web', true, file);
       let outputAcorn = processAcornResult(acornOk, acornFail, failed, zasa, false);
       if (outputAcorn) {
         console.log('##### "web" content that was tested in Acorn:');
@@ -219,7 +226,7 @@ read(PATH262, '', (file, content) => {
         noCommentContent = z.tokens.map(token => !isCommentToken(token.type) ? token.str : token.str.includes('\n') ? '\n' : '').join('');
       }
 
-      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'web', file);
+      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'web', true, file);
       let outputBabel = processBabelResult(babelOk, babelFail, failed, zasb, false);
       if (outputBabel) {
         console.log('##### no comment "web" content that was tested in Babel:');
@@ -261,7 +268,7 @@ read(PATH262, '', (file, content) => {
       throw new Error('File ' + BOLD + file + RESET + BLINK + ' threw an unexpected error' + RESET + ' in ' + BOLD + modstr + RESET);
     }
     if (!failed && !printedOnce) {
-      testZePrinter(content, 'module', false, z.ast);
+      testZePrinter(content, 'module', false, z.ast, false, false, false, false);
       printedOnce = true;
     }
     if (!!failed !== negative) {
@@ -279,7 +286,7 @@ read(PATH262, '', (file, content) => {
       // Parse and hope for the best. AnnexB is applied by default, no opt-out
       // Acorn doesn't spam comments so we don't have to scrub the input
 
-      let [acornOk, acornFail, zasa] = compareAcorn(content, !failed, 'module', file);
+      let [acornOk, acornFail, zasa] = compareAcorn(content, !failed, 'module', true, file);
       let outputAcorn = processAcornResult(acornOk, acornFail, failed, zasa, false);
       if (outputAcorn) {
         console.log('##### "module" content that was tested in Acorn:');
@@ -301,7 +308,7 @@ read(PATH262, '', (file, content) => {
         noCommentContent = z.tokens.map(token => (token.type & $COMMENT) !== $COMMENT ? token.str : token.str.includes('\n') ? '\n' : '').join('');
       }
 
-      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'module', file);
+      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'module', true, file);
       let outputBabel = processBabelResult(babelOk, babelFail, failed, zasb, false);
       if (outputBabel) {
         console.log('##### no comment "module" content that was tested in Babel:');
@@ -315,6 +322,12 @@ read(PATH262, '', (file, content) => {
       }
     }
   }
-});
+}
 
-console.log('The end...? Wow really?');
+(async function(){
+  ZeParser = (await import(USE_BUILD ? ZEPARSER_PROD_FILE : ZEPARSER_DEV_FILE)).default;
+
+  read(PATH262, '', onRead);
+
+  console.log('The end...? Wow really?');
+})();

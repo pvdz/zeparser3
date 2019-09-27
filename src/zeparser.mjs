@@ -202,7 +202,6 @@ import ZeTokenizer, {
   LF_SUPER_CALL,
   LF_SUPER_PROP,
   INITIAL_LEXER_FLAGS,
-  LF_DEBUG as L,
 
   RETURN_ANY_TOKENS,
   RETURN_COMMENT_TOKENS,
@@ -211,10 +210,9 @@ import ZeTokenizer, {
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
-  DEBUG_T as T,
+  L,
+  T,
 } from '../src/zetokenizer.mjs';
-
-// <BODY>
 
 const VERSION_EXPONENTIATION = 7; // ES2016
 const VERSION_ASYNC = 8; // ES2017
@@ -1047,7 +1045,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function skipAny(lexerFlags) {
-    skipRex(lexerFlags); // TODO: optimize; in this case the next token is very restricted but at least no slash
+    skipDiv(lexerFlags); // TODO: optimize; in this case the next token is very restricted but at least no slash
     ASSERT(curc !== $$FWDSLASH_2F || (failForRegexAssertIfPass = curtok, regexAssertTrace = new Error().stack));
   }
 
@@ -1171,6 +1169,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // this can be done efficiently but in destructuring there are too many signals and so this needs to be done before
     // processing the ident for special cases that normally determine whether the next token is a div, regex, or any
     // this check is relatively slow but there's a plan to make these enums, which would improve things
+
     switch (curtok.str) {
       case 'delete':
       case 'typeof':
@@ -2711,7 +2710,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string', 'astprop str', astProp);
 
     if (isBadTickToken(curtype)) {
-      THROW('Template contained an illegal escape, illegal in a statement', T(curtype), ''+curtok);
+      THROW('Template contained an illegal escape, illegal in a statement', ''+curtok);
     }
     AST_open(astProp, 'ExpressionStatement', tickToken);
     parseTickExpression(lexerFlags, tickToken, 'expression');
@@ -3605,7 +3604,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipAny('{', lexerFlagsNoTemplate);
     while (curtype === $IDENT) {
       let nameToken = curtok;
-      skipAny(lexerFlagsNoTemplate);
+      ASSERT_skipAny($IDENT, lexerFlagsNoTemplate);
       AST_open('specifiers', 'ExportSpecifier', nameToken);
       // while the `nameToken` should be a valid non-keyword identifier, it also has to be bound and as such we
       // don't have to check it here since we already apply bind checks anyways and binding would apply this check
@@ -3615,7 +3614,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curtype !== $IDENT) THROW('Can only use ident to indicate alias');
         // note: the exported _name_ can be any identifier, keywords included
         let exportedNameToken = curtok;
-        skipAny(lexerFlagsNoTemplate);
+        ASSERT_skipAny($IDENT, lexerFlagsNoTemplate);
         AST_setIdent('exported', exportedNameToken);
         tmpExportedNames.push(exportedNameToken.str);
         tmpExportedBindings.push(nameToken.str);
@@ -3625,7 +3624,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         tmpExportedBindings.push(nameToken.str);
       }
       AST_close('ExportSpecifier');
-      if (curc === $$COMMA_2C) skipAny(lexerFlagsNoTemplate);
+      if (curc === $$COMMA_2C) ASSERT_skipAny(',', lexerFlagsNoTemplate);
       else if (curc !== $$CURLY_R_7D) THROW('Unexpected token while parsing export object');
     }
     if (curtok.str !== '}') {
@@ -4366,7 +4365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open('specifiers', 'ImportSpecifier', curtok);
 
       let nameToken = curtok;
-      skipAny(lexerFlagsNoTemplate);
+      ASSERT_skipAny($IDENT, lexerFlagsNoTemplate);
       AST_setIdent('imported', nameToken);
 
       // https://tc39.github.io/ecma262/#sec-createimportbinding
@@ -4377,7 +4376,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipAny('as', lexerFlagsNoTemplate);
         if (curtype !== $IDENT) THROW('Alias must be an ident');
         let localToken = curtok;
-        skipAny(lexerFlagsNoTemplate);
+        ASSERT_skipAny($IDENT, lexerFlagsNoTemplate);
         AST_setIdent('local', localToken);
         fatalBindingIdentCheck(localToken, BINDING_TYPE_CONST, lexerFlags);
         SCOPE_addLexBinding(scoop, localToken.str, BINDING_TYPE_LET, FDS_ILLEGAL); // TODO: confirm `let`
@@ -5843,7 +5842,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `async package => {"use strict"}`
       isSimple = PARAMS_SOME_NONSTRICT;
     }
-    skipAny(lexerFlags); // this was `async <curtok>` and curtok is not a keyword; next must be `=>`
+    ASSERT_skipAny($IDENT, lexerFlags); // this was `async <curtok>` and curtok is not a keyword; next must be `=>`
 
     let assignable = parseArrowParenlessFromPunc(lexerFlags, asyncToken, identToken, allowAssignment, isSimple, asyncToken, astProp);
 
@@ -6975,12 +6974,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let wasTail = IS_QUASI_TAIL;
       do {
         awaitYieldFlagsFromAssignable |= parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
-        wasTail = curtype === $TICK_TAIL ? IS_QUASI_TAIL : NOT_QUASI_TAIL;
+        wasTail = curtype === $TICK_TAIL || curtype === $TICK_BAD_TAIL ? IS_QUASI_TAIL : NOT_QUASI_TAIL;
         parseQuasiPart(lexerFlags, wasTail, false);
       } while (wasTail === NOT_QUASI_TAIL);
     }
     else if (isBadTickToken(curtype)) {
-      THROW('Template containd bad escape');
+      THROW('Template contained bad escape');
     }
     else {
       THROW('Template should start as head or pure');
@@ -11368,8 +11367,6 @@ function F(fdState) {
   else if (fdState === FDS_VAR) return ('F=FDS_VAR');
   else ASSERT(false, 'F(): fds is enum', fdState);
 }
-
-// </BODY>
 
 export default ZeParser;
 export {
