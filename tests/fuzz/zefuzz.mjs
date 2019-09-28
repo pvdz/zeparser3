@@ -30,6 +30,8 @@ const NO_PRINTER = USE_BUILD || process.argv.includes('--no-printer');
 if (NO_PRINTER) console.log('-- Not testing ZePrinter');
 const TEST_NODE = process.argv.includes('--node');
 if (TEST_NODE) console.log('-- Comparing pass/fail to node by compiling a function');
+const PREFIX = process.argv.includes('--prefix') && process.argv[process.argv.indexOf('--prefix') + 1];
+const SUFFIX = process.argv.includes('--suffix') && process.argv[process.argv.indexOf('--suffix') + 1];
 console.log('');
 
 const BOLD = '\x1b[;1;1m';
@@ -123,6 +125,8 @@ let injectionMode = false; // Global: currently parsing input that was deliberat
   while (true) {
     let from = Math.floor(Math.random() * 3);
     let input = FUZZERS[from]();
+    if (PREFIX) input = PREFIX + input;
+    if (SUFFIX) input = input + SUFFIX;
     ++counts.fuzzedTests;
     counts.fuzzedBytes += input.length; // sure, "characters", call off the dogs.
 

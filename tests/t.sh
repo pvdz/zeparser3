@@ -10,6 +10,7 @@ ES=''
 NODE=''
 ANNEXB=''
 BUILD=''
+PSFIX=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -154,6 +155,17 @@ ZeParser test runner help:
     --concise)      EXTRA='--concise'     ;;
     -b);&
     --build)        BUILD='-b'            ;;
+    --prefix)
+        PSFIX='--prefix'
+        shift
+        ARG=$1
+        ;;
+    --suffix)
+        PSFIX='--suffix'
+        shift
+        ARG=$1
+        ;;
+
 
 
     6)  ES='--es6'  ;;
@@ -182,7 +194,7 @@ case "${ACTION}" in
     ;;
 
     fuzz)
-        node --experimental-modules tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD}
+        node --experimental-modules --max-old-space-size=8192 tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD} ${PSFIX} "${ARG}"
     ;;
 
     build)
@@ -192,7 +204,7 @@ case "${ACTION}" in
     perf)
       #./t F ignore/perf/es6.material-ui-core.js --annexb --concise ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
       #./t F ignore/perf/es6.angular-compiler.js --annexb --module --concise ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
-      node --experimental-modules tests/perf.mjs ${BUILD}
+      node --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD}
     ;;
 
     *)
