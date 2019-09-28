@@ -473,8 +473,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   let catchforofhack = false;
 
-  let traceast = false;
-
   function THROW(desc, ...args) {
     THROW_TOKEN(desc, curtok, ...args)
   }
@@ -523,11 +521,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     options_astRoot.pathNames = _pnames;
   }
   function AST_open(prop, type, token, explictlyOverwrite = NOT_CALLED_FROM_WRAPPER) {
-    if (traceast) {
-      $log('AST_open; write type='+type+' to prop=' + prop, explictlyOverwrite);
-      $log('- path (before):', _path.map(o => o.type).join(' - '));
-      $log('- AST:', inspect(_tree, false, null))
-    }
     ASSERT(arguments.length === 3 || arguments.length === 4, '3/4 args', arguments.length);
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -576,11 +569,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
   }
   function AST_close(names, forcedToken = false, isTemplateElement = false, isTemplateDouble = false) {
-    if (traceast) {
-      $log('AST_close(' + names +'), closing', _path[_path.length-1].type);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- AST:', inspect(_tree, false, null))
-    }
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'expecting one arg, most of the time');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -631,11 +619,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return was; // debug/assertions only...
   }
   function AST_set(prop, value, clobber = false, unless = false) {
-    if (traceast) {
-      $log('AST_set', prop, value);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- AST:', inspect(_tree, false, null))
-    }
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(arguments.length >= 2 && arguments.length <= 4, 'expecting two args');
     ASSERT(clobber || _path.length > 0, 'path shouldnt be empty');
@@ -768,11 +751,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(token.str.includes('\n') || token.str.includes('\r') || token.str.includes('\u2028') || token.str.includes('\u2029') || node.loc.end.column - node.loc.start.column === token.str.length, 'for literals the location should only span exactly the length of the lit', node.loc);
   }
   function AST_add(prop, value) {
-    if (traceast) {
-      $log('ADD', prop, value);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- AST:', inspect(_tree, false, null))
-    }
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(arguments.length === 2, 'expecting two args');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -782,11 +760,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _path[_path.length - 1][prop].push(value);
   }
   function AST_wrapClosed(prop, newNodeType, newProp, token) {
-    if (traceast) {
-      $log('AST_wrapClosed', prop, newNodeType, newProp);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before:', inspect(_tree, false, null))
-    }
     ASSERT(AST_wrapClosed.length === arguments.length, 'arg count');
     ASSERT(typeof prop === 'string', 'should be string');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -800,30 +773,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let parent = _path[_path.length-1];
     let child = null;
-    if (traceast) $log(' - prop:', prop, ', parent:', parent);
 
     if (Array.isArray(parent[prop])) {
       child = parent[prop].pop();
     } else {
       child = parent[prop];
     }
-    if (traceast) $log(' - child:', child);
     ASSERT(child, 'AST_wrapClosed('+prop+', '+newNodeType+','+newProp+'); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     AST_open(prop, newNodeType, token, IS_CALLED_FROM_WRAPPER);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
-    if (traceast) {
-      $log('- tree after:', inspect(_tree, false, null))
-    }
   }
   function AST_wrapClosedIntoArray(prop, value, newProp, startToken) {
-    if (traceast) {
-      $log('AST_wrapClosedIntoArray', prop, value, newProp);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before:', inspect(_tree, false, null))
-    }
     ASSERT(AST_wrapClosedIntoArray.length === arguments.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -832,22 +795,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let parent = _path[_path.length-1];
     let child = null;
-    if (traceast) $log(' - prop:', prop, ', parent:', parent);
 
     if (Array.isArray(parent[prop])) {
       child = parent[prop].pop();
     } else {
       child = parent[prop];
     }
-    if (traceast) $log(' - child:', child);
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     AST_open(prop, value, startToken, IS_CALLED_FROM_WRAPPER);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
-    if (traceast) {
-      $log('- tree after:', inspect(_tree, false, null))
-    }
   }
   function AST_destruct(prop) {
     // rename object and array literal nodes to patterns to match the AST spec
@@ -861,11 +819,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // note: this function is usually called after a few nodes have closed (the literal struct).
 
-    if (traceast) {
-      $log('AST_destruct', prop);
-      $log('- path:', _path.map(o => o.type).join(' - '));
-      $log('- tree before destruct:', inspect(_tree, false, null))
-    }
     ASSERT(arguments.length === 1, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -875,15 +828,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (Array.isArray(node)) node = node[node.length-1]; // the destruct applies to the node just closed, so last in list
 
     AST__destruct(node);
-    if (traceast) {
-      $log('- tree after destruct:', inspect(_tree, false, null))
-    }
   }
   function AST__destruct(node) {
-    if (traceast) {
-      $log('AST__destruct', node);
-    }
-
     ASSERT(arguments.length === 1, 'arg count');
 
     switch (node.type) {
