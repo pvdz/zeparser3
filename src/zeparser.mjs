@@ -342,6 +342,7 @@ const NOT_LABELLED = dev() ? {NOT_LABELLED: 1} : false;
 const NOT_LHSE = dev() ? {NOT_LHSE: 1} : false; // not requiring a "LeftHandExpression". This is currently only used for class `extends`.
 const ONLY_LHSE = dev() ? {ONLY_LHSE: 1} : true; // restrict value to conform to a "LeftHandExpression" production.
 const PARENT_NOT_LABEL = null; // when the parent statement was not a label statement
+const EMPTY_LABEL_SET = null;
 
 let ASSERT_ASI_REGEX_NEXT = false; // When set, do not throw assertion error in the semi/asi parser for seeing a regex
 
@@ -1217,8 +1218,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let bak = _path.slice(0);
     // </SCRUB AST>
     AST_set('body', []);
-    let labelSet = createLabelSet('root');
-    parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, PARAMS_ALL_SIMPLE, NO_DUPE_PARAMS, NO_ID_TO_VERIFY, IS_GLOBAL_TOPLEVEL, FDS_VAR, 'body');
+    parseBodyPartsWithDirectives(lexerFlags, scoop, EMPTY_LABEL_SET, exportedNames, exportedBindings, PARAMS_ALL_SIMPLE, NO_DUPE_PARAMS, NO_ID_TO_VERIFY, IS_GLOBAL_TOPLEVEL, FDS_VAR, 'body');
 
     // <SCRUB AST>
     ASSERT(_path.length === len, 'should close all that was opened. Open before: ' + JSON.stringify(bak.map(o=>o.type).join(' > ')) + ', open after: ' + JSON.stringify(_path.map(o=>o.type).join(' > ')));
@@ -1859,20 +1859,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function ASSERT_LABELSET(labelSet) {
+    if (labelSet === EMPTY_LABEL_SET) return;
     ASSERT(typeof labelSet === 'object');
     ASSERT(labelSet.IS_LABEL_SET === true, 'must receive a labelset', labelSet);
-  }
-  function createLabelSet(desc) {
-    let set = {parentLabels: null, iterationLabels: null};
-    ASSERT(set.IS_LABEL_SET = true);
-    ASSERT(set.desc = desc);
-    return set;
   }
   function wrapLabelSet(labelSet, desc) {
     ASSERT(wrapLabelSet.length === arguments.length, 'arg count');
     ASSERT(typeof desc === 'string', 'desc is a string');
-    ASSERT(typeof labelSet === 'object');
-    ASSERT(labelSet === null || labelSet.IS_LABEL_SET === true, 'must receive a labelset', labelSet);
+    ASSERT(labelSet === EMPTY_LABEL_SET || typeof labelSet === 'object');
+    ASSERT(labelSet === EMPTY_LABEL_SET || labelSet.IS_LABEL_SET === true, 'must receive a labelset', labelSet);
 
     let set = {parentLabels: labelSet, iterationLabels: null};
     ASSERT(set.IS_LABEL_SET = true);
@@ -2476,7 +2471,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let finalFuncScope = SCOPE_addLayer(paramScoop, SCOPE_LAYER_FUNC_BODY, 'parseFunctionFromParams(body)');
     if (options_exposeScopes) AST_set('$scope', finalFuncScope);
-    parseFunctionBody(lexerFlags, finalFuncScope, createLabelSet('function root'), expressionState, paramsSimple, paramScoop.dupeParamErrorToken, functionNameTokenToVerify);
+    parseFunctionBody(lexerFlags, finalFuncScope, EMPTY_LABEL_SET, expressionState, paramsSimple, paramScoop.dupeParamErrorToken, functionNameTokenToVerify);
   }
   function parseFuncArguments(lexerFlags, scoop, bindingFrom, asyncToken, starToken, getToken, setToken) {
     // parseArguments
@@ -3141,6 +3136,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('BreakStatement');
   }
   function findLabel(inputLabelSet, labelName, checkIteration) {
+    if (inputLabelSet === null) {
+      THROW(`The label (\`${labelName}\`) for this \`break\` was not defined in the current label set, which is illegal`);
+    }
+
     let id = '#' + labelName;
 
     let labelSet = inputLabelSet;
@@ -5025,10 +5024,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'LabeledStatement', identToken);
     AST_setIdent('label', identToken);
     let set = labelSet;
-    do {
+    while (set) {
       if (set['#' + labelName]) THROW('Saw the same label twice which is not allowed');
       set = set.parentLabels;
-    } while (set);
+    }
     labelSet = wrapLabelSet(labelSet, 'labelled statement');
     labelSet['#' + labelName] = true;
     ASSERT_skipRex(':', lexerFlags);
@@ -7338,7 +7337,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('expression', false, undefined, babelCompat);
 
       let arrowScoop = SCOPE_addLayer(paramScoop, SCOPE_LAYER_FUNC_BODY, 'parseArrowFromPunc');
-      parseFunctionBody(lexerFlags, arrowScoop, createLabelSet('arrow body'), IS_EXPRESSION, paramsSimple, NO_DUPE_PARAMS, NO_ID_TO_VERIFY);
+      parseFunctionBody(lexerFlags, arrowScoop, EMPTY_LABEL_SET, IS_EXPRESSION, paramsSimple, NO_DUPE_PARAMS, NO_ID_TO_VERIFY);
     } else {
       // Note: you cannot await in a regular arrow, so this is illegal:
       // - `async function f(fail = () => await x){}`
