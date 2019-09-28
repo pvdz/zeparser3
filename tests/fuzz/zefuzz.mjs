@@ -76,6 +76,7 @@ let lastCounter = 0;
 let lastTick = performance.now();
 let lastSpeed = 0;
 let lastTotalSpeed = 0;
+let dynamicInterval = 88;
 
 // Placeholder...
 let ZeParser = function(){ throw new Error('not yet loaded through import...'); };
@@ -206,16 +207,18 @@ function cycle(input) {
     }
   }
 
-  if (!(counts.zeparserParsed % 88)) {
+  let n = counts.fuzzedTests - lastCounter;
+  if (--dynamicInterval <= 0) {
     let t = performance.now();
     let d = t - lastTick;
     if (d >= 1000) {
-      let n = counts.fuzzedTests - lastCounter;
       lastSpeed = Math.round(n / (d/1000));
       lastTotalSpeed = Math.round(counts.fuzzedTests / ((t - startTick) / 1000));
       lastCounter = counts.fuzzedTests;
       lastTick = t;
+      // Auto-tune the print freq to about 3x a second
     }
+    dynamicInterval = Math.round(counts.fuzzedTests / ((t - startTick) / 1000) / 4);
 
     let totalTime = Math.round((t-startTick)/1000);
 
@@ -229,7 +232,7 @@ function cycle(input) {
       total bytes parsed: ${dotted(counts.bytesParsed)} (${dotted(Math.round(counts.bytesParsed/totalTime))} b/s),
       current: ${lastSpeed} tests/s,
       total: ${lastTotalSpeed} tests/s,
-      reduced ${counts.reduced}
+      reduced ${counts.reduced}, int ${dynamicInterval}
     `.replace(/[\n ]+/g, ' ');
 
     process.stdout.write('\x1b[0G' + stats);
