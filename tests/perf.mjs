@@ -12,7 +12,7 @@ const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
   let zeparser = (await import(USE_BUILD ? ZEPARSER_PROD_FILE : ZEPARSER_DEV_FILE)).default;
 
   let parsers = [
-    {name: 'zeparser', parse: (code, testVariant) => testZeParser(zeparser, code, testVariant, true)}, // zeparser, code, testVariant, enableAnnexb
+    {name: 'zepar', parse: (code, testVariant) => testZeParser(zeparser, code, testVariant, true)}, // zeparser, code, testVariant, enableAnnexb
     {name: 'babel', parse: (code, testVariant) => testBabel(code, testVariant)}, // code, mode
     {name: 'acorn', parse: (code, testVariant) => testAcorn(code, testVariant, undefined)}, // code, mode, version
   ];
@@ -32,7 +32,14 @@ const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
     // From babel repo
     await read({path: 'ignore/perf/es6.material-ui-core.js', mode: 'web'}),
     await read({path: 'ignore/perf/es6.angular-compiler.js', mode: 'module'}),
-  ];
+
+    // Random
+    await read({path: 'ignore/perf/es5.moment-with-locales.js', mode: 'web'}),
+    await read({path: 'ignore/perf/es6.mljs.js', mode: 'module'}),
+
+    // old... 20mb
+    USE_BUILD && await read({path: 'ignore/perf/es5.webkit.npm.1.0.0.js', mode: 'web'}),
+  ].filter(Boolean);
 
   files.forEach(({path, code, mode}) => {
     console.group('File:', code.length, 'bytes:', path);
