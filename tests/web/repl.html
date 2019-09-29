@@ -23,7 +23,7 @@
     .top { margin: 5px; }
 
     .box { align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto; }
-    .header, .box.header { background-color: #eee; border: 1px solid black; box-sizing: border-box; padding: 5px; height: 30px; }
+    .header, .box.header { background-color: #eee; border: 1px solid black; box-sizing: border-box; padding: 5px; height: 30px; font-size: 14px; font-family: Verdana; }
 
     .box.top-left .header { border: 0; border-top: 1px solid #aaa; border-right: 1px solid #aaa; }
     .box.top-right .header { border: 0; border-top: 1px solid #aaa; border-left: 1px solid #aaa; }
@@ -33,6 +33,7 @@
     .mode_selector {
       position: relative;
       border: 1px solid white;
+      height: 42px;
     }
     .mode_selector:hover {
       border: 1px solid black;
@@ -47,6 +48,7 @@
       position: absolute;
       top: 18px;
       left: 5px;
+      height: 14px;
     }
     .mode_selector > label {
       height: 40px;
@@ -69,7 +71,7 @@
       <div class="box top-left" style="flex-direction: column; align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
         <div class="header" style="height: 51px;">
           <b>Input</b>
-          &mdash;
+          &nbsp;&mdash;<br>
           Display:&nbsp;
 
           <span class="mode_selector" title="Click here to show the output of the sloppy mode run">
