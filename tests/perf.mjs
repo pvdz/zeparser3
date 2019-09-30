@@ -9,6 +9,10 @@ const USE_BUILD = process.argv.includes('-b');
 const ZEPARSER_DEV_FILE = '../src/zeparser.mjs';
 const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
 
+const RED = '\x1b[31m';
+const GREEN = '\x1b[32m';
+const RESET = '\x1b[0m';
+
 (async function(){
   let zeparser = (await import(USE_BUILD ? ZEPARSER_PROD_FILE : ZEPARSER_DEV_FILE)).default;
 
@@ -39,7 +43,7 @@ const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
     await read({path: 'ignore/perf/es6.mljs.js', mode: 'module'}),
 
     // old... 20mb
-    USE_BUILD && await read({path: 'ignore/perf/es5.webkit.npm.1.0.0.js', mode: 'web'}),
+    // USE_BUILD && await read({path: 'ignore/perf/es5.webkit.npm.1.0.0.js', mode: 'web'}),
   ].filter(Boolean);
 
   files.forEach(({path, code, mode}) => {
@@ -59,8 +63,8 @@ const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
         ztime = time;
         console.log('Parse time for ' + name + ': ' + (Math.round(ztime * 100)/100) + ' ms');
       } else {
-        let delta = time - ztime;
-        console.log('Parse time for ' + name + ': ' + (Math.round(time * 100)/100) + ' ms (' + (delta > 0 ? '+' : '') + (Math.round(delta * 100)/100) + ' ms)');
+        let delta = ztime - time; // + if z is slower, - if z is faster
+        console.log('Parse time for ' + name + ': ' + (Math.round(time * 100)/100) + ' ms (' + (delta > 0 ? RED + '+' : GREEN + '') + (Math.round(delta * 100)/100) + ' ms' + RESET + ')');
       }
     });
     console.groupEnd();
