@@ -536,12 +536,8 @@ function ZeTokenizer(
   let stale = false; // do NOT read from `cache` when `stale` is true. This is a dev-only assertion based safeguard...
   let cache = input.charCodeAt(0);
 
-  let tokens = null;
   let anyTokenCount = 0;
   let solidTokenCount = 0;
-  if (collectTokens !== COLLECT_TOKENS_NONE) {
-    tokens = tokenStorage;
-  }
 
   function peek() {
     ASSERT(neof(), 'pointer not oob');
@@ -691,7 +687,7 @@ function ZeTokenizer(
 
       if (collectTokens === COLLECT_TOKENS_ALL) {
         let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
-        tokens.push(token);
+        tokenStorage.push(token);
       }
 
       // At this point it has to be some form of whitespace and we're clearly not returning it so we can
@@ -708,12 +704,12 @@ function ZeTokenizer(
 
     if (wasWhite) {
       if (collectTokens === COLLECT_TOKENS_ALL) {
-        tokens.push(token);
+        tokenStorage.push(token);
       }
     } else {
       ++solidTokenCount;
       if (collectTokens === COLLECT_TOKENS_SOLID) {
-        tokens.push(token);
+        tokenStorage.push(token);
       }
       consumedNewlinesThisToken = 0;
       consumedCommentSincePrevSolid = false;
@@ -2113,7 +2109,7 @@ function ZeTokenizer(
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) {
-      tokens.push(token, tokens.pop());
+      tokenStorage.push(token, tokenStorage.pop());
     }
     ++anyTokenCount;
     ++solidTokenCount; // eh... i guess.
@@ -6204,7 +6200,7 @@ function ZeTokenizer(
   }
 
   return {
-    tokens: tokens,
+    tokens: tokenStorage,
 
     nextTokenGeneric: nextTokenGeneric,
     asi: addAsi,
