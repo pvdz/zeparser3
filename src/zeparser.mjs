@@ -233,8 +233,6 @@ const UNDEF_ASYNC = dev() ? {UNDEF_ASYNC: 1, get str(){ASSERT(false)}} : undefin
 const UNDEF_STAR = dev() ? {UNDEF_STAR: 1, get str(){ASSERT(false)}} : undefined;
 const UNDEF_GET = dev() ? {UNDEF_GET: 1, get str(){ASSERT(false)}} : undefined;
 const UNDEF_SET = dev() ? {UNDEF_SET: 1, get str(){ASSERT(false)}} : undefined;
-const IS_CALLED_FROM_WRAPPER = dev() ? {IS_CALLED_FROM_WRAPPER: 1} : true;
-const NOT_CALLED_FROM_WRAPPER = dev() ? {NOT_CALLED_FROM_WRAPPER: 1} :false;
 const IS_FUNC_DECL = dev() ? {IS_FUNC_DECL: 1} : true;
 const NOT_FUNC_DECL = dev() ? {NOT_FUNC_DECL: 1} : false;
 const IS_FUNC_EXPR = dev() ? {IS_FUNC_EXPR: 1} : true;
@@ -573,8 +571,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     options_astRoot.path = _path;
     options_astRoot.pathNames = _pnames;
   }
-  function AST_open(prop, type, token, explictlyOverwrite = NOT_CALLED_FROM_WRAPPER) {
-    ASSERT(arguments.length === 3 || arguments.length === 4, '3/4 args', arguments.length);
+  function AST_open(prop, type, token) {
+    ASSERT(arguments.length === AST_open.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
@@ -611,11 +609,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (Array.isArray(node[prop])) {
       node[prop].push(newnode);
     }
-    else if (node[prop] === undefined || explictlyOverwrite === IS_CALLED_FROM_WRAPPER) {
-      node[prop] = newnode;
-    }
     else {
-      ASSERT(false, `AST_open(${prop}, ${type}, ${explictlyOverwrite}); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`, _path, _tree);
+      ASSERT(node[prop] === undefined, `AST_open(${prop}, ${type}); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`, _path, _tree);
+      node[prop] = newnode;
     }
     _path.push(newnode);
     _pnames.push(prop);
@@ -835,7 +831,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT(child, 'AST_wrapClosed('+prop+', '+newNodeType+','+newProp+'); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, newNodeType, token, IS_CALLED_FROM_WRAPPER);
+    ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
+    AST_open(prop, newNodeType, token);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
@@ -857,7 +854,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, value, startToken, IS_CALLED_FROM_WRAPPER);
+    ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
+    AST_open(prop, value, startToken);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
   }
@@ -8818,7 +8816,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // TODO: verify the args
 
-        AST_open(astProp, 'CallExpression', asyncToken, true);
+        ASSERT(_path[_path.length - 1][astProp]  instanceof Array || !void(_path[_path.length - 1][astProp] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
+        AST_open(astProp, 'CallExpression', asyncToken);
         AST_setIdent('callee', asyncToken);
         AST_set('arguments', args);
         AST_close('CallExpression');
