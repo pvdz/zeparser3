@@ -576,11 +576,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _tree.sourceType = goalMode === GOAL_SCRIPT ? 'script' : 'module';
   }
   let _path = [_tree];
-  let _pnames = ['ROOT'];
+  let _pnames;
+  ASSERT(_pnames = ['ROOT'], '(dev-only verification and debugging tool)');
   if (options_astRoot) {
     options_astRoot.root = _tree;
     options_astRoot.path = _path;
-    options_astRoot.pathNames = _pnames;
+    ASSERT(options_astRoot.pathNames = _pnames, '(dev-only verification and debugging tool)');
   }
   function AST_getBaseLoc(line, col) {
     ASSERT(AST_getBaseLoc.length === arguments.length, 'arg count');
@@ -630,7 +631,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       node[prop] = newnode;
     }
     _path.push(newnode);
-    _pnames.push(prop);
+    ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
   }
   function AST_openCustom(prop, type, newnode, token) {
@@ -653,7 +654,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       node[prop] = newnode;
     }
     _path.push(newnode);
-    _pnames.push(prop);
+    ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
   }
   function AST_close(names, forcedToken = false, isTemplateElement = false, isTemplateDouble = false) {
@@ -701,7 +702,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(was.loc.end.line >= 1, 'end line should be >= 1', was.loc);
     ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
 
-    _pnames.pop();
+    ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
     ASSERT(!names || (typeof names === 'string' && names === was.type) || (names instanceof Array && names.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names + ' but closed: ' + was.type)
 
     return was; // debug/assertions only...
