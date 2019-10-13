@@ -63,7 +63,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`yield`, keyword=`\u0079ield`
+  Cannot use this name (\u0079ield) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 (\u0079ield, "sentinal 89456")
            ^------- error

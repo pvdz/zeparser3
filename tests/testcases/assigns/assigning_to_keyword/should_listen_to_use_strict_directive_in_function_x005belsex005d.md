@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [else]
+  Cannot use this name (else) as a variable name because: Cannot never use this reserved word as a variable name
 
 function f() { "use strict"; (else = "sentinal 79845134"); }
                                    ^------- error

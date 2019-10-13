@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`delete`, keyword=`d\u0065lete`
+  Cannot use this name (d\u0065lete) as a variable name because: Keywords may not have escapes in their name
 
 function *f(){
   d\u0065lete = x

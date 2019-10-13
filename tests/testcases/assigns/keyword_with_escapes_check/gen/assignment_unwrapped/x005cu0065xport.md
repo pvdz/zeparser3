@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`export`, keyword=`\u0065xport`
+  Cannot use this name (\u0065xport) as a variable name because: Keywords may not have escapes in their name
 
 \u0065xport = x;
             ^------- error

@@ -101,7 +101,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Attempted to create a `let` binding on special reserved keyword `await` but: Await is illegal outside of async body with module goal
+  Attempted to create a `let` binding on special reserved keyword `await` but: Await is illegal as var name with module goal
 
 function f() {
   "use strict";

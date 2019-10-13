@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`switch`, keyword=`sw\u0069tch`
+  Cannot use this name (sw\u0069tch) as a variable name because: Keywords may not have escapes in their name
 
 async () => {  sw\u0069tch = x  }
                            ^------- error

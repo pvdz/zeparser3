@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`default`, keyword=`\u0064efault`
+  Cannot use this name (\u0064efault) as a variable name because: Keywords may not have escapes in their name
 
 function *f(){
   \u0064efault = x

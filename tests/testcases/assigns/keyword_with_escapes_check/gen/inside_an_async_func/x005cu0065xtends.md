@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`extends`, keyword=`\u0065xtends`
+  Cannot use this name (\u0065xtends) as a variable name because: Keywords may not have escapes in their name
 
 async () => {  \u0065xtends = x  }
                             ^------- error

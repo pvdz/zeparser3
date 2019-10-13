@@ -62,7 +62,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [public]
+  Cannot use this name (public) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 (public)=2
        ^------- error

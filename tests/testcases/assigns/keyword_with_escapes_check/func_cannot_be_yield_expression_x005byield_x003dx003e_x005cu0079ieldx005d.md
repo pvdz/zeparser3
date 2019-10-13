@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`yield`, keyword=`\u0079ield`
+  Cannot use this name (\u0079ield) as a variable name because: Cannot use this reserved word as a variable name inside a generator
 
 function *f(){   (\u0079ield "sentinal 89456")   }
                              ^------- error
@@ -36,13 +36,20 @@ function *f(){   (\u0079ield "sentinal 89456")   }
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Cannot use this name (\u0079ield) as a variable name because: Cannot use this reserved word as a variable name in strict mode
+
+function *f(){   (\u0079ield "sentinal 89456")   }
+                             ^------- error
+`````
+
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as sloppy mode._
+_Output same as strict mode._
 
 ### Web compat mode
 

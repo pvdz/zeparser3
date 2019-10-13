@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`throw`, keyword=`t\u0068row`
+  Cannot use this name (t\u0068row) as a variable name because: Keywords may not have escapes in their name
 
 (t\u0068row = "sentinal 1564646")
             ^------- error

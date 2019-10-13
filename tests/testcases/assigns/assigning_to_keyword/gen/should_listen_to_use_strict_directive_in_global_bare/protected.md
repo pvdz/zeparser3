@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [protected]
+  Cannot use this name (protected) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 "use strict"; protected = x;
                         ^------- error

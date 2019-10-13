@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`continue`, keyword=`c\u006fntinue`
+  Cannot use this name (c\u006fntinue) as a variable name because: Keywords may not have escapes in their name
 
 function *f(){
   c\u006fntinue = x

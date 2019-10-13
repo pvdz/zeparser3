@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [return]
+  Cannot use this name (return) as a variable name because: Cannot never use this reserved word as a variable name
 
 "use strict"; (return = "sentinal 48945666");
                       ^------- error

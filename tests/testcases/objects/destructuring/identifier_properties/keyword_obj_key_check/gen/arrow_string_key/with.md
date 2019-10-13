@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [with]
+  Cannot use this name (with) as a variable name because: Cannot never use this reserved word as a variable name
 
 ({"key": with}) => null
              ^------- error

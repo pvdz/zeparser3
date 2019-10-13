@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [default]
+  Cannot use this name (default) as a variable name because: Cannot never use this reserved word as a variable name
 
 function *f(){
   (default) = 1;

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`await`, keyword=`\u0061wait`
+  Cannot use this name (\u0061wait) as a variable name because: Await not allowed here
 
 async function f(){   (\u0061wait "sentinal 45334")   }
                                   ^------- error
@@ -42,7 +42,14 @@ _Output same as sloppy mode._
 
 Parsed with the module goal.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Cannot use this name (\u0061wait) as a variable name because: Await is illegal as var name with module goal
+
+async function f(){   (\u0061wait "sentinal 45334")   }
+                                  ^------- error
+`````
+
 
 ### Web compat mode
 

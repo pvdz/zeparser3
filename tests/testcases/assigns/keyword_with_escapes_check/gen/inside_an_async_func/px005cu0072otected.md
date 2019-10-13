@@ -83,7 +83,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`protected`, keyword=`p\u0072otected`
+  Cannot use this name (p\u0072otected) as a variable name because: Keywords may not have escapes in their name
 
 async () => {  p\u0072otected = x  }
                               ^------- error

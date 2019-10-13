@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`instanceof`, keyword=`inst\u0061nceof`
+  Cannot use this name (inst\u0061nceof) as a variable name because: Keywords may not have escapes in their name
 
 inst\u0061nceof = x;
                 ^------- error

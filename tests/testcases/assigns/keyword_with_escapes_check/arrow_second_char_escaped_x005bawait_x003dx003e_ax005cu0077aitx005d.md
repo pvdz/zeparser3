@@ -69,7 +69,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`await`, keyword=`a\u0077ait`
+  Cannot use this name (a\u0077ait) as a variable name because: Await is illegal as var name with module goal
 
 (a\u0077ait, "sentinal 431431")
            ^------- error

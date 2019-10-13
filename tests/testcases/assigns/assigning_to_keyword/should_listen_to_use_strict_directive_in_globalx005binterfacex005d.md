@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [interface]
+  Cannot use this name (interface) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 "use strict"; (interface = "sentinal 535426");
                          ^------- error

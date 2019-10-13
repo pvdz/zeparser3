@@ -83,7 +83,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`public`, keyword=`\u0070ublic`
+  Cannot use this name (\u0070ublic) as a variable name because: Keywords may not have escapes in their name
 
 async () => {  \u0070ublic = x  }
                            ^------- error

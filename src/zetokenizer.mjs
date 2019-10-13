@@ -2274,8 +2274,8 @@ function ZeTokenizer(
         // This range only needs to check the backslash, which unfortunately occurs in the middle of the range
 
         if (c === $$BACKSLASH_5C) { // This seems to hit quite frequently, relative to this function
+          // The canonized value will be updated too
           badEscape = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || badEscape;
-          // TODO: shouldn't this add to the canonized value??
         } else {
           lastCanonizedString += input[pointer];
           // lastCanonizedString += String.fromCharCode(c);

@@ -47,7 +47,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [var]
+  Cannot use this name (var) as a variable name because: Cannot never use this reserved word as a variable name
 
 export default var eval = x;
                    ^------- error

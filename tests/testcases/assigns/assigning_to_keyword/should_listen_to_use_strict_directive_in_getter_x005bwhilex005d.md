@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [while]
+  Cannot use this name (while) as a variable name because: Cannot never use this reserved word as a variable name
 
 foo = { get x(){  "use strict"; (while = "sentinal 79845134");   }}
                                        ^------- error

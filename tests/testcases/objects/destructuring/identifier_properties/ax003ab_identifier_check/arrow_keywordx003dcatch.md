@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [catch]
+  Cannot use this name (catch) as a variable name because: Cannot never use this reserved word as a variable name
 
 ({ggg: catch}) => null
             ^------- error

@@ -84,7 +84,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`implements`, keyword=`implem\u0065nts`
+  Cannot use this name (implem\u0065nts) as a variable name because: Keywords may not have escapes in their name
 
 function *f(){
   implem\u0065nts = x

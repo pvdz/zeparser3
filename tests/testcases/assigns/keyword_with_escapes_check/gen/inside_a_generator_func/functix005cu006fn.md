@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`function`, keyword=`functi\u006fn`
+  Cannot use this name (functi\u006fn) as a variable name because: Keywords may not have escapes in their name
 
 function *f(){
   functi\u006fn = x

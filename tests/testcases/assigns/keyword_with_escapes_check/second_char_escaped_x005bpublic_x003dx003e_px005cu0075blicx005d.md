@@ -62,7 +62,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`public`, keyword=`p\u0075blic`
+  Cannot use this name (p\u0075blic) as a variable name because: Keywords may not have escapes in their name
 
 (p\u0075blic = "sentinal 6543322")
              ^------- error

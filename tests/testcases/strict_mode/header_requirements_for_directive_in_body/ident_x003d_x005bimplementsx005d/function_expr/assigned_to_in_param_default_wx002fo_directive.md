@@ -102,7 +102,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [implements]
+  Cannot use this name (implements) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 f = function f(x=implements=10){ }
                            ^------- error

@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`finally`, keyword=`\u0066inally`
+  Cannot use this name (\u0066inally) as a variable name because: Keywords may not have escapes in their name
 
 function *f(){
   \u0066inally = x

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`default`, keyword=`d\u0065fault`
+  Cannot use this name (d\u0065fault) as a variable name because: Keywords may not have escapes in their name
 
 (d\u0065fault = "sentinal 1564646")
               ^------- error

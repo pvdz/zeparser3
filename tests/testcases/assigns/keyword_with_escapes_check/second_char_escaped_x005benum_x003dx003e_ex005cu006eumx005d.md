@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`enum`, keyword=`e\u006eum`
+  Cannot use this name (e\u006eum) as a variable name because: Keywords may not have escapes in their name
 
 (e\u006eum = "sentinal 1564646")
            ^------- error

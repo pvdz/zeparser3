@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`default`, keyword=`def\u0061ult`
+  Cannot use this name (def\u0061ult) as a variable name because: Keywords may not have escapes in their name
 
 async () => {  def\u0061ult = x  }
                             ^------- error

@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`void`, keyword=`v\u006fid`
+  Cannot use this name (v\u006fid) as a variable name because: Keywords may not have escapes in their name
 
 v\u006fid = x;
           ^------- error

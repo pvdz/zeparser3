@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`extends`, keyword=`ext\u0065nds`
+  Cannot use this name (ext\u0065nds) as a variable name because: Keywords may not have escapes in their name
 
 (ext\u0065nds = x);
               ^------- error

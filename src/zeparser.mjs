@@ -6085,7 +6085,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
           // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
           if (goalMode === GOAL_MODULE) {
-            return 'Await is illegal outside of async body with module goal';
+            return 'Await is illegal as var name with module goal';
           } else {
             // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
             if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) return 'Await not allowed here';
@@ -6214,7 +6214,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
           // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
           if (goalMode === GOAL_MODULE) {
-            return 'Await is illegal outside of async body with module goal';
+            return 'Await is illegal as var name with module goal';
           } else {
             // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
             if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) return 'Await not allowed as ident here';
@@ -6954,121 +6954,165 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = ASSIGNABLE_UNDETERMINED;
     // note: curtok token has been skipped prior to this call.
     let identName = identToken.str;
-    switch (identName) {
-      case 'arguments':
-        assignable = verifyEvalArgumentsVar(lexerFlags);
-        if (curtok.str === '=>') {
-          if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-            THROW('Can not use `arguments` as arg name in strict mode');
+    switch (identName.charCodeAt(0)) {
+      case $$A_61:
+        if (identName === 'arguments') {
+          assignable = verifyEvalArgumentsVar(lexerFlags);
+          if (curtok.str === '=>') {
+            if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+              THROW('Can not use `arguments` as arg name in strict mode');
+            }
+            return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
           }
-          return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
+          AST_setIdent(astProp, identToken);
+          return assignable;
         }
-        AST_setIdent(astProp, identToken);
-        return assignable;
-      case 'async':
-        return parseAsyncExpression(lexerFlags, identToken, isNewArg, NOT_EXPORT, allowAssignment, leftHandSideExpression, astProp);
-      case 'await':
-        return parseAwait(lexerFlags, identToken, isNewArg, allowAssignment, astProp);
-      case 'class':
-        // - `(class x {})`
-        // - `(class x {}.foo)`
-        // - `(class x {}.foo())`
-        // - `(class x {}())`
-        // - `async function f(){   (fail = class extends (await x) {}) => {}   }`
-        return parseClassExpression(lexerFlags, identToken, astProp);
-      case 'delete':
-        if (isNewArg === IS_NEW_ARG) THROW('Cannot delete inside `new`');
-        return parseDeleteExpression(lexerFlags, identToken, assignable, astProp);
-      case 'eval':
-        assignable = verifyEvalArgumentsVar(lexerFlags);
-        if (curtok.str === '=>') {
-          if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-            THROW('Can not use `eval` as arg name in strict mode');
-          }
-          return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
+        if (identName === 'async') {
+          return parseAsyncExpression(lexerFlags, identToken, isNewArg, NOT_EXPORT, allowAssignment, leftHandSideExpression, astProp);
         }
-        AST_setIdent(astProp, identToken);
-        return assignable;
-      case 'false':
-        return parseFalseKeyword(identToken, astProp);
-      case 'function':
-        parseFunctionExpression(lexerFlags, UNDEF_ASYNC, identToken, astProp);
-        return NOT_ASSIGNABLE;
-      case 'import':
-        if (curc === $$PAREN_L_28) {
-          return parseDynamicImport(lexerFlags, identToken, astProp);
+        if (identName === 'await') {
+          return parseAwait(lexerFlags, identToken, isNewArg, allowAssignment, astProp);
         }
-        return THROW('Import keyword only allowed on toplevel or in a dynamic import');
-      case 'let':
-        if (bindingType === BINDING_TYPE_CLASS) {
-          THROW('Can not use `let` as a class name');
-        }
-        if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) {
-          THROW('Can not use `let` when binding through `let` or `const`');
-        }
-        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
-        //   Identifier: IdentifierName but not ReservedWord
-        //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "let" ...
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-          THROW('Can not use `let` as variable name in strict mode');
-        }
-
-        assignable = initAssignable(assignable);
         break;
-      case 'new':
-        // - `new x`
-        // - `new x()`
-        // - `new.target`
-        // - `async function f(){   (fail = new x(await x)) => {}   }`
-        // - `async function f(){   (fail = new (await x)) => {}   }`
-        // - `async function f(){   (fail = new f[await x]) => {}   }`
-        let newAssignable = parseNewKeyword(lexerFlags, identToken, astProp);
-        return setNotAssignable(newAssignable); // note: property in `new x().y` is not parsed yet. new expr is never assignable
-      case 'null':
-        return parseNullKeyword(identToken, astProp);
-      case 'super':
-        return parseSuperKeyword(lexerFlags, identToken, astProp);
-      case 'true':
-        return parseTrueKeyword(identToken, astProp);
-      case 'this':
-        return parseThisKeyword(identToken, astProp);
-      case 'typeof':
-      case 'void':
-        // [v]: `delete typeof true`
-        // [x]: `(typeof 3 ** 2)`
-        // [x]: `async function f(){   function h({x: typeof await x}) {}   }`
-        // [x]: `async function f(){   function h({x: typeof await x}) { "use strict"; }   }`
-        // [v]: `async function f(){   function g(x = typeof await x) {}  }`
-        // [x]: `async function f(){   function g(x = typeof await x) { "use strict"; }  }`
-        // [x]: `[typeof x] = x;`
-        // [v]: `[typeof x]`
-        // [x]: `([typeof x]) => x;`
-        // [x]: `[void x] = x;`
-        // [v]: `[void x]`
-        // [v]: `x + typeof y.x`
-        if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
-        return _parseUnary(lexerFlags, identToken, identName, astProp);
-      case 'yield':
-        // - `x + yield`
-        // - `delete yield`
-        // - `class x extends yield {}`
-        // - `5 + yield => {}`
-        // - `function *f{ (x = x + yield); }`
-        // - `new yield`
-        // - `function *f(){ new yield }`
-        // - `x = x + yield`
-        return parseYield(lexerFlags, identToken, allowAssignment, astProp);
-      default:
-        // - `x` but not `true`
-        // - `[x, y, ...z = arr]`
-        // TODO: is this check redundant with the binding ident check below? I think that supersedes it?
-        if (!checkIdentReadable(lexerFlags, bindingType, identToken)) {
-          THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
+      case $$C_63:
+        if (identName === 'class') {
+          // - `(class x {})`
+          // - `(class x {}.foo)`
+          // - `(class x {}.foo())`
+          // - `(class x {}())`
+          // - `async function f(){   (fail = class extends (await x) {}) => {}   }`
+          return parseClassExpression(lexerFlags, identToken, astProp);
         }
-        fatalBindingIdentCheck(identToken, bindingType, lexerFlags);
-        assignable = initAssignable(assignable);
+        break;
+      case $$D_64:
+        if (identName === 'delete') {
+          if (isNewArg === IS_NEW_ARG) THROW('Cannot delete inside `new`');
+          return parseDeleteExpression(lexerFlags, identToken, assignable, astProp);
+        }
+        break;
+      case $$E_65:
+        if (identName === 'eval') {
+          assignable = verifyEvalArgumentsVar(lexerFlags);
+          if (curtok.str === '=>') {
+            if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+              THROW('Can not use `eval` as arg name in strict mode');
+            }
+            return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
+          }
+          AST_setIdent(astProp, identToken);
+          return assignable;
+        }
+        break;
+      case $$F_66:
+        if (identName === 'false') {
+          return parseFalseKeyword(identToken, astProp);
+        }
+        if (identName === 'function') {
+          parseFunctionExpression(lexerFlags, UNDEF_ASYNC, identToken, astProp);
+          return NOT_ASSIGNABLE;
+        }
+        break;
+      case $$I_69:
+        if (identName === 'import') {
+          if (curc === $$PAREN_L_28) {
+            return parseDynamicImport(lexerFlags, identToken, astProp);
+          }
+          return THROW('Import keyword only allowed on toplevel or in a dynamic import');
+        }
+        break;
+      case $$L_6C:
+        if (identName === 'let') {
+          if (bindingType === BINDING_TYPE_CLASS) {
+            THROW('Can not use `let` as a class name');
+          }
+          if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) {
+            THROW('Can not use `let` when binding through `let` or `const`');
+          }
+          // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+          //   Identifier: IdentifierName but not ReservedWord
+          //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "let" ...
+          if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+            THROW('Can not use `let` as variable name in strict mode');
+          }
+
+          assignable = initAssignable(assignable);
+
+          return parseIdentOrParenlessArrow(lexerFlags, identToken, assignable, allowAssignment, astProp);
+        }
+        break;
+      case $$N_6E:
+        if (identName === 'new') {
+          // - `new x`
+          // - `new x()`
+          // - `new.target`
+          // - `async function f(){   (fail = new x(await x)) => {}   }`
+          // - `async function f(){   (fail = new (await x)) => {}   }`
+          // - `async function f(){   (fail = new f[await x]) => {}   }`
+          let newAssignable = parseNewKeyword(lexerFlags, identToken, astProp);
+          return setNotAssignable(newAssignable); // note: property in `new x().y` is not parsed yet. new expr is never assignable
+        }
+        if (identName === 'null') {
+          return parseNullKeyword(identToken, astProp);
+        }
+        break;
+      case $$S_73:
+        if (identName === 'super') {
+          return parseSuperKeyword(lexerFlags, identToken, astProp);
+        }
+        break;
+      case $$T_74:
+        if (identName === 'true') {
+          return parseTrueKeyword(identToken, astProp);
+        }
+        if (identName === 'this') {
+          return parseThisKeyword(identToken, astProp);
+        }
+        if (identName === 'typeof') {
+          // [v]: `delete typeof true`
+          // [x]: `(typeof 3 ** 2)`
+          // [x]: `async function f(){   function h({x: typeof await x}) {}   }`
+          // [x]: `async function f(){   function h({x: typeof await x}) { "use strict"; }   }`
+          // [v]: `async function f(){   function g(x = typeof await x) {}  }`
+          // [x]: `async function f(){   function g(x = typeof await x) { "use strict"; }  }`
+          // [x]: `[typeof x] = x;`
+          // [v]: `[typeof x]`
+          // [x]: `([typeof x]) => x;`
+          // [v]: `x + typeof y.x`
+          if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
+          return _parseUnary(lexerFlags, identToken, identName, astProp);
+        }
+        break;
+      case $$V_76:
+        if (identName === 'void') {
+          // [x]: `[void x] = x;`
+          // [v]: `[void x]`
+          if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
+          return _parseUnary(lexerFlags, identToken, identName, astProp);
+        }
+        break;
+      case $$Y_79:
+        if (identName === 'yield') {
+          // - `x + yield`
+          // - `delete yield`
+          // - `class x extends yield {}`
+          // - `5 + yield => {}`
+          // - `function *f{ (x = x + yield); }`
+          // - `new yield`
+          // - `function *f(){ new yield }`
+          // - `x = x + yield`
+          return parseYield(lexerFlags, identToken, allowAssignment, astProp);
+        }
+        break;
     }
-    ASSERT(assignable !== ASSIGNABLE_UNDETERMINED, 'everything that breaks should update this');
+
+    // - `x` but not `true`
+    // - `[x, y, ...z = arr]`
+    // TODO: is this check redundant with the binding ident check below? I think that supersedes it?
+    // if (!checkIdentReadable(lexerFlags, bindingType, identToken)) {
+    //   THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
+    // }
+    fatalBindingIdentCheck(identToken, bindingType, lexerFlags);
+    assignable = initAssignable(assignable);
 
     return parseIdentOrParenlessArrow(lexerFlags, identToken, assignable, allowAssignment, astProp);
   }

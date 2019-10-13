@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [if]
+  Cannot use this name (if) as a variable name because: Cannot never use this reserved word as a variable name
 
 async x => (if) = 1
               ^------- error

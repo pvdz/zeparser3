@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Keywords may not have escapes in their name (canon=`finally`, keyword=`fin\u0061lly`
+  Cannot use this name (fin\u0061lly) as a variable name because: Keywords may not have escapes in their name
 
 (fin\u0061lly = x);
               ^------- error
