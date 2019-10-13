@@ -737,8 +737,7 @@ function ZeTokenizer(
     // https://www.ecma-international.org/ecma-262/7.0/#sec-punctuators
     switch (c) {
       case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
-        wasWhite = true;
-        return $SPACE;
+        return parseSpace();
       case $$DOT_2E:
         return parseLeadingDot(); // . ... .25
       case $$PAREN_L_28:
@@ -855,8 +854,7 @@ function ZeTokenizer(
     switch (c) {
       case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
         skip();
-        wasWhite = true;
-        return $SPACE;
+        return parseSpace();
       case $$CR_0D:
         skip();
         return parseCR(); // cr crlf
@@ -2198,6 +2196,11 @@ function ZeTokenizer(
     return $NUMBER_DEC;
   }
 
+  function parseSpace() {
+    // For non-minified code it is very likely that a space is followed by another space
+    wasWhite = true;
+    return $SPACE;
+  }
   function parseCR() {
     wasWhite = true;
     if (neof() && peeky($$LF_0A)) {
@@ -6095,6 +6098,8 @@ function ZeTokenizer(
   function parseOtherUnicode(c) {
     switch (c) {
       case $$BOM_FEFF:
+        // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
+        // >  In ECMAScript source text <ZWNBSP> code points are treated as white space characters (see 11.2).
         return $SPACE;
       case $$PS_2028:
         return parseNewlineSolo();
@@ -6114,12 +6119,6 @@ function ZeTokenizer(
         if (wide !== INVALID_IDENT_CHAR) {
           if (wide === VALID_DOUBLE_CHAR) skip(); // c was skipped but cu was two (16bit) positions
           return parseIdentifierRest(String.fromCodePoint(cu));
-        }
-
-        // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
-        // >  In ECMAScript source text <ZWNBSP> code points are treated as white space characters (see 11.2).
-        if (c === $$BOM_FEFF) {
-          return $SPACE;
         }
 
         if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unexpected unicode character: ' + c + ' (' + String.fromCharCode(c) + ')';
