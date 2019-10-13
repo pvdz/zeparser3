@@ -265,6 +265,7 @@ const BINDING_TYPE_FUNC_LEX = dev() ? {BINDING_TYPE_FUNC_LEX: 1} : 8;
 const BINDING_TYPE_FUNC_STMT = dev() ? {BINDING_TYPE_FUNC_STMT: 1} : 9; // A func decl inside a block or switch (for webcompat mode)
 const BINDING_TYPE_CATCH_IDENT = dev() ? {BINDING_TYPE_CATCH_IDENT: 1} : 10;
 const BINDING_TYPE_CATCH_OTHER = dev() ? {BINDING_TYPE_CATCH_OTHER: 1} : 11;
+const HAS_NO_BINDINGS = dev() ? {HAS_NO_BINDINGS: 1} : null;
 const ASSIGNMENT_IS_INIT = dev() ? {ASSIGNMENT_IS_INIT: 1} : true; // var foo = bar;  (not to be parsed by parseBinding
 const ASSIGNMENT_IS_DEFAULT = dev() ? {ASSIGNMENT_IS_DEFAULT: 1} : false; // (foo = bar) => foo  (parsed by parseBinding)
 const IS_EXPRESSION = dev() ? {IS_EXPRESSION: 1} : 1;
@@ -1795,7 +1796,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (goalMode === GOAL_MODULE) {
       // assert that all exported symbols were in fact recorded
       for (let key in exportedBindings) {
-        if (key[0] === '#' && key !== '#default' && scoop[key] === BINDING_TYPE_NONE) {
+        if (key[0] === '#' && key !== '#default' && (scoop.names === HAS_NO_BINDINGS || !scoop.names.has(key.slice(1)))) {
           THROW('Exporting a name that was not bound in global: `' + key.slice(1) + '`');
         }
       }
@@ -1816,6 +1817,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let scoop = {
       parent: null,
       type: SCOPE_LAYER_GLOBAL,
+      names: HAS_NO_BINDINGS, // Map (when necessary)
       dupeParamErrorToken: NO_DUPE_PARAMS,
     };
 
@@ -1834,6 +1836,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let scoopNew = {
       parent: scoop,
       type: scopeType,
+      names: HAS_NO_BINDINGS, // Map (when necessary)
       // For arrows, dupe params can only be checked when seeing the arrow. `([a,a]);` is fine.
       // For function declarations in sloppy, this can only be validated once the inner directives are parsed
       dupeParamErrorToken: NO_DUPE_PARAMS,
@@ -1847,6 +1850,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(SCOPE_addFuncDeclName.length === arguments.length, 'arg count');
     ASSERT([BINDING_TYPE_FUNC_VAR, BINDING_TYPE_FUNC_LEX, BINDING_TYPE_FUNC_STMT].includes(bindingType), 'either a func lex or var', bindingType);
     ASSERT(scoop === DO_NOT_BIND || scoop.isScope, 'expecting scoop', JSON.stringify(scoop));
+    ASSERT(scoop === DO_NOT_BIND || scoop.names === HAS_NO_BINDINGS || scoop.names instanceof Map, 'if scoop has names, it must be a Map');
     ASSERT_FDS(fdState);
     ASSERT(fdState !== FDS_ILLEGAL, 'This would be an error and should be caught elsewhere...');
 
@@ -1885,6 +1889,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, name) {
     ASSERT(SCOPE_actuallyAddBinding.length === arguments.length, 'arg count');
     ASSERT(typeof name === 'string', 'name is a string');
+    ASSERT(scoop === DO_NOT_BIND || scoop.names === HAS_NO_BINDINGS || scoop.names instanceof Map, 'if scoop has names, it must be a Map', scoop.names);
     ASSERT_BINDING_TYPE(bindingType);
 
     if (bindingType === BINDING_TYPE_VAR) {
@@ -1899,6 +1904,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_addVarBinding(lexerFlags, scoop, name, bindingType) {
     ASSERT(SCOPE_addVarBinding.length === arguments.length, 'arg count');
     ASSERT(typeof name === 'string', 'name = string', name);
+    ASSERT(scoop.names === HAS_NO_BINDINGS || scoop.names instanceof Map, 'if scoop has names, it must be a Map');
     ASSERT_BINDING_TYPE(bindingType);
 
     if (scoop === DO_NOT_BIND) {
@@ -2062,9 +2068,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // All rules stop propagation at function boundaries. Func params only apply inward, not outside of the function.
 
-    // Prevent special keys like __proto__ from causing problems
-    let hashed = '#' + name;
-
     // Concrete cases to check for:
     // TODO: add these test cases as a group somewhere
     // - `var x; var x`
@@ -2092,11 +2095,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // Scan the lex var path and apply the rules outlined above for each level.
     // If nothing throws, mark the var on the current lexvar level and move to the parent lexvar, rinse and repeat
-    let isLexBinding = bindingTypeIsLex(bindingType);
+    let isLexBinding = SCOPE_bindingTypeIsLex(bindingType);
     let s = scoop;
     do {
-      let value = s[hashed];
-      if (bindingTypeIsLex(value)) {
+      let value = s.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : s.names.get(name);
+      if (value !== BINDING_TYPE_NONE && SCOPE_bindingTypeIsLex(value)) {
         // There already was a binding of any kind with the same name on this statement level, or a variable declaration
         // of the same name in a statement that is a descendent of the current statement parent. This is the error.
         if (
@@ -2140,16 +2143,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('Can not create a binding for `' + name + '` because was already bound as a catch clause binding');
         }
       }
-      s[hashed] = bindingType;
+      if (s.names === HAS_NO_BINDINGS) s.names = new Map;
+      s.names.set(name, bindingType);
       s = s.parent;
     } while (s && s.type !== SCOPE_LAYER_FUNC_ROOT);
   }
-  function bindingTypeIsLex(t) {
+  function SCOPE_bindingTypeIsLex(t) {
     ASSERT_BINDING_TYPE(t);
     return t === BINDING_TYPE_LET || t === BINDING_TYPE_CONST || t === BINDING_TYPE_FUNC_LEX || t === BINDING_TYPE_FUNC_STMT || t === BINDING_TYPE_CLASS
   }
   function SCOPE_addLexBinding(scoop, name, bindingType, fdState) {
     ASSERT(SCOPE_addLexBinding.length === arguments.length, 'arg count');
+    ASSERT(scoop === DO_NOT_BIND || scoop.names === HAS_NO_BINDINGS || scoop.names instanceof Map, 'if scoop has names then it must be a Map');
     ASSERT_BINDING_TYPE(bindingType);
 
     // See comments in SCOPE_addVarBinding for excessive rule overview
@@ -2162,11 +2167,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return;
     }
 
-    let hashed = '#' + name; // prevent special keys like __proto__ from causing problems
-
     // Scan the lexical records for any `catch` header record, have to scan all the way up to scope-root (func/glob)
     // for any such lexical records, confirm the current name does not appear in it, or throw. :'(
-    let value = scoop[hashed];
+    let value = scoop.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : scoop.names.get(name);
     if (value !== BINDING_TYPE_NONE) {
       if (bindingType === BINDING_TYPE_ARG) {
         // This is an error but we can't throw yet because we may be inside the not-yet-confirmed arrow header which
@@ -2187,7 +2190,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    if (scoop.type === SCOPE_LAYER_FUNC_BODY && scoop.parent[hashed] !== BINDING_TYPE_NONE) {
+    if (scoop.type === SCOPE_LAYER_FUNC_BODY && scoop.parent.names !== HAS_NO_BINDINGS && scoop.parent.names.get(name) !== BINDING_TYPE_NONE) {
       THROW('Cannot create lexical binding for `' + name + '` because it shadows a function parameter');
     }
 
@@ -2219,14 +2222,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (scoop.type === SCOPE_LAYER_CATCH_BODY) {
       // A lexical binding (or any var) in the catch block cannot be shadowing a catch clause binding
       ASSERT(scoop.parent && scoop.parent.type === SCOPE_LAYER_CATCH_HEAD, 'scoop body must have head as parent', scoop);
-      if (scoop.parent[hashed] === BINDING_TYPE_CATCH_IDENT || scoop.parent[hashed] === BINDING_TYPE_CATCH_OTHER) {
+      let parentValue = scoop.parent.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : scoop.parent.names.get(name);
+      if (parentValue === BINDING_TYPE_CATCH_IDENT || parentValue === BINDING_TYPE_CATCH_OTHER) {
         THROW('Can not create a lexical binding for `' + name + '` because it shadows a catch clause binding');
       }
     }
 
     let s = scoop.parent;
     while (s && s.type !== SCOPE_LAYER_FUNC_ROOT) {
-      let value = s[hashed];
+      let value = s.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : s.names.get(name);
       if (s.type === SCOPE_LAYER_ARROW_PARAMS) {
         if (bindingType === BINDING_TYPE_CATCH_IDENT || bindingType === BINDING_TYPE_CATCH_OTHER) {
           // I guess we ignore this case...
@@ -2249,7 +2253,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       s = s.parent;
     }
 
-    scoop[hashed] = bindingType;
+    if (scoop.names === HAS_NO_BINDINGS) scoop.names = new Map;
+    scoop.names.set(name, bindingType);
   }
 
   function parseDirectivePrologues(lexerFlags, astProp) {

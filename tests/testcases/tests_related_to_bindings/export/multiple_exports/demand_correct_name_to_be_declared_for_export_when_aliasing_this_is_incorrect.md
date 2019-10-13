@@ -14,12 +14,13 @@
 > 
 > > It is a Syntax Error if any element of the ExportedBindings of ModuleItemList does not also occur in either the VarDeclaredNames of ModuleItemList, or the LexicallyDeclaredNames of ModuleItemList.
 
+## FAIL
 
 ## Input
 
-
 `````js
-var canBeUndeclared; export {mustExist as canBeUndeclared};
+var canBeUndeclared;
+export {mustExist as canBeUndeclared};
 `````
 
 ## Output
@@ -38,8 +39,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-var canBeUndeclared; export {mustExist as canBeUndeclared};
-                     ^------- error
+var canBeUndeclared;
+export {mustExist as canBeUndeclared};
+^------- error
 `````
 
 ### Strict mode
@@ -56,8 +58,9 @@ Parsed with the module goal.
 throws: Parser error!
   Exporting a name that was not bound in global: `mustExist` (at EOF)
 
-var canBeUndeclared; export {mustExist as canBeUndeclared};
-                                                          ^------- error
+var canBeUndeclared;
+export {mustExist as canBeUndeclared};
+                                     ^------- error
 `````
 
 
