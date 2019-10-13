@@ -484,18 +484,23 @@ ASSERT(!void (typeof window !== 'undefined' && ASSERT_pushCanonPoison(window.dis
 
 function ZeTokenizer(
   input,
-  targetEsVersion = 6,
-  moduleGoal = GOAL_MODULE,
-  collectTokens = COLLECT_TOKENS_NONE,
-  webCompat = WEB_COMPAT_ON,
-  gracefulErrors = FAIL_HARD,
-  tokenStorage = [],
-  // You can override the logging functions
-  $log = console.log,
-  $warn = console.warn,
-  $error = console.error,
-  returnTokens = RETURN_SOLID_TOKENS // TODO: fix this mess and make it an options object :/
+  options
 ) {
+  const {
+    targetEsVersion = Infinity,
+    parsingGoal = GOAL_MODULE,
+    collectTokens = COLLECT_TOKENS_NONE, // what to collect in the token storage
+    returnTokens = RETURN_SOLID_TOKENS,  // what to emit and not to emit while lexing
+    webCompat = WEB_COMPAT_ON,
+    gracefulErrors = FAIL_HARD,
+    tokenStorage = [],
+
+    // You can override the logging functions
+    $log = console.log,
+    $warn = console.warn,
+    $error = console.error,
+  } = options;
+
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(targetEsVersion !== undefined, 'undefined should become default', targetEsVersion);
   ASSERT(typeof targetEsVersion === 'number', 'targetEsVersion should be a number', typeof targetEsVersion);
@@ -811,7 +816,7 @@ function ZeTokenizer(
         // https://tc39.github.io/ecma262/#sec-html-like-comments
         // The syntax and semantics of 11.4 is extended as follows except that this extension is not allowed when parsing source code using the goal symbol Module:
         // TODO: and properly parse this, not like the duplicate hack it is now
-        if (moduleGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(1) && peeky($$DASH_2D) && peekd(1) === $$GT_3E) {
+        if (parsingGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(1) && peeky($$DASH_2D) && peekd(1) === $$GT_3E) {
           if (consumedNewlinesThisToken > 0 || consumedCommentSincePrevSolid) {
             return parseCommentHtmlClose();
           } else {
@@ -856,7 +861,7 @@ function ZeTokenizer(
       case $$QMARK_3F:
         return $PUNCTUATOR;
       case $$LT_3C:
-        if (moduleGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(3) && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
+        if (parsingGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(3) && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
           return parseCommentHtmlOpen();
         }
         return parseLtPunctuator(); // < << <= <<=
@@ -876,8 +881,8 @@ function ZeTokenizer(
     }
   }
 
-  function nextTokenGeneric(lexerFlags, returnAny) {
-    return nextTokenWithLexer(lexerForSlowFallback, lexerFlags, returnAny);
+  function nextTokenGeneric(lexerFlags) {
+    return nextTokenWithLexer(lexerForSlowFallback, lexerFlags);
   }
 
   function _lexerWhitespaceCommon(c, lexerFlags) {
@@ -904,8 +909,8 @@ function ZeTokenizer(
     return DNF;
   }
 
-  function nextTokenToParenOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToParenOpen, lexerFlags, returnAny);
+  function nextTokenToParenOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToParenOpen, lexerFlags);
   }
   function _nextTokenToParenOpen(lexerFlags) {
     return lexerWithFallback(_lexerForParenOpen, lexerFlags);
@@ -923,8 +928,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToCurlyOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToCurlyOpen, lexerFlags, returnAny);
+  function nextTokenToCurlyOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToCurlyOpen, lexerFlags);
   }
   function _nextTokenToCurlyOpen(lexerFlags) {
     return lexerWithFallback(_lexerForCurlyOpen, lexerFlags);
@@ -950,8 +955,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToParenOpenCurlyOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToParenOpenCurlyOpen, lexerFlags, returnAny);
+  function nextTokenToParenOpenCurlyOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToParenOpenCurlyOpen, lexerFlags);
   }
   function _nextTokenToParenOpenCurlyOpen(lexerFlags) {
     return lexerWithFallback(_lexerForParenOpenCurlyOpen, lexerFlags);
@@ -968,8 +973,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToFrom(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToFrom, lexerFlags, returnAny);
+  function nextTokenToFrom(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToFrom, lexerFlags);
   }
   function _nextTokenToFrom(lexerFlags) {
     return lexerWithFallback(_lexerForFrom, lexerFlags);
@@ -984,8 +989,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToString(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToString, lexerFlags, returnAny);
+  function nextTokenToString(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToString, lexerFlags);
   }
   function _nextTokenToString(lexerFlags) {
     return lexerWithFallback(_lexerForString, lexerFlags);
@@ -1004,8 +1009,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdent(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdent, lexerFlags, returnAny);
+  function nextTokenToIdent(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdent, lexerFlags);
   }
   function _nextTokenToIdent(lexerFlags) {
     return lexerWithFallback(_lexerForIdent, lexerFlags);
@@ -1042,8 +1047,8 @@ function ZeTokenizer(
 
     return DNF;
   }
-  function nextTokenToArrow(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToArrow, lexerFlags, returnAny);
+  function nextTokenToArrow(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToArrow, lexerFlags);
   }
   function _nextTokenToArrow(lexerFlags) {
     return lexerWithFallback(_lexerForArrow, lexerFlags);
@@ -1058,8 +1063,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToAs(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToAs, lexerFlags, returnAny);
+  function nextTokenToAs(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToAs, lexerFlags);
   }
   function _nextTokenToAs(lexerFlags) {
     return lexerWithFallback(_lexerForAs, lexerFlags);
@@ -1074,8 +1079,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToAsCommaCurlyClose(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToAsCommaCurlyClose, lexerFlags, returnAny);
+  function nextTokenToAsCommaCurlyClose(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToAsCommaCurlyClose, lexerFlags);
   }
   function _nextTokenToAsCommaCurlyClose(lexerFlags) {
     return lexerWithFallback(_lexerForAsCommaCurlyClose, lexerFlags);
@@ -1099,8 +1104,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToAsCommaFrom(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToAsCommaFrom, lexerFlags, returnAny);
+  function nextTokenToAsCommaFrom(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToAsCommaFrom, lexerFlags);
   }
   function _nextTokenToAsCommaFrom(lexerFlags) {
     return lexerWithFallback(_lexerForAsCommaFrom, lexerFlags);
@@ -1122,9 +1127,9 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToColon(lexerFlags, returnAny) {
+  function nextTokenToColon(lexerFlags) {
     // - `:`  (for `default`)
-    return nextTokenWithLexer(_nextTokenToColon, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToColon, lexerFlags);
   }
   function _nextTokenToColon(lexerFlags) {
     return lexerWithFallback(_lexerForColon, lexerFlags);
@@ -1139,9 +1144,9 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToTarget(lexerFlags, returnAny) {
+  function nextTokenToTarget(lexerFlags) {
     // - `target`  (for `new.target`)
-    return nextTokenWithLexer(_nextTokenToTarget, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToTarget, lexerFlags);
   }
   function _nextTokenToTarget(lexerFlags) {
     return lexerWithFallback(_lexerForTarget, lexerFlags);
@@ -1156,9 +1161,9 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToStatementStart(lexerFlags, returnAny) {
+  function nextTokenToStatementStart(lexerFlags) {
     // When the next token must be the start of a new statement, or the end of some sort of block (`}`)
-    return nextTokenWithLexer(_nextTokenToStatementStart, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToStatementStart, lexerFlags);
   }
   function _nextTokenToStatementStart(lexerFlags) {
     return lexerWithFallback(_lexerForStatementStart, lexerFlags);
@@ -1205,9 +1210,9 @@ function ZeTokenizer(
 
     return DNF;
   }
-  function nextTokenToExpressionStart(lexerFlags, returnAny) {
+  function nextTokenToExpressionStart(lexerFlags) {
     // When the next token must be the start of a new expression
-    return nextTokenWithLexer(_nextTokenToExpressionStart, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToExpressionStart, lexerFlags);
   }
   function _nextTokenToExpressionStart(lexerFlags) {
     return lexerWithFallback(_lexerForExpressionStart, lexerFlags);
@@ -1268,9 +1273,9 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags | LF_FOR_REGEX);
   }
-  function nextTokenToExpressionStartGrouped(lexerFlags, returnAny) {
+  function nextTokenToExpressionStartGrouped(lexerFlags) {
     // When the next token must be the start of a new expression or end of a group (`)`)
-    return nextTokenWithLexer(_nextTokenToExpressionStartGrouped, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToExpressionStartGrouped, lexerFlags);
   }
   function _nextTokenToExpressionStartGrouped(lexerFlags) {
     return lexerWithFallback(_lexerForExpressionStartGrouped, lexerFlags);
@@ -1286,9 +1291,9 @@ function ZeTokenizer(
     }
     return DNF;
   }
-  function nextTokenToExpressionStartSemi(lexerFlags, returnAny) {
+  function nextTokenToExpressionStartSemi(lexerFlags) {
     // When the next token must be the start of a new expression or the semi in a `for` header
-    return nextTokenWithLexer(_nextTokenToExpressionStartSemi, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToExpressionStartSemi, lexerFlags);
   }
   function _nextTokenToExpressionStartSemi(lexerFlags) {
     return lexerWithFallback(_lexerForExpressionStartSemi, lexerFlags);
@@ -1304,9 +1309,9 @@ function ZeTokenizer(
     }
     return DNF;
   }
-  function nextTokenToExpressionStartSquareCloseComma(lexerFlags, returnAny) {
+  function nextTokenToExpressionStartSquareCloseComma(lexerFlags) {
     // When the next token must be the start of a new expression or `]` or a `,` in an array literal
-    return nextTokenWithLexer(_nextTokenToExpressionStartSquareCloseComma, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToExpressionStartSquareCloseComma, lexerFlags);
   }
   function _nextTokenToExpressionStartSquareCloseComma(lexerFlags) {
     return lexerWithFallback(_lexerForExpressionStartSquareCloseComma, lexerFlags);
@@ -1323,7 +1328,7 @@ function ZeTokenizer(
     }
     return DNF;
   }
-  function nextTokenToObjectMemberStart(lexerFlags, returnAny) {
+  function nextTokenToObjectMemberStart(lexerFlags) {
     // First token of an object member (property or method).
     // - `{foo: bar}`
     //     ^^^
@@ -1331,7 +1336,7 @@ function ZeTokenizer(
     //     ^^^
     // - `{get foo(){}}`
     //     ^^^
-    return nextTokenWithLexer(_nextTokenToObjectMemberStart, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToObjectMemberStart, lexerFlags);
   }
   function _nextTokenToObjectMemberStart(lexerFlags) {
     return lexerWithFallback(_lexerForObjectMemberStart, lexerFlags);
@@ -1394,7 +1399,7 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToObjectMemberRest(lexerFlags, returnAny) {
+  function nextTokenToObjectMemberRest(lexerFlags) {
     // The next token after the first token of an object member (property or method).
     // - `{foo: bar}`
     //        ^
@@ -1404,7 +1409,7 @@ function ZeTokenizer(
     //         ^^^
     // - `{get "ok"(){}}`
     //         ^^^^
-    return nextTokenWithLexer(_nextTokenToObjectMemberRest, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToObjectMemberRest, lexerFlags);
   }
   function _nextTokenToObjectMemberRest(lexerFlags) {
     return lexerWithFallback(_lexerForObjectMemberRest, lexerFlags);
@@ -1465,7 +1470,7 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToClassMemberStart(lexerFlags, returnAny) {
+  function nextTokenToClassMemberStart(lexerFlags) {
     // The first token of a class method
     // - `class x {foo(){}}`
     //             ^
@@ -1473,7 +1478,7 @@ function ZeTokenizer(
     //             ^^^
     // - `class x {get "ok"(){}}`
     //             ^^^
-    return nextTokenWithLexer(_nextTokenToClassMemberStart, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToClassMemberStart, lexerFlags);
   }
   function _nextTokenToClassMemberStart(lexerFlags) {
     return lexerWithFallback(_lexerForClassMemberStart, lexerFlags);
@@ -1537,7 +1542,7 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToClassMemberRest(lexerFlags, returnAny) {
+  function nextTokenToClassMemberRest(lexerFlags) {
     // The next token after the first token of an object member (property or method).
     // - `{foo: bar}`
     //        ^
@@ -1547,7 +1552,7 @@ function ZeTokenizer(
     //         ^^^
     // - `{get "ok"(){}}`
     //         ^^^^
-    return nextTokenWithLexer(_nextTokenToClassMemberRest, lexerFlags, returnAny);
+    return nextTokenWithLexer(_nextTokenToClassMemberRest, lexerFlags);
   }
   function _nextTokenToClassMemberRest(lexerFlags) {
     return lexerWithFallback(_lexerForClassMemberRest, lexerFlags);
@@ -1602,8 +1607,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenSwitchBody(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenSwitchBody, lexerFlags, returnAny);
+  function nextTokenSwitchBody(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenSwitchBody, lexerFlags);
   }
   function _nextTokenSwitchBody(lexerFlags) {
     return lexerWithFallback(_lexerForSwitchBody, lexerFlags);
@@ -1630,8 +1635,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToBindingStart(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToBindingStart, lexerFlags, returnAny);
+  function nextTokenToBindingStart(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToBindingStart, lexerFlags);
   }
   function _nextTokenToBindingStart(lexerFlags) {
     return lexerWithFallback(_lexerForBindingStart, lexerFlags);
@@ -1673,8 +1678,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToBindingStartGrouped(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToBindingStartGrouped, lexerFlags, returnAny);
+  function nextTokenToBindingStartGrouped(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToBindingStartGrouped, lexerFlags);
   }
   function _nextTokenToBindingStartGrouped(lexerFlags) {
     return lexerWithFallback(_lexerForBindingStartGrouped, lexerFlags);
@@ -1719,8 +1724,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToColonOrParenOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToColonOrParenOpen, lexerFlags, returnAny);
+  function nextTokenToColonOrParenOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToColonOrParenOpen, lexerFlags);
   }
   function _nextTokenToColonOrParenOpen(lexerFlags) {
     return lexerWithFallback(_lexerForColonOrParenOpen, lexerFlags);
@@ -1738,8 +1743,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentOrParenOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentOrParenOpen, lexerFlags, returnAny);
+  function nextTokenToIdentOrParenOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentOrParenOpen, lexerFlags);
   }
   function _nextTokenToIdentOrParenOpen(lexerFlags) {
     return lexerWithFallback(_lexerForIdentOrParenOpen, lexerFlags);
@@ -1768,8 +1773,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentStarParenOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentStarParenOpen, lexerFlags, returnAny);
+  function nextTokenToIdentStarParenOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentStarParenOpen, lexerFlags);
   }
   function _nextTokenToIdentStarParenOpen(lexerFlags) {
     return lexerWithFallback(_lexerForIdentStarParenOpen, lexerFlags);
@@ -1801,8 +1806,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentStarCurlyOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentStarCurlyOpen, lexerFlags, returnAny);
+  function nextTokenToIdentStarCurlyOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentStarCurlyOpen, lexerFlags);
   }
   function _nextTokenToIdentStarCurlyOpen(lexerFlags) {
     return lexerWithFallback(_lexerForIdentStarCurlyOpen, lexerFlags);
@@ -1847,8 +1852,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToCommaCurlyClose(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToCommaCurlyClose, lexerFlags, returnAny);
+  function nextTokenToCommaCurlyClose(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToCommaCurlyClose, lexerFlags);
   }
   function _nextTokenToCommaCurlyClose(lexerFlags) {
     return lexerWithFallback(_lexerForCommaCurlyClose, lexerFlags);
@@ -1866,8 +1871,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentCurlyOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentCurlyOpen, lexerFlags, returnAny);
+  function nextTokenToIdentCurlyOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentCurlyOpen, lexerFlags);
   }
   function _nextTokenToIdentCurlyOpen(lexerFlags) {
     return lexerWithFallback(_lexerForIdentCurlyOpen, lexerFlags);
@@ -1896,8 +1901,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentCurlyClose(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentCurlyClose, lexerFlags, returnAny);
+  function nextTokenToIdentCurlyClose(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentCurlyClose, lexerFlags);
   }
   function _nextTokenToIdentCurlyClose(lexerFlags) {
     return lexerWithFallback(_lexerForIdentCurlyClose, lexerFlags);
@@ -1927,8 +1932,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentStarCurlyOpenParenOpenString, lexerFlags, returnAny);
+  function nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentStarCurlyOpenParenOpenString, lexerFlags);
   }
   function _nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags) {
     return lexerWithFallback(_lexerForIdentStarCurlyOpenParenOpenString, lexerFlags);
@@ -1972,8 +1977,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToAwaitParenOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToAwaitParenOpen, lexerFlags, returnAny);
+  function nextTokenToAwaitParenOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToAwaitParenOpen, lexerFlags);
   }
   function _nextTokenToAwaitParenOpen(lexerFlags) {
     return lexerWithFallback(_lexerForAwaitParenOpen, lexerFlags);
@@ -1995,8 +2000,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToIdentStringNumberSquareOpen(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToIdentStringNumberSquareOpen, lexerFlags, returnAny);
+  function nextTokenToIdentStringNumberSquareOpen(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToIdentStringNumberSquareOpen, lexerFlags);
   }
   function _nextTokenToIdentStringNumberSquareOpen(lexerFlags) {
     return lexerWithFallback(_lexerForIdentStringNumberSquareOpen, lexerFlags);
@@ -2047,8 +2052,8 @@ function ZeTokenizer(
 
     return _lexerWhitespaceCommon(c, lexerFlags);
   }
-  function nextTokenToParamStart(lexerFlags, returnAny) {
-    return nextTokenWithLexer(_nextTokenToParamStart, lexerFlags, returnAny);
+  function nextTokenToParamStart(lexerFlags) {
+    return nextTokenWithLexer(_nextTokenToParamStart, lexerFlags);
   }
   function _nextTokenToParamStart(lexerFlags) {
     return lexerWithFallback(_lexerForParamStart, lexerFlags);

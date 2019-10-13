@@ -462,7 +462,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>') + '; ' + JSON.stringify(rest), ':', ...rest);
   }
 
-  let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error, babelCompat ? RETURN_COMMENT_TOKENS : RETURN_SOLID_TOKENS);
+  let tok = ZeTokenizer(code, {
+    targetEsVersion,
+    parsingGoal: goalMode,
+    collectTokens,
+    returnTokens: babelCompat ? RETURN_COMMENT_TOKENS : RETURN_SOLID_TOKENS,
+    webCompat: options_webCompat,
+    gracefulErrors: FAIL_HARD,
+    tokenStorage: options_tokenStorage,
+
+    $log,
+    $warn,
+    $error,
+  });
 
   let tok_throw = tok.throw;
   let tok_regexerror = tok.regexerror;
