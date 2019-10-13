@@ -24,7 +24,6 @@ const CONFIRMED_UPDATE = process.argv.includes('-U');
 const AUTO_GENERATE = process.argv.includes('-g');
 const AUTO_GENERATE_CONSERVATIVE = process.argv.includes('-G');
 const REDUCING = process.argv.includes('--min');
-const SKIP_PRINTER = process.argv.includes('--no-printer');
 const REDUCING_PRINTER = process.argv.includes('--min-printer');
 const ALL_VARIANTS = process.argv.includes('--all');
 let [a,b,c,d] = [process.argv.includes('--sloppy'), process.argv.includes('--strict'), process.argv.includes('--module'), process.argv.includes('--web')];
@@ -51,7 +50,8 @@ const TEST_ACORN = COMPARE_ACORN && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignor
 const TEST_BABEL = COMPARE_BABEL && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
 const NO_FATALS = process.argv.includes('--no-fatals'); // asserts should not stop a full auto run (dev tool, rely on git etc for recovery...)
 const CONCISE = process.argv.includes('--concise');
-const USE_BUILD = process.argv.includes('-b');
+const USE_BUILD = process.argv.includes('-b') || process.argv.includes('--build');
+const SKIP_PRINTER = process.argv.includes('--no-printer') || USE_BUILD;
 
 const ZEPARSER_DEV_FILE = '../src/zeparser.mjs';
 const ZEPARSER_PROD_FILE = '../build/build_w_ast.mjs';
@@ -70,7 +70,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     \`node --experimental-modules cli/build.mjs; node --experimental-modules tests/zeparser.spec.mjs\` [options]
 
   Options:
-    -b            Use prod build instead of dev source for ZeParser in this call (assumes built in \`/build/...\`; \`./t z\`)
+    -b  --build   Use prod build instead of dev source for ZeParser in this call (assumes built in \`/build/...\`; \`./t z\`)
     -f "path"     Only test this file / dir
     -F "path"     Use file contents as input
     -i "input"    Test input only (sloppy, strict, module), implies --sloppy unless at least one mode explicitly given
@@ -154,8 +154,6 @@ import ZeParser, {
 } from '../src/zeparser.mjs';
 
 import {
-  $EOF,
-
   toktypeToString,
 } from '../src/zetokenizer.mjs';
 import {
