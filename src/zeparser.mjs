@@ -462,7 +462,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>') + '; ' + JSON.stringify(rest), ':', ...rest);
   }
 
-  let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error);
+  let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error, babelCompat ? RETURN_COMMENT_TOKENS : RETURN_SOLID_TOKENS);
 
   let tok_throw = tok.throw;
   let tok_regexerror = tok.regexerror;
@@ -1021,16 +1021,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _skip(lexerFlags) {
     // This is regex agnostic and should be called from skipDiv or skipRex only ...
 
+    updateToken(tok_nextTokenGeneric(lexerFlags));
+
     if (babelCompat) {
-      updateToken(tok_nextTokenGeneric(lexerFlags, RETURN_COMMENT_TOKENS));
       let maybeComment = curtok;
       while (isCommentToken(maybeComment.type)) {
-        updateToken(tok_nextTokenGeneric(lexerFlags, RETURN_COMMENT_TOKENS));
+        updateToken(tok_nextTokenGeneric(lexerFlags));
         AST_babelAddComment(maybeComment);
         maybeComment = curtok;
       }
-    } else {
-      updateToken(tok_nextTokenGeneric(lexerFlags, RETURN_SOLID_TOKENS));
     }
   }
   function updateToken(token) {
@@ -1213,10 +1212,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   // </SCRUB ASSERTS>
 
   function skipForBabel(lexer, lexerFlags) {
-    updateToken(lexer(lexerFlags, RETURN_COMMENT_TOKENS));
+    updateToken(lexer(lexerFlags));
     let maybeComment = curtok;
-    while (isCommentToken(maybeComment.type)) {
-      updateToken(lexer(lexerFlags, RETURN_COMMENT_TOKENS));
+    while (isCommentToken(curtype)) {
+      updateToken(lexer(lexerFlags));
       AST_babelAddComment(maybeComment);
       maybeComment = curtok;
     }
@@ -1297,7 +1296,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToParenOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToParenOpen(lexerFlags));
     }
     if (curtok.str !== '(') {
       THROW('Expected to parse an opening paren, found `' + curtok.str + '`');
@@ -1310,7 +1309,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToCurlyOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToCurlyOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToCurlyOpen(lexerFlags));
     }
     if (curtok.str !== '{') {
       THROW('Expected to parse an opening curly, found `' + curtok.str + '`');
@@ -1322,7 +1321,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToParenOpenCurlyOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToParenOpenCurlyOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToParenOpenCurlyOpen(lexerFlags));
     }
     ASSERT_VALID(curtok.str === '(' || curtok.str === '{', 'limited options, expecting { (', curtok);
   }
@@ -1332,7 +1331,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToFrom, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToFrom(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToFrom(lexerFlags));
     }
 
     if (curtok.str !== 'from') {
@@ -1346,7 +1345,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToString, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToString(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToString(lexerFlags));
     }
     if (!isStringToken(curtype)) {
       THROW('Next token should be a string but was `' + curtok.str +'`');
@@ -1358,7 +1357,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdent, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdent(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdent(lexerFlags));
     }
     if (!isIdentToken(curtype)) {
       THROW('Next token should be an ident but was `' + curtok.str +'`');
@@ -1369,7 +1368,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToArrow, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToArrow(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToArrow(lexerFlags));
     }
     if (curtok.str !== '=>') {
       THROW('Next token should be `=>` but was `' + curtok.str +'`');
@@ -1380,7 +1379,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToAs, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToAs(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToAs(lexerFlags));
     }
     if (curtok.str !== 'as') {
       THROW('Next token should be `as` but was `' + curtok.str +'`');
@@ -1391,7 +1390,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToAsCommaCurlyClose, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToAsCommaCurlyClose(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToAsCommaCurlyClose(lexerFlags));
     }
     ASSERT_VALID(curtok.str === 'as' || curtok.str === ',' || curtok.str === '}', 'limited options, wanted `as` , }', curtok);
   }
@@ -1400,7 +1399,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToAsCommaFrom, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToAsCommaFrom(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToAsCommaFrom(lexerFlags));
     }
     ASSERT_VALID(curtok.str === 'as' || curtok.str === 'from' || curtok.str === ',', 'limited options, expecting `as` `from` comma', curtok);
   }
@@ -1409,7 +1408,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToColon, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToColon(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToColon(lexerFlags));
     }
     if (curtok.str !== ':') {
       THROW('Next token should be `:` but was `' + curtok.str +'`');
@@ -1420,7 +1419,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToTarget, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToTarget(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToTarget(lexerFlags));
     }
     if (curtok.str !== 'target') {
       THROW('Next token should be `target` but was `' + curtok.str +'`');
@@ -1431,7 +1430,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToStatementStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToStatementStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToStatementStart(lexerFlags));
     }
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
 
@@ -1464,7 +1463,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToExpressionStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToExpressionStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToExpressionStart(lexerFlags));
     }
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
     ASSERT_VALID(
@@ -1490,7 +1489,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToExpressionStartGrouped, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToExpressionStartGrouped(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToExpressionStartGrouped(lexerFlags));
     }
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
     ASSERT_VALID(
@@ -1517,7 +1516,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToExpressionStartSemi, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToExpressionStartSemi(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToExpressionStartSemi(lexerFlags));
     }
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
     ASSERT_VALID(
@@ -1544,7 +1543,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToExpressionStartSquareCloseComma, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToExpressionStartSquareCloseComma(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToExpressionStartSquareCloseComma(lexerFlags));
     }
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
     ASSERT_VALID(
@@ -1573,7 +1572,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToExpressionStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToExpressionStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToExpressionStart(lexerFlags));
     }
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
     ASSERT_VALID(
@@ -1600,7 +1599,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToObjectMemberStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToObjectMemberStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToObjectMemberStart(lexerFlags));
     }
     // This is more of a hint. Perhaps we can validate it here but I don't think we have to, anyways.
   }
@@ -1609,7 +1608,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToObjectMemberRest, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToObjectMemberRest(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToObjectMemberRest(lexerFlags));
     }
     // This is more of a hint. Perhaps we can validate it here but I don't think we have to, anyways.
   }
@@ -1618,7 +1617,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToClassMemberStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToClassMemberStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToClassMemberStart(lexerFlags));
     }
     // This is more of a hint. Perhaps we can validate it here but I don't think we have to, anyways.
   }
@@ -1627,7 +1626,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToClassMemberRest, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToClassMemberRest(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToClassMemberRest(lexerFlags));
     }
     // This is more of a hint. Perhaps we can validate it here but I don't think we have to, anyways.
   }
@@ -1636,7 +1635,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenSwitchBody, lexerFlags);
     } else {
-      updateToken(tok_nextTokenSwitchBody(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenSwitchBody(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(curtok.str === 'case' || curtok.str === 'default' || curtok.str === '}', 'not many options, wanted case default }', curtok);
@@ -1645,7 +1644,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToBindingStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToBindingStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToBindingStart(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(isIdentToken(curtok.type) || curtok.str === '[' || curtok.str === '{' || curtok.str === '...', 'not many options, wanted ident ... [ {', curtok);
@@ -1655,7 +1654,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToBindingStartGrouped, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToBindingStartGrouped(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToBindingStartGrouped(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(isIdentToken(curtok.type) || curtok.str === '[' || curtok.str === '{' || curtok.str === '...' || curtok.str === ')', 'not many options, wanted ident ... [ { )', curtok);
@@ -1665,7 +1664,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToColonOrParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToColonOrParenOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToColonOrParenOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( curtok.str === ':' || curtok.str === '(', 'not many options, wanted : (', curtok);
@@ -1675,7 +1674,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentOrParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentOrParenOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentOrParenOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '(', 'not many options, wanted ident (', curtok);
@@ -1685,7 +1684,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentStarParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentStarParenOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentStarParenOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '*' || curtok.str === '(', 'not many options, wanted ident * (', curtok);
@@ -1695,7 +1694,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentStarCurlyOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentStarCurlyOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentStarCurlyOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '*' || curtok.str === '{', 'not many options, wanted ident * {', curtok);
@@ -1705,7 +1704,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToCommaCurlyClose, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToCommaCurlyClose(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToCommaCurlyClose(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( curtok.str === ',' || curtok.str === '}', 'not many options, wanted , }', curtok);
@@ -1715,7 +1714,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentCurlyOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentCurlyOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentCurlyOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '{', 'not many options, wanted ident {', curtok);
@@ -1725,7 +1724,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentCurlyClose, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentCurlyClose(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentCurlyClose(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '}', 'not many options, wanted ident }', curtok);
@@ -1735,7 +1734,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentStarCurlyOpenParenOpenString, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtype) || curtok.str === '*' || curtok.str === '{' || curtok.str === '(' || isStringToken(curtype), 'not many options, wanted ident string * { (', curtok);
@@ -1745,7 +1744,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToAwaitParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToAwaitParenOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToAwaitParenOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '(', 'not many options, wanted ident (', curtok);
@@ -1755,7 +1754,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToIdentStringNumberSquareOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentStringNumberSquareOpen(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToIdentStringNumberSquareOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     // Note: big int is okay here...
@@ -1766,7 +1765,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) {
       skipForBabel(tok_nextTokenToParamStart, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToParamStart(lexerFlags, RETURN_SOLID_TOKENS));
+      updateToken(tok_nextTokenToParamStart(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     // Note: big int is okay here...

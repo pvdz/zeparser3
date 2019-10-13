@@ -493,7 +493,8 @@ function ZeTokenizer(
   // You can override the logging functions
   $log = console.log,
   $warn = console.warn,
-  $error = console.error
+  $error = console.error,
+  returnTokens = RETURN_SOLID_TOKENS // TODO: fix this mess and make it an options object :/
 ) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(targetEsVersion !== undefined, 'undefined should become default', targetEsVersion);
@@ -634,8 +635,8 @@ function ZeTokenizer(
   // </SCRUB ASSERTS>
 
   let startForError = 0;
-  function nextTokenWithLexer(lexer, lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
-    ASSERT(arguments.length >= 1 && arguments.length <= 3, 'arg count 1~2');
+  function nextTokenWithLexer(lexer, lexerFlags) {
+    ASSERT(nextTokenWithLexer.length === arguments.length, 'arg count');
     ASSERT(!finished, 'should not next() after eof token');
     ASSERT(typeof lexer === 'function', 'The lexer should be passed on and is something like lexerForSlowFallback or something more specific');
 
@@ -678,7 +679,7 @@ function ZeTokenizer(
       ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
 
       // Non-whitespace tokens always get returned. Whitespace tokens are conditionally returned when requested.
-      if (!wasWhite || (_returnAny === RETURN_ANY_TOKENS || (wasComment && _returnAny === RETURN_COMMENT_TOKENS))) {
+      if (!wasWhite || (returnTokens === RETURN_ANY_TOKENS || (wasComment && returnTokens === RETURN_COMMENT_TOKENS))) {
         token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         break;
       }
