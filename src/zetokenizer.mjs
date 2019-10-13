@@ -667,43 +667,45 @@ function ZeTokenizer(
       ++anyTokenCount;
       let startCol = pointer - currentColOffset;
       let startRow = currentLine;
-      if (neof()) {
-        let cstart = _readCache();
-        let start = startForError = pointer; // TODO: see if startForError makes a dent at all
-        wasWhite = false;
-        wasComment = false;
-        let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
-        let consumedTokenType = lexer(lexerFlags);
-        ASSERT(consumedTokenType !== DNF, 'the DNF should not be returned');
-        ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
-        token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
-        if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
-      } else {
+
+      wasWhite = false;
+      wasComment = false;
+
+      if (eof()) {
         token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN, 0);
         finished = true;
-        wasWhite = false;
         break;
       }
 
-      if (wasWhite) {
-        if (_returnAny === RETURN_ANY_TOKENS) {
-          break;
-        }
-        if (wasComment) {
-          if (_returnAny === RETURN_COMMENT_TOKENS) {
-            break;
-          }
-        }
-      }
-      else {
-        // Any solid should be returned so break
+      let cstart = _readCache();
+      let start = startForError = pointer; // TODO: see if startForError makes a dent at all
+      let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
+
+      let consumedTokenType = lexer(lexerFlags);
+      ASSERT(consumedTokenType !== DNF, 'the DNF should not be returned');
+      ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
+
+      // Non-whitespace tokens always get returned. Whitespace tokens are conditionally returned when requested.
+      if (!wasWhite || (_returnAny === RETURN_ANY_TOKENS || (wasComment && _returnAny === RETURN_COMMENT_TOKENS))) {
+        token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         break;
       }
 
+      if (collectTokens === COLLECT_TOKENS_ALL) {
+        let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
+        tokens.push(token);
+      }
     } while (true);
-    ++solidTokenCount;
-    if (!wasWhite) {
-      if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
+
+    if (wasWhite) {
+      if (collectTokens === COLLECT_TOKENS_ALL) {
+        tokens.push(token);
+      }
+    } else {
+      ++solidTokenCount;
+      if (collectTokens === COLLECT_TOKENS_SOLID) {
+        tokens.push(token);
+      }
       consumedNewlinesThisToken = 0;
       consumedCommentSincePrevSolid = false;
       prevTokenSolid = true;
