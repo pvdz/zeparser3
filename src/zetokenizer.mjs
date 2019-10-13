@@ -642,14 +642,6 @@ function ZeTokenizer(
     // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
     let token;
 
-
-
-    // TODO: in many cases the next token is known. In certain cases it is known whether whitespace must follow,
-    // like after the class keyword or after a number token. How do we optimize the hottest loop for these cases.
-
-
-
-
     if (prevTokenSolid) {
       // Do this at the start because otherwise something like `a \n b` would reset this when forward parsing `b` and
       // would cause `a` to be set to the wrong column data.
@@ -695,6 +687,17 @@ function ZeTokenizer(
         let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         tokens.push(token);
       }
+
+      // At this point it has to be some form of whitespace and we're clearly not returning it so we can
+      // safely skip any number of whitespaces, which are very likely to appear in sequence
+
+      if (consumedTokenType === $COMMENT_SINGLE) {
+        // Either this is EOF or the next token must be a newline
+        if (collectTokens !== COLLECT_TOKENS_ALL) skipNewlinesWithoutTokens();
+      } // do not `else`
+      if (nlwas > 0) {
+        if (collectTokens !== COLLECT_TOKENS_ALL) skipSpacesWithoutTokens();
+      }
     } while (true);
 
     if (wasWhite) {
@@ -712,6 +715,32 @@ function ZeTokenizer(
     }
 
     return token;
+  }
+
+  function skipSpacesWithoutTokens() {
+    while (neof()) {
+      let c = peek();
+      if (c === $$SPACE_20 || c === $$TAB_09) {
+        skip();
+        // parseSpace();
+      } else {
+        break;
+      }
+    }
+  }
+  function skipNewlinesWithoutTokens() {
+    while (neof()) {
+      let c = peek();
+      if (c === $$LF_0A) {
+        skip();
+        incrementLine();
+      } else if (c === $$CR_0D) {
+        skip();
+        parseCR(); // crlf is relevant so skip carefully
+      } else {
+        break;
+      }
+    }
   }
 
   function lexerWithFallback(lexer, lexerFlags) {
@@ -2063,6 +2092,8 @@ function ZeTokenizer(
   }
 
   function incrementLine() {
+    ASSERT(incrementLine.length === arguments.length, 'arg count');
+
     // Call this function AFTER consuming the newline(s) that triggered it
     ASSERT(input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
 
