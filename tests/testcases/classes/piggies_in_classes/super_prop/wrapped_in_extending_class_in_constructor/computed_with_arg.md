@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)
+  Missing right square bracket for computed member, found `y` instead
 
 class outer extends S { constructor(){  class x { [super.foo y](){} }  }}
                                                              ^------- error

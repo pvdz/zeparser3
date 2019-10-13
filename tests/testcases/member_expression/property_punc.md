@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Dot property on `y` must be an identifier, was `)`
+  Next token should be an ident but was `)`
 
 y.)
   ^------- error

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Class members must be methods so was expect an opening parenthesis after number/string literal key
+  Expected to parse an opening paren, found `f`
 
 class x {    static * static f(){}    }
                              ^------- error

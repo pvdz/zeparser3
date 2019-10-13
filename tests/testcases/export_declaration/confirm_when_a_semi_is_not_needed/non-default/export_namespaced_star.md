@@ -5,6 +5,8 @@
 > :: export declaration : confirm when a semi is not needed : non-default
 >
 > ::> export namespaced star
+>
+> Not stage 4
 
 ## Input
 
@@ -44,7 +46,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Next char should be [from] but was [as]
+  Next token should be the ident `from` but was `as`
 
 export * as x from "x" foo
          ^------- error

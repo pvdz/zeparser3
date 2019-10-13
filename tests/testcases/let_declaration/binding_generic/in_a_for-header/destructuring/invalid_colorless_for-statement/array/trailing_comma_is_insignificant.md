@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 59 (`;`) but was 41 (curc: `)`, token: `)`)
+  Missing first semi in `for` header, found `)` instead
 
 for (let [foo,] = arr);
                      ^------- error

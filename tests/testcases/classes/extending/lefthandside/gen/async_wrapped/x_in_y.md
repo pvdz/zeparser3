@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 105 (curc: `i`, token: `in`)
+  Expected the opening curly `{` of a class body, found `in` instead
 
 async function p(){
   class C extends x in y {}

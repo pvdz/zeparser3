@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 125 (`}`) but was 105 (curc: `i`, token: `import`)
+  Missing the closing curly of the switch body, found `import` instead
 
 switch (x) { import {x} from "y"; }
              ^------- error

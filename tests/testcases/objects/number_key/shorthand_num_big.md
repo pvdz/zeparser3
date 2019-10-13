@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/objects/shorthand_num.md
+- Path: tests/testcases/objects/number_key/shorthand_num_big.md
 
-> :: objects
+> :: objects : number key
 >
-> ::> shorthand num
+> ::> shorthand num big
 >
 > A shorthand is reading a local variable by the same name. Does not work on numbers (even if that would make sense)
 
@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-x = {5};
+x = {5n};
 `````
 
 ## Output
@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Object literal keys that are strings or numbers must be a method or have a colon: {# PUNCTUATOR : nl=N ws=N pos=6:7 loc=6:1 curc=125 `}`#}
+  Object literal keys that are strings or numbers must be a method or have a colon: {# PUNCTUATOR : nl=N ws=N pos=7:8 loc=7:1 curc=125 `}`#}
 
-x = {5};
-      ^------- error
+x = {5n};
+       ^------- error
 `````
 
 ### Strict mode

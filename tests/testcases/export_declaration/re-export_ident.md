@@ -46,7 +46,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Source must be a string literal
+  Next token should be a string but was `x`
 
 export * from x
               ^------- error

@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 40 (`(`) but was 61 (curc: `=`, token: `=`)
+  Missing opening paren of the `for` header, found `=` instead
 
 function *f(){
   for = 1;

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 125 (curc: `}`, token: `}`)
+  Expected the opening curly `{` of a class body, found `}` instead
 
 ({ggg: class} = null)
             ^------- error

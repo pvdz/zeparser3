@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Must have func arguments next but did not find `(`
+  Expected to parse an opening paren, found `=`
 
 class x extends y { constructor(){ return function *a=super()) { a }; }}
                                                      ^------- error

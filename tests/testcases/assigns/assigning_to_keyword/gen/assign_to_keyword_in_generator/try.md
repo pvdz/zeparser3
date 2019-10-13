@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 61 (curc: `=`, token: `=`)
+  Expected to parse an opening curly, found `=`
 
 function *f(){
   try = 1;

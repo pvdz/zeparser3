@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 125 (`}`) but was 101 (curc: `e`, token: `export`)
+  Missing the closing curly of the switch body, found `export` instead
 
 switch (x) { export {x}; }
              ^------- error

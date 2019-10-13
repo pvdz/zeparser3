@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 93 (`]`) but was 44 (curc: `,`, token: `,`)
+  Missing closing square bracket for computed property name, found `,` instead
 
 x = {[y,z]: 1};
        ^------- error

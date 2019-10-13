@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 44 (curc: `,`, token: `,`)
+  Missing closing paren of the `for` header, found `,` instead
 
 for (a of b,c) d;
            ^------- error

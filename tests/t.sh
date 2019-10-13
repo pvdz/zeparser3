@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e # Exit on error
+
 ACTION=''
 ARG=''
 MODE=''
@@ -11,6 +13,11 @@ NODE=''
 ANNEXB=''
 BUILD=''
 PSFIX=''
+HF=''
+NOCOMP=''
+NOMIN=''
+INSPECT=''
+DEVTOOLS=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -34,6 +41,7 @@ ZeParser test runner help:
  b             Alias for ./t m --test-babel, to verify ZeParser output against the Babel AST
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
+ hf            Log stats through HeatFiler (wip), can be used in conjunction with almost anything
  p             Run on two large js files (1mb) tucked away in ./ignore to get tentative parse times on them
  z             Create build
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
@@ -52,6 +60,10 @@ ZeParser test runner help:
  --node        Fuzzer: compare pass/fail to node by creating a new function and checking if it throws
  --consise     Do not dump AST and printer output to stdout. Only works with -i or -f (or anything that uses those)
  --build       Use the build (./t z) instead of dev sources for ZeParser in this call
+ --no-compat   For `z`; Replace the compat flags for Acorn and Babel to `false` so the minifier eliminates the dead code
+ --no-min      For `z`; Do not run Terser (minifier) on build output
+ --inspect     Run with `node --inspect-brk` to debug node in the chrome devtools. Use `--devtools` to auto-profile.
+ --devtools    Call `console.profile()` before and after the core parse step (not all actions support this)
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -116,7 +128,11 @@ ZeParser test runner help:
       # Run the fuzzer
       ACTION='fuzz'
       ;;
-
+    hf)
+      # Run in HeatFiler
+      HF='yes'
+      ACTION='hf'
+      ;;
     a)
       # Alias for `m --test-acorn` because I'm lazy
       if [[ "${ACTION}" = "" ]]; then
@@ -155,6 +171,8 @@ ZeParser test runner help:
     --concise)      EXTRA='--concise'     ;;
     -b);&
     --build)        BUILD='-b'            ;;
+    --no-compat)    NOCOMP='--no-compat'  ;;
+    --no-min)       NOMIN='--no-min'      ;;
     --prefix)
         PSFIX='--prefix'
         shift
@@ -165,8 +183,11 @@ ZeParser test runner help:
         shift
         ARG=$1
         ;;
-
-
+    --inspect)
+        INSPECT_NODE='--inspect-brk'
+        INSPECT_ZEPAR='--devtools'
+        ;;
+    --devtools)     DEVTOOLS='--devtools' ;;
 
     6)  ES='--es6'  ;;
     7)  ES='--es7'  ;;
@@ -187,28 +208,84 @@ ZeParser test runner help:
   shift
 done
 
+HFPID=''
+if [[ "${HF}" = "yes" ]]; then
+    # Note: the build is self-hosted so we should start this before transforming with HF
+    if [[ ! -z "${BUILD}" ]]; then
+      set -x
+
+      echo "Creating build without compat code and without minification"
+      node --experimental-modules cli/build.mjs --no-compat --no-min
+
+      echo "Remove the artifacts through Prettier"
+      node_modules/.bin/prettier --write ../zeparser3/build/build_w_ast.mjs
+
+      # Transform the build file inline
+      node --experimental-modules ../heatfiler/bin/cli.mjs --file ../zeparser3/build/build_w_ast.mjs --inline --post-node --interval-sync 1000000
+    else
+      HAS_SRC_CHANGES=$(git diff src)
+      if [[ ! -z "${HAS_SRC_CHANGES}" ]]; then
+          git status -s src
+          echo 'There are changes pending to ./src, please commit/stash them first. Exiting now.';
+          exit 1;
+      fi
+
+      set -x
+
+      # Transform the code inline (rely on git to restore it)
+      node --experimental-modules ../heatfiler/bin/cli.mjs --dir ../zeparser3/src --inline --post-node --interval-sync 1000000
+    fi
+
+    # Start the HF server which accepts stats, serves stats, and serves the HF UI as a tiny webserver
+    node --experimental-modules ../heatfiler/bin/cli.mjs --serve --shhh &
+
+    # Get pid of server, it should be running in the background and we want to kill it when this script exits
+    HFPID=$!
+
+    set +x
+
+    trap "echo '###### HF killing server #####'; kill ${HFPID}" SIGINT SIGTERM EXIT
+
+    echo '###### HF setup complete #####'
+fi
+
 set -x
+
 case "${ACTION}" in
     test262)
-        node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB} ${BUILD}
+      node ${INSPECT_NODE} --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
     ;;
 
     fuzz)
-        node --experimental-modules --max-old-space-size=8192 tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD} ${PSFIX} "${ARG}"
+      node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD} ${PSFIX} "${ARG}" ${INSPECT_ZEPAR}
     ;;
 
     build)
-        node --experimental-modules cli/build.mjs
+      node ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR}
     ;;
 
     perf)
-      #./t F ignore/perf/es6.material-ui-core.js --annexb --concise ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
-      #./t F ignore/perf/es6.angular-compiler.js --annexb --module --concise ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
-      node --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD}
+      if [[ -z "${INSPECT_NODE}" ]]; then
+        node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS}
+      else
+        if [[ ! -z "${BUILD}" ]]; then
+          ./t z --no-compat --no-min
+          node_modules/.bin/prettier build/build_w_ast.mjs --write
+        fi
+        node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS}
+      fi
+    ;;
+
+    hf)
+      node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR}
     ;;
 
     *)
-        node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD}
+      node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
     ;;
 esac
 set +x
+
+if [[ "${HF}" = "yes" ]]; then
+    echo '###### END OF PARSER #####'
+fi

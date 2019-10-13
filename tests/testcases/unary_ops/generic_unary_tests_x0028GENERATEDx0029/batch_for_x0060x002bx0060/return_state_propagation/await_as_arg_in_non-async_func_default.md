@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 120 (curc: `x`, token: `x`)
+  Missing function param definition closing parenthesis, found `x` instead
 
 async function f(){   function g(x = + await x) {}  }
                                              ^------- error

@@ -13,6 +13,9 @@ const COMMENTS = true;
 let filePath = import.meta.url.replace(/^file:\/\//,'');
 let dirname = path.dirname(filePath);
 
+const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
+const NO_MIN = process.argv.includes('--no-min'); // skip minifier
+
 (async() => {
   let sources = (await Promise.all([
     await fs.promises.readFile(path.join(dirname, '../src/utils.mjs')),
@@ -31,7 +34,7 @@ let dirname = path.dirname(filePath);
 
     let build = `
 
-let ZeParser = (function(){ // otherwise terser wont minify the names ...
+const exp = (function(){ // otherwise terser wont minify the names ...
 
 // <utils.js>
 ${utils}
@@ -45,14 +48,38 @@ ${zetokenizer}
 ${zeparser}
 // </zeparser.js>
 
-return ZeParser;
+return {
+  ZeParser,
+  toktypeToString,
+};
 })();
 
+const {
+  ZeParser,
+  toktypeToString,
+} = exp;
+
 export default ZeParser;
+export {
+  ZeParser,
+  toktypeToString,
+};
 `;
 
+    // Sanity check
+    Par(build, GOAL_MODULE, false, {
+      webCompat: false, // Probably...
+      fullErrorContext: true,
+
+      // $log: () => {},
+      // $warn: () => {},
+      // $error: () => {},
+    });
+
     let sizeBefore = build.length;
-    { // Minify:
+    if (NO_MIN) {
+      console.log('Skipping minification step');
+    } else {
       console.time('Terser time');
       console.log('Minification through Terser...');
       let t = Terser.minify(build, {
@@ -78,9 +105,6 @@ export default ZeParser;
       if (!keepAsserts) {
         source = source
         .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '"003 assert scrubbed"')
-        // .replace(/^\s*ASSERT\(.*/mg, '"001 assert scrubbed"')
-        // .replace(/ASSERT_(skip\w+)\(.*?, (\w+)/g, '$1($2')
-        // .replace(/ASSERT_skip\(.*?\)/g, 'skip()')
         ;
       }
 
@@ -98,22 +122,6 @@ export default ZeParser;
       });
 
       source = scrub(z.ast);
-
-
-      // if (!keepAst) {
-      //   // Known issues with the AST-less build:
-      //   // - Expression "tails" will be incorrectly parsed; as part of an arrow (`()=>{}.foo`, `()=>{}+foo` etc)
-      //   // - Update operator on object/arrays (or anything that's writable but not ident/member) like `++{}` and `[]--`
-      //   source = source
-      //     .replace(/\/\/ <SCRUB AST>([\s\S]*?)\/\/ <\/SCRUB AST>/g, '"004 ast scrubbed"')
-      //     // .replace(/^\s*AST_.*/mg, '0x002')
-      //     .replace(/^\s*AST_.*/mg, '"002 ast scrubbed"')
-      //   ;
-      // }
-      // if (!keepComments) {
-      //   source = source
-      //     .replace(/^\s*\/\/.*\n/mg, '');
-      // }
 
       return source;
     }

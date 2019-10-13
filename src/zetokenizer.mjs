@@ -115,55 +115,55 @@ import {
 // First 5 bits are not flags (!), they are "leaf" token types (decimal number, template tail).
 // Other bits are flags, used to augment for super groups (string, number, template)
 // (If the number of leafs exceeds 5 bits then it'll be 6 bits which reduces the number of avaliable flags)
-let $_leaf = 0;
-let $_group = 4;
+let __$leaf = 0;
+let __$group = 4;
 
 // Groups get their own bit. This makes it easier to quickly check for a set of token types (string, string | number)
 // Additionally, modifiers get their own bit. Like bigint suffix or bad escapes. Generally these should apply to more
 // than one token, otherwise it can just go below as their own leaf type.
 
-const $G_WHITE = (1 << ++$_group);
-const $G_NEWLINE = (1 << ++$_group);
-const $G_COMMENT = (1 << ++$_group);
-const $G_IDENT = (1 << ++$_group);
-const $G_NUMBER = (1 << ++$_group);
-const $G_NUMBER_BIG_INT = (1 << ++$_group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
-const $G_PUNCTUATOR = (1 << ++$_group);
-const $G_STRING = (1 << ++$_group);
-const $G_REGEX = (1 << ++$_group);
-const $G_TICK = (1 << ++$_group);
-const $G_TICK_BAD_ESCAPE = (1 << ++$_group);
-ASSERT($_group < 32, 'cannot use more than 32 flags but have ' + $_group);
+const $G_WHITE = (1 << ++__$group);
+const $G_NEWLINE = (1 << ++__$group);
+const $G_COMMENT = (1 << ++__$group);
+const $G_IDENT = (1 << ++__$group);
+const $G_NUMBER = (1 << ++__$group);
+const $G_NUMBER_BIG_INT = (1 << ++__$group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
+const $G_PUNCTUATOR = (1 << ++__$group);
+const $G_STRING = (1 << ++__$group);
+const $G_REGEX = (1 << ++__$group);
+const $G_TICK = (1 << ++__$group);
+const $G_TICK_BAD_ESCAPE = (1 << ++__$group);
+ASSERT(__$group < 32, 'cannot use more than 32 flags but have ' + __$group);
 
 // Token types that are mutually exclusive can be encoded as as a unique id within a few bits of sequential space
 // You can still have group bits to complement these but it's far more space efficient this way
 // I don't think you should ever need the $L constants outside of defining the concrete token type constants below...
-const $L_SPACE = ++$_leaf;
-const $L_TAB = ++$_leaf;
-const $L_NL_SINGLE = ++$_leaf;
-const $L_NL_CRLF = ++$_leaf;
-const $L_COMMENT_SINGLE = ++$_leaf;
-const $L_COMMENT_MULTI = ++$_leaf;
-const $L_COMMENT_HTML = ++$_leaf;
-const $L_IDENT = ++$_leaf;
-const $L_NUMBER_HEX = ++$_leaf;
-const $L_NUMBER_DEC = ++$_leaf;
-const $L_NUMBER_BIN = ++$_leaf;
-const $L_NUMBER_OCT = ++$_leaf;
-const $L_NUMBER_OLD = ++$_leaf;
-const $L_PUNCTUATOR = ++$_leaf;
-const $L_REGEXN = ++$_leaf;
-const $L_REGEXU = ++$_leaf;
-const $L_STRING_SINGLE = ++$_leaf;
-const $L_STRING_DOUBLE = ++$_leaf;
-const $L_TICK_HEAD = ++$_leaf;
-const $L_TICK_BODY = ++$_leaf;
-const $L_TICK_TAIL = ++$_leaf;
-const $L_TICK_PURE = ++$_leaf;
-const $L_EOF = ++$_leaf;
-const $L_ASI = ++$_leaf;
-const $L_ERROR = ++$_leaf;
-ASSERT($_leaf < 32, 'cannot use more than 32 leafs but have ' + $_leaf);
+const $L_SPACE = ++__$leaf;
+const $L_TAB = ++__$leaf;
+const $L_NL_SINGLE = ++__$leaf;
+const $L_NL_CRLF = ++__$leaf;
+const $L_COMMENT_SINGLE = ++__$leaf;
+const $L_COMMENT_MULTI = ++__$leaf;
+const $L_COMMENT_HTML = ++__$leaf;
+const $L_IDENT = ++__$leaf;
+const $L_NUMBER_HEX = ++__$leaf;
+const $L_NUMBER_DEC = ++__$leaf;
+const $L_NUMBER_BIN = ++__$leaf;
+const $L_NUMBER_OCT = ++__$leaf;
+const $L_NUMBER_OLD = ++__$leaf;
+const $L_PUNCTUATOR = ++__$leaf;
+const $L_REGEXN = ++__$leaf;
+const $L_REGEXU = ++__$leaf;
+const $L_STRING_SINGLE = ++__$leaf;
+const $L_STRING_DOUBLE = ++__$leaf;
+const $L_TICK_HEAD = ++__$leaf;
+const $L_TICK_BODY = ++__$leaf;
+const $L_TICK_TAIL = ++__$leaf;
+const $L_TICK_PURE = ++__$leaf;
+const $L_EOF = ++__$leaf;
+const $L_ASI = ++__$leaf;
+const $L_ERROR = ++__$leaf;
+ASSERT(__$leaf < 32, 'cannot use more than 32 leafs but have ' + __$leaf);
 
 // These are the token types and you should be able to do strict comparison against specific token types with
 // `curtok` or `token.type`. Every constant maps to a single number which is a combination of a bitwise field and
@@ -295,29 +295,31 @@ const ALL_TOKEN_TYPES = [
   $ERROR,
 ];
 
-let $flag = 0;
+let __$lf_flag = 0;
 const LF_NO_FLAGS = 0;
-const LF_CAN_NEW_DOT_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
-const LF_FOR_REGEX = 1 << ++$flag;
-const LF_IN_ASYNC = 1 << ++$flag;
-const LF_IN_CONSTRUCTOR = 1 << ++$flag; // inside a class constructor (not a regular function) that is not static
-const LF_IN_FOR_LHS = 1 << ++$flag; // inside the initial part of a for-header, prevents `in` being parsed as an operator, hint for checks when destructuring pattern as lhs
-const LF_IN_FUNC_ARGS = 1 << ++$flag; // throws for await expression
-const LF_IN_GENERATOR = 1 << ++$flag;
-const LF_IN_GLOBAL = 1 << ++$flag; // unset whenever you go into any kind of function (for return)
-const LF_IN_ITERATION = 1 << ++$flag; // inside a loop (tells you whether break/continue is valid)
-const LF_IN_SWITCH = 1 << ++$flag; // inside a switch (tells you whether break is valid)
-const LF_IN_TEMPLATE = 1 << ++$flag;
-const LF_NO_ASI = 1 << ++$flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
-const LF_STRICT_MODE = 1 << ++$flag;
-const LF_SUPER_CALL = 1 << ++$flag; // can call `super()`
-const LF_SUPER_PROP = 1 << ++$flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
-ASSERT($flag < 32, 'cannot use more than 32 flags');
+const LF_CAN_NEW_DOT_TARGET = 1 << ++__$lf_flag; // current scope is inside at least one regular (non-arrow) function
+const LF_FOR_REGEX = 1 << ++__$lf_flag;
+const LF_IN_ASYNC = 1 << ++__$lf_flag;
+const LF_IN_CONSTRUCTOR = 1 << ++__$lf_flag; // inside a class constructor (not a regular function) that is not static
+const LF_IN_FOR_LHS = 1 << ++__$lf_flag; // inside the initial part of a for-header, prevents `in` being parsed as an operator, hint for checks when destructuring pattern as lhs
+const LF_IN_FUNC_ARGS = 1 << ++__$lf_flag; // throws for await expression
+const LF_IN_GENERATOR = 1 << ++__$lf_flag;
+const LF_IN_GLOBAL = 1 << ++__$lf_flag; // unset whenever you go into any kind of function (for return)
+const LF_IN_ITERATION = 1 << ++__$lf_flag; // inside a loop (tells you whether break/continue is valid)
+const LF_IN_SWITCH = 1 << ++__$lf_flag; // inside a switch (tells you whether break is valid)
+const LF_IN_TEMPLATE = 1 << ++__$lf_flag;
+const LF_NO_ASI = 1 << ++__$lf_flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
+const LF_STRICT_MODE = 1 << ++__$lf_flag;
+const LF_SUPER_CALL = 1 << ++__$lf_flag; // can call `super()`
+const LF_SUPER_PROP = 1 << ++__$lf_flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
+ASSERT(__$lf_flag < 32, 'cannot use more than 32 flags');
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
 const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options{$?
+
+const DNF = -1; // did not find
 
 // https://tc39.es/ecma262/#table-nonbinary-unicode-properties
 // (manually copied from spec)
@@ -444,26 +446,41 @@ const FAIL_HARD = false;
 const FOR_TEMPLATE = true; // templates are never not allowed to have octal escapes except when tagged
 const NOT_TEMPLATE = false;
 
-let CODEPOINT_FROM_ESCAPE = -1;
+const CODEPOINT_FROM_ESCAPE = -1;
 
 // These error codes must be negative as not to be ambiguous with decoded escape values
-let INVALID_IDENT_CHAR = -1;
-let VALID_SINGLE_CHAR = -2;
-let VALID_DOUBLE_CHAR = -3;
+const INVALID_IDENT_CHAR = -1;
+const VALID_SINGLE_CHAR = -2;
+const VALID_DOUBLE_CHAR = -3;
 
-let ID_START_REGEX = /|/;
-let ID_CONTINUE_REGEX = /|/;
-(function(){
+// TODO: instantiate these lazily; most inputs won't need them so we can skip on the startup overhead and init in a slow path
+const ID_START_REGEX = (function(){
   try {
-    ID_START_REGEX = new RegExp('^\\p{ID_Start}$','u');
-    ID_CONTINUE_REGEX = new RegExp('^\\p{ID_Continue}$','u');
+    return new RegExp('^\\p{ID_Start}$','u');
   } catch(e) {
     console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
+    return /|/;
+  }
+})();
+const ID_CONTINUE_REGEX = (function(){
+  try {
+    return new RegExp('^\\p{ID_Continue}$','u');
+  } catch(e) {
+    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
+    return /|/;
   }
 })();
 
-let disableCanonPoison = false;
-ASSERT(!void (typeof window !== 'undefined' && window.disableCanonPoison && (disableCanonPoison = true)), 'dont enable this in web env');
+let disableCanonPoison = [false]; // reversed stack; always check disableCanonPoison[0] for the current state
+function ASSERT_pushCanonPoison(disabled) {
+  disableCanonPoison.unshift(disabled);
+  console.log('pushed', disabled, disableCanonPoison)
+}
+function ASSERT_popCanonPoison() {
+  disableCanonPoison.shift();
+  console.log('popped', disableCanonPoison)
+}
+ASSERT(!void (typeof window !== 'undefined' && ASSERT_pushCanonPoison(window.disableCanonPoison)), '(suppress this warning in web env and known cases)');
 
 function ZeTokenizer(
   input,
@@ -510,11 +527,7 @@ function ZeTokenizer(
   let prevTokenEndLine = 0;
   let prevTokenSolid = true;
 
-  nextToken.prevEndColumn = () => prevTokenEndColumn;
-  nextToken.prevEndLine = () => prevTokenEndLine;
-  nextToken.currColumn = () => pointer - currentColOffset;
-  nextToken.currLine = () => currentLine;
-
+  let stale = false; // do NOT read from `cache` when `stale` is true. This is a dev-only assertion based safeguard...
   let cache = input.charCodeAt(0);
 
   let tokens = null;
@@ -522,7 +535,6 @@ function ZeTokenizer(
   let solidTokenCount = 0;
   if (collectTokens !== COLLECT_TOKENS_NONE) {
     tokens = tokenStorage;
-    nextToken.tokens = tokens; // probably will want to find a better way..
   }
 
   function peek() {
@@ -530,6 +542,15 @@ function ZeTokenizer(
     ASSERT(!arguments.length, 'peek is not expecting args');
     ASSERT(cache === input.charCodeAt(pointer), 'cache should be up to date');
 
+    return _readCache();
+  }
+  function ASSERT_peekUncached() {
+    // You can use this even if stale=true
+    return input.charCodeAt(pointer);
+  }
+  function _readCache() {
+    // _ALL_ reads for `cache` must go through this function. This way we can assert that it is not read when stale.
+    ASSERT(stale === false, 'do NOT read from cache while it is stale ... (meaning the pointer got changed without updating the cache)');
     return cache;
   }
   function peekd(delta) {
@@ -559,13 +580,13 @@ function ZeTokenizer(
     ASSERT(!arguments.length, 'no args');
     ASSERT(neof(), 'lexer input pointer not oob');
 
-    let t = cache;
+    let t = _readCache();
     cache = skipPeek();
     return t;
   }
   function ASSERT_skipPeek(c) {
     ASSERT(ASSERT_skipPeek.length === arguments.length, 'arg count');
-    ASSERT(cache === c, 'expecting to skip a particular char', c, cache);
+    ASSERT(stale ? ASSERT_peekUncached() === c : peek() === c, 'expecting to skip a particular char', c, stale ? ASSERT_peekUncached() : peek());
     return skipPeek();
   }
   function skipPeek() {
@@ -580,6 +601,12 @@ function ZeTokenizer(
     ASSERT(!arguments.length, 'no args');
 
     cache = input.charCodeAt(++pointer);
+    ASSERT(!(stale = false), '(marking cache fresh so in devmode it wont throw when read)');
+  }
+  function skipFastWithoutUpdatingCache() {
+    // Use ASSERT_peekUncached() for peeking in dev assertions
+    ASSERT(stale = true, '(marking the cache unsafe, any reads should throw in dev mode while stale)');
+    ++pointer;
   }
 
   function eof() {
@@ -607,11 +634,21 @@ function ZeTokenizer(
   // </SCRUB ASSERTS>
 
   let startForError = 0;
-  function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
-    ASSERT(arguments.length >= 1 && arguments.length <= 2, 'arg count 1~2');
+  function nextTokenWithLexer(lexer, lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
+    ASSERT(arguments.length >= 1 && arguments.length <= 3, 'arg count 1~2');
     ASSERT(!finished, 'should not next() after eof token');
+    ASSERT(typeof lexer === 'function', 'The lexer should be passed on and is something like lexerForSlowFallback or something more specific');
+
     // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
     let token;
+
+
+
+    // TODO: in many cases the next token is known. In certain cases it is known whether whitespace must follow,
+    // like after the class keyword or after a number token. How do we optimize the hottest loop for these cases.
+
+
+
 
     if (prevTokenSolid) {
       // Do this at the start because otherwise something like `a \n b` would reset this when forward parsing `b` and
@@ -631,12 +668,13 @@ function ZeTokenizer(
       let startCol = pointer - currentColOffset;
       let startRow = currentLine;
       if (neof()) {
-        let cstart = cache;
+        let cstart = _readCache();
         let start = startForError = pointer; // TODO: see if startForError makes a dent at all
         wasWhite = false;
         wasComment = false;
         let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
-        let consumedTokenType = next(lexerFlags);
+        let consumedTokenType = lexer(lexerFlags);
+        ASSERT(consumedTokenType !== DNF, 'the DNF should not be returned');
         ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
         token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
@@ -674,96 +712,21 @@ function ZeTokenizer(
     return token;
   }
 
-  function incrementLine() {
-    // Call this function AFTER consuming the newline(s) that triggered it
-    ASSERT(input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
-
-    ++consumedNewlinesThisToken;
-    ++currentLine;
-    currentColOffset = pointer;
-  }
-
-  function addAsi() {
-    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken, SOLID_TOKEN, $$SEMI_3B);
-    // are asi's whitespace? i dunno. they're kinda special so maybe.
-    // put it _before_ the current token (that should be the "offending" token)
-    if (collectTokens !== COLLECT_TOKENS_NONE) {
-      tokens.push(token, tokens.pop());
+  function lexerWithFallback(lexer, lexerFlags) {
+    let type = lexer(lexerFlags);
+    // There are certain whitespace cases that could be validly caught here so don't
+    if (type === DNF) {
+      type = lexerForSlowFallback(lexerFlags);
     }
-    ++anyTokenCount;
-    ++solidTokenCount; // eh... i guess.
-    prevTokenSolid = true;
+    ASSERT(type !== DNF, 'the generic lexer should not return DNFs');
+    return type;
   }
+  function lexerForSlowFallback(lexerFlags) {
+    ASSERT(lexerForSlowFallback.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
 
-  function createToken(type, start, stop, column, line, nl, ws, c) {
-    ASSERT(createToken.length === arguments.length);
-    ASSERT(
-      ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext())
-      , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
-    ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
-
-    let str = slice(start, stop);
-
-    let canon = '';
-    if (type === $IDENT) canon = lastParsedIdent;
-    else if (isStringToken(type)) {
-      canon = str[0] + lastCanonizedString + str[0];
-    }
-    else if (isTickToken(type)) {
-      // Mostly necessary for AST output.
-      // There are some `constructor` and `__proto__` checks that use it
-      if (type === $TICK_PURE) {
-        canon = '`' + lastCanonizedString + '`';
-      } else if (type === $TICK_HEAD) {
-        canon = '`' + lastCanonizedString + '${';
-      } else if (type === $TICK_BODY) {
-        canon = '}' + lastCanonizedString + '${';
-      } else if (type === $TICK_TAIL) {
-        canon = '}' + lastCanonizedString + '`';
-      } else if (type === $TICK_BAD_PURE) {
-        canon = '`' + lastCanonizedString + '`';
-      } else if (type === $TICK_BAD_HEAD) {
-        canon = '`' + lastCanonizedString + '${';
-      } else if (type === $TICK_BAD_BODY) {
-        canon = '}' + lastCanonizedString + '${';
-      } else if (type === $TICK_BAD_TAIL) {
-        canon = '}' + lastCanonizedString + '`';
-      } else {
-        ASSERT(false, 'tick should be enum');
-      }
-    }
-
-    let token = {
-      // <SCRUB DEV>
-      _t: toktypeToString(type),
-      // </SCRUB DEV>
-      type,
-      ws, // is this token considered whitespace? (space, tab, newline, comment)
-      nl, // how many newlines between the start of the previous relevant token and the start of this one?
-      start,
-      stop, // start of next token
-      column, // of first char of token
-      line, // of first char of token
-      c,
-      str,
-      // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
-      // The ReservedWord definitions are specified as literal sequences of specific SourceCharacter elements.
-      // A code point in a ReservedWord cannot be expressed by a \ UnicodeEscapeSequence.
-      canon, // will NOT contain escapes, only for idents, strings, and templates // TODO: should perf check this, perhaps we need to take this slowpath differently
-
-      // <SCRUB DEV>
-      toString() {
-        return `{# ${toktypeToString(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} pos=${start}:${stop} loc=${column}:${line} curc=${c} \`${str}\`${canon&&canon!==str?' (canonical=`' + canon + '`)':''}#}`;
-      },
-      // </SCRUB DEV>
-    };
-    ASSERT(disableCanonPoison || type === $IDENT || isStringToken(type) || isTickToken(type) || !void Object.defineProperty(token, 'canon', {get: ASSERT.bind(undefined, false, 'do not read .canon on non-ident tokens'), set: ASSERT.bind(undefined, false, 'do not write to .canon on non-ident tokens')}), 'debugging');
-    return token;
-  }
-
-  function next(lexerFlags) {
-    ASSERT(arguments.length === 1);
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags');
+    // This creates one token of any kind that is valid in JS. It's often the fallback for specific parsers is optimized
+    // to expect a specific kind of token next. This parser will parse a token as long as it could be valid for JS.
 
     let c = peekSkip();
 
@@ -882,6 +845,1324 @@ function ZeTokenizer(
     }
   }
 
+  function nextTokenGeneric(lexerFlags, returnAny) {
+    return nextTokenWithLexer(lexerForSlowFallback, lexerFlags, returnAny);
+  }
+
+  function _lexerWhitespaceCommon(c, lexerFlags) {
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex
+        skip();
+        return parseFwdSlash(lexerFlags); // / /= //.. /*..*/
+    }
+
+    return DNF;
+  }
+
+  function nextTokenToParenOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToParenOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToParenOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForParenOpen, lexerFlags);
+  }
+  function _lexerForParenOpen(lexerFlags) {
+    ASSERT(arguments.length === 1);
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
+    let c = peek();
+
+    if (c === $$PAREN_L_28) {
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToCurlyOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToCurlyOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToCurlyOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForCurlyOpen, lexerFlags);
+  }
+  function _lexerForCurlyOpen(lexerFlags) {
+    ASSERT(_lexerForCurlyOpen.length === arguments.length);
+
+    // This function will consume whitespace, line terminators, comments, and curlies
+    // Otherwise it signals not having found anything (after which the generic `next()` lexer will take over)
+    // and in that case the parser will probably emit an error.
+
+
+    // Start with the most likely; space, tab, newline, curly. Then check the more exotic spaces. Then bail.
+    // TODO: considering to not cover the more exotic whitespace cases here and let the fallback deal with them
+    // Note: in the specific case of a curly, I expect a regular space is to be by far the most likely whitespace ...
+
+    let c = peek();
+
+    if (c === $$CURLY_L_7B) {
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToParenOpenCurlyOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToParenOpenCurlyOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToParenOpenCurlyOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForParenOpenCurlyOpen, lexerFlags);
+  }
+  function _lexerForParenOpenCurlyOpen(lexerFlags) {
+    ASSERT(_lexerForParenOpenCurlyOpen.length === arguments.length);
+
+    let c = peek();
+
+    if (c === $$PAREN_L_28 || c === $$CURLY_L_7B) {
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToFrom(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToFrom, lexerFlags, returnAny);
+  }
+  function _nextTokenToFrom(lexerFlags) {
+    return lexerWithFallback(_lexerForFrom, lexerFlags);
+  }
+  function _lexerForFrom(lexerFlags) {
+    let c = peek();
+
+    if (c === $$F_66) {
+      skip();
+      return parseIdentifierRest('f');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToString(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToString, lexerFlags, returnAny);
+  }
+  function _nextTokenToString(lexerFlags) {
+    return lexerWithFallback(_lexerForString, lexerFlags);
+  }
+  function _lexerForString(lexerFlags) {
+    let c = peek();
+
+    if (c === $$SQUOTE_27) {
+      skip();
+      return parseSingleString(lexerFlags);
+    }
+    if (c === $$DQUOTE_22) {
+      skip();
+      return parseDoubleString(lexerFlags);
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdent(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdent, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdent(lexerFlags) {
+    return lexerWithFallback(_lexerForIdent, lexerFlags);
+  }
+  function _lexerForIdent(lexerFlags) {
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+    if (c === $$$_24) {
+      skip();
+      return parseIdentifierRest('$');
+    }
+    if (c === $$LODASH_5F) {
+      skip();
+      return parseIdentifierRest('_');
+    }
+
+    let w = _lexerWhitespaceCommon(c, lexerFlags);
+    if (w !== DNF) return w;
+
+    // Since this function is called when the next token must be ident, we should now first do the expensive unicode
+    // check before returning to the fallback, since that is very very likely to be a syntax error anyways.
+
+    let cu = input.codePointAt(pointer);
+    let wide = isIdentStart(cu, pointer);
+    if (wide !== INVALID_IDENT_CHAR) {
+      skip();
+      if (wide === VALID_DOUBLE_CHAR) skip();
+      return parseIdentifierRest(String.fromCodePoint(cu));
+    }
+
+    return DNF;
+  }
+  function nextTokenToArrow(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToArrow, lexerFlags, returnAny);
+  }
+  function _nextTokenToArrow(lexerFlags) {
+    return lexerWithFallback(_lexerForArrow, lexerFlags);
+  }
+  function _lexerForArrow(lexerFlags) {
+    let c = peek();
+
+    if (c === $$IS_3D) {
+      skip();
+      return parseEqual(); // = == === =>
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToAs(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToAs, lexerFlags, returnAny);
+  }
+  function _nextTokenToAs(lexerFlags) {
+    return lexerWithFallback(_lexerForAs, lexerFlags);
+  }
+  function _lexerForAs(lexerFlags) {
+    let c = peek();
+
+    if (c === $$A_61) {
+      skip();
+      return parseIdentifierRest('a');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToAsCommaCurlyClose(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToAsCommaCurlyClose, lexerFlags, returnAny);
+  }
+  function _nextTokenToAsCommaCurlyClose(lexerFlags) {
+    return lexerWithFallback(_lexerForAsCommaCurlyClose, lexerFlags);
+  }
+  function _lexerForAsCommaCurlyClose(lexerFlags) {
+    let c = peek();
+
+    switch (c) {
+      case $$A_61:
+        // Only `as` would be valid here (we can always improve this but let's leave it generic for now)
+        skip();
+        return parseIdentifierRest('a');
+
+      case $$CURLY_R_7D:
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for import/export)');
+        // fall-through
+      case $$COMMA_2C:
+        skip();
+        return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToAsCommaFrom(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToAsCommaFrom, lexerFlags, returnAny);
+  }
+  function _nextTokenToAsCommaFrom(lexerFlags) {
+    return lexerWithFallback(_lexerForAsCommaFrom, lexerFlags);
+  }
+  function _lexerForAsCommaFrom(lexerFlags) {
+    let c = peek();
+
+    switch (c) {
+      case $$A_61: // `as`
+        skip();
+        return parseIdentifierRest('a');
+      case $$F_66: // `from`
+        skip();
+        return parseIdentifierRest('f');
+      case $$COMMA_2C:
+        skip();
+        return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToColon(lexerFlags, returnAny) {
+    // - `:`  (for `default`)
+    return nextTokenWithLexer(_nextTokenToColon, lexerFlags, returnAny);
+  }
+  function _nextTokenToColon(lexerFlags) {
+    return lexerWithFallback(_lexerForColon, lexerFlags);
+  }
+  function _lexerForColon(lexerFlags) {
+    let c = peek();
+
+    if (c === $$COLON_3A) {
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToTarget(lexerFlags, returnAny) {
+    // - `target`  (for `new.target`)
+    return nextTokenWithLexer(_nextTokenToTarget, lexerFlags, returnAny);
+  }
+  function _nextTokenToTarget(lexerFlags) {
+    return lexerWithFallback(_lexerForTarget, lexerFlags);
+  }
+  function _lexerForTarget(lexerFlags) {
+    let c = peek();
+
+    if (c === $$T_74) {
+      skip();
+      return parseIdentifierRest('t');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToStatementStart(lexerFlags, returnAny) {
+    // When the next token must be the start of a new statement, or the end of some sort of block (`}`)
+    return nextTokenWithLexer(_nextTokenToStatementStart, lexerFlags, returnAny);
+  }
+  function _nextTokenToStatementStart(lexerFlags) {
+    return lexerWithFallback(_lexerForStatementStart, lexerFlags);
+  }
+  function _lexerForStatementStart(lexerFlags) {
+
+    // This is more of an optimization since we can't "quickly" verify whether or not we parsed a valid token, nor
+    // do we care since that will be picked up by the next attempt to consume a body part, if that were the case.
+    // Note that this assumes a forward slash is a regex (this is not necessarily the case for an asi-continuation!)
+
+    // Things that we optimize for;
+    // - almost any expression start (and some things just overlap, like objlit vs block)
+      // - identifier (more than likely as many statements start with a keyword)
+      // - `(` (some scripts may have many of these for iife's)
+      // - string (esp directives)
+      // - number (meh)
+      // - `[` (meh)
+      // - `{` (block)
+      // - `+` (meh, most likely a `++`?)
+      // - `-` (meh, most likely a `--`?)
+      // - `~` (meh)
+      // - `~` (meh)
+      // - `\` (meh, idents)
+      // - `/` (likely due to comments, perhaps regex)
+    // - `}` (will happen a few times in most scripts)
+    // - `;` (meh)
+    // - ?
+
+    // First check for expr. This also takes care of any statement keywords and block statement. Whitespace stuff too.
+    let exprstuff = _lexerForExpressionStart(lexerFlags);
+    if (exprstuff !== DNF) return exprstuff;
+
+    // Now there are a few things commonly left for statements that won't appear as expr starts:
+
+    let c = peek();
+
+    // If not space or tab then I deem ident the mots likely. Above comments
+
+    if (c === $$CURLY_R_7D || c === $$SEMI_3B) {
+      ASSERT(c === $$SEMI_3B || (lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for statement start)');
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return DNF;
+  }
+  function nextTokenToExpressionStart(lexerFlags, returnAny) {
+    // When the next token must be the start of a new expression
+    return nextTokenWithLexer(_nextTokenToExpressionStart, lexerFlags, returnAny);
+  }
+  function _nextTokenToExpressionStart(lexerFlags) {
+    return lexerWithFallback(_lexerForExpressionStart, lexerFlags);
+  }
+  function _lexerForExpressionStart(lexerFlags) {
+    let c = peek();
+
+    // This is more of an optimization since we can't "quickly" verify whether or not we parsed a valid token, nor
+    // do we care since that will be picked up by the next attempt to consume the token, if that were the case.
+
+    // Things that we optimize for;
+    // - identifier (more than likely)
+    // - string (more than likely)
+    // - number (more than likely)
+    // - `!` (likely)
+    // - `[` (likely)
+    // - `{` (likely)
+    // - space (maybe)
+    // - tab (maybe, for multi-line expressions, the next line would be indented)
+    // - cr / lf (multi-line expressions, like call args)
+    // - `(` (maybe, for disambiguation purposes)
+    // - `/` (comment (more likely for multi-line) or regular expression)
+    // - `+` (maybe, most likely a `++`?)
+    // - `-` (maybe, most likely a `--`? but used as a negative var also happens (`-x`))
+    // - `~` (meh)
+    // - `\` (meh, it's possible)
+    // - `...` (spread)
+    // - ?
+
+    // If not space or tab then I deem ident the mots likely. Above comments
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+      case $$EXCL_21:
+      case $$SQUARE_L_5B:
+      case $$CURLY_L_7B:
+        skip();
+        return $PUNCTUATOR;
+      case $$DOT_2E: // . ... .25
+        skip();
+        return parseLeadingDot();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags | LF_FOR_REGEX);
+  }
+  function nextTokenToExpressionStartGrouped(lexerFlags, returnAny) {
+    // When the next token must be the start of a new expression or end of a group (`)`)
+    return nextTokenWithLexer(_nextTokenToExpressionStartGrouped, lexerFlags, returnAny);
+  }
+  function _nextTokenToExpressionStartGrouped(lexerFlags) {
+    return lexerWithFallback(_lexerForExpressionStartGrouped, lexerFlags);
+  }
+  function _lexerForExpressionStartGrouped(lexerFlags) {
+    // Same as nextTokenToExpressionStart except it also checks `)`
+
+    let exprstuff = _lexerForExpressionStart(lexerFlags);
+    if (exprstuff !== DNF) return exprstuff;
+    if (peeky($$PAREN_R_29)) {
+      skip();
+      return $PUNCTUATOR;
+    }
+    return DNF;
+  }
+  function nextTokenToExpressionStartSemi(lexerFlags, returnAny) {
+    // When the next token must be the start of a new expression or the semi in a `for` header
+    return nextTokenWithLexer(_nextTokenToExpressionStartSemi, lexerFlags, returnAny);
+  }
+  function _nextTokenToExpressionStartSemi(lexerFlags) {
+    return lexerWithFallback(_lexerForExpressionStartSemi, lexerFlags);
+  }
+  function _lexerForExpressionStartSemi(lexerFlags) {
+    // Same as nextTokenToExpressionStart except it also checks `;`
+
+    let exprstuff = _lexerForExpressionStart(lexerFlags);
+    if (exprstuff !== DNF) return exprstuff;
+    if (peeky($$SEMI_3B)) {
+      skip();
+      return $PUNCTUATOR;
+    }
+    return DNF;
+  }
+  function nextTokenToExpressionStartSquareCloseComma(lexerFlags, returnAny) {
+    // When the next token must be the start of a new expression or `]` or a `,` in an array literal
+    return nextTokenWithLexer(_nextTokenToExpressionStartSquareCloseComma, lexerFlags, returnAny);
+  }
+  function _nextTokenToExpressionStartSquareCloseComma(lexerFlags) {
+    return lexerWithFallback(_lexerForExpressionStartSquareCloseComma, lexerFlags);
+  }
+  function _lexerForExpressionStartSquareCloseComma(lexerFlags) {
+    // Same as nextTokenToExpressionStart except it also checks `]` and `,`
+
+    let exprstuff = _lexerForExpressionStart(lexerFlags);
+    if (exprstuff !== DNF) return exprstuff;
+    let c = peek();
+    if (c === $$SQUARE_R_5D || c === $$COMMA_2C) {
+      skip();
+      return $PUNCTUATOR;
+    }
+    return DNF;
+  }
+  function nextTokenToObjectMemberStart(lexerFlags, returnAny) {
+    // First token of an object member (property or method).
+    // - `{foo: bar}`
+    //     ^^^
+    // - `{foo(){}}`
+    //     ^^^
+    // - `{get foo(){}}`
+    //     ^^^
+    return nextTokenWithLexer(_nextTokenToObjectMemberStart, lexerFlags, returnAny);
+  }
+  function _nextTokenToObjectMemberStart(lexerFlags) {
+    return lexerWithFallback(_lexerForObjectMemberStart, lexerFlags);
+  }
+  function _lexerForObjectMemberStart(lexerFlags) {
+    let c = peek();
+
+    // Anything that is valid as the start of an object member (so after the `{` or comma in an objlit)
+    // Will have to investigate what the proper order is in terms of odds. Hard to say.
+    // - ident
+    // - string
+    // - number
+    // - `}` (empty obj)
+    // - `[` (computed method)
+    // - `*` (generator method)
+    // - ?
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+
+      case $$CURLY_R_7D:
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for objkey start, must close object before closing the quasi)');
+        // fall-through
+      case $$SQUARE_L_5B:
+        skip();
+        return $PUNCTUATOR;
+
+      case $$IS_3D:
+        skip();
+        return parseEqual(); // = == === =>
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$0_30:
+        skip();
+        return parseLeadingZero(lexerFlags);
+    }
+
+    if (isAsciiNumber(c)) {
+      // non-zero start
+      skip();
+      return parseDecimal();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToObjectMemberRest(lexerFlags, returnAny) {
+    // The next token after the first token of an object member (property or method).
+    // - `{foo: bar}`
+    //        ^
+    // - `{foo(){}}`
+    //        ^
+    // - `{get foo(){}}`
+    //         ^^^
+    // - `{get "ok"(){}}`
+    //         ^^^^
+    return nextTokenWithLexer(_nextTokenToObjectMemberRest, lexerFlags, returnAny);
+  }
+  function _nextTokenToObjectMemberRest(lexerFlags) {
+    return lexerWithFallback(_lexerForObjectMemberRest, lexerFlags);
+  }
+  function _lexerForObjectMemberRest(lexerFlags) {
+    let c = peek();
+
+    // Anything that is valid after parsing the first token of a member of an object literal
+    // Will have to investigate what the proper order is in terms of odds. Hard to say.
+    // I think whitespace is actually less likely, except if this was a modifier. Newlines are very unlikely, regardless
+    // - `:` (property)
+    // - `(` (method)
+    // - ident, string, number (like when the first token is a modifier)
+    // - `,` (shorthand)
+    // - `}` (shorthand)
+    // - `=` (shorthand init)
+    // - `[` (computed method name with modifier)
+    // - `*` (static/async generator method)
+    // - ?
+
+    // TODO: this has an interesting additional property where if there is whitespace it is much more likely to be ident
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$CURLY_R_7D:
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for objkey rest, must close object before closing the quasi)');
+        // fall-through
+      case $$COMMA_2C:
+        skip();
+        return $PUNCTUATOR;
+
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+      case $$SQUARE_L_5B:
+        skip();
+        return $PUNCTUATOR;
+      case $$IS_3D:
+        skip();
+        return parseEqual(); // = == === =>
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToClassMemberStart(lexerFlags, returnAny) {
+    // The first token of a class method
+    // - `class x {foo(){}}`
+    //             ^
+    // - `class x {get foo(){}}`
+    //             ^^^
+    // - `class x {get "ok"(){}}`
+    //             ^^^
+    return nextTokenWithLexer(_nextTokenToClassMemberStart, lexerFlags, returnAny);
+  }
+  function _nextTokenToClassMemberStart(lexerFlags) {
+    return lexerWithFallback(_lexerForClassMemberStart, lexerFlags);
+  }
+  function _lexerForClassMemberStart(lexerFlags) {
+    let c = peek();
+
+    // Anything that is valid as the start of a class member (so after the `{` or semi-colon in a class)
+    // Will have to investigate what the proper order is in terms of odds. Hard to say.
+    // - ident
+    // - string
+    // - number
+    // - `}` (empty class body)
+    // - `[` (computed method)
+    // - `*` (generator method)
+    // - `;` (can have multiple succeeding semi-colons)
+    // - ?
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+
+      case $$CURLY_R_7D:
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for class member start, must close object before closing the quasi)');
+        // fall-through
+      case $$SQUARE_L_5B:
+      case $$SEMI_3B:
+        skip();
+        return $PUNCTUATOR;
+      case $$IS_3D:
+        skip();
+        return parseEqual(); // = == === =>
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$0_30:
+        skip();
+        return parseLeadingZero(lexerFlags);
+    }
+
+    if (isAsciiNumber(c)) {
+      // non-zero start
+      skip();
+      return parseDecimal();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToClassMemberRest(lexerFlags, returnAny) {
+    // The next token after the first token of an object member (property or method).
+    // - `{foo: bar}`
+    //        ^
+    // - `{foo(){}}`
+    //        ^
+    // - `{get foo(){}}`
+    //         ^^^
+    // - `{get "ok"(){}}`
+    //         ^^^^
+    return nextTokenWithLexer(_nextTokenToClassMemberRest, lexerFlags, returnAny);
+  }
+  function _nextTokenToClassMemberRest(lexerFlags) {
+    return lexerWithFallback(_lexerForClassMemberRest, lexerFlags);
+  }
+  function _lexerForClassMemberRest(lexerFlags) {
+    let c = peek();
+
+    // Anything that is valid after parsing the first token of a member of a class body
+    // Will have to investigate what the proper order is in terms of odds. Hard to say.
+    // - `(` (method)
+    // - ident, string, number (like when the first token is a modifier)
+    // - `[` (computed method name with modifier)
+    // - `*` (static/async generator method)
+    // - ?
+
+    // TODO: this has an interesting additional property where if there is whitespace it is much more likely to be ident
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+      case $$SQUARE_L_5B:
+        skip();
+        return $PUNCTUATOR;
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$0_30:
+        skip();
+        return parseLeadingZero(lexerFlags);
+    }
+
+    if (isAsciiNumber(c)) {
+      // non-zero start
+      skip();
+      return parseDecimal();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenSwitchBody(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenSwitchBody, lexerFlags, returnAny);
+  }
+  function _nextTokenSwitchBody(lexerFlags) {
+    return lexerWithFallback(_lexerForSwitchBody, lexerFlags);
+  }
+  function _lexerForSwitchBody(lexerFlags) {
+    // A switch must start with a case or default, or be empty. So not that many valid options here.
+
+    let c = peek();
+
+    switch (c) {
+      case $$C_63: // `case`
+        skip();
+        return parseIdentifierRest('c');
+
+      case $$D_64: // `default`
+        skip();
+        return parseIdentifierRest('d');
+
+      case $$CURLY_R_7D: // `switch (x) {}`
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only inside switch, must close switch before closing the quasi)');
+        skip();
+        return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToBindingStart(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToBindingStart, lexerFlags, returnAny);
+  }
+  function _nextTokenToBindingStart(lexerFlags) {
+    return lexerWithFallback(_lexerForBindingStart, lexerFlags);
+  }
+  function _lexerForBindingStart(lexerFlags) {
+    // The start of a binding, generally after a `var`, `let`, or `const` (but also a `for`-header) is rather restricted
+    // - identifier
+    // - pattern; `[`, `{`
+    // - `...`
+    // ?
+    // (It is not optional so there are no closing curlies, comma, semi, etc to check)
+    // Some whitespace is mandatory, except in a `for`-header.
+
+    let c = peek();
+
+    // I expect this the most likely
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+
+      case $$SQUARE_L_5B: // `let [x] = y`
+      case $$CURLY_R_7D: // `var {x} = y`
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (cant declare vars inside a quasi)');
+        skip();
+        return $PUNCTUATOR;
+      case $$DOT_2E: // . ... .25    }
+        skip();
+        return parseLeadingDot();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToBindingStartGrouped(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToBindingStartGrouped, lexerFlags, returnAny);
+  }
+  function _nextTokenToBindingStartGrouped(lexerFlags) {
+    return lexerWithFallback(_lexerForBindingStartGrouped, lexerFlags);
+  }
+  function _lexerForBindingStartGrouped(lexerFlags) {
+    // The start of a binding, generally after a `var`, `let`, or `const` (but also a `for`-header) is rather restricted
+    // This is the case of params, where the next token may also be a paren (unlike var decls which can not have parens)
+    // - identifier
+    // - pattern; `[`, `{`
+    // - `...`
+    // - end of header; `)`
+    // ?
+    // (It is optional in this context so we must check `)` as well)
+
+    let c = peek();
+
+    // I expect this the most likely
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+
+      case $$CURLY_R_7D: // `var {x} = y`
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (if declaring vars here we are in a param header, which must be closed before closing the template)');
+        // fall-through
+      case $$PAREN_R_29: // `function x(){}` but also after comma: `function x(a,){}`
+      case $$SQUARE_L_5B: // `let [x] = y`
+        skip();
+        return $PUNCTUATOR;
+      case $$DOT_2E: // . ... .25
+        skip();
+        return parseLeadingDot();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToColonOrParenOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToColonOrParenOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToColonOrParenOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForColonOrParenOpen, lexerFlags);
+  }
+  function _lexerForColonOrParenOpen(lexerFlags) {
+    // This is after an object literal property, where the first token was a number, string, star, or computed property
+    // In that case the next token must be a colon or a curly, there are no other options. Except for whitespace.
+
+    let c = peek();
+
+    if (c === $$COLON_3A || c === $$PAREN_L_28) {
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentOrParenOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentOrParenOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentOrParenOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentOrParenOpen, lexerFlags);
+  }
+  function _lexerForIdentOrParenOpen(lexerFlags) {
+    // After a function star or async function star (expression), the next token must be an ident or a paren
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$PAREN_L_28:
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentStarParenOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentStarParenOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentStarParenOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentStarParenOpen, lexerFlags);
+  }
+  function _lexerForIdentStarParenOpen(lexerFlags) {
+    // After a function keyword, the next token must be an ident, star, or an opening paren
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+      case $$PAREN_L_28:
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentStarCurlyOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentStarCurlyOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentStarCurlyOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentStarCurlyOpen, lexerFlags);
+  }
+  function _lexerForIdentStarCurlyOpen(lexerFlags) {
+    // The next token after the `export` keyword;
+    // - `export * from 'x'`
+    // - `export {}`
+    // - `export foo`
+    // - `export default ...`
+    // - `export var ...`
+    // - `export let ...`
+    // - `export const ...`
+    // - `export class ...`
+    // - `export function ...`
+    // - `export async function ...`
+    // So for us this means star, curly open, and ident.
+    // And while `default` and `function` are more likely idents than the others, right now the lexer just returns
+    // the $IDENT flag so we may as well do two range checks and call it a day. For now.
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+      case $$CURLY_L_7B:
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToCommaCurlyClose(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToCommaCurlyClose, lexerFlags, returnAny);
+  }
+  function _nextTokenToCommaCurlyClose(lexerFlags) {
+    return lexerWithFallback(_lexerForCommaCurlyClose, lexerFlags);
+  }
+  function _lexerForCommaCurlyClose(lexerFlags) {
+    // Inside the object for export after as-ident the next token is either a comma or a closing curly
+
+    let c = peek();
+
+    if (c === $$CURLY_R_7D || c === $$COMMA_2C) {
+      ASSERT(c === $$COMMA_2C || (lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called in export obj)');
+      skip();
+      return $PUNCTUATOR;
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentCurlyOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentCurlyOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentCurlyOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentCurlyOpen, lexerFlags);
+  }
+  function _lexerForIdentCurlyOpen(lexerFlags) {
+    // After `class` keyword, the next is the id (an ident), `extends` (an ident), or an opening curly (anon class expr)
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$CURLY_L_7B:
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentCurlyClose(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentCurlyClose, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentCurlyClose(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentCurlyClose, lexerFlags);
+  }
+  function _lexerForIdentCurlyClose(lexerFlags) {
+    // Inside the object for export after a comma the next token is either an ident or a closing curly
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$CURLY_R_7D:
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called export object)');
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentStarCurlyOpenParenOpenString, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentStarCurlyOpenParenOpenString(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentStarCurlyOpenParenOpenString, lexerFlags);
+  }
+  function _lexerForIdentStarCurlyOpenParenOpenString(lexerFlags) {
+    // The next token after the `import` keyword;
+    // - `import * as x from 'x'`
+    // - `import {} ...`
+    // - `import foo from ...`
+    // - `import();`                // (dynamic import)
+    // - `import 'foo';`            // this is valid, too
+    // The ident can be anything
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$STAR_2A:
+        skip();
+        return parseStar(); // * *= ** **=
+      case $$CURLY_L_7B:
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToAwaitParenOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToAwaitParenOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToAwaitParenOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForAwaitParenOpen, lexerFlags);
+  }
+  function _lexerForAwaitParenOpen(lexerFlags) {
+    // After a function star or async function star (expression), the next token must be an ident or a paren
+
+    let c = peek();
+
+    switch (c) {
+      case $$PAREN_L_28: // Most likely for the `for` case ...
+        skip();
+        return $PUNCTUATOR;
+      case $$A_61:
+        // `for await (...`
+        skip();
+        return parseIdentifierRest('a');
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToIdentStringNumberSquareOpen(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToIdentStringNumberSquareOpen, lexerFlags, returnAny);
+  }
+  function _nextTokenToIdentStringNumberSquareOpen(lexerFlags) {
+    return lexerWithFallback(_lexerForIdentStringNumberSquareOpen, lexerFlags);
+  }
+  function _lexerForIdentStringNumberSquareOpen(lexerFlags) {
+    // The next token after a star inside an object method or class member
+    // - `x = {*x(){}}`
+    //         ^
+    // - `class x {*x(){}}`
+    //             ^
+
+    // Next must be the id, so number, string, ident, or `[`
+
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$SQUARE_L_5B:
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+      case $$0_30:
+        skip();
+        return parseLeadingZero(lexerFlags);
+    }
+
+    if (isAsciiNumber(c)) {
+      // non-zero start
+      skip();
+      return parseDecimal();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+  function nextTokenToParamStart(lexerFlags, returnAny) {
+    return nextTokenWithLexer(_nextTokenToParamStart, lexerFlags, returnAny);
+  }
+  function _nextTokenToParamStart(lexerFlags) {
+    return lexerWithFallback(_lexerForParamStart, lexerFlags);
+  }
+  function _lexerForParamStart(lexerFlags) {
+    // The next token that is the start of a func param
+    // - `function f(){}`
+    //               ^
+    // - `function f(x){}`
+    //               ^
+    // - `function f([x]]){}`
+    // - `function f({x}){}`
+    // - `function f(...x){}`
+
+    let c = peek();
+
+    if (isAsciiLetter(c)) {
+      skip();
+      return parseIdentifierRest(String.fromCharCode(c));
+    }
+
+    switch (c) {
+      case $$SQUARE_L_5B:
+        skip();
+        return $PUNCTUATOR;
+      case $$CURLY_R_7D:
+        ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called export object)');
+        skip();
+        return $PUNCTUATOR;
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+      case $$DOT_2E: // . ... .25
+        skip();
+        return parseLeadingDot();
+    }
+
+    return _lexerWhitespaceCommon(c, lexerFlags);
+  }
+
+  function incrementLine() {
+    // Call this function AFTER consuming the newline(s) that triggered it
+    ASSERT(input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
+
+    ++consumedNewlinesThisToken;
+    ++currentLine;
+    currentColOffset = pointer;
+  }
+
+  function addAsi() {
+    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken, SOLID_TOKEN, $$SEMI_3B);
+    // are asi's whitespace? i dunno. they're kinda special so maybe.
+    // put it _before_ the current token (that should be the "offending" token)
+    if (collectTokens !== COLLECT_TOKENS_NONE) {
+      tokens.push(token, tokens.pop());
+    }
+    ++anyTokenCount;
+    ++solidTokenCount; // eh... i guess.
+    prevTokenSolid = true;
+  }
+
+  function createToken(type, start, stop, column, line, nl, ws, c) {
+    ASSERT(createToken.length === arguments.length);
+    ASSERT(
+      ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext())
+      , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
+    ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
+
+    let str = slice(start, stop);
+
+    let canon = '';
+    if (type === $IDENT) canon = lastParsedIdent;
+    else if (isStringToken(type)) {
+      canon = str[0] + lastCanonizedString + str[0];
+    }
+    else if (isTickToken(type)) {
+      // Mostly necessary for AST output.
+      // There are some `constructor` and `__proto__` checks that use it
+      if (type === $TICK_PURE) {
+        canon = '`' + lastCanonizedString + '`';
+      } else if (type === $TICK_HEAD) {
+        canon = '`' + lastCanonizedString + '${';
+      } else if (type === $TICK_BODY) {
+        canon = '}' + lastCanonizedString + '${';
+      } else if (type === $TICK_TAIL) {
+        canon = '}' + lastCanonizedString + '`';
+      } else if (type === $TICK_BAD_PURE) {
+        canon = '`' + lastCanonizedString + '`';
+      } else if (type === $TICK_BAD_HEAD) {
+        canon = '`' + lastCanonizedString + '${';
+      } else if (type === $TICK_BAD_BODY) {
+        canon = '}' + lastCanonizedString + '${';
+      } else if (type === $TICK_BAD_TAIL) {
+        canon = '}' + lastCanonizedString + '`';
+      } else {
+        ASSERT(false, 'tick should be enum');
+      }
+    }
+
+    let token = {
+      // <SCRUB DEV>
+      _t: toktypeToString(type),
+      // </SCRUB DEV>
+      type,
+      ws, // is this token considered whitespace? (space, tab, newline, comment)
+      nl, // how many newlines between the start of the previous relevant token and the start of this one?
+      start,
+      stop, // start of next token
+      column, // of first char of token
+      line, // of first char of token
+      c,
+      str,
+      // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
+      // The ReservedWord definitions are specified as literal sequences of specific SourceCharacter elements.
+      // A code point in a ReservedWord cannot be expressed by a \ UnicodeEscapeSequence.
+      canon, // will NOT contain escapes, only for idents, strings, and templates // TODO: should perf check this, perhaps we need to take this slowpath differently
+
+      // <SCRUB DEV>
+      toString() {
+        return `{# ${toktypeToString(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} pos=${start}:${stop} loc=${column}:${line} curc=${c} \`${str}\`${canon&&canon!==str?' (canonical=`' + canon + '`)':''}#}`;
+      },
+      // </SCRUB DEV>
+    };
+    ASSERT(
+      disableCanonPoison[0] ||
+      type === $IDENT ||
+      isStringToken(type) ||
+      isTickToken(type) ||
+      !void Object.defineProperty(
+        token,
+        'canon',
+        {
+          get: () => disableCanonPoison[0] || ASSERT(false, 'do not read .canon on non-ident tokens'),
+          set: () => disableCanonPoison[0] || ASSERT(false, 'do not write to .canon on non-ident tokens')
+        }
+      ),
+      '(debugging)'
+    );
+    return token;
+  }
+
   function parseLeadingDot() {
     if (eof()) return $PUNCTUATOR; // will lead to an error in the parser
 
@@ -942,50 +2223,81 @@ function ZeTokenizer(
     ASSERT(arguments.length === 3, 'need 3 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    let bad = false;
+    let badEscape = false;
+    let hadNewline = false;
     let c;
     while (neof()) {
       // while we will want to consume at least one more byte for proper strings,
       // there could be a malformed string and we wouldnt want to consume the newline
       c = peek();
 
-      if (c === marker) {
-        ASSERT_skip(marker);
-        break;
-      }
+      /*
+        There are a handful of chars that we must verify for strings;
+          - $$LF_0A                       1010    newline
+          - $$CR_0D                       1101    newline
+          - $$DQUOTE_22                 100010    end of double quoted strings
+          - $$SQUOTE_27                 100111    end of single quoted strings
+          - $$BACKSLASH_5C             1011100    starts an escape
+          - $$PS_2028           10000000101000    special edge case for locations
+          - $$LS_2029           10000000101001    special edge case for locations
+       */
 
-      // Note: LF and PS are newlines that are _explicitly_ allowed in a string, so only check for LF and CR here
-      if (c === $$LF_0A) {
-        bad = true;
-        break;
-      }
+      // Break on the marker (we only need to check one of the quotes and the marker tells us which quote)
+      if (c <= marker) {
+        // This can catch characters; space, !, ", #, $, %, &, ' (and a bunch of non-printables)
+        // This range needs to (only) check for the marker (matches once) and the newlines \r and \n (matches never)
 
-      if (c === $$CR_0D) {
-        // this peeky is already on a slow error path so no need to "optimize" it to prevent double parsing that byte
-        if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
-        bad = true;
-        break;
-      }
+        if (c === marker) {
+          ASSERT_skip(marker);
 
-      if (c === $$BACKSLASH_5C) {
-        bad = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || bad;
+          if (badEscape) {
+            if (!lastReportableTokenizerError) lastReportableTokenizerError = 'String had an illegal escape';
+            return $ERROR;
+          }
+
+          // Note: LF and PS are newlines that are _explicitly_ allowed in a string, so only check for LF and CR here
+          if (hadNewline) {
+            if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Encountered newline in string which is not allowed';
+            return $ERROR;
+          }
+
+          return tokenType;
+        }
+
+        hadNewline = hadNewline || c === $$LF_0A || c === $$CR_0D;
+
+        // lastCanonizedString += String.fromCharCode(c);
+        lastCanonizedString += input[pointer];
+        ASSERT_skip(c);
+      } else if (c <= 0x7e) {
+        // This catches all the other ascii characters
+        // This range only needs to check the backslash, which unfortunately occurs in the middle of the range
+
+        if (c === $$BACKSLASH_5C) { // This seems to hit quite frequently, relative to this function
+          badEscape = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || badEscape;
+          // TODO: shouldn't this add to the canonized value??
+        } else {
+          lastCanonizedString += input[pointer];
+          // lastCanonizedString += String.fromCharCode(c);
+          ASSERT_skip(c);
+        }
       } else {
+        // This is anything non-ascii
+        // This range (which is fairly uncommon at time of writing) needs to check the 2028 and 2029 "newlines"
+
+        lastCanonizedString += input[pointer];
+        // lastCanonizedString += String.fromCharCode(c);
         ASSERT_skip(c);
         if (isPsLs(c)) {
           // This is a bit of a weird case for strings.
           // (Increment after consumption as that's what incrementLine expects and asserts)
           incrementLine();
         }
-        lastCanonizedString += String.fromCharCode(c);
       }
     }
-
-    if (bad || c !== marker) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unclosed string or string had an illegal escape';
-      return $ERROR;
-    }
-
-    return tokenType;
+    ASSERT(eof(), 'this is only reachable in the early EOF case');
+    if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unclosed string at EOF';
+    return $ERROR;
   }
   function parseStringEscape(lexerFlags, forTemplate) {
     ASSERT(arguments.length === parseStringEscape.length, 'need args');
@@ -1095,10 +2407,14 @@ function ZeTokenizer(
     // if this is a bad escape then dont consume the chars. one of them could be a closing quote
     if (isHex(a) && isHex(b) && isHex(c) && isHex(d)) {
       // okay, _now_ consume them
-      ASSERT_skip(a);
-      ASSERT_skip(b);
-      ASSERT_skip(c);
-      ASSERT_skip(d);
+      ASSERT(ASSERT_peekUncached() === a);
+      skipFastWithoutUpdatingCache();
+      ASSERT(ASSERT_peekUncached() === b);
+      skipFastWithoutUpdatingCache();
+      ASSERT(ASSERT_peekUncached() === c);
+      skipFastWithoutUpdatingCache();
+      ASSERT(ASSERT_peekUncached() === d);
+      skip();
       lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b, c, d), 16));
       return GOOD_ESCAPE;
     } else {
@@ -1554,10 +2870,10 @@ function ZeTokenizer(
       if (isAsciiNumber(e)) {
         // ok, we've confirmed the exponent part is legit. consume the peeks.
         ASSERT(peek() === $$E_65 || peek() === $$E_UC_45, 'should skip an e');
-        skip();
+        skipFastWithoutUpdatingCache();
         if (d === $$DASH_2D || d === $$PLUS_2B) {
-          ASSERT(peek() === $$DASH_2D || peek() === $$PLUS_2B, 'should skip + or -');
-          skip();
+          ASSERT(ASSERT_peekUncached() === $$DASH_2D || ASSERT_peekUncached() === $$PLUS_2B, 'should skip + or -', ASSERT_peekUncached());
+          skipFastWithoutUpdatingCache();
         }
         ASSERT(isAsciiNumber(e), 'should be digit');
         skip();
@@ -1768,7 +3084,7 @@ function ZeTokenizer(
           if (wide === INVALID_IDENT_CHAR) break;
           if (wide === VALID_DOUBLE_CHAR) {
             prevStr += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
-            skip();
+            skipFastWithoutUpdatingCache();
             skip();
           } else {
             ASSERT(wide === VALID_SINGLE_CHAR, 'enum');
@@ -1889,7 +3205,7 @@ function ZeTokenizer(
           if (wide === VALID_DOUBLE_CHAR) {
             uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'name contained a character that is only a valid identifier with u-flag');
             prevStr += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
-            skip();
+            skipFastWithoutUpdatingCache();
             skip();
           }
           else {
@@ -2031,6 +3347,7 @@ function ZeTokenizer(
     return d >= $$A_61 && d <= $$Z_7A;
   }
   function isAsciiNumber(c) {
+    // isDigit isNumber
     return c >= $$0_30 && c <= $$9_39;
   }
 
@@ -2881,7 +4198,8 @@ function ZeTokenizer(
         // The first character is a valid ident start, however, it only is as a code point, which is only the case
         // when u-flag is present. So this is an error without u-flag, since surrogate pair heads are not valid here.
         uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'The start of an group name had a surrogate pair and is therefor only valid with u-flag');
-        ASSERT_skip(c);
+        ASSERT(peeky(c));
+        skipFastWithoutUpdatingCache();
         skip();
         foundValidGroupName = true;
       }
@@ -2912,7 +4230,8 @@ function ZeTokenizer(
             //           ^
             // Do we need to throw without u-flag? Is it relevant to only skip one character without u-flag? I don't think so because I don't think a valid surrogate tail can lead to a significant syntax character
             wide = VALID_DOUBLE_CHAR;
-            ASSERT_skip(c);
+            ASSERT(peeky(c));
+            skipFastWithoutUpdatingCache();
             skip();
           }
         }
@@ -3177,7 +4496,7 @@ function ZeTokenizer(
           // does not violate the syntax.
 
           c = input.codePointAt(pointer);
-          skip();
+          skipFastWithoutUpdatingCache();
           skip();
         } else if (wide === VALID_SINGLE_CHAR) {
           // backslash is parsed, c is peeked
@@ -3284,10 +4603,14 @@ function ZeTokenizer(
     // if this is a bad escape then dont consume the chars. one of them could be a closing quote
     if (isHex(a) && isHex(b) && isHex(c) && isHex(d)) {
       // okay, _now_ consume them
-      ASSERT_skip(a);
-      ASSERT_skip(b);
-      ASSERT_skip(c);
-      ASSERT_skip(d);
+      ASSERT(ASSERT_peekUncached() === a);
+      skipFastWithoutUpdatingCache();
+      ASSERT(ASSERT_peekUncached() === b);
+      skipFastWithoutUpdatingCache();
+      ASSERT(ASSERT_peekUncached() === c);
+      skipFastWithoutUpdatingCache();
+      ASSERT(ASSERT_peekUncached() === d);
+      skip();
       let firstPart = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
 
       // Is this a surrogate high byte? then we'll try another one
@@ -3313,11 +4636,17 @@ function ZeTokenizer(
             // let expected = 0x10437;
 
             // now skip `\uxxxx` (6)
-            ASSERT_skip($$BACKSLASH_5C);
-            ASSERT_skip($$U_75);
-            skip();
-            skip();
-            skip();
+            ASSERT(ASSERT_peekUncached() === $$BACKSLASH_5C);
+            skipFastWithoutUpdatingCache();
+            ASSERT(ASSERT_peekUncached() === $$U_75);
+            skipFastWithoutUpdatingCache();
+            ASSERT(ASSERT_peekUncached() === a);
+            skipFastWithoutUpdatingCache();
+            ASSERT(ASSERT_peekUncached() === b);
+            skipFastWithoutUpdatingCache();
+            ASSERT(ASSERT_peekUncached() === c);
+            skipFastWithoutUpdatingCache();
+            ASSERT(ASSERT_peekUncached() === d);
             skip();
 
             // we have a matching low+hi, combine them
@@ -4109,7 +5438,8 @@ function ZeTokenizer(
           // bad escapes
           ASSERT_skip(c);
         } else if (wide === VALID_DOUBLE_CHAR) {
-          ASSERT_skip(c);
+          ASSERT(peeky(c));
+          skipFastWithoutUpdatingCache();
           skip();
         }
         return REGEX_CHARCLASS_BAD;
@@ -4835,20 +6165,62 @@ function ZeTokenizer(
     // return '```\n' + slice(Math.max(0, pointer - 20), pointer) + sep + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
   }
 
-  nextToken.asi = addAsi;
-  nextToken.throw = _THROW;
-  nextToken.lexError = function() {
-    ASSERT(lastReportableTokenizerError, 'lexError should only be called if a lexer error was actually detected');
-    THROW(lastReportableTokenizerError);
-  };
-  //nextToken.deopt = () => funcs.forEach(([f,n]) => printStatus(f,n));
-  nextToken.getTokenCountAny = () => anyTokenCount;
-  nextToken.getTokenCountSolid = () => solidTokenCount;
-  nextToken.DEBUG = DEBUG;
-  nextToken.getErrorContext = getErrorContext;
-  nextToken.regexerror = () => lastPotentialRegexError;
+  return {
+    tokens: tokens,
 
-  return nextToken;
+    nextTokenGeneric: nextTokenGeneric,
+    asi: addAsi,
+    throw: _THROW,
+    lexError: function() {
+      ASSERT(lastReportableTokenizerError, 'lexError should only be called if a lexer error was actually detected');
+      THROW(lastReportableTokenizerError);
+    },
+    //deopt: () => funcs.forEach(([f,n]) => printStatus(f,n)),
+    getTokenCountAny: function(){ return anyTokenCount; },
+    getTokenCountSolid: function(){ return solidTokenCount; },
+    DEBUG: DEBUG,
+    getErrorContext: getErrorContext,
+    regexerror: function(){ return lastPotentialRegexError; },
+    prevEndColumn: function(){ return prevTokenEndColumn; },
+    prevEndLine: function(){ return prevTokenEndLine; },
+    currColumn: function(){ return pointer - currentColOffset; },
+    currLine: function(){ return currentLine; },
+    nextTokenToParenOpen: nextTokenToParenOpen,
+    nextTokenToCurlyOpen: nextTokenToCurlyOpen,
+    nextTokenToParenOpenCurlyOpen: nextTokenToParenOpenCurlyOpen,
+    nextTokenToFrom: nextTokenToFrom,
+    nextTokenToString: nextTokenToString,
+    nextTokenToIdent: nextTokenToIdent,
+    nextTokenToArrow: nextTokenToArrow,
+    nextTokenToAs: nextTokenToAs,
+    nextTokenToAsCommaCurlyClose: nextTokenToAsCommaCurlyClose,
+    nextTokenToAsCommaFrom: nextTokenToAsCommaFrom,
+    nextTokenToColon: nextTokenToColon,
+    nextTokenToTarget: nextTokenToTarget,
+    nextTokenToStatementStart: nextTokenToStatementStart,
+    nextTokenToExpressionStart: nextTokenToExpressionStart,
+    nextTokenToExpressionStartGrouped: nextTokenToExpressionStartGrouped,
+    nextTokenToExpressionStartSemi: nextTokenToExpressionStartSemi,
+    nextTokenToExpressionStartSquareCloseComma: nextTokenToExpressionStartSquareCloseComma,
+    nextTokenToObjectMemberStart: nextTokenToObjectMemberStart,
+    nextTokenToObjectMemberRest: nextTokenToObjectMemberRest,
+    nextTokenToClassMemberStart: nextTokenToClassMemberStart,
+    nextTokenToClassMemberRest: nextTokenToClassMemberRest,
+    nextTokenSwitchBody: nextTokenSwitchBody,
+    nextTokenToBindingStart: nextTokenToBindingStart,
+    nextTokenToBindingStartGrouped: nextTokenToBindingStartGrouped,
+    nextTokenToColonOrParenOpen: nextTokenToColonOrParenOpen,
+    nextTokenToIdentOrParenOpen: nextTokenToIdentOrParenOpen,
+    nextTokenToIdentStarParenOpen: nextTokenToIdentStarParenOpen,
+    nextTokenToIdentStarCurlyOpen: nextTokenToIdentStarCurlyOpen,
+    nextTokenToCommaCurlyClose: nextTokenToCommaCurlyClose,
+    nextTokenToIdentCurlyClose: nextTokenToIdentCurlyClose,
+    nextTokenToIdentCurlyOpen: nextTokenToIdentCurlyOpen,
+    nextTokenToIdentStarCurlyOpenParenOpenString: nextTokenToIdentStarCurlyOpenParenOpenString,
+    nextTokenToAwaitParenOpen: nextTokenToAwaitParenOpen,
+    nextTokenToIdentStringNumberSquareOpen: nextTokenToIdentStringNumberSquareOpen,
+    nextTokenToParamStart: nextTokenToParamStart,
+  };
 }
 
 function isLfPsLs(c) {
@@ -4859,7 +6231,7 @@ function isPsLs(c) {
 }
 
 function toktypeToString(type, _, ignoreUnknown) {
-  ASSERT(ALL_TOKEN_TYPES.includes(type), 'should be known type', type);
+  ASSERT(ALL_TOKEN_TYPES.includes(type), 'should be known type', type, ALL_TOKEN_TYPES);
 
   switch (type) {
     case $SPACE: return 'SPACE';
@@ -5010,4 +6382,6 @@ export {
 
   toktypeToString,
   T,
+  ASSERT_pushCanonPoison,
+  ASSERT_popCanonPoison,
 };

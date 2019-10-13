@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 102 (curc: `f`, token: `foo`)
+  Missing start of catch clause (`(`) or start of catch body (`{`), found `foo` instead
 
 try {} catch foo {}
              ^------- error

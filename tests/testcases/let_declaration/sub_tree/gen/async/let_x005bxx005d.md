@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  An `async` followed by an identifier should lead to an arrow function, found something unexpected
+  Next token should be `=>` but was `[`
 
 async let [x]
           ^------- error

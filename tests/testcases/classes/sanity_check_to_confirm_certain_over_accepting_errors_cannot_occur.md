@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  A getter or setter can not be async or a generator as well
+  Expected to parse an opening paren, found `foo`
 
 class x { async get foo(){ }}
                     ^------- error

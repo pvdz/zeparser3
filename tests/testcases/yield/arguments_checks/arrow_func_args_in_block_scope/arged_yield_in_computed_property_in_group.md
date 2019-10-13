@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)
+  Missing closing square bracket for computed property name, found `y` instead
 
 { (x = {[yield y]: 1}) }
                ^------- error

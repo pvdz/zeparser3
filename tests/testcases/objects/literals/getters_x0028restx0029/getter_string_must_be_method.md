@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Objects with certain modifiers must be methods
+  Expected to parse an opening paren, found `:`
 
 wrap({get "abc": x});
                ^------- error

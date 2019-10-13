@@ -28,7 +28,63 @@ function assert(a, b) {
   if (a !== b) throw new Error('Expected `' + b + '`, got `' + a + '`');
 }
 
+const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
+const SCRUB_ERRORS = process.argv.includes('--strip-errors'); // strip error message contents (wip)
+
 let strippedAssertNames = new Set;
+let assertWhitelist = new Set([
+  'ASSERT',
+  'ASSERT_VALID',
+  'ASSERT_FDS',
+  'ASSERT_BINDING_TYPE',
+  'ASSERT_LABELSET',
+  'ASSERT_ASSIGN_EXPR',
+  'ASSERT_BINDING_ORIGIN',
+
+  'ASSERT_skipAny',
+]);
+let assertSkipWhitelist = new Set([
+  'ASSERT_skipRex',
+  'ASSERT_skipDiv',
+  'ASSERT_skipToParenOpen',
+  'ASSERT_skipParenOpenCurlyOpen',
+  'ASSERT_skipToCurlyOpen',
+  'ASSERT_skipToFrom',
+  'ASSERT_skipToString',
+  'ASSERT_skipToIdent',
+  'ASSERT_skipArrow',
+  'ASSERT_skipAs',
+  'ASSERT_skipAsCommaCurlyClose',
+  'ASSERT_skipAsCommaFrom',
+  'ASSERT_skipColon',
+  'ASSERT_skipTarget',
+  'ASSERT_skipStatementStart',
+  'ASSERT_skipExpressionStart',
+  'ASSERT_skipObjectMemberStart',
+  'ASSERT_skipObjectMemberRest',
+  'ASSERT_skipClassMemberStart',
+  'ASSERT_skipClassMemberRest',
+  'ASSERT_skipSwitchBody',
+  'ASSERT_skipBindingStart',
+  'ASSERT_skipBindingStartGrouped',
+  'ASSERT_skipColonOrParenOpen',
+  'ASSERT_skipIdentOrParenOpen',
+  'ASSERT_skipIdentStarParenOpen',
+  'ASSERT_skipIdentStarCurlyOpen',
+  'ASSERT_skipIdentCommaCurlyClose',
+  'ASSERT_skipCommaCurlyClose',
+  'ASSERT_skipIdentCurlyOpen',
+  'ASSERT_skipIdentCurlyClose',
+  'ASSERT_skipIdentStarCurlyOpenParenOpenString',
+  'ASSERT_skipAwaitParenOpen',
+  'ASSERT_skipIdentStringNumberSquareOpen',
+  'ASSERT_skipParamStart',
+  'ASSERT_skipExpressionStartSemi',
+  'ASSERT_skipExpressionStartGrouped',
+  'ASSERT_skipToAfterNew',
+  'ASSERT_skipExpressionStartSquareCloseComma',
+]);
+let constMap = new Map;
 
 function ArrayExpression(node) {
   assert(node.type, 'ArrayExpression');
@@ -87,22 +143,76 @@ function BreakStatement(node) {
 function CallExpression(node) {
   assert(node.type, 'CallExpression');
 
+  if (node.callee.type === 'Identifier') {
+    // Terser should do this :'(
+    if (node.callee.name === 'dev') {
+      return 'false';
+    }
+
+    // The tokenizer `peek()` is really just a return of a closured variable, and in dev mode some assertions.
+    // So for a build, just replace it with the closured variable instead...
+    if (node.callee.name === 'peek' || node.callee.name === '_readCache') {
+      return 'cache'; // This is the local closure
+    }
+    // The tokenizer `peek()` is really just a local comparison. similar to the `peek()` optimization above
+    if (node.callee.name === 'peeky') {
+      return 'cache === ' + $(node.arguments[0]);
+    }
+    // `neof()` is really just `pointer < len`
+    if (node.callee.name === 'neof') {
+      return 'pointer < len';
+    }
+    // `eof()` is really just `pointer >= len`
+    if (node.callee.name === 'eof') {
+      return 'pointer >= len';
+    }
+  }
+  // Drop error messages
+  // TODO: symbolize them, store them in a local lookup file, build a mechanism to make that all work smoothly
+  if (SCRUB_ERRORS && node.callee.type === 'Identifier') {
+    if (node.callee.name === 'THROW') {
+      return 'THROW(1)';
+    }
+    if (node.callee.name === 'THROW_TOKEN') {
+      return 'THROW_TOKEN(1)';
+    }
+    if (node.callee.name === 'regexSyntaxError') {
+      return 'regexSyntaxError(1)';
+    }
+    if (node.callee.name === 'updateRegexPotentialError') {
+      return 'updateRegexPotentialError(1)';
+    }
+    if (node.callee.name === 'updateRegexUflagIsIllegal') {
+      return 'updateRegexUflagIsIllegal(' + $(node.arguments[0]) + ', 1)';
+    }
+    if (node.callee.name === 'updateRegexUflagIsMandatory') {
+      return 'updateRegexUflagIsMandatory(' + $(node.arguments[0]) + ', 1)';
+    }
+  }
+
   if (node.callee.type === 'Identifier' && node.callee.name.startsWith('ASSERT')) {
+
+    if (assertSkipWhitelist.has(node.callee.name)) {
+      // The first argument (some aspect of the token to skip we want to assert) must be dropped, too
+      return node.callee.name.slice('ASSERT_'.length) + '(' + node.arguments.slice(1).map($).join(', ') + ')';
+    }
+
     switch (node.callee.name) {
-      case 'ASSERT_skipRex':
-      case 'ASSERT_skipDiv':
-      case 'ASSERT_skipAny':
-        // The first argument (some aspect of the token to skip we want to assert) must be dropped, too
-        return node.callee.name.slice('ASSERT_'.length) + '(' + node.arguments.slice(1).map($).join(', ') + ')';
       case 'ASSERT_skip':
       case 'ASSERT_skipPeek':
-        return node.callee.name.slice('ASSERT_'.length) + '(' + node.arguments.map($).join(', ') + ')';
+        // Drop the first arg which is the char to assert
+        return node.callee.name.slice('ASSERT_'.length) + '(' + node.arguments.slice(1).map($).join(', ') + ')';
     }
+
     if (!strippedAssertNames.has(node.callee.name)) {
+      if (!assertWhitelist.has(node.callee.name)) {
+        throw new Error('assert calls that can be dropped must be whitelisted to prevent accidentally dropping calls to new prefix-only asserts, `' + node.callee.name + '` was not white listed');
+      }
       console.log('Stripping', node.callee.name);
       strippedAssertNames.add(node.callee.name);
     }
-    return '101';
+
+    return '1001';
   }
 
   return (
@@ -189,12 +299,12 @@ function ExportDefaultDeclaration(node) {
   if (!(node.declaration && node.declaration.type === 'Identifier' && (node.declaration.name === 'ZeParser' || node.declaration.name === 'ZeTokenizer'))) {
     throw new Error('Not expecting default exports. Every file must work in one scope with imports/exports cut. Default exports make that process more difficult to guarantee.');
   }
-  return '104;'; // Still scrub all exports :)
+  return '/*1004*/;'; // Still scrub all exports :)
   return 'export default ' + $(node.declaration) + (node.declaration.type === 'ClassDeclaration' || node.declaration.type === 'FunctionDeclaration' ? '' : ';');
 }
 function ExportNamedDeclaration(node) {
   assert(node.type, 'ExportNamedDeclaration');
-  return '103;'; // Drop all exports from the build
+  return '/*1003*/;'; // Drop all exports from the build
   return 'export ' + (node.declaration ? $(node.declaration) : ('{' + node.specifiers.map($).join(', ') + '}')) + (node.source ? ' from ' + $(node.source) : '');
 }
 function ExportSpecifier(node) {
@@ -219,9 +329,13 @@ function ExpressionStatement(node) {
     node.expression.type === 'AssignmentExpression'
   )) {
     // :'(
-    return $w(node.expression) + ';';
+    let stmt = $w(node.expression) + ';';
+    if (stmt === '(1001);') return ';';
+    return stmt;
   }
-  return $(node.expression) + ';';
+  let stmt = $(node.expression) + ';';
+  if (stmt === '1001;') return ';';
+  return stmt;
 }
 function ForInStatement(node) {
   assert(node.type, 'ForInStatement');
@@ -245,6 +359,11 @@ function FunctionExpression(node) {
 }
 function Identifier(node) {
   assert(node.type, 'Identifier');
+  if (SCRUB_OTHERS) {
+    if (node.name === 'babelCompat') return 'false';
+    if (node.name === 'acornCompat') return 'false';
+  }
+  if (constMap.has(node.name)) return constMap.get(node.name); // inline constants...
   return node.name;
 }
 function IfStatement(node) {
@@ -257,7 +376,7 @@ function Import(node) {
 }
 function ImportDeclaration(node) {
   assert(node.type, 'ImportDeclaration');
-  return '102;'; // Drop all imports from the build
+  return '/*1002*/;'; // Drop all imports from the build
 
   let importSpecifiers = node.specifiers.filter(s => s.type === 'ImportSpecifier');
   let otherSpecifiers = node.specifiers.filter(s => s.type !== 'ImportSpecifier');
@@ -393,6 +512,11 @@ function Program(node) {
 }
 function Property(node) {
   assert(node.type, 'Property');
+  if (SCRUB_OTHERS) {
+    if (node.key.type === 'Identifier' && (node.key.name === 'acornCompat' || node.key.name === 'babelCompat')) {
+      return node.key.name;
+    }
+  }
   return (
     (node.kind === 'get' || node.kind === 'set' || node.method) ?
       (
@@ -478,8 +602,50 @@ function UpdateExpression(node) {
   assert(node.type, 'UpdateExpression');
   return (node.prefix ? node.operator : '') + $(node.argument) + (node.prefix ? '' : node.operator);
 }
+let $g_flags = 4; // start at the 5th bit
+let $l_flags = 0;
+let $lf_flags = 0;
 function VariableDeclaration(node, fromFor) {
   assert(node.type, 'VariableDeclaration');
+  if (node.kind === 'const' && node.declarations.length === 1 && node.declarations[0].id.type === 'Identifier') {
+    let name = node.declarations[0].id.name;
+
+    if (name.slice(0, 3) === '$G_') {
+      let val = '(' + String(1 << ++$g_flags) + ')';
+      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+        throw new Error('each constant should only appear once');
+      }
+      constMap.set(node.declarations[0].id.name, val);
+      return (fromFor ? '' : ';'); // no semi inside `for`
+    } else if (name.slice(0, 3) === '$L_') {
+      let val = '(' + String(++$l_flags) + ')';
+      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+        throw new Error('each constant should only appear once');
+      }
+      constMap.set(node.declarations[0].id.name, val);
+      return (fromFor ? '' : ';'); // no semi inside `for`
+    } else if (name.slice(0, 3) === 'LF_') {
+      let val = '(' + String(1 << ++$lf_flags) + ')';
+      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+        throw new Error('each constant should only appear once');
+      }
+      constMap.set(node.declarations[0].id.name, val);
+      return (fromFor ? '' : ';'); // no semi inside `for`
+    } else if (name[0] === '$' && name[1] === '$') {
+      if (name[1] !== '$') console.log('Replacing', name);
+
+      let val = '(' + $(node.declarations[0].init) + ')';
+      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+        throw new Error('each constant should only appear once');
+      }
+      constMap.set(node.declarations[0].id.name, val);
+      return (fromFor ? '' : ';'); // no semi inside `for`
+    }
+  }
   return node.kind + ' ' + node.declarations.map($).join(', ') + (fromFor ? '' : ';'); // no semi inside `for`
 }
 function VariableDeclarator(node) {

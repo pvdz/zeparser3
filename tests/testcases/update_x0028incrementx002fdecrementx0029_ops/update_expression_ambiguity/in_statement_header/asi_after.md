@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 98 (curc: `b`, token: `b`)
+  Missing closing paren of statement header, found `b` instead
 
 if (a++
 b);

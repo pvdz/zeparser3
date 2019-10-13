@@ -45,7 +45,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 102 (curc: `f`, token: `foo`)
+  Missing function param definition closing parenthesis, found `foo` instead
 
 function *as(){ let f = function *f(x=await foo) {} }
                                             ^------- error

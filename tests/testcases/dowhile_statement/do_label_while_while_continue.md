@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next char should be [while] but was [] (at EOF)
+  A `do` must be followed by a `while`, but found `` instead (at EOF)
 
 do wow: while (x) while (x) continue wow;
                                         ^------- error

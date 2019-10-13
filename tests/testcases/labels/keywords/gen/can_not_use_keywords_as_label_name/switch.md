@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 40 (`(`) but was 58 (curc: `:`, token: `:`)
+  Expected to parse an opening paren, found `:`
 
 switch: x
       ^------- error

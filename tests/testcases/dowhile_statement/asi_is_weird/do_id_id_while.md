@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next char should be [while] but was [b]
+  A `do` must be followed by a `while`, but found `b` instead
 
 do
   a

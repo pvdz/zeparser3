@@ -1,15 +1,25 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/new/new_operator/beforex002fafter/can_not_new_a_x002bx002b_with_prop_1.md
+- Path: tests/testcases/new/new_operator/beforex002fafter/can_not_new_dot_property_plusplus.md
 
 > :: new : new operator : beforex002fafter
 >
-> ::> can not new a x002bx002b with prop 1
+> ::> can not new dot property plusplus
+>
+> Syntactically the code is valid (as `(new x.y)++` however there is a static semantic rule that states
+>
+> https://tc39.es/ecma262/#sec-update-expressions-static-semantics-early-errors
+>
+> > It is an early Syntax Error if AssignmentTargetType of LeftHandSideExpression is not simple.
+>
+> And so it fails, anyways.
+
+## FAIL
 
 ## Input
 
 `````js
-new ++x.y
+new x.y++
 `````
 
 ## Output
@@ -26,10 +36,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot `new` on an inc/dec expr
+  Cannot inc/dec a non-assignable value as postfix
 
-new ++x.y
-    ^------- error
+new x.y++
+       ^------- error
 `````
 
 ### Strict mode

@@ -45,7 +45,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 49 (curc: `1`, token: `100`)
+  Missing function param definition closing parenthesis, found `100` instead
 
 async function as(){ let f = async function f(x=yield 100) {} }
                                                       ^------- error

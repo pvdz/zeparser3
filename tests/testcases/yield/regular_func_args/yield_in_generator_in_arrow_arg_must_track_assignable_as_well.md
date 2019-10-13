@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 122 (curc: `z`, token: `z`)
+  Missing function param definition closing parenthesis, found `z` instead
 
 function *g() { function f(x = y = yield z) {}; }
                                          ^------- error

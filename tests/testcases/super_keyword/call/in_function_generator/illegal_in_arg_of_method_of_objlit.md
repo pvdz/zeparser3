@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Must have func arguments next but did not find `(`
+  Expected to parse an opening paren, found `=`
 
 x={ dsda(){ return function *a=super()) {}; }}
                               ^------- error

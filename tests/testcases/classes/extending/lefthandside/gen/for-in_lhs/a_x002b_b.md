@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 59 (`;`) but was 105 (curc: `i`, token: `in`)
+  Missing first semi in `for` header, found `in` instead
 
 for (a + b in x) ;
            ^------- error

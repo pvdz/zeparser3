@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)
+  Expected the opening curly `{` of a class body, found `y` instead
 
 function f() {   class x extends await y { }   }
                                        ^------- error

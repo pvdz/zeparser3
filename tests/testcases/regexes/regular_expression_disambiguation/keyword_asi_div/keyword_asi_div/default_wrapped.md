@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Missing colon after default
+  Next token should be `:` but was `/`
 
 switch (x) {
   default
