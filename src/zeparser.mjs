@@ -715,7 +715,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(clobber ? (_path[_path.length - 1][prop] !== undefined) : true, 'expected to clobber a value but it was undefined');
     ASSERT(clobber !== (_path[_path.length - 1][prop] === undefined), 'dont clobber, prop=' + prop + ', val=' + value + ', clobber=' + clobber);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
     ASSERT(typeof unless === 'boolean', 'unless is bool');
-    if (unless === true) {
+    if (unless === true) { // TODO: drop in noCompat build
       // This is to skip for babel compat, for example. Prevents call sites to be too cluttered with conditionals.
       return;
     }
@@ -877,8 +877,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     _path[_path.length - 1][prop].push(value);
   }
-  function AST_wrapClosed(prop, newNodeType, newProp, token) {
-    ASSERT(AST_wrapClosed.length === arguments.length, 'arg count');
+  function AST_wrapClosedCustom(prop, newNodeType, newNode, newProp, token) { // TODO: a build can strip the second arg ... maybe we can formalize that a little bit
+    ASSERT(AST_wrapClosedCustom.length === arguments.length, 'arg count');
     ASSERT(typeof prop === 'string', 'should be string');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths', 'pnames='+_pnames+', path=' + _path.map(p => p.type));
@@ -897,10 +897,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       child = parent[prop];
     }
-    ASSERT(child, 'AST_wrapClosed('+prop+', '+newNodeType+','+newProp+'); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
+    ASSERT(child, 'AST_wrapClosedCustom("'+prop+'", "'+newNodeType+'", <node>, "'+newProp+'", <token>); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
-    AST_open(prop, newNodeType, token);
+    AST_openCustom(prop, newNodeType, newNode, token);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
@@ -2419,20 +2419,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
 
         if (AST_directiveNodes && !babelCompat) {
-          AST_wrapClosed(astProp, 'Directive', 'directive', stringToken);
+          AST_wrapClosedCustom(astProp, 'Directive', {
+            type: 'Directive',
+            loc: AST_getBaseLoc(stringToken.line, stringToken.column),
+            directive: undefined,
+          }, 'directive', stringToken);
           AST_set("directive", dir, true); // replace the string token with just the string value, then wrap it
           AST_close('Directive');
           parseSemiOrAsi(lexerFlags);
         }
         else {
-          AST_wrapClosed(astProp, 'ExpressionStatement', 'expression', stringToken);
-          AST_set("directive", dir); // This is what other parsers seem to do...
+          AST_wrapClosedCustom(astProp, 'ExpressionStatement', {
+            type: 'ExpressionStatement',
+            loc: AST_getBaseLoc(stringToken.line, stringToken.column),
+            expression: undefined,
+            directive: dir,
+          }, 'expression', stringToken); // This is what other parsers seem to do...
           // The whole expression has already been parsed so we can just close it.
           parseSemiOrAsi(lexerFlags);
           AST_close('ExpressionStatement');
         }
       } else {
-        AST_wrapClosed(astProp, 'ExpressionStatement', 'expression', stringToken);
+        AST_wrapClosedCustom(astProp, 'ExpressionStatement', {
+          type: 'ExpressionStatement',
+          loc: AST_getBaseLoc(stringToken.line, stringToken.column),
+          expression: undefined,
+        }, 'expression', stringToken);
         // The whole expression has already been parsed so we can just close it.
         parseSemiOrAsi(lexerFlags);
         AST_close('ExpressionStatement');
@@ -4712,20 +4724,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         if (hadAssign) THROW('The lhs of a `for-of` cannot have an assignment');
         if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-of` loops');
-        AST_wrapClosed(astProp, 'ForOfStatement', 'left', forToken);
+        AST_wrapClosedCustom(astProp, 'ForOfStatement', {
+          type: 'ForOfStatement',
+          loc: AST_getBaseLoc(forToken.line, forToken.column),
+          left: undefined,
+          right: undefined,
+          await: awaitable, // as per https://github.com/estree/estree/pull/138
+          body: undefined,
+        }, 'left', forToken);
         if (notAssignable(assignable)) THROW('Left part of for-of must be assignable');
         ASSERT_skipExpressionStart('of', lexerFlags);
         // `for (a of b=c) ..`
         // Note that this rhs is an AssignmentExpression, _not_ a SequenceExpression
         parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
-        AST_set('await', !!awaitable); // as per https://github.com/estree/estree/pull/138
         return;
       }
       if (awaitable) THROW('`for await` only accepts the `for-of` type');
       if (curtok.str === 'in') {
         if (hadAssign) THROW('The lhs of a `for-in` cannot have an assignment');
         if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-in` loops');
-        AST_wrapClosed(astProp, 'ForInStatement', 'left', forToken);
+        AST_wrapClosedCustom(astProp, 'ForInStatement', {
+          type: 'ForInStatement',
+          loc: AST_getBaseLoc(forToken.line, forToken.column),
+          left: undefined,
+          right: undefined,
+          body: undefined,
+        }, 'left', forToken);
         if (notAssignable(assignable)) {
           // certain cases were possible in legacy mode
           // if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
@@ -4784,7 +4808,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         body: undefined,
       }, forToken);
     } else {
-      AST_wrapClosed(astProp, 'ForStatement', 'init', forToken);
+      AST_wrapClosedCustom(astProp, 'ForStatement', {
+        type: 'ForStatement',
+        loc: AST_getBaseLoc(forToken.line, forToken.column),
+        init: undefined,
+        test: undefined,
+        update: undefined,
+        body: undefined,
+      }, 'init', forToken);
       // we are still in the `init` part of a classic for. keep parsing _with_ LF_IN_FOR_LHS from the current expression value.
       if (wasNotDecl) {
         // [v]: `for (a+b;;) c;`
@@ -6167,13 +6198,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `try {} catch (a) {}`
         // - `try {} catch ([a]) {}`
         // - `try {} catch ([a] = b) {}`
-        AST_wrapClosed(astProp, 'AssignmentPattern', 'left', bindingStartToken);
+        AST_wrapClosedCustom(astProp, 'AssignmentPattern', {
+          type: 'AssignmentPattern',
+          loc: AST_getBaseLoc(bindingStartToken.line, bindingStartToken.column),
+          left: undefined,
+          right: undefined,
+        }, 'left', bindingStartToken);
         parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         AST_close('AssignmentPattern');
       } else {
         ASSERT(bindingOrigin !== FROM_CATCH, 'catch is default');
         ASSERT(defaultsOption === ASSIGNMENT_IS_INIT, 'two options');
-        AST_wrapClosed('declarations', 'VariableDeclarator', 'id', bindingStartToken);
+        AST_wrapClosedCustom('declarations', 'VariableDeclarator', {
+          type: 'VariableDeclarator',
+          loc: AST_getBaseLoc(bindingStartToken.line, bindingStartToken.column),
+          id: undefined,
+          init: undefined,
+        }, 'id', bindingStartToken);
         parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'init');
         AST_close('VariableDeclarator');
       }
@@ -6194,7 +6235,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [v] `var x \n /foo/`
         ASSERT_ASI_REGEX_NEXT = true;
       }
-      AST_wrapClosed('declarations', 'VariableDeclarator', 'id', bindingStartToken);
+      AST_wrapClosedCustom('declarations', 'VariableDeclarator', {
+        type: 'VariableDeclarator',
+        loc: AST_getBaseLoc(bindingStartToken.line, bindingStartToken.column),
+        id: undefined,
+        init: undefined,
+      }, 'id', bindingStartToken);
       AST_set('init', null);
       AST_close('VariableDeclarator');
     } else {
@@ -6750,8 +6796,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // </SCRUB AST>
 
     // Note: assignment to object/array is caught elsewhere
-    AST_wrapClosed(astProp, 'AssignmentExpression', 'left', firstAssignmentToken);
-    AST_set('operator', curtok.str);
+    AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+      type: 'AssignmentExpression',
+      loc: AST_getBaseLoc(firstAssignmentToken.line, firstAssignmentToken.column),
+      left: undefined,
+      operator: curtok.str,
+      right: undefined,
+    }, 'left', firstAssignmentToken);
     ASSERT_skipExpressionStart(curtok.str, lexerFlags);
 
     let rhsAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
@@ -6803,8 +6854,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `a ** b`
     let curop = curtok.str;
     let AST_nodeName = (curop === '&&' || curop === '||') ? 'LogicalExpression' : 'BinaryExpression';
-    AST_wrapClosed(astProp, AST_nodeName, 'left', exprStartToken);
-    AST_set('operator', curop);
+    AST_wrapClosedCustom(astProp, AST_nodeName, {
+      type: AST_nodeName,
+      loc: AST_getBaseLoc(exprStartToken.line, exprStartToken.column),
+      left: undefined,
+      operator: curtok.str,
+      right: undefined,
+    }, 'left', exprStartToken);
     ASSERT_skipExpressionStart(curop, lexerFlags);
     let rightExprStartToken = curtok;
     let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, NOT_LHSE, 'right');
@@ -6831,7 +6887,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `a ? b = d : c`
     // - `a ? b : c = d`
     // - `a ? b : yield c`
-    AST_wrapClosed(astProp, 'ConditionalExpression', 'test', firstExprToken);
+    AST_wrapClosedCustom(astProp, 'ConditionalExpression', {
+      type: 'ConditionalExpression',
+      loc: AST_getBaseLoc(firstExprToken.line, firstExprToken.column),
+      test: undefined,
+      consequent: undefined,
+      alternate: undefined,
+    }, 'test', firstExprToken);
     ASSERT_skipExpressionStart('?', lexerFlags);
     // you can have an assignment between `?` and `:` but not after `:`
     // the `in` is allowed between as well because there can be no ambiguity
@@ -8038,24 +8100,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [x] `y.)`
       THROW('Dot property on `' + valueFirstToken.str + '` must be an identifier, was `' + curtok.str + '`');
     }
-    AST_wrapClosed(astProp, 'MemberExpression', 'object', valueFirstToken);
+    AST_wrapClosedCustom(astProp, 'MemberExpression', {
+      type: 'MemberExpression',
+      loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
+      object: undefined,
+      property: undefined,
+      computed: false,
+    }, 'object', valueFirstToken);
     let identToken = curtok;
     ASSERT_skipDiv($IDENT, lexerFlags); // x.y / z is division
     AST_setIdent('property', identToken);
-    AST_set('computed', false); // x[y] vs x.y
     AST_close('MemberExpression');
     return parseValueTail(lexerFlags, valueFirstToken, setAssignable(assignable), isNewArg, NOT_LHSE, astProp);
   }
   function _parseValueTailDynamicProperty(lexerFlags, valueFirstToken, assignable, isNewArg, astProp) {
     // parseMemberExpression dynamic
     // parseDynamicProperty
-    AST_wrapClosed(astProp, 'MemberExpression', 'object', valueFirstToken);
+    AST_wrapClosedCustom(astProp, 'MemberExpression', {
+      type: 'MemberExpression',
+      loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
+      object: undefined,
+      property: undefined,
+      computed: true,
+    }, 'object', valueFirstToken);
     ASSERT_skipExpressionStart('[', lexerFlags);
     let nowAssignable = parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, 'property');
     // - `foo[await bar]`
     assignable = mergeAssignable(nowAssignable, assignable); // pass on piggies (yield, await, etc)
     skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: next has too many options
-    AST_set('computed', true); // x[y] vs x.y
     AST_close('MemberExpression');
     return parseValueTail(lexerFlags, valueFirstToken, setAssignable(assignable), isNewArg, NOT_LHSE, astProp); // member expressions are assignable
   }
@@ -8072,8 +8144,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       // Not `new`, parses tail, does not throw on `new async () =>`
       ASSERT(typeof astProp === 'string', 'should be string');
-      AST_wrapClosed(astProp, 'CallExpression', 'callee', valueFirstToken);
-      AST_set('arguments', []);
+      AST_wrapClosedCustom(astProp, 'CallExpression', {
+        type: 'CallExpression',
+        loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
+        callee: undefined,
+        arguments: [],
+      }, 'callee', valueFirstToken);
       let nowAssignable = parseCallArgs(lexerFlags, 'arguments');
       assignable = mergeAssignable(nowAssignable, assignable);
       AST_close('CallExpression');
@@ -8084,10 +8160,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseValueTailTemplate(lexerFlags, valueFirstToken, assignable, isNewArg, astProp) {
     // parseTaggedTemplate
-    // note: in es9+ (only) it is legal for _tagged_ templates to contain illegal escapes (`isBadTickToken(curtype)`)
+    // Note: in es9+ (only) it is legal for _tagged_ templates to contain illegal escapes (`isBadTickToken(curtype)`)
 
-    // tagged template is like a call but slightly special (and a very particular AST)
-    AST_wrapClosed(astProp, 'TaggedTemplateExpression', 'tag', valueFirstToken);
+    // Tagged template is like a call but slightly special (and a very particular AST)
+    AST_wrapClosedCustom(astProp, 'TaggedTemplateExpression', {
+      type: 'TaggedTemplateExpression',
+      loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
+      tag: undefined,
+      quasi: undefined,
+    }, 'tag', valueFirstToken);
 
     AST_openCustom('quasi', 'TemplateLiteral', {
       type: 'TemplateLiteral',
@@ -8191,9 +8272,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     // </SCRUB AST>
 
-    AST_wrapClosed(astProp, 'UpdateExpression', 'argument', argStartToken);
-    AST_set('operator', curtok.str);
-    AST_set('prefix', false);
+    AST_wrapClosedCustom(astProp, 'UpdateExpression', {
+      type: 'UpdateExpression',
+      loc: AST_getBaseLoc(argStartToken.line, argStartToken.column),
+      argument: undefined,
+      operator: curtok.str,
+      prefix: false,
+    }, 'argument', argStartToken);
+
     ASSERT_skipDiv($PUNCTUATOR, lexerFlags);
     AST_close('UpdateExpression');
     return NOT_ASSIGNABLE;
@@ -9413,8 +9499,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           addBindingToExports(exportedBindings, identToken.str);
 
           // We should have just added an Identifier to the AST, so wrap that as left now
-          AST_wrapClosed(astProp, 'AssignmentExpression', 'left', identToken);
-          AST_set('operator', '=');
+          AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+            type: 'AssignmentExpression',
+            loc: AST_getBaseLoc(identToken.line, identToken.column),
+            left: undefined,
+            operator: '=',
+            right: undefined,
+          }, 'left', identToken);
           ASSERT_skipExpressionStart('=', lexerFlags);
           // The rhs of the assignment is irrelevant beyond yield/await flags
           let rightAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
@@ -9588,8 +9679,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             //                ^
             // [v]: `([(x).foo = x] = x)`
             //                 ^
-            AST_wrapClosed(astProp, 'AssignmentExpression', 'left', elementStartToken);
-            AST_set('operator', '=');
+            AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+              type: 'AssignmentExpression',
+              loc: AST_getBaseLoc(elementStartToken.line, elementStartToken.column),
+              left: undefined,
+              operator: '=',
+              right: undefined,
+            }, 'left', elementStartToken);
             ASSERT_skipExpressionStart('=', lexerFlags);
             // pick up the flags from assignable and put them in destructible
             // - `= await bar`
@@ -9943,13 +10039,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `[a, {[b]:d}, c] = obj`
         // - `function f({[x]: {y = z}}) {}`
 
-        AST_wrapClosed(astProp, NODE_NAME_PROPERTY, 'key', startOfKeyToken);
+        AST_wrapClosedCustom(astProp, NODE_NAME_PROPERTY, {
+          type: NODE_NAME_PROPERTY,
+          loc: AST_getBaseLoc(startOfKeyToken.line, startOfKeyToken.column),
+          key: undefined,
+          kind: 'init',
+          method: false,
+          computed: true,
+          value: undefined,
+          shorthand: false,
+        }, 'key', startOfKeyToken);
         ASSERT_skipExpressionStart(':', lexerFlags); // skip after so the end-column is correct
-        AST_set('kind', 'init', undefined, babelCompat); // only getters/setters get special value here
-        AST_set('method', false);
-        AST_set('computed', true);
         destructible = _parseObjectPropertyValueAfterColon(lexerFlags, undefined, bindingType, IS_ASSIGNABLE, destructible, scoop, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-        AST_set('shorthand', false);
         AST_close(NODE_NAME_PROPERTY);
       }
       else if (curc === $$PAREN_L_28) {
@@ -10113,8 +10214,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // the array MUST now be a pattern. Does not need to be an arrow.
       // the outer-most assignment is an expression, the inner assignments become patterns too.
       AST_destruct(astProp);
-      AST_wrapClosed(astProp, 'AssignmentExpression', 'left', patternStartToken);
-      AST_set('operator', '=');
+      AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+        type: 'AssignmentExpression',
+        loc: AST_getBaseLoc(patternStartToken.line, patternStartToken.column),
+        left: undefined,
+        operator: '=',
+        right: undefined,
+      }, 'left', patternStartToken);
       ASSERT_skipExpressionStart('=', lexerFlags); // a forward slash after = has to be a division
       // pick up the flags from assignable and put them in destructible
       // - `({x} = await bar) => {}`
@@ -10523,8 +10629,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= MUST_DESTRUCT; // shorthand + _init_ is only allowed in Pattern
 
         ASSERT(propLeadingIdentToken === startOfPropToken, 'can not have modifiers');
-        AST_wrapClosed('value', 'AssignmentExpression', 'left', propLeadingIdentToken);
-        AST_set('operator',  '=');
+        AST_wrapClosedCustom('value', 'AssignmentExpression', {
+          type: 'AssignmentExpression',
+          loc: AST_getBaseLoc(propLeadingIdentToken.line, propLeadingIdentToken.column),
+          left: undefined,
+          operator: '=',
+          right: undefined,
+        }, 'left', propLeadingIdentToken);
         ASSERT_skipExpressionStart('=', lexerFlags); // a forward slash after = has to be a regex
         let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         assignable = mergeAssignable(nowAssignable, assignable);
@@ -10784,10 +10895,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
 
     // Acorn uses the parenthesis open as start of method while zeparser/babel uses the start of the first modifier and otherwise the id
-    AST_wrapClosed(astProp, NODE_NAME_METHOD_OBJECT, 'key', methodStartToken);
-    AST_set('kind', getToken !== UNDEF_GET ? 'get' : setToken !== UNDEF_SET ? 'set' : (babelCompat ? 'method' : 'init')); // only getters/setters get special value here, "init" for the others. In the Babel AST the "other" kind is "method" instead.
-    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
-    AST_set('computed', keyToken === undefined);
+    AST_wrapClosedCustom(astProp, NODE_NAME_METHOD_OBJECT, {
+      type: NODE_NAME_PROPERTY,
+      loc: AST_getBaseLoc(methodStartToken.line, methodStartToken.column),
+      key: undefined,
+      // Kind: only getters/setters get special value here, "init" for the others. In the Babel AST the "other" kind is "method" instead.
+      kind: getToken !== UNDEF_GET ? 'get' : setToken !== UNDEF_SET ? 'set' : (babelCompat ? 'method' : 'init'),
+      // Method: getters and setters are not methods but properties
+      method: getToken === UNDEF_GET && setToken === UNDEF_SET,
+      computed: keyToken === undefined,
+      value: undefined,
+      shorthand: false, // not for babel
+    }, 'key', methodStartToken);
 
     verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, false);
 
@@ -10811,7 +10930,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       FDS_ILLEGAL,
       'value',
     );
-    AST_set('shorthand', false, undefined, babelCompat);
     AST_close(NODE_NAME_METHOD_OBJECT);
     ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
   }
@@ -11469,56 +11587,63 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let destructible = CANT_DESTRUCT; // this is mostly for piggy flags like detecting duplicate constructors
 
-    AST_wrapClosed(astProp,  NODE_NAME_METHOD_CLASS, 'key', methodStartToken);
-    AST_set('static', staticToken !== UNDEF_STATIC);
-    AST_set('computed', keyToken === undefined);
-
-    // https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-propname
-    // > LiteralPropertyName: StringLiteral
-    // >   Return the String value whose code units are the SV of the StringLiteral.
-    // In other words; `class x{"constructor"(){}}` is also a proper constructor
-    // Constructors can't have get/set/*/async but can be static
-    // https://tc39.github.io/ecma262/#sec-identifier-names-static-semantics-stringvalue
-    // Note: the "constructor" check is determined by the "StringValue" of ident, which is the canonical value
-    // https://tc39.github.io/ecma262/#sec-string-literals-static-semantics-stringvalue
-    // And for strings it is the unquoted canonical value of the string (so "constructor" and 'constructor' + escapes)
-
-    let isClassConstructor = NOT_CONSTRUCTOR; // function parser needs this flag for "can we parse `super`?" state
+    let isClassConstructor = NOT_CONSTRUCTOR;
+    let kind = 'method';
     if (
-      keyToken !== undefined &&
-      staticToken === UNDEF_STATIC &&
-      ((
+      keyToken !== undefined &&          // Not computed
+      staticToken === UNDEF_STATIC &&    // Not static
+      (
+        // https://tc39.github.io/ecma262/#sec-identifier-names-static-semantics-stringvalue
+        // Note: the "constructor" check is determined by the "StringValue" of ident, which is the canonical value
+        (
           keyToken.type === $IDENT &&
-          keyToken.canon === 'constructor' // "StringValue" of ident is canonical (so escapes resolved)
+          keyToken.canon === 'constructor' // .canon will have any escapes properly unescaped
         ) ||
+        // > LiteralPropertyName: StringLiteral
+        // >   Return the String value whose code units are the SV of the StringLiteral.
+        // In other words; `class x{"constructor"(){}}` is also a proper constructor
+        // https://tc39.github.io/ecma262/#sec-string-literals-static-semantics-stringvalue
+        // And for strings it is the unquoted canonical value of the string (so "constructor" and 'constructor' + escapes)
         (
           isStringToken(keyToken.type) &&
-          keyToken.canon.slice(1, -1) === 'constructor' // "StringValue" is canonical (so escapes resolved)
-        ))
+          keyToken.canon.slice(1, -1) === 'constructor' // .canon will have any escapes properly unescaped
+        )
+      )
     ) {
       // This is a proper class constructor
       isClassConstructor = IS_CONSTRUCTOR;
+      kind = 'constructor';
 
+      // Constructors can't have get/set/*/async but can be static
       if (asyncToken !== UNDEF_ASYNC) THROW('Class constructors can not be async');
       if (starToken !== UNDEF_STAR) THROW('Class constructors can not be generators');
       if (getToken !== UNDEF_GET) THROW('Class constructors can not be getters');
       if (setToken !== UNDEF_SET) THROW('Class constructors can not be setters');
 
-      AST_set('kind', 'constructor'); // only getters/setters/constructors get special value here
-
       // This is a constructor method. We need to signal the caller that we parsed one to dedupe them
       // In order to signal the caller we piggy back on the destructible mechanism which is already a bit-field
       destructible |= PIGGY_BACK_WAS_CONSTRUCTOR;
-    } else if (getToken !== UNDEF_GET) {
-      // - `class A {get foo(){}}`
-      AST_set('kind', 'get'); // only getters/setters/constructors get special value here
-    } else if (setToken !== UNDEF_SET) {
-      // - `class A {set foo(x){}}`
-      AST_set('kind', 'set'); // only getters/setters/constructors get special value here
     } else {
-      // [v]: `class x { foo(){ }}`
-      AST_set('kind', 'method'); // only getters/setters/constructors get special value here, else it's method for classes
+      if (getToken !== UNDEF_GET) {
+        // - `class A {get foo(){}}`
+        kind = 'get';
+      } else if (setToken !== UNDEF_SET) {
+        // - `class A {set foo(x){}}`
+        kind = 'set';
+      } else {
+        // [v]: `class x { foo(){ }}`
+      }
     }
+
+    AST_wrapClosedCustom(astProp, NODE_NAME_METHOD_CLASS, {
+      type: NODE_NAME_METHOD_CLASS,
+      loc: AST_getBaseLoc(methodStartToken.line, methodStartToken.column),
+      key: undefined,
+      static: staticToken !== UNDEF_STATIC,
+      computed: keyToken === undefined,
+      kind: kind,
+      value: undefined,
+    }, 'key', methodStartToken);
 
     // [v]: `class A {a(){}}`
     ASSERT(curc === $$PAREN_L_28, 'these (non-assert) checks have already been applied at this point');
@@ -12131,8 +12256,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // the array MUST now be a pattern. Does not need to be an arrow.
         // the outer-most assignment is an expression, the inner assignments become patterns too.
         AST_destruct(astProp);
-        AST_wrapClosed(astProp, 'AssignmentExpression', 'left', argStartToken);
-        AST_set('operator', '=');
+        AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+          type: 'AssignmentExpression',
+          loc: AST_getBaseLoc(argStartToken.line, argStartToken.column),
+          left: undefined,
+          operator: '=',
+          right: undefined,
+        }, 'left', argStartToken);
         ASSERT_skipExpressionStart('=', lexerFlags);
         let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         assignable = mergeAssignable(nowAssignable, assignable);
@@ -12170,59 +12300,93 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let destructible = CANT_DESTRUCT; // this is mostly for piggy flags like detecting duplicate constructors
 
+    // The object method can start with `async`, `*`, `get`, `set`, `[`, or the key (ident/string/number). In that order
+    let methodStartToken = keyToken; // If nothing else, this
+    let kind = 'init'; // only getters and setters have special values for object methods
+    let method = true; // only false for actual getters and setters (since you won't call those members)
+
+    // TODO: this if-else chain is very basic/dumb but still I'm worried it will DEOPT... :( To confirm.
     if (asyncToken !== UNDEF_ASYNC) {
+      // - `let o = {async foo(){}}`
+      //                      ^
+      // - `let o = {async await(){}}`
       if (!allowAsyncFunctions) {
         THROW('Async functions are not supported in the currently targeted language version');
       }
-      else if (starToken !== UNDEF_STAR && !allowAsyncGenerators) {
-        THROW('Async generators are not supported in the currently targeted language version');
+
+      if (getToken !== UNDEF_GET || setToken !== UNDEF_SET) {
+        // - `{async get foo(){}}`
+        // - `{async set foo(x){}}`
+        THROW('A getter or setter can not be async');
       }
+
+      if (starToken !== UNDEF_STAR) {
+        if (!allowAsyncGenerators) {
+          THROW('Async generators are not supported in the currently targeted language version');
+        }
+      }
+
+      methodStartToken = asyncToken;
+      if (babelCompat) kind = 'method';
     }
+    else if (starToken !== UNDEF_STAR) {
+      if (getToken !== UNDEF_GET || setToken !== UNDEF_SET) {
+        // - `{get *foo(){}}`
+        // - `{set *foo(x){}}`
+        THROW('A getter or setter can not be async');
+      }
 
-    if ((asyncToken !== UNDEF_ASYNC || starToken !== UNDEF_STAR) && (getToken !== UNDEF_GET || setToken !== UNDEF_SET)) {
-      // - `{async set foo(x){}}`
-      // - `{get *foo(){}}`
-      THROW('A getter or setter can not be async or a generator');
+      methodStartToken = starToken;
+      if (babelCompat) kind = 'method';
     }
-    if (getToken !== UNDEF_GET && setToken !== UNDEF_SET) {
-      // (This would throw an error for the param arity check, anyways)
-      // - `{get set foo(x){}}`
-      THROW('A getter can not also be a setter');
-    }
-
-    let methodStartToken =
-      asyncToken !== UNDEF_ASYNC ?
-        asyncToken :
-        starToken !== UNDEF_STAR ?
-          starToken :
-          getToken !== UNDEF_GET ?
-            getToken :
-            setToken !== UNDEF_SET ?
-              setToken :
-              bracketOpenToken !== undefined ?
-                bracketOpenToken :
-                keyToken;
-
-    ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
-
-    AST_wrapClosed(astProp, NODE_NAME_METHOD_OBJECT, 'key', methodStartToken);
-
-    if (getToken !== UNDEF_GET) {
+    else if (getToken !== UNDEF_GET) {
       // - `{get foo(){}}`
       //            ^
-      AST_set('kind', 'get'); // only getters/setters get special value here
-    } else if (setToken !== UNDEF_SET) {
+
+      if (setToken !== UNDEF_SET) {
+        // (This would throw an error for the param arity check, anyways)
+        // - `{get set foo(x){}}`
+        THROW('A getter can not also be a setter');
+      }
+
+      methodStartToken = getToken;
+      kind = 'get';
+      method = false;
+    }
+    else if (setToken !== UNDEF_SET) {
       // - `{set foo(x){}}`
       //            ^
-      AST_set('kind', 'set'); // only getters/setters get special value here
+      // - `{set [foo](x){}}`
+      //              ^
+      methodStartToken = setToken;
+      kind = 'set';
+      method = false;
+    }
+    else if (bracketOpenToken !== undefined) {
+      // [v]: `x = { [foo](){ }}`
+      //                  ^
+      methodStartToken = bracketOpenToken;
+      if (babelCompat) kind = 'method';
     } else {
       // [v]: `x = { foo(){ }}`
       //                ^
-      // - `let o = {async await(){}}`
-      AST_set('kind', babelCompat ? 'method' : 'init'); // In objects, non-getset get "init". In Babel ast it's still "method".
+      ASSERT(methodStartToken === keyToken);
+      ASSERT(kind === 'init');
+      if (babelCompat) kind = 'method';
     }
-    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
-    AST_set('computed', keyToken === undefined);
+
+    ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
+
+    AST_wrapClosedCustom(astProp, NODE_NAME_METHOD_OBJECT, {
+      type: NODE_NAME_PROPERTY,
+      loc: AST_getBaseLoc(methodStartToken.line, methodStartToken.column),
+      key: undefined,
+      kind: kind,
+      method: method,
+      computed: keyToken === undefined,
+      value: undefined,
+      shorthand: false, // not for babel
+    }, 'key', methodStartToken);
 
     if (curc !== $$PAREN_L_28) {
       // TODO: move this to outside of this branch?
@@ -12268,7 +12432,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       'value'
     );
 
-    AST_set('shorthand', false, undefined, babelCompat);
     AST_close(NODE_NAME_METHOD_OBJECT);
 
     return destructible;
