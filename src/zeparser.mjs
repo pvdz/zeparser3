@@ -585,6 +585,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_getBaseLoc(line, col) {
     ASSERT(AST_getBaseLoc.length === arguments.length, 'arg count');
+    // (Not used for idents but pretty much anything else)
 
     return {
       start: {
@@ -624,6 +625,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_close(names_ASSERT_ONLY) {
     ASSERT(AST_close.length === arguments.length, 'arg count');
+    // Note: names_ASSERT_ONLY is stripped in the build...
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
     ASSERT(!names_ASSERT_ONLY.includes('TemplateElement'), 'use AST_closeTemplateElement instead');
@@ -675,35 +677,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
     ASSERT(was.type === 'CommentBlock' || was.type === 'CommentLine', 'only use this to skip comments');
-
-    return was; // debug/assertions only...
-  }
-  function AST_closeIdent(identToken) {
-    ASSERT(AST_closeIdent.length === arguments.length, 'arg count');
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(typeof identToken === 'object' && identToken.type === $IDENT, 'the token should come from AST setIdent');
-
-    let was = _path.pop();
-    ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
-    ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
-    // In all cases where AST_close is called, `curtok` should be the first token of the next node(s)
-    // However, it ought to be the first _whitespace_ token, not just non-whitespace
-    // This exception path is used for `async();` kinds of cases, for example.
-    ASSERT(!identToken.str.includes('\n'), 'tokens that use this path should not be able to hold newlines');
-    if (babelCompat) was.loc.identifierName = identToken.canon;
-    was.loc.end.column = identToken.column + identToken.str.length;
-    was.loc.end.line = identToken.line;
-
-    ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
-    ASSERT(was.loc.start.line < was.loc.end.line || was.loc.start.column <= was.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', was.loc);
-    ASSERT(was.loc.start.line >= 1, 'start line should be >= 1', was.loc);
-    ASSERT(was.loc.start.column >= 0, 'start column should be >= 0', was.loc);
-    ASSERT(was.loc.end.line >= 1, 'end line should be >= 1', was.loc);
-    ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
-
-    ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
-    ASSERT(was.type === 'Identifier', 'only use this func to skip idents');
 
     return was; // debug/assertions only...
   }
@@ -764,16 +737,40 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(token.type === $IDENT, 'token must be ident');
     ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
 
-    AST_openCustom(astProp, 'Identifier', {
-      type: 'Identifier',
-      loc: AST_getBaseLoc(token.line, token.column),
-      // name value doesn't seem to be specced in estree but it makes sense to use the canonical name here
-      name: token.canon,
-    }, token);
+    let col = token.column;
+    let line = token.line;
+    let canon = token.canon;
 
-    let node = AST_closeIdent(token);
-    // It's difficult to make this generic but for idents and literals it's doable
-    ASSERT(node.loc.end.column - node.loc.start.column === token.str.length, 'for idents the location should only span exactly the length of the ident');
+    let identNode = {
+      type: 'Identifier',
+      loc: {
+        start: {
+          line: line, // offset 1
+          column: col, // offset 0
+        },
+        end: { // Updated in AST_close with the next token (which seems to be accurate)
+          line: line,
+          column: col + token.str.length,
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      // name value doesn't seem to be specced in estree but it makes sense to use the canonical name here
+      name: canon,
+    };
+    if (astUids) identNode.$uid = uid_counter++;
+    if (babelCompat) identNode.loc.identifierName = canon;
+    ASSERT(identNode.loc.end.column - identNode.loc.start.column === token.str.length, 'for idents the location should only span exactly the length of the ident and cannot hold newlines');
+
+    let parentNode = _path[_path.length - 1];
+
+    let p = parentNode[astProp];
+    if (p !== undefined && p.length !== undefined) {
+      p.push(identNode);
+    }
+    else {
+      ASSERT(p === undefined, `(this invariant does not hold without ASSERTs!) parentNode[astProp] should be empty or an array`);
+      parentNode[astProp] = identNode;
+    }
   }
 
   function AST_setLiteral(astProp, token, fromDirective) {
