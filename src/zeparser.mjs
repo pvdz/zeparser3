@@ -715,7 +715,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return node; // for ASSERTs only!
   }
+  function AST_setNodeDangerously(astProp, node) {
+    ASSERT(AST_setNode.length === arguments.length, 'arg count');
+    ASSERT(_path.length > 0, 'path shouldnt be empty');
+    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+    ASSERT(typeof node === 'object' && node && typeof node.type === 'string', 'should receive ast node to set', node);
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
 
+    if (astUids) node.$uid = uid_counter++;
+
+    let parentNode = _path[_path.length - 1];
+
+    let p = parentNode[astProp];
+    if (p !== undefined && p.length !== undefined) {
+      p.push(node);
+    }
+    else {
+      ASSERT(p === undefined, `(this invariant does not hold without ASSERTs!) parentNode[astProp] should be empty or an array`);
+      parentNode[astProp] = node;
+    }
+
+    return node; // for ASSERTs only!
+  }
   function AST_setIdent(astProp, token) {
     ASSERT(AST_setIdent.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
@@ -953,9 +974,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     _path[_path.length - 1][prop].push(value);
   }
+  function AST_popNode(prop) {
+    ASSERT(AST_popNode.length === arguments.length, 'arg count');
+
+    // Get the current "top" node and either remove it from the parent array, or mark it as `undefined` inside an ASSERT
+
+    let parent = _path[_path.length-1];
+    let p = parent[prop];
+    ASSERT(p, 'the prop should exist... (and be a node)');
+    if (p.length !== undefined) {
+      ASSERT(Array.isArray(p), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+      ASSERT(p.length);
+      return p.pop();
+    } else {
+      ASSERT(!void(parent[prop] = undefined), '(mark as undefined so that assertions dont trip over the value existing)');
+      return p;
+    }
+  }
   function AST_wrapClosedCustom(prop, newNodeType, newNode, newProp, token) { // TODO: a build can strip the second arg ... maybe we can formalize that a little bit
     ASSERT(AST_wrapClosedCustom.length === arguments.length, 'arg count');
     ASSERT(typeof prop === 'string', 'should be string');
+
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths', 'pnames='+_pnames+', path=' + _path.map(p => p.type));
     ASSERT_VALID(token !== curtok, 'should probably already consume the given token because otherwise end loc will be incorrect');
@@ -964,25 +1003,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // so the parent of node becomes the parent of a new node and
     // the old node becomes a child of the new node
     // a(x:b) -> a(x:c(y:b))
+    // If the child is an array, replace the last element in the array but not the array itself
 
-    let parent = _path[_path.length-1];
-    let child = null;
+    let child = AST_popNode(prop);
 
-    let p = parent[prop];
-    ASSERT(p, 'the prop should exist... (and be a node)');
-    if (p.length !== undefined) {
-      ASSERT(Array.isArray(p), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
-      child = p.pop();
-    } else {
-      child = p;
-    }
-    ASSERT(child, 'AST_wrapClosedCustom("'+prop+'", "'+newNodeType+'", <node>, "'+newProp+'", <token>); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
-
-    ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
-    ASSERT(Array.isArray(parent[prop]) || parent[prop] === undefined, 'either an array or undefined');
     AST_openCustom(prop, newNodeType, newNode, token);
     // set it as child of new node
-    // TODO: what if array?
     AST_set(newProp, child);
   }
   function AST_wrapClosedIntoArrayCustom(prop, value, newNode, newProp, startToken) {
@@ -992,20 +1018,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // same as AST_wrapClosed except the node is put in an array
 
-    let parent = _path[_path.length-1];
-    let child = null;
+    let child = AST_popNode(prop);
 
-    let p = parent[prop];
-    ASSERT(p, 'the prop should exist');
-    if (p.length !== undefined) {
-      ASSERT(Array.isArray(p), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
-      child = p.pop();
-    } else {
-      child = p;
-    }
-    ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
-
-    ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
     AST_openCustom(prop, value, newNode, startToken);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
@@ -2653,13 +2667,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
 
         if (AST_directiveNodes && !babelCompat) {
-          AST_wrapClosedCustom(astProp, 'Directive', {
+          AST_setNodeDangerously(astProp, { // we know we will overwrite the existing string node
             type: 'Directive',
             loc: AST_getBaseLoc(stringToken.line, stringToken.column),
-            directive: undefined,
-          }, 'directive', stringToken);
-          AST_set("directive", dir, true); // replace the string token with just the string value, then wrap it
-          AST_close('Directive');
+            directive: dir,
+          });
           parseSemiOrAsi(lexerFlags);
         }
         else {
