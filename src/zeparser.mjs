@@ -609,16 +609,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // The column offsets at 0
 
-    let node = _path[_path.length - 1];
-    if (astUids) newnode.$uid = uid_counter++;
-    let p = node[prop];
-    if (p !== undefined && p.length !== undefined) {
-      p.push(newnode);
-    }
-    else {
-      ASSERT(p === undefined, `(this invariant does not hold without ASSERTs!) AST_openCustom(${prop}, ${type}, <newnode>, <token>); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`, _path, _tree);
-      node[prop] = newnode;
-    }
+    AST_setNode(prop, newnode);
     _path.push(newnode);
     ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -651,32 +642,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
     ASSERT(!names_ASSERT_ONLY || (typeof names_ASSERT_ONLY === 'string' && names_ASSERT_ONLY === was.type) || (names_ASSERT_ONLY instanceof Array && names_ASSERT_ONLY.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names_ASSERT_ONLY + ' but closed: ' + was.type)
-
-    return was; // debug/assertions only...
-  }
-  function AST_closeComment() {
-    ASSERT(AST_close.length === arguments.length, 'arg count');
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-
-    let was = _path.pop();
-    ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
-    ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
-    // In all cases where AST_close is called, `curtok` should be the first token of the next node(s)
-    // However, it ought to be the first _whitespace_ token, not just non-whitespace
-    // Comment nodes are recorded immediately and should read the current position as their end...
-    was.loc.end.column = tok_currColumn();
-    was.loc.end.line = tok_currLine();
-
-    ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
-    ASSERT(was.loc.start.line < was.loc.end.line || was.loc.start.column <= was.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', was.loc);
-    ASSERT(was.loc.start.line >= 1, 'start line should be >= 1', was.loc);
-    ASSERT(was.loc.start.column >= 0, 'start column should be >= 0', was.loc);
-    ASSERT(was.loc.end.line >= 1, 'end line should be >= 1', was.loc);
-    ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
-
-    ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
-    ASSERT(was.type === 'CommentBlock' || was.type === 'CommentLine', 'only use this to skip comments');
 
     return was; // debug/assertions only...
   }
@@ -728,15 +693,37 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let head = _path[_path.length - 1];
     head[prop] = value;
   }
-  function AST_setIdent(astProp, token) {
-    ASSERT(AST_setIdent.length === arguments.length, 'arg count');
-    ASSERT(typeof astProp === 'string', 'prop should be a string',astProp);
-    ASSERT(typeof token === 'object', 'token should be an obj');
+  function AST_setNode(astProp, node) {
+    ASSERT(AST_setNode.length === arguments.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(token.type === $IDENT, 'token must be ident');
-    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+    ASSERT(typeof node === 'object' && node && typeof node.type === 'string', 'should receive ast node to set', node);
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
 
+    if (astUids) node.$uid = uid_counter++;
+
+    let parentNode = _path[_path.length - 1];
+
+    let p = parentNode[astProp];
+    if (p !== undefined && p.length !== undefined) {
+      p.push(node);
+    }
+    else {
+      ASSERT(p === undefined, `(this invariant does not hold without ASSERTs!) parentNode[astProp] should be empty or an array`);
+      parentNode[astProp] = node;
+    }
+
+    return node; // for ASSERTs only!
+  }
+
+  function AST_setIdent(astProp, token) {
+    ASSERT(AST_setIdent.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
+    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+    ASSERT(token.type === $IDENT, 'token must be ident');
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, col, line, ...} = token`. It may be :)
     let col = token.column;
     let line = token.line;
     let canon = token.canon;
@@ -757,23 +744,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // name value doesn't seem to be specced in estree but it makes sense to use the canonical name here
       name: canon,
     };
-    if (astUids) identNode.$uid = uid_counter++;
     if (babelCompat) identNode.loc.identifierName = canon;
     ASSERT(identNode.loc.end.column - identNode.loc.start.column === token.str.length, 'for idents the location should only span exactly the length of the ident and cannot hold newlines');
 
-    let parentNode = _path[_path.length - 1];
-
-    let p = parentNode[astProp];
-    if (p !== undefined && p.length !== undefined) {
-      p.push(identNode);
-    }
-    else {
-      ASSERT(p === undefined, `(this invariant does not hold without ASSERTs!) parentNode[astProp] should be empty or an array`);
-      parentNode[astProp] = identNode;
-    }
+    return AST_setNode(astProp, identNode); // only for ASSERTS
   }
-
-  function AST_setLiteral(astProp, token, fromDirective) {
+  function AST_setLiteral(astProp, token) {
+    return _AST_setLiteral(astProp, token, false);
+  }
+  function _AST_setLiteral(astProp, token, fromDirective) {
+    ASSERT(_AST_setLiteral.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'prop is string');
     ASSERT(typeof token === 'object', 'token is obj');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -781,113 +761,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(isNumberStringRegex(token.type), 'should be number or string');
     ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
 
-    let c = token.str.charCodeAt(0);
     let node; // for assert
     if (isStringToken(token.type)) {
-      let str = token.str.slice(1, -1);
       if (babelCompat) {
-        // Babel does not canonize the string if it's for a directive ...
-        AST_openCustom(astProp, 'StringLiteral', {
-          type: 'StringLiteral',
-          loc: AST_getBaseLoc(token.line, token.column),
-          // doesn't seem to be specced in estree but it makes sense to use the canonical name here
-          value: fromDirective ? str : token.canon.slice(1, -1),
-          extra: {
-            raw: token.str,
-            rawValue: fromDirective ? str : token.canon.slice(1, -1)
-          },
-        }, token);
-        node = AST_close('StringLiteral');
+        node = AST_babelSetStringLiteral(astProp, token, fromDirective);
       } else {
-        AST_openCustom(astProp, 'Literal', {
-          type: 'Literal',
-          loc: AST_getBaseLoc(token.line, token.column),
-          // doesn't seem to be specced in estree but it makes sense to use the canonical name here
-          value: token.canon.slice(1, -1),
-          raw: token.str,
-        }, token);
-        node = AST_close('Literal');
+        node = AST_setStringLiteral(astProp, token);
       }
-    }
-    else if (isBigintToken(token.type)) {
-      // [v] `45n`
-      // [v] `0b100n`
-      // [v] `0o533n`
-      // [v] `0xabcn`
-      // https://github.com/estree/estree/pull/198/files
-      AST_openCustom(astProp, 'BigIntLiteral', {
-        type: 'BigIntLiteral',
-        loc: AST_getBaseLoc(token.line, token.column),
-        value: null,
-        bigint: token.str.slice(0, -1), // TODO: Normalize? Pending https://github.com/estree/estree/issues/200
-      }, token);
-      node = AST_close('BigIntLiteral');
     }
     else if (isNumberToken(token.type)) {
-      let value =
-        token.type === $NUMBER_DEC ? parseFloat(token.str) : // parseFloat also deals with `e` cases
-        token.type === $NUMBER_HEX ? parseInt(token.str.slice(2), 16) :
-        token.type === $NUMBER_BIN ? parseInt(token.str.slice(2), 2) :
-        token.type === $NUMBER_OCT ? parseInt(token.str.slice(2), 8) :
-        token.type === $NUMBER_OLD ? (
-          token.str === '0' ? 0 :
-          token.str.includes('8') || token.str.includes('9') ? parseFloat(token.str.slice(1)) :
-          parseInt(token.str.slice(1), 8)
-        ) :
-        (ASSERT(isNumberToken(token.type)) && ASSERT(false, 'number enum') && FIXME);
-
-      if (babelCompat) {
-        // TODO: locally babel seems to make this null but in astexplorer it (properly?) uses Infinity ... dunno
-        if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
-
-        AST_openCustom(astProp, 'NumericLiteral', {
-          type: 'NumericLiteral',
-          loc: AST_getBaseLoc(token.line, token.column),
-          value: value,
-          bigint: {raw: token.str, rawValue: value},
-        }, token);
-        // AST_set('raw', token.str);
-        node = AST_close('NumericLiteral');
+      if (isBigintToken(token.type)) {
+        // [v] `45n`
+        // [v] `0b100n`
+        // [v] `0o533n`
+        // [v] `0xabcn`
+        // https://github.com/estree/estree/pull/198/files
+        node = AST_setBigInt(astProp, token);
+      } else if (babelCompat) {
+        node = AST_babelSetNumberLiteral(astProp, token);
       } else {
-        if (acornCompat) {
-          if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
-        }
-        AST_openCustom(astProp, 'Literal', {
-          type: 'Literal',
-          loc: AST_getBaseLoc(token.line, token.column),
-          value: value,
-          raw: token.str,
-        }, token);
-        node = AST_close('Literal');
+        node = AST_setNumberLiteral(astProp, token);
       }
     }
-    else if (c === $$FWDSLASH_2F) {
+    else if (isRegexToken(token.type)) {
       ASSERT(token.str.split('/').length > 2, 'a regular expression should have at least two forward slashes', token.str);
-      let pos = token.str.lastIndexOf('/');
-      let body = token.str.slice(1, pos);
-      let tail = token.str.slice(pos + 1);
       if (babelCompat) {
-        AST_openCustom(astProp, 'RegExpLiteral', {
-          type: 'RegExpLiteral',
-          loc: AST_getBaseLoc(token.line, token.column),
-          pattern: body,
-          flags: tail,
-          extra: {raw: token.str},
-        }, token);
-        node = AST_close('RegExpLiteral');
+        node = AST_babelSetRegexLiteral(astProp, token);
       } else {
-        // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
-        AST_openCustom(astProp, 'Literal', {
-          type: 'Literal',
-          loc: AST_getBaseLoc(token.line, token.column),
-          value: acornCompat ? {} : null,
-          regex: {
-            pattern: body,
-            flags: tail,
-          },
-          raw: token.str,
-        }, token);
-        node = AST_close('Literal');
+        node = AST_setRegexLiteral(astProp, token);
       }
     }
     else {
@@ -896,6 +797,152 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // It's difficult to make this generic but for idents and literals it's doable
     ASSERT(node, 'should be set by one of the branches');
     ASSERT(token.str.includes('\n') || token.str.includes('\r') || token.str.includes('\u2028') || token.str.includes('\u2029') || node.loc.end.column - node.loc.start.column === token.str.length, 'for literals the location should only span exactly the length of the lit', node.loc);
+  }
+  function AST_setStringLiteral(astProp, token) {
+    ASSERT(AST_setStringLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
+    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let stringNode = {
+      type: 'Literal',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: token.canon.slice(1, -1),
+      raw: token.str,
+    };
+
+    return AST_setNode(astProp, stringNode); // for ASSERTs only!
+  }
+  function AST_setNumberLiteral(astProp, token) {
+    ASSERT(AST_setNumberLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
+    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let type = token.type;
+    let str = token.str;
+    let value =
+      type === $NUMBER_DEC ? parseFloat(str) : // parseFloat also deals with `e` cases
+        type === $NUMBER_HEX ? parseInt(str.slice(2), 16) :
+          type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
+            type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
+              type === $NUMBER_OLD ? (
+                  str === '0' ? 0 : // TODO: I think a zero is just a number_dec?
+                    str.includes('8') || str.includes('9') ? parseFloat(str.slice(1)) :
+                      parseInt(str.slice(1), 8)
+                ) :
+                (ASSERT(isNumberToken(type)) && ASSERT(false, 'number enum') && FIXME);
+    if (acornCompat && value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
+
+    let numberNode = {
+      type: 'Literal',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: value,
+      raw: str,
+    };
+
+    return AST_setNode(astProp, numberNode); // for ASSERTs only!
+  }
+  function AST_setBigInt(astProp, token) {
+    ASSERT(AST_setBigInt.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
+    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let bigintNode = {
+      type: 'BigIntLiteral',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: null,
+      bigint: token.str.slice(0, -1), // TODO: Normalize... https://github.com/estree/estree/issues/200
+    };
+
+    return AST_setNode(astProp, bigintNode); // for ASSERTs only!
+  }
+  function AST_setRegexLiteral(astProp, token) {
+    ASSERT(AST_setRegexLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
+    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let str = token.str;
+    let pos = str.lastIndexOf('/');
+    let body = str.slice(1, pos);
+    let tail = str.slice(pos + 1);
+
+    // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
+
+    let regexNode = {
+      type: 'Literal',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: acornCompat ? {} : null,
+      regex: {
+        pattern: body,
+        flags: tail,
+      },
+      raw: str,
+    };
+
+    return AST_setNode(astProp, regexNode); // for ASSERTs only!
   }
   function AST_add(prop, value) {
     ASSERT(typeof prop === 'string', 'prop should be string');
@@ -1033,7 +1080,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
     }
   }
-
   function AST_babelDirectives() {
     // Remove Directive nodes from the body and generate them in a special directives array
     // https://babeljs.io/docs/en/babel-parser#output
@@ -1079,22 +1125,170 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Add comment if it does.
     if (!_path[_path.length - 1].innerComments) _path[_path.length - 1].innerComments = [];
 
-    let type = commentToken.type === $COMMENT_MULTI ? 'CommentBlock' : 'CommentLine';
-    AST_openCustom('innerComments', type, {
-      type: type,
-      loc: AST_getBaseLoc(commentToken.line, commentToken.column),
-      value:
-        commentToken.type === $COMMENT_SINGLE ? commentToken.str.slice(2) :
-        commentToken.type === $COMMENT_MULTI ? commentToken.str.slice(2, -2) :
-        (
-          ASSERT(commentToken.type === $COMMENT_HTML, 'comment is enum so this must be html'),
-          commentToken.str.slice(0, 3) === '-->' ? commentToken.str.slice(3) : (
-            ASSERT(commentToken.str.slice(0, 4) === '<!--', 'should be html open now'),
-            commentToken.str.slice(4)
-          )
-        ),
-    }, commentToken);
-    AST_closeComment();
+    let type = commentToken.type;
+    let str = commentToken.str;
+
+    let typeName = 'CommentLine';
+    let value = '';
+    if (type === $COMMENT_SINGLE) {
+      // typeName = 'CommentBlock'
+      value = str.slice(2);
+    } else if (type === $COMMENT_MULTI) {
+      typeName = 'CommentBlock'
+      value = str.slice(2, -2);
+    } else {
+      ASSERT(type === $COMMENT_HTML, 'comment is enum so this must be html');
+      ASSERT(str.slice(0,3) === '-->' || str.slice(0, 4) === '<!--', 'only two types of html comment');
+      // Note: html comments are single line ast nodes
+      // typeName = 'CommentLine'
+      value = str.slice(0, 3) === '-->' ? commentToken.str.slice(3) : commentToken.str.slice(4);
+    }
+
+    let commentNode = {
+      type: typeName,
+      loc: {
+        start: {
+          line: commentToken.line, // offset 1
+          column: commentToken.column, // offset 0
+        },
+        // Comment nodes are recorded immediately and should read the current position as their end...
+        end: {
+          line: tok_currLine(),
+          column: tok_currColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: value
+    };
+
+    AST_setNode('innerComments', commentNode);
+
+    ASSERT(commentNode.loc.start.line <= commentNode.loc.end.line, 'end line should be same or later than start', commentNode.loc);
+    ASSERT(commentNode.loc.start.line < commentNode.loc.end.line || commentNode.loc.start.column <= commentNode.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', commentNode.loc);
+    ASSERT(commentNode.loc.start.line >= 1, 'start line should be >= 1', commentNode.loc);
+    ASSERT(commentNode.loc.start.column >= 0, 'start column should be >= 0', commentNode.loc);
+    ASSERT(commentNode.loc.end.line >= 1, 'end line should be >= 1', commentNode.loc);
+    ASSERT(commentNode.loc.end.column >= 0, 'end column should be >= 0', commentNode.loc);
+
+    return commentNode; // debug/assertions only...
+  }
+  function AST_babelSetStringLiteral(astProp, token, fromDirective) {
+    ASSERT(AST_babelSetStringLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let canon = token.canon;
+    let str = token.str;
+    let strUnquoted = str.slice(1, -1);
+    let value = fromDirective ? strUnquoted : canon.slice(1, -1);
+
+    let stringNode = {
+      type: 'StringLiteral',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: value,
+      extra: {
+        raw: str,
+        rawValue: value,
+      },
+    };
+
+    return AST_setNode(stringNode); // for ASSERTs only!
+  }
+  function AST_babelSetNumberLiteral(astProp, token) {
+    ASSERT(AST_babelSetNumberLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let type = token.type;
+    let str = token.str;
+    let value =
+      type === $NUMBER_DEC ? parseFloat(str) : // parseFloat also deals with `e` cases
+        type === $NUMBER_HEX ? parseInt(str.slice(2), 16) :
+          type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
+            type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
+              type === $NUMBER_OLD ? (
+                  str === '0' ? 0 : // TODO: I think a zero is just a number_dec?
+                    str.includes('8') || str.includes('9') ? parseFloat(str.slice(1)) :
+                      parseInt(str.slice(1), 8)
+                ) :
+                (ASSERT(isNumberToken(type)) && ASSERT(false, 'number enum') && FIXME);
+
+    // TODO: locally babel seems to make this null but in astexplorer it (properly?) uses Infinity ... dunno
+    if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
+
+    let numberNode = {
+      type: 'NumericLiteral',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: value,
+      raw: str,
+    };
+
+    return AST_setNode(numberNode); // for ASSERTs only!
+  }
+  function AST_babelSetRegexLiteral(astProp, token) {
+    ASSERT(AST_babelSetRegexLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let str = token.str;
+    let pos = str.lastIndexOf('/');
+    let body = str.slice(1, pos);
+    let tail = str.slice(pos + 1);
+
+    let regexNode = {
+      type: 'RegExpLiteral',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      pattern: body,
+      flags: tail,
+      extra: {raw: str},
+    };
+
+    return AST_setNode(regexNode); // for ASSERTs only!
   }
 
   function initLexer(lexerFlags) {
@@ -2382,7 +2576,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // scan here is not so bad... And let's face it; trivial cases are quickly found.
       let stringToken = curtok;
       ASSERT_skipDiv($G_STRING, lexerFlags); // statement start means div
-      AST_setLiteral(astProp, stringToken, true);
+      _AST_setLiteral(astProp, stringToken, true);
 
       // Remember the next token. Do a regular parse. If the next token is still the same token then there was no tail
       // and we can assume ASI will happen.
