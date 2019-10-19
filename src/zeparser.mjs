@@ -622,43 +622,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
   }
-  function AST_close(names, forcedToken = false, isTemplateElement = false, isTemplateDouble = false) {
-    ASSERT(arguments.length >= 1 && arguments.length <= 4, 'expecting one arg, most of the time');
+  function AST_close(names) {
+    ASSERT(AST_close.length === arguments.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(forcedToken === false || (typeof forcedToken === 'object' && forcedToken.type === $IDENT), 'the forced token should come from AST setIdent');
+    ASSERT(!names.includes('TemplateElement'), 'use AST_closeTemplateElement instead');
+    ASSERT(!names.includes('CommentBlock'), 'use AST_closeComment instead');
+    ASSERT(!names.includes('CommentLine'), 'use AST_closeComment instead');
+    ASSERT(!names.includes('Identifier'), 'use AST_closeIdent instead');
 
     let was = _path.pop();
     ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
     ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
     // In all cases where AST_close is called, `curtok` should be the first token of the next node(s)
     // However, it ought to be the first _whitespace_ token, not just non-whitespace
-    if (forcedToken) {
-      // This exception path is used for `async();` kinds of cases, for example.
-      ASSERT(!forcedToken.str.includes('\n'), 'tokens that use this path should not be able to hold newlines');
-      if (babelCompat) was.loc.identifierName = forcedToken.canon;
-      was.loc.end.column = forcedToken.column + forcedToken.str.length;
-      was.loc.end.line = forcedToken.line;
-    } else if (names === 'CommentBlock' || names === 'CommentLine') {
-      // Comment nodes are recorded immediately and should read the current position as their end...
-      was.loc.end.column = tok_currColumn();
-      was.loc.end.line = tok_currLine();
-    } else {
-
-      // The column offsets at 0
-      let colEnd = tok_prevEndColumn();
-      if (isTemplateElement) {
-        // For template elements the backticks, `${`, and `}` characters are ignored in the location ranges...
-        --colEnd;
-        if (isTemplateDouble) {
-          // This is for TICK_HEAD and TICK_BODY which start with `${`
-          --colEnd;
-        }
-      }
-
-      was.loc.end.column = colEnd;
-      was.loc.end.line = tok_prevEndLine();
-    }
+    // The column offsets at 0, the line at 1
+    was.loc.end.column = tok_prevEndColumn();
+    was.loc.end.line = tok_prevEndLine();
 
     ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
     ASSERT(was.loc.start.line < was.loc.end.line || was.loc.start.column <= was.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', was.loc);
@@ -669,6 +649,93 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
     ASSERT(!names || (typeof names === 'string' && names === was.type) || (names instanceof Array && names.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names + ' but closed: ' + was.type)
+
+    return was; // debug/assertions only...
+  }
+  function AST_closeComment() {
+    ASSERT(AST_close.length === arguments.length, 'arg count');
+    ASSERT(_path.length > 0, 'path shouldnt be empty');
+    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+
+    let was = _path.pop();
+    ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
+    ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
+    // In all cases where AST_close is called, `curtok` should be the first token of the next node(s)
+    // However, it ought to be the first _whitespace_ token, not just non-whitespace
+    // Comment nodes are recorded immediately and should read the current position as their end...
+    was.loc.end.column = tok_currColumn();
+    was.loc.end.line = tok_currLine();
+
+    ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
+    ASSERT(was.loc.start.line < was.loc.end.line || was.loc.start.column <= was.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', was.loc);
+    ASSERT(was.loc.start.line >= 1, 'start line should be >= 1', was.loc);
+    ASSERT(was.loc.start.column >= 0, 'start column should be >= 0', was.loc);
+    ASSERT(was.loc.end.line >= 1, 'end line should be >= 1', was.loc);
+    ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
+
+    ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
+    ASSERT(was.type === 'CommentBlock' || was.type === 'CommentLine', 'only use this to skip comments');
+
+    return was; // debug/assertions only...
+  }
+  function AST_closeIdent(identToken) {
+    ASSERT(AST_closeIdent.length === arguments.length, 'arg count');
+    ASSERT(_path.length > 0, 'path shouldnt be empty');
+    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+    ASSERT(typeof identToken === 'object' && identToken.type === $IDENT, 'the token should come from AST setIdent');
+
+    let was = _path.pop();
+    ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
+    ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
+    // In all cases where AST_close is called, `curtok` should be the first token of the next node(s)
+    // However, it ought to be the first _whitespace_ token, not just non-whitespace
+    // This exception path is used for `async();` kinds of cases, for example.
+    ASSERT(!identToken.str.includes('\n'), 'tokens that use this path should not be able to hold newlines');
+    if (babelCompat) was.loc.identifierName = identToken.canon;
+    was.loc.end.column = identToken.column + identToken.str.length;
+    was.loc.end.line = identToken.line;
+
+    ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
+    ASSERT(was.loc.start.line < was.loc.end.line || was.loc.start.column <= was.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', was.loc);
+    ASSERT(was.loc.start.line >= 1, 'start line should be >= 1', was.loc);
+    ASSERT(was.loc.start.column >= 0, 'start column should be >= 0', was.loc);
+    ASSERT(was.loc.end.line >= 1, 'end line should be >= 1', was.loc);
+    ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
+
+    ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
+    ASSERT(was.type === 'Identifier', 'only use this func to skip idents');
+
+    return was; // debug/assertions only...
+  }
+  function AST_closeTemplateElement(isTemplateDouble) {
+    ASSERT(AST_closeTemplateElement.length === arguments.length, 'arg count');
+    ASSERT(_path.length > 0, 'path shouldnt be empty');
+    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+
+    let was = _path.pop();
+    ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
+    ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
+
+    // The column offsets at 0
+    // For template elements the backticks, `${`, and `}` characters are ignored in the location ranges... so -1
+    let colEnd = tok_prevEndColumn() - 1;
+    if (isTemplateDouble) {
+      // This is for TICK_HEAD and TICK_BODY which start with `${`
+      --colEnd;
+    }
+
+    was.loc.end.column = colEnd;
+    was.loc.end.line = tok_prevEndLine();
+
+    ASSERT(was.loc.start.line <= was.loc.end.line, 'end line should be same or later than start', was.loc);
+    ASSERT(was.loc.start.line < was.loc.end.line || was.loc.start.column <= was.loc.end.column, 'if the node does not span multiple lines then the start column should come before the end column', was.loc);
+    ASSERT(was.loc.start.line >= 1, 'start line should be >= 1', was.loc);
+    ASSERT(was.loc.start.column >= 0, 'start column should be >= 0', was.loc);
+    ASSERT(was.loc.end.line >= 1, 'end line should be >= 1', was.loc);
+    ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
+
+    ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
+    ASSERT(was.type === 'TemplateElement', 'Expecting to close a TemplateElement node but closed: ' + was.type)
 
     return was; // debug/assertions only...
   }
@@ -704,7 +771,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       name: token.canon,
     }, token);
 
-    let node = AST_close('Identifier', token);
+    let node = AST_closeIdent(token);
     // It's difficult to make this generic but for idents and literals it's doable
     ASSERT(node.loc.end.column - node.loc.start.column === token.str.length, 'for idents the location should only span exactly the length of the ident');
   }
@@ -1030,7 +1097,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           )
         ),
     }, commentToken);
-    AST_close(commentToken.type === $COMMENT_MULTI ? 'CommentBlock' : 'CommentLine');
+    AST_closeComment();
   }
 
   function initLexer(lexerFlags) {
@@ -8007,8 +8074,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_VALID(isTickToken(curtype), 'expect current token to be a tick pure, head, body, or tail', curtype);
 
     let tickToken = curtok;
-
+    let hasDoubleStart = false;
     let noCooked = false;
+
     if (isBadTickToken(curtype)) {
       if (!allowBadEscapes) THROW_TOKEN('Template contained an illegal escape, these are only allowed in _tagged_ templates in >=ES2018', tickToken);
       noCooked = true;
@@ -8017,6 +8085,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipDiv(lexerFlags); // First token after template is division
     } else if (curtype === $TICK_HEAD || curtype === $TICK_BODY || curtype === $TICK_BAD_HEAD || curtype === $TICK_BAD_BODY) {
       ASSERT_skipExpressionStart($G_TICK, lexerFlags); // First token in template expression can be regex
+      hasDoubleStart = true; // the raw string of the token starts with the two-char delimiter `${` instead of one
     } else {
       THROW_TOKEN('The first token after the template expression should be a continuation of the template', tickToken);
     }
@@ -8041,7 +8110,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         cooked: cookedValue,
       },
     }, tickToken);
-    AST_close('TemplateElement', undefined, true, tickToken.type === $TICK_HEAD || tickToken.type === $TICK_BODY || tickToken.type === $TICK_BAD_HEAD || tickToken.type === $TICK_BAD_BODY);
+    AST_closeTemplateElement(hasDoubleStart);
   }
 
   function parseValueTail(lexerFlags, valueFirstToken, assignable, isNewArg, leftHandSideExpression, astProp) {
