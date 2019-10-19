@@ -166,6 +166,12 @@ function CallExpression(node) {
     if (node.callee.name === 'eof') {
       return 'pointer >= len';
     }
+
+    // AST_close('BlockStatement') -> AST_close(), because the names are only used for assertions
+    if (node.callee.name === 'AST_close') {
+      assert(node.arguments.length, 1); // node name(s) to close
+      return 'AST_close()'; // basically drop the arg
+    }
   }
   // Drop error messages
   // TODO: symbolize them, store them in a local lookup file, build a mechanism to make that all work smoothly

@@ -622,14 +622,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
   }
-  function AST_close(names) {
+  function AST_close(names_ASSERT_ONLY) {
     ASSERT(AST_close.length === arguments.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(!names.includes('TemplateElement'), 'use AST_closeTemplateElement instead');
-    ASSERT(!names.includes('CommentBlock'), 'use AST_closeComment instead');
-    ASSERT(!names.includes('CommentLine'), 'use AST_closeComment instead');
-    ASSERT(!names.includes('Identifier'), 'use AST_closeIdent instead');
+    ASSERT(!names_ASSERT_ONLY.includes('TemplateElement'), 'use AST_closeTemplateElement instead');
+    ASSERT(!names_ASSERT_ONLY.includes('CommentBlock'), 'use AST_closeComment instead');
+    ASSERT(!names_ASSERT_ONLY.includes('CommentLine'), 'use AST_closeComment instead');
+    ASSERT(!names_ASSERT_ONLY.includes('Identifier'), 'use AST_closeIdent instead');
 
     let was = _path.pop();
     ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
@@ -648,7 +648,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(was.loc.end.column >= 0, 'end column should be >= 0', was.loc);
 
     ASSERT(!void _pnames.pop(), '(dev-only verification and debugging tool)');
-    ASSERT(!names || (typeof names === 'string' && names === was.type) || (names instanceof Array && names.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names + ' but closed: ' + was.type)
+    ASSERT(!names_ASSERT_ONLY || (typeof names_ASSERT_ONLY === 'string' && names_ASSERT_ONLY === was.type) || (names_ASSERT_ONLY instanceof Array && names_ASSERT_ONLY.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names_ASSERT_ONLY + ' but closed: ' + was.type)
 
     return was; // debug/assertions only...
   }
