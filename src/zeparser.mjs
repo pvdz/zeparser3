@@ -598,42 +598,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       source: sourceField, // File containing the code being parsed. Source maps may use this.
     };
   }
-  function AST_open(prop, type, token) {
-    ASSERT(arguments.length === AST_open.length, 'arg count');
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
-    ASSERT(typeof prop === 'string' && prop !== 'undefined', 'prop should be string');
-    ASSERT(typeof type === 'string' && type !== 'undefined', 'type should be string');
-
-    // The column offsets at 0
-    let colOffset = token.column;
-    if (type === 'TemplateElement') {
-      // For template elements the backticks, `${`, and `}` characters are ignored in the location ranges...
-      ++colOffset;
-      // Bug in Babel? Feels like it should skip two chars for `${`
-      // if (token.type === $TICK_BODY || token.type === $TICK_TAIL) {
-      //   ++colOffset;
-      // }
-    }
-
-    let node = _path[_path.length - 1];
-    let newnode = { // unoptimized ast nodes are created here (see AST_openCustom for the others)
-      type,
-      loc: AST_getBaseLoc(token.line, colOffset),
-    };
-    if (astUids) newnode.$uid = uid_counter++;
-    if (Array.isArray(node[prop])) {
-      node[prop].push(newnode);
-    }
-    else {
-      ASSERT(node[prop] === undefined, `AST_open(${prop}, ${type}); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`, _path, _tree);
-      node[prop] = newnode;
-    }
-    _path.push(newnode);
-    ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-  }
   function AST_openCustom(prop, type, newnode, token) {
     ASSERT(arguments.length === AST_openCustom.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -646,11 +610,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let node = _path[_path.length - 1];
     if (astUids) newnode.$uid = uid_counter++;
-    if (Array.isArray(node[prop])) {
-      node[prop].push(newnode);
+    let p = node[prop];
+    if (p !== undefined && p.length !== undefined) {
+      p.push(newnode);
     }
     else {
-      ASSERT(node[prop] === undefined, `AST_openCustom("${prop}", "${type}", node, token); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`, _path, _tree);
+      ASSERT(p === undefined, `(this invariant does not hold without ASSERTs!) AST_openCustom(${prop}, ${type}, <newnode>, <token>); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`, _path, _tree);
       node[prop] = newnode;
     }
     _path.push(newnode);
@@ -892,21 +857,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let parent = _path[_path.length-1];
     let child = null;
 
-    if (Array.isArray(parent[prop])) {
-      child = parent[prop].pop();
+    let p = parent[prop];
+    ASSERT(p, 'the prop should exist... (and be a node)');
+    if (p.length !== undefined) {
+      ASSERT(Array.isArray(p), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+      child = p.pop();
     } else {
-      child = parent[prop];
+      child = p;
     }
     ASSERT(child, 'AST_wrapClosedCustom("'+prop+'", "'+newNodeType+'", <node>, "'+newProp+'", <token>); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
+    ASSERT(Array.isArray(parent[prop]) || parent[prop] === undefined, 'either an array or undefined');
     AST_openCustom(prop, newNodeType, newNode, token);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
   }
-  function AST_wrapClosedIntoArray(prop, value, newProp, startToken) {
-    ASSERT(AST_wrapClosedIntoArray.length === arguments.length, 'arg count');
+  function AST_wrapClosedIntoArrayCustom(prop, value, newNode, newProp, startToken) {
+    ASSERT(AST_wrapClosedIntoArrayCustom.length === arguments.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
 
@@ -915,15 +884,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let parent = _path[_path.length-1];
     let child = null;
 
-    if (Array.isArray(parent[prop])) {
-      child = parent[prop].pop();
+    let p = parent[prop];
+    ASSERT(p, 'the prop should exist');
+    if (p.length !== undefined) {
+      ASSERT(Array.isArray(p), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+      child = p.pop();
     } else {
-      child = parent[prop];
+      child = p;
     }
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     ASSERT(_path[_path.length - 1][prop]  instanceof Array || !void(_path[_path.length - 1][prop] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
-    AST_open(prop, value, startToken);
+    AST_openCustom(prop, value, newNode, startToken);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
   }
@@ -945,7 +917,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let node = _path[_path.length-1][prop];
     ASSERT(node, 'top[' + prop + '] should be a node');
-    if (Array.isArray(node)) node = node[node.length-1]; // the destruct applies to the node just closed, so last in list
+    if (node.length !== undefined) {
+      ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+      node = node[node.length-1]; // the destruct applies to the node just closed, so last in list
+    }
 
     AST__destruct(node);
   }
@@ -1019,7 +994,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Hack: get the node we just closed and add the extra meta data to it
     let parent = _path[_path.length-1];
     let child = parent[astProp];
-    if (Array.isArray(child)) {
+    if (child.length !== undefined) {
+      ASSERT(Array.isArray(child), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
       ASSERT(child.length > 0, 'babel should not be able to wrap the closed child of an empty container');
       child = child[child.length - 1];
     }
@@ -6788,7 +6764,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Conditionally convert the lhs in the AST to a Pattern
     if (curc === $$IS_3D && curtok.str === '=') {
       let node = _path[_path.length - 1][astProp];
-      if (Array.isArray(node)) node = node[node.length - 1];
+      if (node.length !== undefined) {
+        ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+        node = node[node.length - 1];
+      }
       if (node.type === 'ArrayExpression' || node.type === 'ObjectExpression') {
         AST_destruct(astProp);
       }
@@ -6933,7 +6912,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseExpressions(lexerFlags, startOfFirstExprToken, assignableForPiggies, astProp) {
     ASSERT(arguments.length === _parseExpressions.length, 'arg count');
     ASSERT(curc === $$COMMA_2C, 'confirm at callsite');
-    AST_wrapClosedIntoArray(astProp, 'SequenceExpression', 'expressions', startOfFirstExprToken);
+    AST_wrapClosedIntoArrayCustom(astProp, 'SequenceExpression', {
+      type: 'SequenceExpression',
+      loc: AST_getBaseLoc(startOfFirstExprToken.line, startOfFirstExprToken.column),
+      expressions: undefined,
+    }, 'expressions', startOfFirstExprToken);
     assignableForPiggies = __parseExpressions(lexerFlags, assignableForPiggies, 'expressions');
     AST_close('SequenceExpression');
     return assignableForPiggies; // since we asserted a comma, we can be certain about this
@@ -8809,7 +8792,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COMMA_2C) {
           if (!toplevelComma) {
             toplevelComma = true;
-            AST_wrapClosedIntoArray(rootAstProp, 'SequenceExpression', 'expressions', firstTokenAfterParen);
+            AST_wrapClosedIntoArrayCustom(rootAstProp, 'SequenceExpression', {
+              type: 'SequenceExpression',
+              loc: AST_getBaseLoc(firstTokenAfterParen.line, firstTokenAfterParen.column),
+              expressions: undefined,
+            }, 'expressions', firstTokenAfterParen);
             astProp = 'expressions';
           }
           assignable = __parseExpressions(lexerFlags, assignable, astProp);
@@ -8901,7 +8888,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (!toplevelComma) {
         toplevelComma = true;
         // only do this once
-        AST_wrapClosedIntoArray(rootAstProp, 'SequenceExpression', 'expressions', firstTokenAfterParen);
+        AST_wrapClosedIntoArrayCustom(rootAstProp, 'SequenceExpression', {
+          type: 'SequenceExpression',
+          loc: AST_getBaseLoc(firstTokenAfterParen.line, firstTokenAfterParen.column),
+          expressions: undefined,
+        }, 'expressions', firstTokenAfterParen);
         astProp = 'expressions';
       }
     }
@@ -9323,7 +9314,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     // <SCRUB AST>
-    AST_wrapClosedIntoArray(astProp, 'ArrowFunctionExpression', 'params', arrowStartToken);
+    AST_wrapClosedIntoArrayCustom(astProp, 'ArrowFunctionExpression', {
+      type: 'ArrowFunctionExpression',
+      loc: AST_getBaseLoc(arrowStartToken.line, arrowStartToken.column),
+      params: undefined,
+      id: undefined,
+      generator: undefined, // TODO: init to bool... (and prevent redundant sets)
+      async: undefined, // TODO: init to bool... (and prevent redundant sets)
+      expression: undefined, // TODO: init to bool
+      body: undefined,
+    }, 'params', arrowStartToken);
 
     let top = _path[_path.length - 1];
     if (toplevelComma) {
