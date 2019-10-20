@@ -493,13 +493,15 @@ function ZeTokenizer(
     returnTokens = RETURN_SOLID_TOKENS,  // what to emit and not to emit while lexing
     webCompat = WEB_COMPAT_ON,
     gracefulErrors = FAIL_HARD,
-    tokenStorage = [],
+    tokenStorageExternal,
 
     // You can override the logging functions
     $log = console.log,
     $warn = console.warn,
     $error = console.error,
   } = options;
+
+  const tokenStorage = tokenStorageExternal || (collectTokens !== COLLECT_TOKENS_NONE ? [] : undefined);
 
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(targetEsVersion !== undefined, 'undefined should become default', targetEsVersion);

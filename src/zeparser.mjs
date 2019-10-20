@@ -406,7 +406,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     webCompat: options_webCompat = WEB_COMPAT_ON,
     strictMode: options_strictMode = false,
     astRoot: options_astRoot = null,
-    tokenStorage: options_tokenStorage = [],
+    tokenStorage: options_tokenStorage,
     getTokenizer = null,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
     targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, 10, 11, Infinity
