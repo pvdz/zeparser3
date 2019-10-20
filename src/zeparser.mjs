@@ -381,21 +381,29 @@ function copyPiggies(output, input) {
 }
 
 function sansFlag(flags, flag) {
+  // This function is inlined by the build script...
+  ASSERT(sansFlag.length === arguments.length, 'arg count');
   ASSERT(typeof flag === 'number', 'sansFlag flag 1 should be number;', flag, flags);
   ASSERT(typeof flags === 'number', 'sansFlag flag 2 should be number;', flag, flags);
   return (flags | flag) ^ flag;
 }
 function hasAllFlags(flags1, flags2) {
+  // This function is inlined by the build script...
+  ASSERT(hasAllFlags.length === arguments.length, 'arg count');
   ASSERT(typeof flags1 === 'number', 'hasAllFlags flag 1 should be number;', flags1, flags2);
   ASSERT(typeof flags2 === 'number', 'hasAllFlags flag 2 should be number;', flags1, flags2);
   return (flags1 & flags2) === flags2;
 }
 function hasAnyFlag(flags1, flags2) {
+  // This function is inlined by the build script...
+  ASSERT(hasAnyFlag.length === arguments.length, 'arg count');
   ASSERT(typeof flags1 === 'number', 'hasAnyFlag flag 1 should be a number;', flags1, flags2);
   ASSERT(typeof flags2 === 'number', 'hasAnyFlag flag 2 should be a number;', flags1, flags2);
   return (flags1 & flags2) !== 0;
 }
 function hasNoFlag(flags, flag) {
+  // This function is inlined by the build script...
+  ASSERT(hasNoFlag.length === arguments.length, 'arg count');
   ASSERT(typeof flag === 'number', 'hasNoFlag flag 1 should be number;', flag, flags);
   ASSERT(typeof flags === 'number', 'hasNoFlag flag 2 should be number;', flag, flags);
   return (flags & flag) === 0;
@@ -1376,12 +1384,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function initLexer(lexerFlags) {
     do {
       skipStatementStart(lexerFlags);
-      if (curtok.type === $ERROR) softError();
+      if (curtok.type === $ERROR) {
+        THROW_TOKEN('Tokenizer error: ' + tok_lexError(), curtok);
+      }
     } while (curtok.type === $ERROR);
-  }
-
-  function softError() {
-    THROW_TOKEN('Tokenizer error: ' + (tok_regexerror() ? 'Regex: ' +tok_regexerror() : '(but not regex)'), curtok);
   }
 
   function skipRex(lexerFlags) {
@@ -2947,7 +2953,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (curtok.type === $ERROR) {
-      THROW_TOKEN('Tokenizer error: ' + (tok_regexerror() ? 'Regex: ' + tok_regexerror() : '(not regex?)'), curtok );
+      THROW_TOKEN('Tokenizer error: ' + tok_lexError(), curtok );
       return;
     }
 
@@ -2956,7 +2962,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       + ': ' + T(curtok.type)
       // </SCRUB DEV>
       , curtok
-      , tok_regexerror()
+      , tok_lexError()
     );
   }
 

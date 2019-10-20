@@ -6212,8 +6212,14 @@ function ZeTokenizer(
     asi: addAsi,
     throw: _THROW,
     lexError: function() {
-      ASSERT(lastReportableTokenizerError, 'lexError should only be called if a lexer error was actually detected');
-      THROW(lastReportableTokenizerError);
+      if (lastReportableTokenizerError) {
+        THROW(lastReportableTokenizerError);
+      }
+      if (lastPotentialRegexError) {
+        THROW(lastPotentialRegexError);
+      }
+      ASSERT(false, 'lexError should only be called if a lexer error was actually detected');
+      THROW('Parser thought lexer threw an error but lexer has no error message prepared so ... please file an issue with this input?');
     },
     //deopt: () => funcs.forEach(([f,n]) => printStatus(f,n)),
     getTokenCountAny: function(){ return anyTokenCount; },
