@@ -648,7 +648,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       source: sourceField, // File containing the code being parsed. Source maps may use this.
     };
   }
-  function AST_openCustom(prop, newnode) {
+  function AST_openCustom(prop, newNode) {
     ASSERT(arguments.length === AST_openCustom.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -656,8 +656,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // The column offsets at 0
 
-    AST_setNode(prop, newnode);
-    _path.push(newnode);
+    AST_setNode(prop, newNode);
+    _path.push(newNode);
     ASSERT(_pnames.push(prop), '(dev-only verification and debugging tool)');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
   }
