@@ -50,13 +50,13 @@ ast: {
             argument: {
               type: 'UpdateExpression',
               loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
-              operator: '++',
-              prefix: true,
               argument: {
                 type: 'Identifier',
                 loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
                 name: 'a'
-              }
+              },
+              operator: '++',
+              prefix: true
             }
           }
         ]

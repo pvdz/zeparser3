@@ -62,13 +62,13 @@ ast: {
           argument: {
             type: 'UpdateExpression',
             loc:{start:{line:2,column:2},end:{line:2,column:8},source:''},
-            operator: '--',
-            prefix: true,
             argument: {
               type: 'Identifier',
               loc:{start:{line:2,column:5},end:{line:2,column:8},source:''},
               name: 'foo'
-            }
+            },
+            operator: '--',
+            prefix: true
           }
         }
       }

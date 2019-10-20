@@ -64,13 +64,13 @@ ast: {
             expression: {
               type: 'UpdateExpression',
               loc:{start:{line:2,column:0},end:{line:2,column:3},source:''},
-              operator: '++',
-              prefix: true,
               argument: {
                 type: 'Identifier',
                 loc:{start:{line:2,column:2},end:{line:2,column:3},source:''},
                 name: 'c'
-              }
+              },
+              operator: '++',
+              prefix: true
             }
           }
         ]

@@ -43,13 +43,13 @@ ast: {
         expression: {
           type: 'UpdateExpression',
           loc:{start:{line:1,column:7},end:{line:1,column:10},source:''},
-          operator: '--',
-          prefix: true,
           argument: {
             type: 'Identifier',
             loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
             name: 'a'
-          }
+          },
+          operator: '--',
+          prefix: true
         }
       },
       alternate: null

@@ -35,8 +35,6 @@ ast: {
       expression: {
         type: 'UpdateExpression',
         loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
-        operator: '--',
-        prefix: true,
         argument: {
           type: 'MemberExpression',
           loc:{start:{line:1,column:2},end:{line:1,column:7},source:''},
@@ -53,7 +51,9 @@ ast: {
             name: 'c'
           },
           computed: false
-        }
+        },
+        operator: '--',
+        prefix: true
       }
     }
   ]

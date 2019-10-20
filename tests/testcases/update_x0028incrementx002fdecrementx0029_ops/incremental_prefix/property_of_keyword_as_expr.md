@@ -35,8 +35,6 @@ ast: {
       expression: {
         type: 'UpdateExpression',
         loc:{start:{line:1,column:1},end:{line:1,column:9},source:''},
-        operator: '++',
-        prefix: true,
         argument: {
           type: 'MemberExpression',
           loc:{start:{line:1,column:3},end:{line:1,column:9},source:''},
@@ -50,7 +48,9 @@ ast: {
             name: 'x'
           },
           computed: false
-        }
+        },
+        operator: '++',
+        prefix: true
       }
     }
   ]

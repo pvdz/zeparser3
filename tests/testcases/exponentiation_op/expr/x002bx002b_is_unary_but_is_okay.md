@@ -40,13 +40,13 @@ ast: {
         left: {
           type: 'UpdateExpression',
           loc:{start:{line:1,column:1},end:{line:1,column:4},source:''},
-          operator: '++',
-          prefix: true,
           argument: {
             type: 'Identifier',
             loc:{start:{line:1,column:3},end:{line:1,column:4},source:''},
             name: 'x'
-          }
+          },
+          operator: '++',
+          prefix: true
         },
         operator: '**',
         right: {

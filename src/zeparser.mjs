@@ -7982,9 +7982,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_openCustom(astProp, 'UpdateExpression', {
       type: 'UpdateExpression',
       loc: AST_getBaseLoc(curtok.line, curtok.column),
+      argument: undefined,
       operator: curtok.str,
       prefix: true,
-      argument: undefined,
     }, curtok);
     ASSERT_skipExpressionStart($PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
     let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, NOT_LHSE, 'argument');

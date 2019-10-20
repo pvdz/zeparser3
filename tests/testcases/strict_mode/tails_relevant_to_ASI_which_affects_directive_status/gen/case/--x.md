@@ -66,13 +66,13 @@ ast: {
             expression: {
               type: 'UpdateExpression',
               loc:{start:{line:3,column:2},end:{line:3,column:5},source:''},
-              operator: '--',
-              prefix: true,
               argument: {
                 type: 'Identifier',
                 loc:{start:{line:3,column:4},end:{line:3,column:5},source:''},
                 name: 'x'
-              }
+              },
+              operator: '--',
+              prefix: true
             }
           }
         ]

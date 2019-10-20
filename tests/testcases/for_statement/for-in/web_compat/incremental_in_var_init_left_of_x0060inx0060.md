@@ -87,13 +87,13 @@ ast: {
             init: {
               type: 'UpdateExpression',
               loc:{start:{line:1,column:13},end:{line:1,column:16},source:''},
-              operator: '++',
-              prefix: true,
               argument: {
                 type: 'Identifier',
                 loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
                 name: 'b'
-              }
+              },
+              operator: '++',
+              prefix: true
             }
           }
         ]

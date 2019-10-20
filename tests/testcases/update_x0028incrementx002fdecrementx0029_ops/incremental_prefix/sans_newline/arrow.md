@@ -53,13 +53,13 @@ ast: {
             body: {
               type: 'UpdateExpression',
               loc:{start:{line:1,column:14},end:{line:1,column:17},source:''},
-              operator: '++',
-              prefix: true,
               argument: {
                 type: 'Identifier',
                 loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
                 name: 'a'
-              }
+              },
+              operator: '++',
+              prefix: true
             }
           }
         }

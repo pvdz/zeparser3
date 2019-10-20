@@ -91,13 +91,13 @@ ast: {
                 {
                   type: 'UpdateExpression',
                   loc:{start:{line:1,column:14},end:{line:1,column:23},source:''},
-                  operator: '++',
-                  prefix: true,
                   argument: {
                     type: 'Identifier',
                     loc:{start:{line:1,column:16},end:{line:1,column:23},source:''},
                     name: 'effects'
-                  }
+                  },
+                  operator: '++',
+                  prefix: true
                 },
                 {
                   type: 'UnaryExpression',
