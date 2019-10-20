@@ -566,6 +566,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // The spec says to add the whole source of the range but that just sounds a little redundant to me :/
       source: sourceField,
     },
+    body: [],
   };
   if (babelCompat) {
     delete _tree.source;
@@ -707,6 +708,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     let head = _path[_path.length - 1];
+    ASSERT(head.hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', head);
     head[prop] = value;
   }
   function AST_setNode(astProp, node) {
@@ -2125,10 +2127,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let exportedBindings = {}; // which binding an exported name refers to
     ASSERT(exportedBindings._ = 'exported bindings');
     // <SCRUB AST>
-    let len = _path.length;
-    let bak = _path.slice(0);
+    let len;
+    ASSERT(!void(len = _path.length));
+    let bak ;
+    ASSERT(!void(bak = _path.slice(0)));
     // </SCRUB AST>
-    AST_set('body', []);
     parseBodyPartsWithDirectives(lexerFlags, scoop, EMPTY_LABEL_SET, exportedNames, exportedBindings, PARAMS_ALL_SIMPLE, NO_DUPE_PARAMS, NO_ID_TO_VERIFY, IS_GLOBAL_TOPLEVEL, FDS_VAR, 'body');
 
     // <SCRUB AST>
