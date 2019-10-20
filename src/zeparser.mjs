@@ -616,12 +616,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       source: sourceField, // File containing the code being parsed. Source maps may use this.
     };
   }
-  function AST_openCustom(prop, type, newnode) {
+  function AST_openCustom(prop, newnode) {
     ASSERT(arguments.length === AST_openCustom.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
     ASSERT(typeof prop === 'string' && prop !== 'undefined', 'prop should be string');
-    ASSERT(typeof type === 'string' && type !== 'undefined', 'type should be string');
 
     // The column offsets at 0
 
@@ -1016,7 +1015,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return p;
     }
   }
-  function AST_wrapClosedCustom(prop, newNodeType, newNode, newProp) { // TODO: a build can strip the second arg ... maybe we can formalize that a little bit
+  function AST_wrapClosedCustom(prop, newNode, newProp) { // TODO: a build can strip the second arg ... maybe we can formalize that a little bit
     ASSERT(AST_wrapClosedCustom.length === arguments.length, 'arg count');
     ASSERT(typeof prop === 'string', 'should be string');
 
@@ -1031,11 +1030,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let child = AST_popNode(prop);
 
-    AST_openCustom(prop, newNodeType, newNode);
+    AST_openCustom(prop, newNode);
     // set it as child of new node
     AST_set(newProp, child);
   }
-  function AST_wrapClosedIntoArrayCustom(prop, value, newNode, newProp, startToken) {
+  function AST_wrapClosedIntoArrayCustom(prop, newNode, newProp, startToken) {
     ASSERT(AST_wrapClosedIntoArrayCustom.length === arguments.length, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -1044,7 +1043,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let child = AST_popNode(prop);
 
-    AST_openCustom(prop, value, newNode);
+    AST_openCustom(prop, newNode);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
   }
@@ -3198,7 +3197,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     */
 
     if (!babelCompat || isMethod === NOT_METHOD) { // Babel extends the Function node to be a ClassMethod, rather than .value
-      AST_openCustom(astProp, isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression', {
+      AST_openCustom(astProp, {
         type: isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression',
         loc: AST_getBaseLoc(firstToken.line, firstToken.column),
         // name value doesn't seem to be specced in estree but it makes sense to use the canonical name here
@@ -3478,7 +3477,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION);
 
-    AST_openCustom('body', 'BlockStatement', {
+    AST_openCustom('body', {
       type: 'BlockStatement',
       loc: AST_getBaseLoc(curtok.line, curtok.column),
       body: [],
@@ -3632,7 +3631,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string', 'astprop str', astProp);
     ASSERT(isNumberStringRegex(litToken.type), 'lit is a lit');
 
-    AST_openCustom(astProp, 'ExpressionStatement', {
+    AST_openCustom(astProp, {
       type: 'ExpressionStatement',
       loc: AST_getBaseLoc(litToken.line, litToken.column),
       expression: undefined, // TODO: "AST_getLiteralNode()"
@@ -3654,7 +3653,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isBadTickToken(curtype)) {
       THROW('Template contained an illegal escape, illegal in a statement', ''+curtok);
     }
-    AST_openCustom(astProp, 'ExpressionStatement', {
+    AST_openCustom(astProp, {
       type: 'ExpressionStatement',
       loc: AST_getBaseLoc(tickToken.line, tickToken.column),
       expression: undefined,
@@ -3850,7 +3849,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (fromStmtOrExpr === IS_STATEMENT) {
-        AST_openCustom(astProp, 'ExpressionStatement', {
+        AST_openCustom(astProp, {
           type: 'ExpressionStatement',
           loc: AST_getBaseLoc(asyncToken.line, asyncToken.column),
           expression: undefined,
@@ -3964,7 +3963,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async function f(){ new await; }`
     // - `async function *f(){ new await; }`
 
-    AST_openCustom(astProp, 'AwaitExpression', {
+    AST_openCustom(astProp, {
       type: 'AwaitExpression',
       loc: AST_getBaseLoc(awaitToken.line, awaitToken.column),
       argument: undefined,
@@ -4023,7 +4022,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI); // TODO: validate these. Are they for arrow inside a template?
 
-    AST_openCustom(astProp, 'BlockStatement', {
+    AST_openCustom(astProp, {
       type: 'BlockStatement',
       loc: AST_getBaseLoc(curtok.line, curtok.column),
       body: [],
@@ -4256,7 +4255,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let doToken = curtok;
     ASSERT_skipStatementStart('do', lexerFlags); // Note: most likely is a block...
-    AST_openCustom(astProp, 'DoWhileStatement', {
+    AST_openCustom(astProp, {
       type: 'DoWhileStatement',
       loc: AST_getBaseLoc(doToken.line, doToken.column),
       body: undefined,
@@ -4325,7 +4324,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let needsSemi = true; // only classes and function decls don't get this. var/let/const semi's are parsed elsewhere
 
     if (curc === $$D_64 && curtok.str === 'default') {
-      AST_openCustom(astProp, 'ExportDefaultDeclaration', {
+      AST_openCustom(astProp, {
         type: 'ExportDefaultDeclaration',
         loc: AST_getBaseLoc(exportToken.line, exportToken.column),
         declaration: undefined,
@@ -4462,7 +4461,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let sourceToken = curtok;
       ASSERT_skipStatementStart($G_STRING, lexerFlags);
 
-      AST_openCustom(astProp, 'ExportAllDeclaration', {
+      AST_openCustom(astProp, {
         type: 'ExportAllDeclaration',
         loc: AST_getBaseLoc(exportToken.line, exportToken.column),
         source: undefined, // unfortunately we need to skip two tokens before we can see the source...
@@ -4474,7 +4473,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('ExportAllDeclaration');
     }
     else {
-      AST_openCustom(astProp, 'ExportNamedDeclaration', {
+      AST_openCustom(astProp, {
         type: 'ExportNamedDeclaration',
         loc: AST_getBaseLoc(exportToken.line, exportToken.column),
         specifiers: [],
@@ -5005,7 +5004,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         if (hadAssign) THROW('The lhs of a `for-of` cannot have an assignment');
         if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-of` loops');
-        AST_wrapClosedCustom(astProp, 'ForOfStatement', {
+        AST_wrapClosedCustom(astProp, {
           type: 'ForOfStatement',
           loc: AST_getBaseLoc(forToken.line, forToken.column),
           left: undefined,
@@ -5024,7 +5023,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === 'in') {
         if (hadAssign) THROW('The lhs of a `for-in` cannot have an assignment');
         if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-in` loops');
-        AST_wrapClosedCustom(astProp, 'ForInStatement', {
+        AST_wrapClosedCustom(astProp, {
           type: 'ForInStatement',
           loc: AST_getBaseLoc(forToken.line, forToken.column),
           left: undefined,
@@ -5080,7 +5079,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (emptyInit) {
-      AST_openCustom(astProp, 'ForStatement', {
+      AST_openCustom(astProp, {
         type: 'ForStatement',
         loc: AST_getBaseLoc(forToken.line, forToken.column),
         init: null, // yes, null, not undefined
@@ -5089,7 +5088,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         body: undefined,
       });
     } else {
-      AST_wrapClosedCustom(astProp, 'ForStatement', {
+      AST_wrapClosedCustom(astProp, {
         type: 'ForStatement',
         loc: AST_getBaseLoc(forToken.line, forToken.column),
         init: undefined,
@@ -5300,7 +5299,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let ifToken = curtok;
     ASSERT_skipToParenOpen('if', lexerFlags);
-    AST_openCustom(astProp, 'IfStatement', {
+    AST_openCustom(astProp, {
       type: 'IfStatement',
       loc: AST_getBaseLoc(ifToken.line, ifToken.column),
       test: undefined,
@@ -5355,7 +5354,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (goalMode !== GOAL_MODULE) THROW('The `import` keyword can only be used with the module goal');
     if (isGlobalToplevel === NOT_GLOBAL_TOPLEVEL) THROW('The `import` keyword is only supported at the top level'); // TODO: import() ?
 
-    AST_openCustom(astProp, 'ImportDeclaration', {
+    AST_openCustom(astProp, {
       type: 'ImportDeclaration',
       loc: AST_getBaseLoc(importToken.line, importToken.column),
       specifiers: [],
@@ -5630,7 +5629,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curc === $$COLON_3A) {
       return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, nestedLabels, astProp);
     } else {
-      AST_openCustom(astProp, 'ExpressionStatement', {
+      AST_openCustom(astProp, {
         type: 'ExpressionStatement',
         loc: AST_getBaseLoc(identToken.line, identToken.column),
         expression: undefined,
@@ -5652,7 +5651,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let returnToken = curtok;
     ASSERT_skipStatementStart('return', lexerFlags); // Either an expression on the same line or a statement on the next (which includes exprs)
-    AST_openCustom(astProp, 'ReturnStatement', {
+    AST_openCustom(astProp, {
       type: 'ReturnStatement',
       loc: AST_getBaseLoc(returnToken.line, returnToken.column),
       argument: undefined,
@@ -5683,7 +5682,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let switchToken = curtok;
     ASSERT_skipToParenOpen('switch', lexerFlags);
-    AST_openCustom(astProp, 'SwitchStatement', {
+    AST_openCustom(astProp, {
       type: 'SwitchStatement',
       loc: AST_getBaseLoc(switchToken.line, switchToken.column),
       discriminant: undefined,
@@ -5711,7 +5710,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === 'case') {
         let caseToken = curtok;
         ASSERT_skipExpressionStart('case', lexerFlags);
-        AST_openCustom(astProp, 'SwitchCase', {
+        AST_openCustom(astProp, {
           type: 'SwitchCase',
           loc: AST_getBaseLoc(caseToken.line, caseToken.column),
           test: undefined,
@@ -5729,7 +5728,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         hadDefault = true;
         let defaultToken = curtok;
         ASSERT_skipColon('default', lexerFlags);
-        AST_openCustom(astProp, 'SwitchCase', {
+        AST_openCustom(astProp, {
           type: 'SwitchCase',
           loc: AST_getBaseLoc(defaultToken.line, defaultToken.column),
           test: null, // yes, null
@@ -5750,7 +5749,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseThrowStatement(lexerFlags, astProp) {
     let throwToken = curtok;
     ASSERT_skipExpressionStart('throw', lexerFlags); // The arg is mandatory so next token cannot start a statement
-    AST_openCustom(astProp, 'ThrowStatement', {
+    AST_openCustom(astProp, {
       type: 'ThrowStatement',
       loc: AST_getBaseLoc(throwToken.line, throwToken.column),
       argument: undefined,
@@ -5768,7 +5767,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let tryToken = curtok;
     ASSERT_skipToCurlyOpen('try', lexerFlags);
-    AST_openCustom(astProp, 'TryStatement', {
+    AST_openCustom(astProp, {
       type: 'TryStatement',
       loc: AST_getBaseLoc(tryToken.line, tryToken.column),
       block: undefined,
@@ -5785,7 +5784,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       hasEither = true;
       let catchToken = curtok;
       ASSERT_skipParenOpenCurlyOpen('catch', lexerFlags);
-      AST_openCustom('handler', 'CatchClause', {
+      AST_openCustom('handler', {
         type: 'CatchClause',
         loc: AST_getBaseLoc(catchToken.line, catchToken.column),
         param: undefined,
@@ -5890,7 +5889,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let whileToken = curtok;
     ASSERT_skipToParenOpen('while', lexerFlags);
-    AST_openCustom(astProp, 'WhileStatement', {
+    AST_openCustom(astProp, {
       type: 'WhileStatement',
       loc: AST_getBaseLoc(whileToken.line, whileToken.column),
       test: undefined,
@@ -5935,7 +5934,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, nestedLabels, astProp);
     }
 
-    AST_openCustom(astProp, 'ExpressionStatement', {
+    AST_openCustom(astProp, {
       type: 'ExpressionStatement',
       loc: AST_getBaseLoc(identToken.line, identToken.column),
       expression: undefined,
@@ -5945,7 +5944,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('ExpressionStatement');
   }
   function parseDeleteExpression(lexerFlags, deleteToken, inputAssignable, astProp) {
-    AST_openCustom(astProp, 'UnaryExpression', {
+    AST_openCustom(astProp, {
       type: 'UnaryExpression',
       loc: AST_getBaseLoc(deleteToken.line, deleteToken.column),
       operator: 'delete',
@@ -6202,7 +6201,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       labelSet.iterationLabels = nestedLabels; // When scanning labels for `continue`, only visit these arrays
     }
 
-    AST_openCustom(astProp, 'LabeledStatement', {
+    AST_openCustom(astProp, {
       type: 'LabeledStatement',
       loc: AST_getBaseLoc(identToken.line, identToken.column),
       label: AST_getIdentNode(identToken),
@@ -6226,7 +6225,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseEmptyStatement(lexerFlags, astProp);
         break;
       default:
-        AST_openCustom(astProp, 'ExpressionStatement', {
+        AST_openCustom(astProp, {
           type: 'ExpressionStatement',
           loc: AST_getBaseLoc(curtok.line, curtok.column),
           expression: undefined,
@@ -6255,7 +6254,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let withToken = curtok;
     ASSERT_skipToParenOpen('with', lexerFlags);
-    AST_openCustom(astProp, 'WithStatement', {
+    AST_openCustom(astProp, {
       type: 'WithStatement',
       loc: AST_getBaseLoc(withToken.line, withToken.column),
       object: undefined,
@@ -6281,7 +6280,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype !== $IDENT && curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B) THROW('Expected identifier, or array/object destructuring, next token is: ' + curtok);
     let keyword = bindingType === BINDING_TYPE_VAR ? 'var' : bindingType === BINDING_TYPE_LET ? 'let' : 'const';
 
-    AST_openCustom(astProp, 'VariableDeclaration', {
+    AST_openCustom(astProp, {
       type: 'VariableDeclaration',
       loc: AST_getBaseLoc(bindingToken.line, bindingToken.column),
       kind: keyword,
@@ -6482,7 +6481,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `try {} catch (a) {}`
         // - `try {} catch ([a]) {}`
         // - `try {} catch ([a] = b) {}`
-        AST_wrapClosedCustom(astProp, 'AssignmentPattern', {
+        AST_wrapClosedCustom(astProp, {
           type: 'AssignmentPattern',
           loc: AST_getBaseLoc(bindingStartToken.line, bindingStartToken.column),
           left: undefined,
@@ -6493,7 +6492,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else {
         ASSERT(bindingOrigin !== FROM_CATCH, 'catch is default');
         ASSERT(defaultsOption === ASSIGNMENT_IS_INIT, 'two options');
-        AST_wrapClosedCustom('declarations', 'VariableDeclarator', {
+        AST_wrapClosedCustom('declarations', {
           type: 'VariableDeclarator',
           loc: AST_getBaseLoc(bindingStartToken.line, bindingStartToken.column),
           id: undefined,
@@ -6951,7 +6950,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Basically this now ends in one of two ways; Either it's a parenless arrow a plain binding.
 
     if (stmtOrExpr === IS_STATEMENT) {
-      AST_openCustom(astProp, 'ExpressionStatement', {
+      AST_openCustom(astProp, {
         type: 'ExpressionStatement',
         loc: AST_getBaseLoc(asyncToken.line, asyncToken.column),
         expression: undefined,
@@ -7001,7 +7000,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async eval => { "use strict"; }`
 
     if (fromStmtOrExpr === IS_STATEMENT) {
-      AST_openCustom(astProp, 'ExpressionStatement', {
+      AST_openCustom(astProp, {
         type: 'ExpressionStatement',
         loc: AST_getBaseLoc(asyncToken.line, asyncToken.column),
         expression: undefined,
@@ -7081,7 +7080,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // </SCRUB AST>
 
     // Note: assignment to object/array is caught elsewhere
-    AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+    AST_wrapClosedCustom(astProp, {
       type: 'AssignmentExpression',
       loc: AST_getBaseLoc(firstAssignmentToken.line, firstAssignmentToken.column),
       left: undefined,
@@ -7138,7 +7137,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `a ** b`
     let curop = curtok.str;
     let AST_nodeName = (curop === '&&' || curop === '||') ? 'LogicalExpression' : 'BinaryExpression';
-    AST_wrapClosedCustom(astProp, AST_nodeName, {
+    AST_wrapClosedCustom(astProp, {
       type: AST_nodeName,
       loc: AST_getBaseLoc(exprStartToken.line, exprStartToken.column),
       left: undefined,
@@ -7171,7 +7170,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `a ? b = d : c`
     // - `a ? b : c = d`
     // - `a ? b : yield c`
-    AST_wrapClosedCustom(astProp, 'ConditionalExpression', {
+    AST_wrapClosedCustom(astProp, {
       type: 'ConditionalExpression',
       loc: AST_getBaseLoc(firstExprToken.line, firstExprToken.column),
       test: undefined,
@@ -7217,7 +7216,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseExpressions(lexerFlags, startOfFirstExprToken, assignableForPiggies, astProp) {
     ASSERT(arguments.length === _parseExpressions.length, 'arg count');
     ASSERT(curc === $$COMMA_2C, 'confirm at callsite');
-    AST_wrapClosedIntoArrayCustom(astProp, 'SequenceExpression', {
+    AST_wrapClosedIntoArrayCustom(astProp, {
       type: 'SequenceExpression',
       loc: AST_getBaseLoc(startOfFirstExprToken.line, startOfFirstExprToken.column),
       expressions: undefined,
@@ -7892,7 +7891,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseNewExpression(lexerFlags, newToken, astProp) {
-    AST_openCustom(astProp, 'NewExpression', {
+    AST_openCustom(astProp, {
       type: 'NewExpression',
       loc: AST_getBaseLoc(newToken.line, newToken.column),
       arguments: [],
@@ -7968,7 +7967,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function *f(){ ~yield }`       // error
     // - `+await x`                      // ok, await state needs to propagate back down for strict mode arg check case
 
-    AST_openCustom(astProp, 'UnaryExpression', {
+    AST_openCustom(astProp, {
       type: 'UnaryExpression',
       loc: AST_getBaseLoc(unaryToken.line, unaryToken.column),
       operator: identName,
@@ -7999,7 +7998,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let puncToken = curtok;
     ASSERT_skipExpressionStart($PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
-    AST_openCustom(astProp, 'UpdateExpression', {
+    AST_openCustom(astProp, {
       type: 'UpdateExpression',
       loc: AST_getBaseLoc(puncToken.line, puncToken.column),
       argument: undefined,
@@ -8063,7 +8062,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Did not expect to parse an AssignmentExpression but found `yield`');
     }
 
-    AST_openCustom(astProp, 'YieldExpression', {
+    AST_openCustom(astProp, {
       type: 'YieldExpression',
       loc: AST_getBaseLoc(yieldToken.line, yieldToken.column),
       delegate: undefined, // TODO: init to false
@@ -8224,7 +8223,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(!(hasAnyFlag(lexerFlags, LF_STRICT_MODE) && identToken.str === 'yield'), 'in strict mode this function will not be called by the parse yield function so we dont need to make an edge case for it');
 
     // arrow with single param
-    AST_openCustom(astProp, 'ArrowFunctionExpression', {
+    AST_openCustom(astProp, {
       type: 'ArrowFunctionExpression',
       loc: AST_getBaseLoc(arrowStartToken.line, arrowStartToken.column),
       params: [AST_getIdentNode(identToken)],
@@ -8260,7 +8259,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // basically; parse tick. if head, keep parsing body until parsing tail
 
-    AST_openCustom(astProp, 'TemplateLiteral', {
+    AST_openCustom(astProp, {
       type: 'TemplateLiteral',
       loc: AST_getBaseLoc(tickToken.line, tickToken.column),
       expressions: [],
@@ -8328,7 +8327,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     let cookedValue = noCooked ? null : tickToken.canon.slice(1, (wasTail === IS_QUASI_TAIL) ? -1 : -2);
 
-    AST_openCustom('quasis', 'TemplateElement', {
+    AST_openCustom('quasis', {
       type: 'TemplateElement',
       // For template elements the backticks, `${`, and `}` characters are ignored in the location ranges... so +1 it
       loc: AST_getBaseLoc(tickToken.line, tickToken.column + 1),
@@ -8390,7 +8389,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseValueTailDynamicProperty(lexerFlags, valueFirstToken, assignable, isNewArg, astProp) {
     // parseMemberExpression dynamic
     // parseDynamicProperty
-    AST_wrapClosedCustom(astProp, 'MemberExpression', {
+    AST_wrapClosedCustom(astProp, {
       type: 'MemberExpression',
       loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
       object: undefined,
@@ -8418,7 +8417,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       // Not `new`, parses tail, does not throw on `new async () =>`
       ASSERT(typeof astProp === 'string', 'should be string');
-      AST_wrapClosedCustom(astProp, 'CallExpression', {
+      AST_wrapClosedCustom(astProp, {
         type: 'CallExpression',
         loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
         callee: undefined,
@@ -8437,14 +8436,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Note: in es9+ (only) it is legal for _tagged_ templates to contain illegal escapes (`isBadTickToken(curtype)`)
 
     // Tagged template is like a call but slightly special (and a very particular AST)
-    AST_wrapClosedCustom(astProp, 'TaggedTemplateExpression', {
+    AST_wrapClosedCustom(astProp, {
       type: 'TaggedTemplateExpression',
       loc: AST_getBaseLoc(valueFirstToken.line, valueFirstToken.column),
       tag: undefined,
       quasi: undefined,
     }, 'tag');
 
-    AST_openCustom('quasi', 'TemplateLiteral', {
+    AST_openCustom('quasi', {
       type: 'TemplateLiteral',
       loc: AST_getBaseLoc(curtok.line, curtok.column),
       expressions: [],
@@ -8570,7 +8569,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$DOT_2E && curtok.str === '...') {
           let spreadToken = curtok;
           ASSERT_skipExpressionStart('...', lexerFlags);
-          AST_openCustom(astProp, 'SpreadElement', {
+          AST_openCustom(astProp, {
             type: 'SpreadElement',
             loc: AST_getBaseLoc(spreadToken.line, spreadToken.column),
             argument: undefined,
@@ -8597,7 +8596,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseDynamicImportStatement(lexerFlags, importToken, astProp) {
     ASSERT(parseDynamicImportStatement.length === arguments.length, 'arg count');
 
-    AST_openCustom(astProp, 'ExpressionStatement', {
+    AST_openCustom(astProp, {
       type: 'ExpressionStatement',
       loc: AST_getBaseLoc(importToken.line, importToken.column),
       expression: undefined,
@@ -8620,13 +8619,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // https://github.com/estree/estree/blob/master/experimental/import-expression.md
 
     if (acornCompat) {
-      AST_openCustom(astProp, 'ImportExpression', {
+      AST_openCustom(astProp, {
         type: 'ImportExpression',
         loc: AST_getBaseLoc(importToken.line, importToken.column),
         source: undefined,
       });
     } else {
-      AST_openCustom(astProp, 'CallExpression', {
+      AST_openCustom(astProp, {
         type: 'CallExpression',
         loc: AST_getBaseLoc(importToken.line, importToken.column),
         callee: undefined,
@@ -8863,7 +8862,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `( () => x )`
       // - `return () => x`
 
-      AST_openCustom(astProp, 'ArrowFunctionExpression', {
+      AST_openCustom(astProp, {
         type: 'ArrowFunctionExpression',
         loc: AST_getBaseLoc(parenToken.line, parenToken.column),
         params: [],
@@ -9081,7 +9080,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COMMA_2C) {
           if (!toplevelComma) {
             toplevelComma = true;
-            AST_wrapClosedIntoArrayCustom(rootAstProp, 'SequenceExpression', {
+            AST_wrapClosedIntoArrayCustom(rootAstProp, {
               type: 'SequenceExpression',
               loc: AST_getBaseLoc(firstTokenAfterParen.line, firstTokenAfterParen.column),
               expressions: undefined,
@@ -9177,7 +9176,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (!toplevelComma) {
         toplevelComma = true;
         // only do this once
-        AST_wrapClosedIntoArrayCustom(rootAstProp, 'SequenceExpression', {
+        AST_wrapClosedIntoArrayCustom(rootAstProp, {
           type: 'SequenceExpression',
           loc: AST_getBaseLoc(firstTokenAfterParen.line, firstTokenAfterParen.column),
           expressions: undefined,
@@ -9578,7 +9577,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async () => foo`
     //             ^
 
-    AST_openCustom(astProp, 'ArrowFunctionExpression', {
+    AST_openCustom(astProp, {
       type: 'ArrowFunctionExpression',
       loc: AST_getBaseLoc(asyncToken.line, asyncToken.column),
       params: [],
@@ -9599,7 +9598,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     // <SCRUB AST>
-    AST_wrapClosedIntoArrayCustom(astProp, 'ArrowFunctionExpression', {
+    AST_wrapClosedIntoArrayCustom(astProp, {
       type: 'ArrowFunctionExpression',
       loc: AST_getBaseLoc(arrowStartToken.line, arrowStartToken.column),
       params: undefined,
@@ -9708,7 +9707,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let arrayOpenToken = curtok;
     ASSERT_skipExpressionStartSquareCloseComma('[', lexerFlags);
-    AST_openCustom(_astProp, 'ArrayExpression', {
+    AST_openCustom(_astProp, {
       type: 'ArrayExpression',
       loc: AST_getBaseLoc(arrayOpenToken.line, arrayOpenToken.column),
       elements: [],
@@ -9784,7 +9783,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           addBindingToExports(exportedBindings, identToken.str);
 
           // We should have just added an Identifier to the AST, so wrap that as left now
-          AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+          AST_wrapClosedCustom(astProp, {
             type: 'AssignmentExpression',
             loc: AST_getBaseLoc(identToken.line, identToken.column),
             left: undefined,
@@ -9964,7 +9963,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             //                ^
             // [v]: `([(x).foo = x] = x)`
             //                 ^
-            AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+            AST_wrapClosedCustom(astProp, {
               type: 'AssignmentExpression',
               loc: AST_getBaseLoc(elementStartToken.line, elementStartToken.column),
               left: undefined,
@@ -10082,7 +10081,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - {...x.x = y, y}
 
     let curlyToken = curtok;
-    AST_openCustom(astProp, 'ObjectExpression', {
+    AST_openCustom(astProp, {
       type: 'ObjectExpression',
       loc: AST_getBaseLoc(curlyToken.line, curlyToken.column),
       properties: [],
@@ -10324,7 +10323,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `[a, {[b]:d}, c] = obj`
         // - `function f({[x]: {y = z}}) {}`
 
-        AST_wrapClosedCustom(astProp, NODE_NAME_PROPERTY, {
+        AST_wrapClosedCustom(astProp, {
           type: NODE_NAME_PROPERTY,
           loc: AST_getBaseLoc(startOfKeyToken.line, startOfKeyToken.column),
           key: undefined,
@@ -10499,7 +10498,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // the array MUST now be a pattern. Does not need to be an arrow.
       // the outer-most assignment is an expression, the inner assignments become patterns too.
       AST_destruct(astProp);
-      AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+      AST_wrapClosedCustom(astProp, {
         type: 'AssignmentExpression',
         loc: AST_getBaseLoc(patternStartToken.line, patternStartToken.column),
         left: undefined,
@@ -10540,7 +10539,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(startOfKeyToken.str === '[' || isIdentToken(startOfKeyToken.type) || isNumberStringToken(startOfKeyToken.type));
     ASSERT(curtok.str === ':', 'should not skip colon yet because that breaks end column');
 
-    AST_openCustom(astProp, NODE_NAME_PROPERTY, {
+    AST_openCustom(astProp, {
       type: NODE_NAME_PROPERTY,
       loc: AST_getBaseLoc(startOfKeyToken.line, startOfKeyToken.column),
       key: undefined,
@@ -10895,7 +10894,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       addNameToExports(exportedNames, propLeadingIdentToken.str);
       addBindingToExports(exportedBindings, propLeadingIdentToken.str);
 
-      AST_openCustom(astProp, NODE_NAME_PROPERTY, {
+      AST_openCustom(astProp, {
         type: NODE_NAME_PROPERTY,
         loc: AST_getBaseLoc(startOfPropToken.line, startOfPropToken.column),
         key: AST_getIdentNode(propLeadingIdentToken),
@@ -10912,7 +10911,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= MUST_DESTRUCT; // shorthand + _init_ is only allowed in Pattern
 
         ASSERT(propLeadingIdentToken === startOfPropToken, 'can not have modifiers');
-        AST_wrapClosedCustom('value', 'AssignmentExpression', {
+        AST_wrapClosedCustom('value', {
           type: 'AssignmentExpression',
           loc: AST_getBaseLoc(propLeadingIdentToken.line, propLeadingIdentToken.column),
           left: undefined,
@@ -11177,7 +11176,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
 
     // Acorn uses the parenthesis open as start of method while zeparser/babel uses the start of the first modifier and otherwise the id
-    AST_wrapClosedCustom(astProp, NODE_NAME_METHOD_OBJECT, {
+    AST_wrapClosedCustom(astProp, {
       type: NODE_NAME_PROPERTY,
       loc: AST_getBaseLoc(methodStartToken.line, methodStartToken.column),
       key: undefined,
@@ -11239,7 +11238,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let classToken = curtok;
     ASSERT_skipIdentCurlyOpen('class', lexerFlags);
-    AST_openCustom(astProp, 'ClassDeclaration', {
+    AST_openCustom(astProp, {
       type: 'ClassDeclaration',
       loc: AST_getBaseLoc(classToken.line, classToken.column),
       id: undefined,
@@ -11271,7 +11270,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // _all_ bits of a class decl/expr are strict
     lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_FOR_LHS | LF_IN_TEMPLATE | LF_NO_ASI);
 
-    AST_openCustom(astProp, 'ClassExpression', {
+    AST_openCustom(astProp, {
       type: 'ClassExpression',
       loc: AST_getBaseLoc(classToken.line, classToken.column),
       id: undefined,
@@ -11387,7 +11386,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curtok.str === '{', 'must have asserted to be at the opening curly of the class body');
 
     let curlyToken = curtok;
-    AST_openCustom(astProp, 'ClassBody', {
+    AST_openCustom(astProp, {
       type: 'ClassBody',
       loc: AST_getBaseLoc(curlyToken.line, curlyToken.column),
       body: [],
@@ -11918,7 +11917,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    AST_wrapClosedCustom(astProp, NODE_NAME_METHOD_CLASS, {
+    AST_wrapClosedCustom(astProp, {
       type: NODE_NAME_METHOD_CLASS,
       loc: AST_getBaseLoc(methodStartToken.line, methodStartToken.column),
       key: undefined,
@@ -12118,7 +12117,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipExpressionStart('...', lexerFlags);
 
     if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
-    AST_openCustom(astProp, 'SpreadElement', {
+    AST_openCustom(astProp, {
       type: 'SpreadElement',
       loc: AST_getBaseLoc(spreadToken.line, spreadToken.column),
       argument: undefined,
@@ -12539,7 +12538,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // the array MUST now be a pattern. Does not need to be an arrow.
         // the outer-most assignment is an expression, the inner assignments become patterns too.
         AST_destruct(astProp);
-        AST_wrapClosedCustom(astProp, 'AssignmentExpression', {
+        AST_wrapClosedCustom(astProp, {
           type: 'AssignmentExpression',
           loc: AST_getBaseLoc(argStartToken.line, argStartToken.column),
           left: undefined,
@@ -12660,7 +12659,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
 
-    AST_wrapClosedCustom(astProp, NODE_NAME_METHOD_OBJECT, {
+    AST_wrapClosedCustom(astProp, {
       type: NODE_NAME_PROPERTY,
       loc: AST_getBaseLoc(methodStartToken.line, methodStartToken.column),
       key: undefined,
