@@ -83,6 +83,8 @@ let assertSkipWhitelist = new Set([
   'ASSERT_skipExpressionStartGrouped',
   'ASSERT_skipToAfterNew',
   'ASSERT_skipExpressionStartSquareCloseComma',
+  'ASSERT_pushCanonPoison',
+  'ASSERT_popCanonPoison',
 ]);
 let constMap = new Map;
 
