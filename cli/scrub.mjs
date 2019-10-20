@@ -174,6 +174,23 @@ function CallExpression(node) {
       assert(node.arguments.length, 1); // node name(s) to close
       return 'AST_close()'; // basically drop the arg
     }
+
+    if (node.callee.name === 'sansFlag') {
+      // Basically an alias for `(a | b) ^ b`, to unset all bits in a that are set in b
+      return '((' + $w(node.arguments[0]) + ' | ' + $w(node.arguments[1]) + ') ^ ' + $w(node.arguments[1]) + ')';
+    }
+    if (node.callee.name === 'hasAllFlags') {
+      // Basically an alias for `(flags1 & flags2) === flags2`, to check whether at least all bits in b are set in a
+      return '((' + $w(node.arguments[0]) + ' & ' + $w(node.arguments[1]) + ') === ' + $w(node.arguments[1]) + ')';
+    }
+    if (node.callee.name === 'hasAnyFlag') {
+      // Basically an alias for `(flags1 & flags2) === flags2`, to check whether at least one bit in b is set in a
+      return '((' + $w(node.arguments[0]) + ' & ' + $w(node.arguments[1]) + ') !== 0)';
+    }
+    if (node.callee.name === 'hasNoFlag') {
+      // Basically an alias for `(flags1 & flags2) === 0`, to check whether none of the bits in b is set in a
+      return '((' + $w(node.arguments[0]) + ' & ' + $w(node.arguments[1]) + ') === 0)';
+    }
   }
   // Drop error messages
   // TODO: symbolize them, store them in a local lookup file, build a mechanism to make that all work smoothly
