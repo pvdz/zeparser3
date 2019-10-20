@@ -8260,9 +8260,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       type: 'ArrowFunctionExpression',
       loc: AST_getBaseLoc(arrowStartToken),
       params: [AST_getIdentNode(identToken)],
-      id: undefined,
-      generator: undefined, // TODO: init to bool... (and prevent redundant sets)
-      async: undefined, // TODO: init to bool... (and prevent redundant sets)
+      id: null,
+      generator: false,
+      async: asyncToken !== UNDEF_ASYNC,
       expression: undefined, // TODO: init to bool
       body: undefined,
     });
@@ -8723,9 +8723,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (options_exposeScopes) AST_set('$scope', paramScoop);
-    AST_set('id', null);
-    AST_set('generator', false);
-    AST_set('async', asyncToken !== UNDEF_ASYNC);
 
     if (paramScoop.dupeParamErrorToken !== NO_DUPE_PARAMS) {
       // Dupe params are never allowed in arrows (only in some cases for functions)
@@ -8898,9 +8895,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         type: 'ArrowFunctionExpression',
         loc: AST_getBaseLoc(parenToken),
         params: [],
-        id: undefined,
-        generator: undefined, // TODO: init to bool... (and prevent redundant sets)
-        async: undefined, // TODO: init to bool... (and prevent redundant sets)
+        id: null,
+        generator: false,
+        async: asyncToken !== UNDEF_ASYNC,
         expression: undefined, // TODO: init to bool
         body: undefined,
       });
@@ -9122,7 +9119,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = __parseExpressions(lexerFlags, assignable, astProp);
         }
         if (toplevelComma) {
-          AST_set('extra', {parenthesized: true, parenStart: parenToken.start}, undefined, !babelCompat);
+          if (babelCompat) AST_set('extra', {parenthesized: true, parenStart: parenToken.start});
           AST_close('SequenceExpression');
           assignable = setNotAssignable(assignable);
         }
@@ -9219,7 +9216,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (toplevelComma) {
       assignable = setNotAssignable(assignable);
-      AST_set('extra', {parenthesized: true, parenStart: parenToken.start}, undefined, !babelCompat);
+      if (babelCompat) AST_set('extra', {parenthesized: true, parenStart: parenToken.start});
       AST_close('SequenceExpression');
     }
 
@@ -9613,9 +9610,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       type: 'ArrowFunctionExpression',
       loc: AST_getBaseLoc(asyncToken),
       params: [],
-      id: undefined,
-      generator: undefined, // TODO: init to bool... (and prevent redundant sets)
-      async: undefined, // TODO: init to bool... (and prevent redundant sets)
+      id: null,
+      generator: false,
+      async: asyncToken !== UNDEF_ASYNC,
       expression: undefined, // TODO: init to bool
       body: undefined,
     });
@@ -9634,9 +9631,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       type: 'ArrowFunctionExpression',
       loc: AST_getBaseLoc(arrowStartToken),
       params: undefined,
-      id: undefined,
-      generator: undefined, // TODO: init to bool... (and prevent redundant sets)
-      async: undefined, // TODO: init to bool... (and prevent redundant sets)
+      id: null,
+      generator: false,
+      async: asyncToken !== UNDEF_ASYNC,
       expression: undefined, // TODO: init to bool
       body: undefined,
     }, 'params', arrowStartToken);
