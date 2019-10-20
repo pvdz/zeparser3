@@ -474,11 +474,11 @@ const ID_CONTINUE_REGEX = (function(){
 let disableCanonPoison = [false]; // reversed stack; always check disableCanonPoison[0] for the current state
 function ASSERT_pushCanonPoison(disabled) {
   disableCanonPoison.unshift(disabled);
-  console.log('pushed', disabled, disableCanonPoison)
+  // console.log('pushed', disabled, disableCanonPoison)
 }
 function ASSERT_popCanonPoison() {
   disableCanonPoison.shift();
-  console.log('popped', disableCanonPoison)
+  // console.log('popped', disableCanonPoison)
 }
 ASSERT(!void (typeof window !== 'undefined' && ASSERT_pushCanonPoison(window.disableCanonPoison)), '(suppress this warning in web env and known cases)');
 
@@ -507,6 +507,7 @@ function ZeTokenizer(
   ASSERT(targetEsVersion !== undefined, 'undefined should become default', targetEsVersion);
   ASSERT(typeof targetEsVersion === 'number', 'targetEsVersion should be a number', typeof targetEsVersion);
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 11) || targetEsVersion === Infinity, 'only support v6~11 right now [' + targetEsVersion + ','+(typeof targetEsVersion)+']');
+  ASSERT(!(disableCanonPoison.length = 0), 'clear the poison stack');
 
   const supportRegexPropertyEscapes = targetEsVersion >= 9 || targetEsVersion === Infinity;
   const supportRegexLookbehinds = targetEsVersion >= 9 || targetEsVersion === Infinity;
@@ -765,24 +766,28 @@ function ZeTokenizer(
 
     let c = peekSkip();
 
-    if (isAsciiLetter(c)) return parseIdentifierRest(String.fromCharCode(c));
-
     // https://www.ecma-international.org/ecma-262/7.0/#sec-punctuators
     switch (c) {
       case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
         return parseSpace();
-      case $$DOT_2E:
-        return parseLeadingDot(); // . ... .25
-      case $$PAREN_L_28:
+      case $$COMMA_2C:
+        return $PUNCTUATOR;
+      case $$COLON_3A:
         return $PUNCTUATOR;
       case $$PAREN_R_29:
         return $PUNCTUATOR;
-      case $$CR_0D:
-        return parseCR(); // cr crlf
+      case $$PAREN_L_28:
+        return $PUNCTUATOR;
+      case $$DOT_2E:
+        return parseLeadingDot(); // . ... .25
+      case $$SEMI_3B:
+        return $PUNCTUATOR;
+      case $$IS_3D:
+        return parseEqual(); // = == === =>
       case $$LF_0A:
         return parseNewlineSolo();
-      case $$COMMA_2C:
-        return $PUNCTUATOR;
+      case $$CR_0D:
+        return parseCR(); // cr crlf
       case $$TAB_09:
         wasWhite = true;
         return $TAB;
@@ -794,6 +799,8 @@ function ZeTokenizer(
         return parseTemplateString(lexerFlags, PARSING_FROM_TICK);
       case $$0_30:
         return parseLeadingZero(lexerFlags);
+      case $$QMARK_3F:
+        return $PUNCTUATOR;
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -837,10 +844,6 @@ function ZeTokenizer(
       case $$VTAB_0B:
         wasWhite = true;
         return $SPACE;
-      case $$SEMI_3B:
-        return $PUNCTUATOR;
-      case $$IS_3D:
-        return parseEqual(); // = == === =>
       case $$CURLY_L_7B:
         return $PUNCTUATOR;
       case $$CURLY_R_7D:
@@ -850,14 +853,10 @@ function ZeTokenizer(
         return $PUNCTUATOR;
       case $$SQUARE_R_5D:
         return $PUNCTUATOR;
-      case $$COLON_3A:
-        return $PUNCTUATOR;
       case $$LODASH_5F:
         return parseIdentifierRest('_');
       case $$OR_7C:
         return parseSameOrCompound(c); // | || |=
-      case $$QMARK_3F:
-        return $PUNCTUATOR;
       case $$LT_3C:
         if (parsingGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(3) && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
           return parseCommentHtmlOpen();
@@ -877,6 +876,8 @@ function ZeTokenizer(
       default:
         return parseOtherUnicode(c);
     }
+
+    if (isAsciiLetter(c)) return parseIdentifierRest(String.fromCharCode(c));
   }
 
   function nextTokenGeneric(lexerFlags) {
@@ -1247,18 +1248,21 @@ function ZeTokenizer(
     }
 
     switch (c) {
-      case $$$_24:
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
         skip();
-        return parseIdentifierRest('$');
-      case $$LODASH_5F:
-        skip();
-        return parseIdentifierRest('_');
+        return parseSpace();
       case $$SQUOTE_27:
         skip();
         return parseSingleString(lexerFlags);
       case $$DQUOTE_22:
         skip();
         return parseDoubleString(lexerFlags);
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
       case $$EXCL_21:
       case $$SQUARE_L_5B:
       case $$CURLY_L_7B:
