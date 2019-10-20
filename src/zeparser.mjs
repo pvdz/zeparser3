@@ -927,15 +927,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let str = token.str;
     let value =
       type === $NUMBER_DEC ? parseFloat(str) : // parseFloat also deals with `e` cases
-        type === $NUMBER_HEX ? parseInt(str.slice(2), 16) :
-          type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
-            type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
-              type === $NUMBER_OLD ? (
-                  str === '0' ? 0 : // TODO: I think a zero is just a number_dec?
-                    str.includes('8') || str.includes('9') ? parseFloat(str.slice(1)) :
-                      parseInt(str.slice(1), 8)
-                ) :
-                (ASSERT(isNumberToken(type)) && ASSERT(false, 'number enum') && FIXME);
+      type === $NUMBER_HEX ? parseInt(str.slice(2), 16) :
+      type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
+      type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
+      (
+        ASSERT(type === $NUMBER_OLD, 'number types are enum and bigint should not reach this'),
+        ASSERT(str !== '0', 'a zero should just be a decimal'),
+        str.includes('8') || str.includes('9')
+        ? parseFloat(str.slice(1))
+        : parseInt(str.slice(1), 8)
+      );
     if (acornCompat && value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
 
     let numberNode = {
@@ -1299,15 +1300,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let str = token.str;
     let value =
       type === $NUMBER_DEC ? parseFloat(str) : // parseFloat also deals with `e` cases
-        type === $NUMBER_HEX ? parseInt(str.slice(2), 16) :
-          type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
-            type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
-              type === $NUMBER_OLD ? (
-                  str === '0' ? 0 : // TODO: I think a zero is just a number_dec?
-                    str.includes('8') || str.includes('9') ? parseFloat(str.slice(1)) :
-                      parseInt(str.slice(1), 8)
-                ) :
-                (ASSERT(isNumberToken(type)) && ASSERT(false, 'number enum') && FIXME);
+      type === $NUMBER_HEX ? parseInt(str.slice(2), 16) :
+      type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
+      type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
+      (
+        ASSERT(type === $NUMBER_OLD, 'number types are enum and bigint should not reach this'),
+        ASSERT(str !== '0', 'a zero should just be a decimal'),
+        str.includes('8') || str.includes('9')
+        ? parseFloat(str.slice(1))
+        : parseInt(str.slice(1), 8)
+      );
 
     // TODO: locally babel seems to make this null but in astexplorer it (properly?) uses Infinity ... dunno
     if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
