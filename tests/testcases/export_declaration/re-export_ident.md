@@ -45,8 +45,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Next token should be a string but was `x`
+throws: Tokenizer error!
+    Was looking for a string, found `x` (120 / 0x78) instead
 
 export * from x
               ^------- error

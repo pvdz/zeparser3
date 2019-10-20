@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Only unicode escapes are supported in identifier escapes
+    Was looking for a paren open or curly open, found `\` (92 / 0x5c) instead
 
 try {} catch \n {}
              ^------- error

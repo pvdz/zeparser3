@@ -5,6 +5,10 @@
 > :: export declaration
 >
 > ::> the x0060asx0060 keyword cannot contain escape sequence
+>
+> https://tc39.es/ecma262/#prod-ReservedWord
+>
+> > Per 5.1.5, keywords in the grammar match literal sequences of specific SourceCharacter elements. A code point in a keyword cannot be expressed by a \ UnicodeEscapeSequence.
 
 ## Input
 
@@ -43,8 +47,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Unexpected token while parsing export object
+throws: Tokenizer error!
+    Was looking for the ident `as` or comma or `}`, found `\` (92 / 0x5c) instead
 
 export {a \u0061s b} from "x";
           ^------- error

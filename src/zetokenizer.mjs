@@ -895,239 +895,673 @@ function ZeTokenizer(
   }
 
   function nextTokenToParenOpen(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToParenOpen, lexerFlags);
-  }
-  function _nextTokenToParenOpen(lexerFlags) {
-    return lexerWithFallback(_lexerForParenOpen, lexerFlags);
+    return nextTokenWithLexer(_lexerForParenOpen, lexerFlags);
   }
   function _lexerForParenOpen(lexerFlags) {
-    ASSERT(arguments.length === 1);
+    ASSERT(_lexerForParenOpen.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
 
     let c = peek();
 
-    if (c === $$PAREN_L_28) {
-      skip();
-      return $PUNCTUATOR;
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$PAREN_L_28:
+        skip();
+        return $PUNCTUATOR;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for a paren open, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToCurlyOpen(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToCurlyOpen, lexerFlags);
-  }
-  function _nextTokenToCurlyOpen(lexerFlags) {
-    return lexerWithFallback(_lexerForCurlyOpen, lexerFlags);
+    return nextTokenWithLexer(_lexerForCurlyOpen, lexerFlags);
   }
   function _lexerForCurlyOpen(lexerFlags) {
-    ASSERT(_lexerForCurlyOpen.length === arguments.length);
-
-    // This function will consume whitespace, line terminators, comments, and curlies
-    // Otherwise it signals not having found anything (after which the generic `next()` lexer will take over)
-    // and in that case the parser will probably emit an error.
-
-
-    // Start with the most likely; space, tab, newline, curly. Then check the more exotic spaces. Then bail.
-    // TODO: considering to not cover the more exotic whitespace cases here and let the fallback deal with them
-    // Note: in the specific case of a curly, I expect a regular space is to be by far the most likely whitespace ...
+    ASSERT(_lexerForCurlyOpen.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
 
     let c = peek();
 
-    if (c === $$CURLY_L_7B) {
-      skip();
-      return $PUNCTUATOR;
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$CURLY_L_7B:
+        skip();
+        return $PUNCTUATOR;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for a paren open, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToParenOpenCurlyOpen(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToParenOpenCurlyOpen, lexerFlags);
-  }
-  function _nextTokenToParenOpenCurlyOpen(lexerFlags) {
-    return lexerWithFallback(_lexerForParenOpenCurlyOpen, lexerFlags);
+    return nextTokenWithLexer(_lexerForParenOpenCurlyOpen, lexerFlags);
   }
   function _lexerForParenOpenCurlyOpen(lexerFlags) {
-    ASSERT(_lexerForParenOpenCurlyOpen.length === arguments.length);
+    ASSERT(_lexerForParenOpenCurlyOpen.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
 
     let c = peek();
 
-    if (c === $$PAREN_L_28 || c === $$CURLY_L_7B) {
-      skip();
-      return $PUNCTUATOR;
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$PAREN_L_28:
+      case $$CURLY_L_7B:
+        skip();
+        return $PUNCTUATOR;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for a paren open or curly open, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToFrom(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToFrom, lexerFlags);
-  }
-  function _nextTokenToFrom(lexerFlags) {
-    return lexerWithFallback(_lexerForFrom, lexerFlags);
+    return nextTokenWithLexer(_lexerForFrom, lexerFlags);
   }
   function _lexerForFrom(lexerFlags) {
+    ASSERT(_lexerForFrom.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
-    if (c === $$F_66) {
-      skip();
-      return parseIdentifierRest('f');
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$F_66:
+        if (neofd(4)) {
+          if (
+            peekd(1) === $$R_72 && peekd(2) === $$O_6F && peekd(3) === $$M_6D
+            && (eofd(5) || isIdentRestChr(peekd(4), pointer + 4) === INVALID_IDENT_CHAR) // Must ensure this isn't just a prefix
+          ) {
+            skipFastWithoutUpdatingCache();
+            skipFastWithoutUpdatingCache();
+            skipFastWithoutUpdatingCache();
+            skip();
+            lastParsedIdent = 'from'; // Keywords cannot have unicode escapes so don't worry about them
+            return $IDENT;
+          }
+        }
+        skip();
+
+        parseIdentifierRest('f');
+        THROW('Was looking for the ident `from` but found `' + lastParsedIdent + '` instead');
+        return DNF;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for the ident `from`, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToString(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToString, lexerFlags);
-  }
-  function _nextTokenToString(lexerFlags) {
-    return lexerWithFallback(_lexerForString, lexerFlags);
+    return nextTokenWithLexer(_lexerForString, lexerFlags);
   }
   function _lexerForString(lexerFlags) {
+    ASSERT(_lexerForString.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
-    if (c === $$SQUOTE_27) {
-      skip();
-      return parseSingleString(lexerFlags);
-    }
-    if (c === $$DQUOTE_22) {
-      skip();
-      return parseDoubleString(lexerFlags);
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$SQUOTE_27:
+        skip();
+        return parseSingleString(lexerFlags);
+      case $$DQUOTE_22:
+        skip();
+        return parseDoubleString(lexerFlags);
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for a string, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToIdent(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToIdent, lexerFlags);
-  }
-  function _nextTokenToIdent(lexerFlags) {
-    return lexerWithFallback(_lexerForIdent, lexerFlags);
+    return nextTokenWithLexer(_lexerForIdent, lexerFlags);
   }
   function _lexerForIdent(lexerFlags) {
+    ASSERT(_lexerForIdent.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
     if (isAsciiLetter(c)) {
       skip();
       return parseIdentifierRest(String.fromCharCode(c));
     }
-    if (c === $$$_24) {
-      skip();
-      return parseIdentifierRest('$');
+
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$$_24:
+        skip();
+        return parseIdentifierRest('$');
+      case $$LODASH_5F:
+        skip();
+        return parseIdentifierRest('_');
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+      case $$BACKSLASH_5C:
+        TODO;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicode(c);
+          if (r !== $ERROR) return r;
+          break;
+        }
     }
-    if (c === $$LODASH_5F) {
-      skip();
-      return parseIdentifierRest('_');
-    }
 
-    let w = _lexerWhitespaceCommon(c, lexerFlags);
-    if (w !== DNF) return w;
-
-    // Since this function is called when the next token must be ident, we should now first do the expensive unicode
-    // check before returning to the fallback, since that is very very likely to be a syntax error anyways.
-
-    let cu = input.codePointAt(pointer);
-    let wide = isIdentStart(cu, pointer);
-    if (wide !== INVALID_IDENT_CHAR) {
-      skip();
-      if (wide === VALID_DOUBLE_CHAR) skip();
-      return parseIdentifierRest(String.fromCodePoint(cu));
-    }
-
+    THROW('Was looking for an ident, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
     return DNF;
   }
   function nextTokenToArrow(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToArrow, lexerFlags);
-  }
-  function _nextTokenToArrow(lexerFlags) {
-    return lexerWithFallback(_lexerForArrow, lexerFlags);
+    return nextTokenWithLexer(_lexerForArrow, lexerFlags);
   }
   function _lexerForArrow(lexerFlags) {
+    ASSERT(_lexerForArrow.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
-    if (c === $$IS_3D) {
-      skip();
-      return parseEqual(); // = == === =>
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$IS_3D:
+        if (neofd(1) && peekd(1) === $$GT_3E) {
+          skipFastWithoutUpdatingCache();
+          skip();
+          return $PUNCTUATOR;
+        }
+        break;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for an arrow, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToAs(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToAs, lexerFlags);
-  }
-  function _nextTokenToAs(lexerFlags) {
-    return lexerWithFallback(_lexerForAs, lexerFlags);
+    return nextTokenWithLexer(_lexerForAs, lexerFlags);
   }
   function _lexerForAs(lexerFlags) {
+    ASSERT(_lexerForAs.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
-    if (c === $$A_61) {
-      skip();
-      return parseIdentifierRest('a');
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$A_61:
+        if (neofd(1)) {
+          if (
+            peekd(1) === $$S_73
+            && (eofd(2) || isIdentRestChr(peekd(2), pointer + 2) === INVALID_IDENT_CHAR) // Must ensure this isn't just a prefix
+          ) {
+            skipFastWithoutUpdatingCache();
+            skip();
+            lastParsedIdent = 'as'; // Keywords cannot have unicode escapes so don't worry about them
+            return $IDENT;
+          }
+        }
+        parseIdentifierRest('f');
+        THROW('Was looking for the ident `from` but found `' + lastParsedIdent + '` instead');
+        return DNF;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for the ident `from`, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToAsCommaCurlyClose(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToAsCommaCurlyClose, lexerFlags);
-  }
-  function _nextTokenToAsCommaCurlyClose(lexerFlags) {
-    return lexerWithFallback(_lexerForAsCommaCurlyClose, lexerFlags);
+    return nextTokenWithLexer(_lexerForAsCommaCurlyClose, lexerFlags);
   }
   function _lexerForAsCommaCurlyClose(lexerFlags) {
+    ASSERT(_lexerForAsCommaCurlyClose.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
     switch (c) {
-      case $$A_61:
-        // Only `as` would be valid here (we can always improve this but let's leave it generic for now)
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
         skip();
-        return parseIdentifierRest('a');
+        return parseSpace();
 
+      case $$A_61:
+        if (neofd(1)) {
+          if (
+            peekd(1) === $$S_73
+            && (eofd(2) || isIdentRestChr(peekd(2), pointer + 2) === INVALID_IDENT_CHAR) // Must ensure this isn't just a prefix
+          ) {
+            skipFastWithoutUpdatingCache();
+            skip();
+            lastParsedIdent = 'as'; // Keywords cannot have unicode escapes so don't worry about them
+            return $IDENT;
+          }
+        }
+        parseIdentifierRest('f');
+        THROW('Was looking for the ident `as` or comma or `}` but found `' + lastParsedIdent + '` instead');
+        return DNF;
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for import/export)');
-        // fall-through
+        skip();
+        return $PUNCTUATOR;
       case $$COMMA_2C:
         skip();
         return $PUNCTUATOR;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for the ident `as` or comma or `}`, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToAsCommaFrom(lexerFlags) {
-    return nextTokenWithLexer(_nextTokenToAsCommaFrom, lexerFlags);
-  }
-  function _nextTokenToAsCommaFrom(lexerFlags) {
-    return lexerWithFallback(_lexerForAsCommaFrom, lexerFlags);
+    return nextTokenWithLexer(_lexerForAsCommaFrom, lexerFlags);
   }
   function _lexerForAsCommaFrom(lexerFlags) {
+    ASSERT(_lexerForAsCommaFrom.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
     switch (c) {
-      case $$A_61: // `as`
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
         skip();
-        return parseIdentifierRest('a');
-      case $$F_66: // `from`
+        return parseSpace();
+
+      case $$A_61:
+        if (neofd(1)) {
+          if (
+            peekd(1) === $$S_73
+            && (eofd(2) || isIdentRestChr(peekd(2), pointer + 2) === INVALID_IDENT_CHAR) // Must ensure this isn't just a prefix
+          ) {
+            skipFastWithoutUpdatingCache();
+            skip();
+            lastParsedIdent = 'as'; // Keywords cannot have unicode escapes so don't worry about them
+            return $IDENT;
+          }
+        }
+        parseIdentifierRest('f');
+        THROW('Was looking for the ident `as` or comma or `}` but found `' + lastParsedIdent + '` instead');
+        return DNF;
+      case $$F_66:
+        if (neofd(4)) {
+          if (
+            peekd(1) === $$R_72 && peekd(2) === $$O_6F && peekd(3) === $$M_6D
+            && (eofd(5) || isIdentRestChr(peekd(4), pointer + 4) === INVALID_IDENT_CHAR) // Must ensure this isn't just a prefix
+          ) {
+            skipFastWithoutUpdatingCache();
+            skipFastWithoutUpdatingCache();
+            skipFastWithoutUpdatingCache();
+            skip();
+            lastParsedIdent = 'from'; // Keywords cannot have unicode escapes so don't worry about them
+            return $IDENT;
+          }
+        }
         skip();
-        return parseIdentifierRest('f');
+
+        parseIdentifierRest('f');
+        THROW('Was looking for the ident `from` but found `' + lastParsedIdent + '` instead');
+        return DNF;
       case $$COMMA_2C:
         skip();
         return $PUNCTUATOR;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for the ident `as`, `from`, or a comma, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToColon(lexerFlags) {
     // - `:`  (for `default`)
-    return nextTokenWithLexer(_nextTokenToColon, lexerFlags);
-  }
-  function _nextTokenToColon(lexerFlags) {
-    return lexerWithFallback(_lexerForColon, lexerFlags);
+    return nextTokenWithLexer(_lexerForColon, lexerFlags);
   }
   function _lexerForColon(lexerFlags) {
+    ASSERT(_lexerForColon.length === arguments.length, 'arg count');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+
     let c = peek();
 
-    if (c === $$COLON_3A) {
-      skip();
-      return $PUNCTUATOR;
+    switch (c) {
+      case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
+        skip();
+        return parseSpace();
+
+      case $$COLON_3A:
+        skip();
+        return $PUNCTUATOR;
+
+      case $$CR_0D:
+        skip();
+        return parseCR(); // cr crlf
+      case $$LF_0A:
+        skip();
+        return parseNewlineSolo();
+      case $$TAB_09:
+        skip();
+        wasWhite = true;
+        return $TAB;
+      case $$VTAB_0B:
+      case $$FF_0C:
+      case $$NBSP_A0:
+        skip();
+        wasWhite = true;
+        return $SPACE;
+      case $$FWDSLASH_2F:
+        // Most likely a comment, but perhaps a regex (which we'd reject here)
+        skip();
+        let r = parseFwdSlashMustBeComment(); // Only accepts comments: //.. /*..*/
+        if (r !== DNF) return r;
+        break;
+      default:
+        if (c > 0x7f) {
+          skip();
+          let r = parseOtherUnicodeSpacesOrDNF(c);
+          if (r !== DNF) return r;
+        }
     }
 
-    return _lexerWhitespaceCommon(c, lexerFlags);
+    THROW('Was looking for a colon, found `' + String.fromCharCode(c) + '` (' + c + ' / 0x' + c.toString(16).padStart(2, '0') + ') instead');
+    return DNF;
   }
   function nextTokenToTarget(lexerFlags) {
     // - `target`  (for `new.target`)
@@ -3830,6 +4264,25 @@ function ZeTokenizer(
     return $PUNCTUATOR;
   }
 
+  function parseFwdSlashMustBeComment() {
+    // The initial forward slash has already been consumed
+    // This func is only called in contexts where a division or regular expression would be a syntax error anyways
+    // So we only check for the second forward slash and a star.
+
+    if (eof()) return DNF;
+
+    let c = peek();
+    if (c === $$FWDSLASH_2F) {
+      ASSERT_skip($$FWDSLASH_2F); // `//`
+      return parseCommentSingle();
+    } else if (c === $$STAR_2A) {
+      // must be multi comment
+      ASSERT_skip($$STAR_2A); // `/*`
+      return parseCommentMulti();
+    }
+
+    return DNF;
+  }
   function parseFwdSlash(lexerFlags) {
     if (eof()) {
       // I don't think there's any way this can lead to a valid parse... but let the parser deal with that.
@@ -3840,7 +4293,6 @@ function ZeTokenizer(
     if (c === $$FWDSLASH_2F) {
       // must be single comment
       ASSERT_skip($$FWDSLASH_2F); // `//`
-      wasWhite = true;
       return parseCommentSingle();
     } else if (c === $$STAR_2A) {
       // must be multi comment
@@ -3864,6 +4316,7 @@ function ZeTokenizer(
   }
   function parseCommentSingle() {
     consumedCommentSincePrevSolid = true;
+    wasWhite = true;
     wasComment = true;
     while (neof()) {
       let c = peek();
@@ -3876,8 +4329,6 @@ function ZeTokenizer(
     return $COMMENT_SINGLE;
   }
   function parseCommentMulti() {
-    consumedCommentSincePrevSolid = true;
-    wasComment = true;
     let c;
     while (neof()) {
       c = peekSkip();
@@ -3888,7 +4339,9 @@ function ZeTokenizer(
         }
         c = peekSkip();
         if (c === $$FWDSLASH_2F) {
+          consumedCommentSincePrevSolid = true;
           wasWhite = true;
+          wasComment = true;
           return $COMMENT_MULTI;
         }
       }
@@ -3908,7 +4361,6 @@ function ZeTokenizer(
     // This is the starting html comment `<!--`
     // the spec defines it as the start of a single line JS comment
     parseCommentSingle();
-    wasWhite = true;
     return $COMMENT_HTML;
   }
   function parseCommentHtmlClose() {
@@ -3916,7 +4368,6 @@ function ZeTokenizer(
     // This is the closing html comment, `-->`
     // Note: parseCommentSingle will just skip the - - > because they are not newlines.
     parseCommentSingle();
-    wasWhite = true;
     return $COMMENT_HTML;
   }
 
@@ -6571,6 +7022,7 @@ function ZeTokenizer(
       case $$BOM_FEFF:
         // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
         // >  In ECMAScript source text <ZWNBSP> code points are treated as white space characters (see 11.2).
+        wasWhite = true;
         return $SPACE;
       case $$PS_2028:
         return parseNewlineSolo();
@@ -6580,6 +7032,21 @@ function ZeTokenizer(
       default:
         return parseIdentUnicodeOrError(c);
     }
+  }
+  function parseOtherUnicodeSpacesOrDNF(c) {
+    switch (c) {
+      case $$BOM_FEFF:
+        // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
+        // >  In ECMAScript source text <ZWNBSP> code points are treated as white space characters (see 11.2).
+        wasWhite = true;
+        return $SPACE;
+      case $$PS_2028:
+        return parseNewlineSolo();
+      case $$LS_2029:
+        return parseNewlineSolo();
+    }
+
+    return DNF;
   }
 
   function parseIdentUnicodeOrError(c) {
