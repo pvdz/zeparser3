@@ -554,27 +554,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   // https://astexplorer.net/
   let _tree = {
     type: 'Program',
-    loc: {
-      start: {
-        line: 1,
-        column: 0,
-      },
-      end: { // Initialized here but properly updated at the end
-        line: 1,
-        column: 0,
-      },
-      // The spec says to add the whole source of the range but that just sounds a little redundant to me :/
-      source: sourceField,
-    },
+    loc: AST_getFirstLoc(),
     body: [],
   };
   if (babelCompat) {
-    delete _tree.source;
-    _tree.sourceType = goalMode === GOAL_SCRIPT ? 'script' : 'module';
-    _tree.interpreter = null; // https://github.com/babel/babel/blob/master/packages/babel-parser/ast/spec.md#interpreterdirective
+    _tree = {
+      type: 'Program',
+      loc: AST_getFirstLoc(),
+      body: [],
+      sourceType: goalMode === GOAL_SCRIPT ? 'script' : 'module',
+      interpreter: null, // https://github.com/babel/babel/blob/master/packages/babel-parser/ast/spec.md#interpreterdirective
+    };
   }
   if (acornCompat) {
-    _tree.sourceType = goalMode === GOAL_SCRIPT ? 'script' : 'module';
+    _tree = {
+      type: 'Program',
+      loc: AST_getFirstLoc(),
+      body: [],
+      sourceType: goalMode === GOAL_SCRIPT ? 'script' : 'module',
+    };
   }
   let _path = [_tree];
   let _pnames;
@@ -583,6 +581,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     options_astRoot.root = _tree;
     options_astRoot.path = _path;
     ASSERT(options_astRoot.pathNames = _pnames, '(dev-only verification and debugging tool)');
+  }
+  function AST_getFirstLoc() {
+    ASSERT(AST_getFirstLoc.length === arguments.length, 'arg count');
+    // Create a loc for the start of the program
+
+    return {
+      start: {
+        line: 1, // offset 1
+        column: 0,
+      },
+      end: { // Updated in AST_close
+        line: 1,
+        column: 0,
+      },
+      source: sourceField, // File containing the code being parsed. Source maps may use this.
+    };
   }
   function AST_getBaseLoc(firstToken) {
     ASSERT(AST_getBaseLoc.length === arguments.length, 'arg count');
