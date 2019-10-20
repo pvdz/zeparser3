@@ -724,17 +724,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return was; // debug/assertions only...
   }
-  function AST_set(prop, value, clobber = false) {
+  function AST_set(prop, value) {
+    ASSERT(AST_set.length === arguments.length, 'expecting two args');
     ASSERT(typeof prop === 'string', 'prop should be string');
-    ASSERT(arguments.length >= 2 && arguments.length <= 4, 'expecting two args');
-    ASSERT(clobber || _path.length > 0, 'path shouldnt be empty');
+    ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(clobber ? (_path[_path.length - 1][prop] !== undefined) : true, 'expected to clobber a value but it was undefined');
-    ASSERT(clobber !== (_path[_path.length - 1][prop] === undefined), 'dont clobber, prop=' + prop + ', val=' + value + ', clobber=' + clobber);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
+    ASSERT(_path[_path.length - 1].hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', _path[_path.length - 1]);
 
-    let head = _path[_path.length - 1];
-    ASSERT(head.hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', head);
-    head[prop] = value;
+    // Set a property value and expect it to be undefined before
+    ASSERT(_path[_path.length - 1][prop] === undefined, 'use AST_clobber? This func doesnt clobber, prop=' + prop + ', val=' + value);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
+
+    _path[_path.length - 1][prop] = value;
+  }
+  function AST_clobber(prop, value) {
+    ASSERT(AST_clobber.length === arguments.length, 'expecting two args');
+    ASSERT(typeof prop === 'string', 'prop should be string');
+    ASSERT(_path.length > 0, 'path shouldnt be empty');
+    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+    ASSERT(_path[_path.length - 1].hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', _path[_path.length - 1]);
+
+    // Set a property value and ignore any existing values
+    ASSERT(_path[_path.length - 1][prop] !== undefined, 'expected to clobber a value but it was undefined');
+
+    _path[_path.length - 1][prop] = value;
   }
   function AST_setNode(astProp, node) {
     ASSERT(AST_setNode.length === arguments.length, 'arg count');
