@@ -3236,7 +3236,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         generator: starToken !== UNDEF_STAR,
         async: asyncToken !== UNDEF_ASYNC,
         id: undefined,
-        params: undefined,
+        params: [],
         body: undefined,
       });
     }
@@ -3453,7 +3453,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //          ^
 
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
-    AST_set('params', []);
 
     let paramsSimple = PARAMS_ALL_SIMPLE;
 
