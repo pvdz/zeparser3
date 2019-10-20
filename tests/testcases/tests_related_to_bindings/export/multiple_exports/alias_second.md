@@ -19,7 +19,9 @@
 
 
 `````js
-export {a}; export {b as a};
+var a, b;
+export {a};
+export {b as a};
 `````
 
 ## Output
@@ -38,8 +40,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-export {a}; export {b as a};
+var a, b;
+export {a};
 ^------- error
+
+export {b as a};
 `````
 
 ### Strict mode
@@ -56,8 +61,10 @@ Parsed with the module goal.
 throws: Parser error!
   Tried to export the name `a` twice
 
-export {a}; export {b as a};
-                           ^------- error
+var a, b;
+export {a};
+export {b as a};
+               ^------- error
 `````
 
 

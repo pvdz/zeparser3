@@ -54,7 +54,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Tried to export the name `a` twice (at EOF)
+  Tried to export the name `a` twice
 
 var a, b; export {a, b as a}
                            ^------- error

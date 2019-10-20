@@ -2122,10 +2122,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let scoop = SCOPE_createGlobal('_parseTopLevels');
     if (options_exposeScopes) AST_set('$scope', scoop);
     ASSERT(scoop._ = 'root scope'); // debug
-    let exportedNames = {}; // how other modules refer to something
+    let exportedNames = new Set; // how other modules refer to something
     ASSERT(exportedNames._ = 'exported names');
-    let exportedBindings = {}; // which binding an exported name refers to
+    ASSERT(exportedNames._i = ++uid_counter);
+    let exportedBindings = new Set; // which binding an exported name refers to
     ASSERT(exportedBindings._ = 'exported bindings');
+    ASSERT(exportedBindings._i = ++uid_counter);
     // <SCRUB AST>
     let len;
     ASSERT(!void(len = _path.length));
@@ -2138,12 +2140,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_path.length === len, 'should close all that was opened. Open before: ' + JSON.stringify(bak.map(o=>o.type).join(' > ')) + ', open after: ' + JSON.stringify(_path.map(o=>o.type).join(' > ')));
     // </SCRUB AST>
     if (goalMode === GOAL_MODULE) {
+      let globalNames = scoop.names;
       // assert that all exported symbols were in fact recorded
-      for (let key in exportedBindings) {
-        if (key[0] === '#' && key !== '#default' && (scoop.names === HAS_NO_BINDINGS || !scoop.names.has(key.slice(1)))) {
-          THROW('Exporting a name that was not bound in global: `' + key.slice(1) + '`');
+      exportedBindings.forEach(name => {
+        if (name !== 'default' && (globalNames === HAS_NO_BINDINGS || !globalNames.has(name))) {
+          THROW('Exporting a name that was not bound in global: `' + name + '`');
         }
-      }
+      });
       ASSERT((function(){for (let key in exportedBindings) ASSERT(key[0] !== '#' || exportedBindings[key] === 1, 'key should be 1', exportedBindings[key]); return true})(), 'all bindings should exist exactly one, or have thrown an error');
     }
   }
@@ -4487,8 +4490,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // We don't know whether we need to use the names for exportBindings/exportNames until we see the token after
         // the closing curly. If that's "from" then we don't use the list, otherwise we do. So collect the names in
         // arrays :'( and act accordingly after the fact.
-        let tmpExportedNames = [];
-        let tmpExportedBindings = [];
+        let tmpExportedNames = new Set;
+        ASSERT(tmpExportedNames._ = 'exported names');
+        ASSERT(tmpExportedNames._i = ++uid_counter);
+        let tmpExportedBindings = new Set;
+        ASSERT(tmpExportedBindings._ = 'exported bindings');
+        ASSERT(tmpExportedBindings._i = ++uid_counter);
         parseExportObject(lexerFlags, tmpExportedNames, tmpExportedBindings);
 
         if (curtok.str === 'from') {
@@ -4502,9 +4509,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_setLiteral('source', fromToken);
         } else {
           AST_set('source', null);
-          // pump the names in now
-          for (let i=0,l=tmpExportedNames.length; i<l; ++i) addNameToExports(exportedNames, tmpExportedNames[i]);
-          for (let i=0,l=tmpExportedBindings.length; i<l; ++i) addBindingToExports(exportedBindings, tmpExportedBindings[i]);
+          // pump the names into the real sets now
+          tmpExportedNames.forEach(name => addNameToExports(exportedNames, name));
+          tmpExportedBindings.forEach(name => addBindingToExports(exportedBindings, name));
         }
       }
       else if (curc === $$V_76 && curtok.str === 'var') {
@@ -4594,19 +4601,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('ExportNamedDeclaration');
     }
   }
-  function addNameToExports(exportList, exportedName) {
-    ASSERT(exportList !== DO_NOT_BIND, 'use UNDEF_EXPORTS not DO_NOT_BIND');
-    if (exportList !== UNDEF_EXPORTS && exportedName !== '') {
-      let hashed = '#' + exportedName;
-      if (exportList[hashed]) THROW('Tried to export the name `' + exportedName + '` twice');
-      exportList[hashed] = 1;
+  function addNameToExports(exportedNames, exportedName) {
+    ASSERT(exportedNames !== DO_NOT_BIND, 'use UNDEF_EXPORTS for exportedNames, not DO_NOT_BIND');
+    ASSERT(exportedNames === UNDEF_EXPORTS || exportedNames._ === 'exported names', 'explicitly expecting to receive the `exportedNames` set');
+    if (exportedNames !== UNDEF_EXPORTS && exportedName !== '') {
+      if (exportedNames.has(exportedName)) THROW('Tried to export the name `' + exportedName + '` twice');
+      exportedNames.add(exportedName);
     }
   }
-  function addBindingToExports(exportList, exportedName) {
-    ASSERT(exportList !== DO_NOT_BIND, 'use UNDEF_EXPORTS not DO_NOT_BIND');
-    if (exportList !== UNDEF_EXPORTS && exportedName !== '') {
-      let hashed = '#' + exportedName;
-      exportList[hashed] = 1;
+  function addBindingToExports(exportedBindings, exportedName) {
+    ASSERT(exportedBindings !== DO_NOT_BIND, 'use UNDEF_EXPORTS not DO_NOT_BIND');
+    if (exportedBindings !== UNDEF_EXPORTS && exportedName !== '') {
+      exportedBindings.add(exportedName);
     }
   }
   function parseExportObject(lexerFlags, tmpExportedNames, tmpExportedBindings) {
@@ -4626,8 +4632,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipCommaCurlyClose($IDENT, lexerFlags);
       }
 
-      tmpExportedNames.push(exportedNameToken.str);
-      tmpExportedBindings.push(nameToken.str);
+      addNameToExports(tmpExportedNames, exportedNameToken.str);
+      addBindingToExports(tmpExportedBindings, nameToken.str);
 
       AST_setNode('specifiers', {
         type: 'ExportSpecifier',

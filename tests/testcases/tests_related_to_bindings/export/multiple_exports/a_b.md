@@ -17,7 +17,9 @@
 ## Input
 
 `````js
-var a,b; export {a}; export {b};
+var a,b;
+export {a};
+export {b};
 `````
 
 ## Output
@@ -36,8 +38,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-var a,b; export {a}; export {b};
-         ^------- error
+var a,b;
+export {a};
+^------- error
+
+export {b};
 `````
 
 ### Strict mode
@@ -53,7 +58,7 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:32},source:''},
+  loc:{start:{line:1,column:0},end:{line:3,column:11},source:''},
   body: [
     {
       type: 'VariableDeclaration',
@@ -84,19 +89,19 @@ ast: {
     },
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,column:9},end:{line:1,column:20},source:''},
+      loc:{start:{line:2,column:0},end:{line:2,column:11},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
+          loc:{start:{line:2,column:8},end:{line:2,column:9},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
+            loc:{start:{line:2,column:8},end:{line:2,column:9},source:''},
             name: 'a'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
+            loc:{start:{line:2,column:8},end:{line:2,column:9},source:''},
             name: 'a'
           }
         }
@@ -106,19 +111,19 @@ ast: {
     },
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,column:21},end:{line:1,column:32},source:''},
+      loc:{start:{line:3,column:0},end:{line:3,column:11},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,column:29},end:{line:1,column:30},source:''},
+          loc:{start:{line:3,column:8},end:{line:3,column:9},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,column:29},end:{line:1,column:30},source:''},
+            loc:{start:{line:3,column:8},end:{line:3,column:9},source:''},
             name: 'b'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,column:29},end:{line:1,column:30},source:''},
+            loc:{start:{line:3,column:8},end:{line:3,column:9},source:''},
             name: 'b'
           }
         }
