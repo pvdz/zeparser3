@@ -437,7 +437,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let failForRegexAssertIfPass = '';
   let regexAssertTrace = undefined;
 
-  let prevtok = null;
   let curtok = null;
   let curtype = 0;
   let curc = 0;
@@ -459,7 +458,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function ASSERT(bool, desc, ...rest) {
-    if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>') + '; ' + JSON.stringify(rest), ':', ...rest);
+    if (!bool) {
+      ASSERT_pushCanonPoison(true);
+      THROW('Assertion fail: ' + (desc || '<no desc>') + '; ' + JSON.stringify(rest), ':', ...rest);
+      ASSERT_popCanonPoison();
+    }
   }
 
   let tok = ZeTokenizer(code, {
@@ -847,33 +850,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let node; // for assert
     if (isStringToken(token.type)) {
-      if (babelCompat) {
-        node = AST_babelSetStringLiteral(astProp, token, fromDirective);
-      } else {
-        node = AST_setStringLiteral(astProp, token);
-      }
+      node = AST_setStringLiteral(astProp, token, fromDirective);
     }
     else if (isNumberToken(token.type)) {
       if (isBigintToken(token.type)) {
-        // [v] `45n`
-        // [v] `0b100n`
-        // [v] `0o533n`
-        // [v] `0xabcn`
-        // https://github.com/estree/estree/pull/198/files
         node = AST_setBigInt(astProp, token);
-      } else if (babelCompat) {
-        node = AST_babelSetNumberLiteral(astProp, token);
       } else {
         node = AST_setNumberLiteral(astProp, token);
       }
     }
     else if (isRegexToken(token.type)) {
       ASSERT(token.str.split('/').length > 2, 'a regular expression should have at least two forward slashes', token.str);
-      if (babelCompat) {
-        node = AST_babelSetRegexLiteral(astProp, token);
-      } else {
-        node = AST_setRegexLiteral(astProp, token);
-      }
+      node = AST_setRegexLiteral(astProp, token);
     }
     else {
       ASSERT(false, 'what kind of literal is this?', T(token.type), ''+token, isNumberToken(token.type));
@@ -882,18 +870,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(node, 'should be set by one of the branches');
     ASSERT(token.str.includes('\n') || token.str.includes('\r') || token.str.includes('\u2028') || token.str.includes('\u2029') || node.loc.end.column - node.loc.start.column === token.str.length, 'for literals the location should only span exactly the length of the lit', node.loc);
   }
-  function AST_setStringLiteral(astProp, token) {
-    ASSERT(AST_setStringLiteral.length === arguments.length, 'arg count');
-    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
-    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
-    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+  function AST_getStringNode(token, fromDirective) {
+    ASSERT(AST_getStringNode.length === arguments.length, 'arg count');
 
-    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
-    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+    if (babelCompat) return AST_babelGetStringNode(token, fromDirective);
 
     // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
 
-    let stringNode = {
+    return {
       type: 'Literal',
       loc: {
         start: {
@@ -909,11 +893,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       value: token.canon.slice(1, -1),
       raw: token.str,
     };
-
-    return AST_setNode(astProp, stringNode); // for ASSERTs only!
   }
-  function AST_setNumberLiteral(astProp, token) {
-    ASSERT(AST_setNumberLiteral.length === arguments.length, 'arg count');
+  function AST_setStringLiteral(astProp, token, fromDirective) {
+    ASSERT(AST_setStringLiteral.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
     ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
@@ -921,9 +903,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
     // between open and close (which is often the case). So this is used for literals (while idents have their own func)
 
-    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+    let stringNode = AST_getStringNode(token, fromDirective);
+    return AST_setNode(astProp, stringNode); // for ASSERTs only!
+  }
+  function AST_getNumberNode(token) {
+    ASSERT(AST_getNumberNode.length === arguments.length, 'arg count');
 
     let type = token.type;
+    if (isBigintToken(type)) return AST_getBigIntNode(token);
+    if (babelCompat) return AST_babelgetNumberNode(token);
+
+    // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
     let str = token.str;
     let value =
       type === $NUMBER_DEC ? parseFloat(str) : // parseFloat also deals with `e` cases
@@ -931,15 +922,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       type === $NUMBER_BIN ? parseInt(str.slice(2), 2) :
       type === $NUMBER_OCT ? parseInt(str.slice(2), 8) :
       (
-        ASSERT(type === $NUMBER_OLD, 'number types are enum and bigint should not reach this'),
-        ASSERT(str !== '0', 'a zero should just be a decimal'),
+        ASSERT(type === $NUMBER_OLD, 'number types are enum and bigint should not reach this', token),
+        ASSERT(str !== '0', 'a zero should just be a decimal', token),
         str.includes('8') || str.includes('9')
         ? parseFloat(str.slice(1))
         : parseInt(str.slice(1), 8)
       );
     if (acornCompat && value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
 
-    let numberNode = {
+    return {
       type: 'Literal',
       loc: {
         start: {
@@ -955,11 +946,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       value: value,
       raw: str,
     };
-
-    return AST_setNode(astProp, numberNode); // for ASSERTs only!
   }
-  function AST_setBigInt(astProp, token) {
-    ASSERT(AST_setBigInt.length === arguments.length, 'arg count');
+  function AST_setNumberLiteral(astProp, token) {
+    ASSERT(AST_setNumberLiteral.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
     ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
@@ -967,9 +956,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
     // between open and close (which is often the case). So this is used for literals (while idents have their own func)
 
+    let numberNode = AST_getNumberNode(token);
+    return AST_setNode(astProp, numberNode); // for ASSERTs only!
+  }
+  function AST_getBigIntNode(token) {
+    // [v] `45n`
+    // [v] `0b100n`
+    // [v] `0o533n`
+    // [v] `0xabcn`
+    // https://github.com/estree/estree/pull/198/files
+
+    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
+    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
+
     // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
 
-    let bigintNode = {
+    return {
       type: 'BigIntLiteral',
       loc: {
         start: {
@@ -985,14 +987,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       value: null,
       bigint: token.str.slice(0, -1), // TODO: Normalize... https://github.com/estree/estree/issues/200
     };
-
-    return AST_setNode(astProp, bigintNode); // for ASSERTs only!
   }
-  function AST_setRegexLiteral(astProp, token) {
-    ASSERT(AST_setRegexLiteral.length === arguments.length, 'arg count');
+  function AST_setBigInt(astProp, token) {
+    ASSERT(AST_setBigInt.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
     ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
+
+    let bigintNode = AST_getBigIntNode(token);
+    return AST_setNode(astProp, bigintNode); // for ASSERTs only!
+  }
+  function AST_getRegexNode(token) {
+    ASSERT(AST_getRegexNode.length === arguments.length, 'arg count');
+
+    if (babelCompat) return AST_babelGetRegexNode(token);
 
     // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
     // between open and close (which is often the case). So this is used for literals (while idents have their own func)
@@ -1006,7 +1014,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
 
-    let regexNode = {
+    return {
       type: 'Literal',
       loc: {
         start: {
@@ -1026,7 +1034,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       },
       raw: str,
     };
+  }
+  function AST_setRegexLiteral(astProp, token) {
+    ASSERT(AST_setRegexLiteral.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
+    ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
+    ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
 
+    let regexNode = AST_getRegexNode(token);
     return AST_setNode(astProp, regexNode); // for ASSERTs only!
   }
   function AST_add(prop, value) {
@@ -1249,13 +1264,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return commentNode; // debug/assertions only...
   }
-  function AST_babelSetStringLiteral(astProp, token, fromDirective) {
-    ASSERT(AST_babelSetStringLiteral.length === arguments.length, 'arg count');
+  function AST_babelGetStringNode(token, fromDirective) {
+    ASSERT(AST_babelGetStringNode.length === arguments.length, 'arg count');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
-    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
-
-    // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
-    // between open and close (which is often the case). So this is used for literals (while idents have their own func)
 
     // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
 
@@ -1264,7 +1275,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let strUnquoted = str.slice(1, -1);
     let value = fromDirective ? strUnquoted : canon.slice(1, -1);
 
-    let stringNode = {
+    return {
       type: 'StringLiteral',
       loc: {
         start: {
@@ -1283,13 +1294,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         rawValue: value,
       },
     };
-
-    return AST_setNode(stringNode); // for ASSERTs only!
   }
-  function AST_babelSetNumberLiteral(astProp, token) {
-    ASSERT(AST_babelSetNumberLiteral.length === arguments.length, 'arg count');
+  function AST_babelgetNumberNode(token) {
+    ASSERT(AST_babelgetNumberNode.length === arguments.length, 'arg count');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
-    ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
 
     // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
     // between open and close (which is often the case). So this is used for literals (while idents have their own func)
@@ -1314,7 +1322,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: locally babel seems to make this null but in astexplorer it (properly?) uses Infinity ... dunno
     if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
 
-    let numberNode = {
+    return {
       type: 'NumericLiteral',
       loc: {
         start: {
@@ -1330,10 +1338,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       value: value,
       raw: str,
     };
-
-    return AST_setNode(numberNode); // for ASSERTs only!
   }
-  function AST_babelSetRegexLiteral(astProp, token) {
+  function AST_babelGetRegexNode(astProp, token) {
     ASSERT(AST_babelSetRegexLiteral.length === arguments.length, 'arg count');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
     ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
@@ -1417,7 +1423,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function updateToken(token) {
-    prevtok = curtok;
     curtok = token;
     curtype = curtok.type;
     curc = curtok.c;
@@ -2926,12 +2931,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (isNumberToken(curtype)) {
-      parseFromLiteralStatement(lexerFlags, astProp);
+      parseFromNumberStatement(lexerFlags, astProp);
       return;
     }
 
     if (isStringToken(curtype)) {
-      parseFromLiteralStatement(lexerFlags, astProp);
+      parseFromStringStatement(lexerFlags, astProp);
       return;
     }
 
@@ -2941,7 +2946,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (isRegexToken(curtype)) {
-      parseFromLiteralStatement(lexerFlags, astProp);
+      parseFromRegexStatement(lexerFlags, astProp);
       return;
     }
 
@@ -3658,29 +3663,62 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     THROW('Unexpected identifier case');
   }
 
-  function parseFromLiteralStatement(lexerFlags, astProp) {
-    ASSERT(parseFromLiteralStatement.length === arguments.length, 'arg count');
+  function parseFromNumberStatement(lexerFlags, astProp) {
+    ASSERT(parseFromNumberStatement.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop str', astProp);
-    ASSERT(isNumberStringRegex(curtype), 'lit is a lit');
+    ASSERT(isNumberToken(curtype));
 
-    let litToken = curtok;
-    skipDiv(lexerFlags); // note: this can be any literal
-    _parseFromLiteralStatement(lexerFlags, litToken, astProp);
-  }
-  function _parseFromLiteralStatement(lexerFlags, litToken, astProp) {
-    ASSERT(_parseFromLiteralStatement.length === arguments.length, 'arg count');
-    ASSERT(typeof astProp === 'string', 'astprop str', astProp);
-    ASSERT(isNumberStringRegex(litToken.type), 'lit is a lit');
+    let numberToken = curtok;
+    ASSERT_skipDiv($G_NUMBER, lexerFlags); // note: this can be any tail, semi, asi, etc
 
     AST_openCustom(astProp, {
       type: 'ExpressionStatement',
-      loc: AST_getBaseLoc(litToken),
-      expression: undefined, // TODO: "AST_getLiteralNode()"
+      loc: AST_getBaseLoc(numberToken),
+      expression: AST_getNumberNode(numberToken),
     });
-    AST_setLiteral('expression', litToken);
-    parseExpressionAfterLiteral(lexerFlags, litToken, 'expression');
+    parseExpressionAfterLiteral(lexerFlags, numberToken, 'expression');
     if (curc === $$COMMA_2C) {
-      _parseExpressions(lexerFlags, litToken, initNotAssignable(), 'expression');
+      _parseExpressions(lexerFlags, numberToken, initNotAssignable(), 'expression');
+    }
+    parseSemiOrAsi(lexerFlags);
+    AST_close('ExpressionStatement');
+  }
+  function parseFromStringStatement(lexerFlags, astProp) {
+    ASSERT(parseFromStringStatement.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop str', astProp);
+    ASSERT(isStringToken(curtype));
+
+    let stringToken = curtok;
+    ASSERT_skipDiv($G_STRING, lexerFlags); // note: this can be any tail, semi, asi, etc
+
+    AST_openCustom(astProp, {
+      type: 'ExpressionStatement',
+      loc: AST_getBaseLoc(stringToken),
+      expression: AST_getStringNode(stringToken, false),
+    });
+    parseExpressionAfterLiteral(lexerFlags, stringToken, 'expression');
+    if (curc === $$COMMA_2C) {
+      _parseExpressions(lexerFlags, stringToken, initNotAssignable(), 'expression');
+    }
+    parseSemiOrAsi(lexerFlags);
+    AST_close('ExpressionStatement');
+  }
+  function parseFromRegexStatement(lexerFlags, astProp) {
+    ASSERT(parseFromRegexStatement.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop str', astProp);
+    ASSERT(isRegexToken(curtype));
+
+    let regexToken = curtok;
+    ASSERT_skipDiv($G_REGEX, lexerFlags); // note: this can be any tail, semi, asi, etc
+
+    AST_openCustom(astProp, {
+      type: 'ExpressionStatement',
+      loc: AST_getBaseLoc(regexToken),
+      expression: AST_getRegexNode(regexToken),
+    });
+    parseExpressionAfterLiteral(lexerFlags, regexToken, 'expression');
+    if (curc === $$COMMA_2C) {
+      _parseExpressions(lexerFlags, regexToken, initNotAssignable(), 'expression');
     }
     parseSemiOrAsi(lexerFlags);
     AST_close('ExpressionStatement');
@@ -4500,24 +4538,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
 
-      ASSERT_skipToFrom('*', lexerFlags);
-      ASSERT_skipToString('from', lexerFlags); // The skipToFrom call above will explicitly verify the token to be "from"
-      if (!isStringToken(curtype, $G_STRING)) {
-        THROW('Source must be a string literal');
-      }
+      ASSERT_skipToFrom('*', lexerFlags); // Will throw if next token is not "from"
+      ASSERT_skipToString('from', lexerFlags); // Will throw if next token is not a string
       let sourceToken = curtok;
       ASSERT_skipStatementStart($G_STRING, lexerFlags);
 
-      AST_openCustom(astProp, {
-        type: 'ExportAllDeclaration',
-        loc: AST_getBaseLoc(exportToken),
-        source: undefined, // unfortunately we need to skip two tokens before we can see the source...
-      });
-      AST_setLiteral('source', sourceToken);
-
       parseSemiOrAsi(lexerFlags);
 
-      AST_close('ExportAllDeclaration');
+      AST_setNode(astProp, {
+        type: 'ExportAllDeclaration',
+        loc: AST_getClosedLoc(exportToken),
+        source: AST_getStringNode(sourceToken, false),
+      });
     }
     else {
       AST_openCustom(astProp, {
@@ -4551,7 +4583,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let fromToken = curtok;
 
           ASSERT_skipStatementStart($G_STRING, lexerFlags);
-          AST_setLiteral('source', fromToken);
+          AST_setStringLiteral('source', fromToken, false);
         } else {
           AST_set('source', null);
           // pump the names into the real sets now
@@ -5453,7 +5485,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let sourceToken = curtok;
     ASSERT_skipStatementStart($G_STRING, lexerFlags); // semi or asi
-    AST_setLiteral('source', sourceToken);
+    AST_setStringLiteral('source', sourceToken, false);
     parseSemiOrAsi(lexerFlags);
     AST_close('ImportDeclaration');
   }
@@ -7523,10 +7555,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (maybe === PARSE_VALUE_MUST) THROW('Expected to parse a value');
     // currently all callsites that have maybe=PARSE_VALUE_MAYBE will ignore the return value if nothing was consumed
 
+    // <SCRUB DEV>
     let returnValue = 0;
     // This return value should be ignored. I want to know when that is not the case.
     ASSERT(returnValue = new Proxy({}, {getPrototypeOf: () => ASSERT(false, 'poisoned getPrototypeOf'), setPrototypeOf: () => ASSERT(false, 'poisoned setPrototypeOf'), isExtensible: () => ASSERT(false, 'poisoned isExtensible'), preventExtensions: () => ASSERT(false, 'poisoned preventExtensions'), getOwnPropertyDescriptor: () => ASSERT(false, 'poisoned getOwnPropertyDescriptor'), defineProperty: () => ASSERT(false, 'poisoned defineProperty'), has: () => ASSERT(false, 'poisoned has'), get: () => ASSERT(false, 'poisoned get'), set: () => ASSERT(false, 'poisoned set'), deleteProperty: () => ASSERT(false, 'poisoned deleteProperty'), ownKeys: () => ASSERT(false, 'poisoned ownKeys'), apply: () => ASSERT(false, 'poisoned apply'), construct: () => ASSERT(false, 'poisoned construct')}));
     return returnValue;
+    // </SCRUB DEV>
   }
   function _parseValueHeadBodyAfterObjArr(wasDestruct) {
     ASSERT(_parseValueHeadBodyAfterObjArr.length === arguments.length, 'argcount');
@@ -12767,7 +12801,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   parseTopLevels(initialLexerFlags);
 
   if (curtype !== $EOF) THROW('Unexpected further input');
-  
+
   if (failForRegexAssertIfPass !== '') {
     // We assume that when we call skipAny that we don't expect the next token to be legally start with a forward slash
     // But there may still be explicit test cases that assert illegal forward slashes are throwing gracefully
