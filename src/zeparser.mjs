@@ -724,18 +724,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return was; // debug/assertions only...
   }
-  function AST_set(prop, value, clobber = false, unless = false) {
+  function AST_set(prop, value, clobber = false) {
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(arguments.length >= 2 && arguments.length <= 4, 'expecting two args');
     ASSERT(clobber || _path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
     ASSERT(clobber ? (_path[_path.length - 1][prop] !== undefined) : true, 'expected to clobber a value but it was undefined');
     ASSERT(clobber !== (_path[_path.length - 1][prop] === undefined), 'dont clobber, prop=' + prop + ', val=' + value + ', clobber=' + clobber);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
-    ASSERT(typeof unless === 'boolean', 'unless is bool');
-    if (unless === true) { // TODO: drop in noCompat build
-      // This is to skip for babel compat, for example. Prevents call sites to be too cluttered with conditionals.
-      return;
-    }
 
     let head = _path[_path.length - 1];
     ASSERT(head.hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', head);
@@ -4056,15 +4051,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let curlyToken = curtok;
     ASSERT_skipStatementStart('{', lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}` TODO: next must be statement start, or `}`
-    AST_openCustom(astProp, {
-      type: 'BlockStatement',
-      loc: AST_getBaseLoc(curlyToken),
-      body: [],
-    });
     if (babelCompat) {
-      // (All BlockStatements receive this property in the Babel AST... even when it can't have any directives.)
-      // TODO: this needs way more love and will make things a little tricky :/
-      AST_set('directives', []);
+      // (All BlockStatements receive the `directives` property in the Babel AST... even when it can't have any directives.)
+      AST_openCustom(astProp, {
+        type: 'BlockStatement',
+        loc: AST_getBaseLoc(curlyToken),
+        directives: [],
+        body: [],
+      });
+    } else {
+      AST_openCustom(astProp, {
+        type: 'BlockStatement',
+        loc: AST_getBaseLoc(curlyToken),
+        body: [],
+      });
     }
     if (options_exposeScopes) AST_set('$scope', scoop);
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) {
@@ -8738,7 +8738,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$CURLY_L_7B) {
       // This means: "is the body of the arrow not a block?"
       // Skip for Babel: https://github.com/babel/babel/pull/6836
-      AST_set('expression', false, undefined, babelCompat);
+      if (!babelCompat) AST_set('expression', false);
 
       let arrowScoop = SCOPE_addLayer(paramScoop, SCOPE_LAYER_FUNC_BODY, 'parseArrowFromPunc');
       parseFunctionBody(lexerFlags, arrowScoop, EMPTY_LABEL_SET, IS_EXPRESSION, paramsSimple, NO_DUPE_PARAMS, NO_ID_TO_VERIFY);
@@ -8754,7 +8754,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // Note: in `for-in` headers, the LF_IN_FOR_LHS flag is NOT reset for expr-body arrows
       if (insideForLhs) lexerFlags |= LF_IN_FOR_LHS;
 
-      AST_set('expression', true, undefined, babelCompat); // "body of arrow is expr"
+      if (!babelCompat) AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'body');
     }
 
