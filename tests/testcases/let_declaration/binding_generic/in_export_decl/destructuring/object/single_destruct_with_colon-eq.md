@@ -43,8 +43,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Expected to parse a value
+throws: Tokenizer error!
+    Was looking for a character that starts an expression, found `=` (61 / 0x3d) instead
 
 export let {a:=c} = z;
               ^------- error

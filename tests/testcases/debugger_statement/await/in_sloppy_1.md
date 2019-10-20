@@ -65,8 +65,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Cannot use this name (await) as a variable name because: Await is illegal as var name with module goal
+throws: Tokenizer error!
+    Was looking for a character that starts an expression, found `:` (58 / 0x3a) instead
 
 await: x
      ^------- error

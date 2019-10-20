@@ -79,8 +79,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Cannot use `await` as var when goal=module but found `await` outside an async function
+throws: Tokenizer error!
+    Was looking for a character that starts an expression, found `]` (93 / 0x5d) instead
 
 { (x = [await]) }
              ^------- error

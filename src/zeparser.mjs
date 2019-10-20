@@ -4172,7 +4172,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) {
       // This is a `break` that is not inside a loop or switch
       // [v]: `if (x) break`
-      THROW('Can only `break` inside a `switch` or loop');
+      THROW('Can only `break` without label inside a `switch` or loop');
     } else {
       if (curtok.nl > 0 && isRegexToken(curtok.type)) {
         // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.

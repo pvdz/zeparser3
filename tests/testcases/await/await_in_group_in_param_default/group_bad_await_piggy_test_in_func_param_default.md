@@ -109,8 +109,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Cannot use `await` as var when goal=module but found `await` outside an async function
+throws: Tokenizer error!
+    Was looking for a character that starts an expression, found `)` (41 / 0x29) instead
 
 async function f(){    function g(x=(await)=y){}   }
                                           ^------- error

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can only `break` inside a `switch` or loop (at EOF)
+  Can only `break` without label inside a `switch` or loop (at EOF)
 
 if (x) break
        ^------- error

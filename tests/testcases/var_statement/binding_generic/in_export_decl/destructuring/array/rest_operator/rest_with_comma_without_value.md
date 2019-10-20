@@ -44,8 +44,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Expected to parse a value
+throws: Tokenizer error!
+    Was looking for a character that starts an expression, found `,` (44 / 0x2c) instead
 
 export var [...,] = obj;
                ^------- error
