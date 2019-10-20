@@ -18,6 +18,7 @@ NOCOMP=''
 NOMIN=''
 INSPECT=''
 DEVTOOLS=''
+PRETTIER=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -62,6 +63,7 @@ ZeParser test runner help:
  --build       Use the build (./t z) instead of dev sources for ZeParser in this call
  --no-compat   For `z`; Replace the compat flags for Acorn and Babel to `false` so the minifier eliminates the dead code
  --no-min      For `z`; Do not run Terser (minifier) on build output
+ --pretty      For `z`; Run prettier on the build afterwards (useful with `--no-min`)
  --inspect     Run with `node --inspect-brk` to debug node in the chrome devtools. Use `--devtools` to auto-profile.
  --devtools    Call `console.profile()` before and after the core parse step (not all actions support this)
  6 ... 11      Parse according to the rules of this particular version of the spec
@@ -173,6 +175,7 @@ ZeParser test runner help:
     --build)        BUILD='-b'            ;;
     --no-compat)    NOCOMP='--no-compat'  ;;
     --no-min)       NOMIN='--no-min'      ;;
+    --pretty)       PRETTIER='yes'        ;;
     --prefix)
         PSFIX='--prefix'
         shift
@@ -262,6 +265,9 @@ case "${ACTION}" in
 
     build)
       node ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR}
+      if [[ ! -z "${PRETTIER}" ]]; then
+          node_modules/.bin/prettier build/build_w_ast.mjs --write
+      fi
     ;;
 
     perf)
