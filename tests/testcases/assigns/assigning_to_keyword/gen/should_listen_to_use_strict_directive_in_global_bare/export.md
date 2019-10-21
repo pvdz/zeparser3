@@ -45,8 +45,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Unknown export type [=] (note: you can only export individual vars through `export {=};`)
+throws: Tokenizer error!
+    Was looking for an ident, star, or opening curly, found `=` (61 / 0x3d) instead
 
 "use strict"; export = x;
                      ^------- error

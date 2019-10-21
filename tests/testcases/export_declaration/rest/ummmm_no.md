@@ -43,8 +43,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Expected identifier, or array/object destructuring, next token is: {# PUNCTUATOR : nl=N ws=N pos=11:14 loc=11:1 curc=46 `...`#}
+throws: Tokenizer error!
+    Was looking for the start of a binding, found `.` (46 / 0x2e) instead
 
 export let ...x = y
            ^------- error

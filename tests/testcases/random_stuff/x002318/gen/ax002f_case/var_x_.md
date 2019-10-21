@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Unexpected unicode character: 5760 (@{x1680}@)
+    Was looking for the start of a binding, found `@{x1680}@` (5760 / 0x1680) instead
 
 var@{x1680}@x;
    ^------- error

@@ -518,8 +518,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let tok_nextTokenSwitchBody = tok.nextTokenSwitchBody;
   let tok_nextTokenToBindingStart = tok.nextTokenToBindingStart;
   let tok_nextTokenToBindingStartGrouped = tok.nextTokenToBindingStartGrouped;
-  let tok_nextTokenToColonOrParenOpen = tok.nextTokenToColonOrParenOpen;
-  let tok_nextTokenToIdentOrParenOpen = tok.nextTokenToIdentOrParenOpen;
+  let tok_nextTokenToColonParenOpen = tok.nextTokenToColonParenOpen;
+  let tok_nextTokenToIdentParenOpen = tok.nextTokenToIdentParenOpen;
   let tok_nextTokenToIdentStarParenOpen = tok.nextTokenToIdentStarParenOpen;
   let tok_nextTokenToIdentStarCurlyOpen = tok.nextTokenToIdentStarCurlyOpen;
   let tok_nextTokenToCommaCurlyClose = tok.nextTokenToCommaCurlyClose;
@@ -528,7 +528,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let tok_nextTokenToIdentStarCurlyOpenParenOpenString = tok.nextTokenToIdentStarCurlyOpenParenOpenString;
   let tok_nextTokenToAwaitParenOpen = tok.nextTokenToAwaitParenOpen;
   let tok_nextTokenToIdentStringNumberSquareOpen = tok.nextTokenToIdentStringNumberSquareOpen;
-  let tok_nextTokenToParamStart = tok.nextTokenToParamStart;
 
   let allowTrailingFunctionComma = targetEsVersion >= VERSION_TRAILING_FUNC_COMMAS || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncFunctions = targetEsVersion >= VERSION_ASYNC || targetEsVersion === VERSION_WHATEVER;
@@ -1566,11 +1565,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function ASSERT_skipBindingStartGrouped(what, lexerFlags) {
     skipBindingStartGrouped(lexerFlags);
   }
-  function ASSERT_skipColonOrParenOpen(what, lexerFlags) {
-    skipColonOrParenOpen(lexerFlags);
+  function ASSERT_skipColonParenOpen(what, lexerFlags) {
+    skipColonParenOpen(lexerFlags);
   }
-  function ASSERT_skipIdentOrParenOpen(what, lexerFlags) {
-    skipIdentOrParenOpen(lexerFlags);
+  function ASSERT_skipIdentParenOpen(what, lexerFlags) {
+    skipIdentParenOpen(lexerFlags);
   }
   function ASSERT_skipIdentStarParenOpen(what, lexerFlags) {
     skipIdentStarParenOpen(lexerFlags);
@@ -1595,9 +1594,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function ASSERT_skipIdentStringNumberSquareOpen(what, lexerFlags) {
     skipIdentStringNumberSquareOpen(lexerFlags);
-  }
-  function ASSERT_skipParamStart(what, lexerFlags) {
-    skipParamStart(lexerFlags);
   }
 
   // </SCRUB ASSERTS>
@@ -2050,22 +2046,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(isIdentToken(curtok.type) || curtok.str === '[' || curtok.str === '{' || curtok.str === '...' || curtok.str === ')', 'not many options, wanted ident ... [ { )', curtok);
   }
-  function skipColonOrParenOpen(lexerFlags) {
+  function skipColonParenOpen(lexerFlags) {
     // Next token must be `:`, or `(`, with unlikely some whitespace
     if (babelCompat) {
-      skipForBabel(tok_nextTokenToColonOrParenOpen, lexerFlags);
+      skipForBabel(tok_nextTokenToColonParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToColonOrParenOpen(lexerFlags));
+      updateToken(tok_nextTokenToColonParenOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( curtok.str === ':' || curtok.str === '(', 'not many options, wanted : (', curtok);
   }
-  function skipIdentOrParenOpen(lexerFlags) {
+  function skipIdentParenOpen(lexerFlags) {
     // Next token must be ident, or `(`, with maybe some whitespace
     if (babelCompat) {
-      skipForBabel(tok_nextTokenToIdentOrParenOpen, lexerFlags);
+      skipForBabel(tok_nextTokenToIdentParenOpen, lexerFlags);
     } else {
-      updateToken(tok_nextTokenToIdentOrParenOpen(lexerFlags));
+      updateToken(tok_nextTokenToIdentParenOpen(lexerFlags));
     }
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '(', 'not many options, wanted ident (', curtok);
@@ -2150,17 +2146,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Since the rest has to check it anyways we don't need to validate it here
     // Note: big int is okay here...
     ASSERT_VALID( isIdentToken(curtok.type) || isStringToken(curtok.type) || isNumberToken(curtok.type) || curtok.str === '[', 'not many options, wanted ident number string [', curtok);
-  }
-  function skipParamStart(lexerFlags) {
-    // Token after the star of an object/class method shorthand
-    if (babelCompat) {
-      skipForBabel(tok_nextTokenToParamStart, lexerFlags);
-    } else {
-      updateToken(tok_nextTokenToParamStart(lexerFlags));
-    }
-    // Since the rest has to check it anyways we don't need to validate it here
-    // Note: big int is okay here...
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.str === '[' || curtok.str === '{' || curtok.str === '...' || curtok.str === ')', 'wanted param start: ident [ { ... )', curtok);
   }
 
   function parseTopLevels(lexerFlags) {
@@ -3017,7 +3002,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: `foo: function *f(){}`
         THROW_TOKEN('Labelled function statements must be plain functions, not generators', starToken);
       }
-      ASSERT_skipIdentOrParenOpen('*', lexerFlags);
+      ASSERT_skipIdentParenOpen('*', lexerFlags);
       if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
         THROW_TOKEN('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018', asyncToken);
       }
@@ -3145,7 +3130,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let starToken = UNDEF_STAR;
     if (curtok.str === '*') {
       starToken = curtok;
-      ASSERT_skipIdentOrParenOpen('*', lexerFlags);
+      ASSERT_skipIdentParenOpen('*', lexerFlags);
       if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
         THROW('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018');
       }
@@ -3475,7 +3460,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.c !== $$PAREN_L_28) {
       THROW('Must have func arguments next but did not find `(`');
     }
-    ASSERT_skipParamStart($$PAREN_L_28, lexerFlags); // Next must be valid params start (ident, `[`, `{`, `...`. `)`)
+    ASSERT_skipBindingStartGrouped($$PAREN_L_28, lexerFlags);
 
     // - `function f(a){}`
     //               ^
@@ -6544,7 +6529,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else if (curtok.c === $$DOT_2E && curtok.str === '...') {
-      ASSERT(bindingType === BINDING_TYPE_ARG, 'other binding types should catch this sooner?');
+      if (bindingType !== BINDING_TYPE_ARG) THROW('Rest is not allowed as toplevel for var/let/const declaration binding');
       let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
       verifyDestructibleForBinding(subDestruct, bindingType);
       paramSimple = PARAM_WAS_COMPLEX;
@@ -10299,7 +10284,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       //     ^
       // - `({15: bar}) => x`
       let litToken = curtok;
-      ASSERT_skipColonOrParenOpen(litToken.str, lexerFlags);
+      ASSERT_skipColonParenOpen(litToken.str, lexerFlags);
 
       if (curtok.c === $$COLON_3A) {
         // Any key-colon combo is destructible, the "value" determines assign/binding/both destructibility:
@@ -10385,7 +10370,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.c !== $$SQUARE_R_5D) {
         THROW('Missing closing square bracket for computed property name, found `' + curtok.str +'` instead');
       }
-      ASSERT_skipColonOrParenOpen($$SQUARE_R_5D, lexerFlags);
+      ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
       if (curtok.c === $$COLON_3A) {
         // Computed keys do not affect destructibility
@@ -10501,7 +10486,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curtok.c !== $$SQUARE_R_5D) {
           THROW('Missing closing square bracket for computed property member name, found `' + curtok.str +'` instead');
         }
-        ASSERT_skipColonOrParenOpen($$SQUARE_R_5D, lexerFlags);
+        ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
         let assignablePiggies2 = parseObjectMethod(lexerFlags, UNDEF_ASYNC, starToken, UNDEF_GET, UNDEF_SET, undefined, bracketOpenToken, astProp);
 
@@ -11209,7 +11194,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.c !== $$SQUARE_R_5D) {
         THROW('Missing closing square bracket for computed property name, found `' + curtok.str +'` instead');
       }
-      ASSERT_skipColonOrParenOpen($$SQUARE_R_5D, lexerFlags);
+      ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, undefined, bracketOpenToken, astProp);
     }

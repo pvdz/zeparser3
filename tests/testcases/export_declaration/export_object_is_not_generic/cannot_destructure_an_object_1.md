@@ -43,8 +43,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Export object can only have "shorthand" `{x}` or "as" `{x as y}
+throws: Tokenizer error!
+    Was looking for an ident or closing curly, found `{` (123 / 0x7b) instead
 
 var foo, bar; export {{foo}}
                       ^------- error

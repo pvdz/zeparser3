@@ -45,8 +45,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Objects cant have comma without something preceding it
+throws: Tokenizer error!
+    Was looking for the start of an object member, found `,` (44 / 0x2c) instead
 
 export let {,x} = obj;
             ^------- error
