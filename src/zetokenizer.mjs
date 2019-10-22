@@ -520,7 +520,7 @@ function ZeTokenizer(
 
   let wasWhite = false;
   let wasComment = false; // for Babel, I guess...
-  let consumedNewlinesThisToken = 0; // whitespace newline token or string token that contained newline or multiline comment
+  let consumedNewlinesThisToken = false; // whitespace newline token or string token that contained newline or multiline comment
   let consumedCommentSincePrevSolid = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
@@ -700,7 +700,7 @@ function ZeTokenizer(
         // Either this is EOF or the next token must be a newline
         if (collectTokens !== COLLECT_TOKENS_ALL) skipNewlinesWithoutTokens();
       } // do not `else`
-      if (nlwas > 0) {
+      if (nlwas === true) {
         if (collectTokens !== COLLECT_TOKENS_ALL) skipSpacesWithoutTokens();
       }
     } while (true);
@@ -714,7 +714,7 @@ function ZeTokenizer(
       if (collectTokens === COLLECT_TOKENS_SOLID) {
         tokenStorage.push(token);
       }
-      consumedNewlinesThisToken = 0;
+      consumedNewlinesThisToken = false;
       consumedCommentSincePrevSolid = false;
       prevTokenSolid = true;
     }
@@ -3715,7 +3715,7 @@ function ZeTokenizer(
     // Call this function AFTER consuming the newline(s) that triggered it
     ASSERT(input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
 
-    ++consumedNewlinesThisToken;
+    consumedNewlinesThisToken = true;
     ++currentLine;
     currentColOffset = pointer;
   }
@@ -4314,11 +4314,14 @@ function ZeTokenizer(
     // - compound assignment (`-=`)
     // - html comment (`-->`)
 
-    // https://tc39.github.io/ecma262/#sec-html-like-comments
-    // The syntax and semantics of 11.4 is extended as follows except that this extension is not allowed when parsing source code using the goal symbol Module:
-    // TODO: and properly parse this, not like the duplicate hack it is now
     if (parsingGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(1) && peeky($$DASH_2D) && peekd(1) === $$GT_3E) {
-      if (consumedNewlinesThisToken > 0 || consumedCommentSincePrevSolid) {
+      // https://tc39.github.io/ecma262/#sec-html-like-comments
+      // This extension is not allowed when parsing source code using the goal symbol Module
+      // There are two valid ways of closing html comment;
+      // - <a multi-line comment that contains at least one newline> <space>* <html close>
+      // - <newline> <space>* <html close>
+      // TODO: and properly parse this, not like the duplicate hack it is now
+      if (consumedNewlinesThisToken === true || consumedCommentSincePrevSolid) {
         return parseCommentHtmlClose();
       } else {
         // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
