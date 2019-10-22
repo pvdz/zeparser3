@@ -644,7 +644,6 @@ function ZeTokenizer(
     ASSERT(!finished, 'should not next() after eof token');
     ASSERT(typeof lexer === 'function', 'The lexer should be passed on and is something like lexerForSlowFallback or something more specific');
 
-    // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
     let token;
 
     if (prevTokenSolid) {
@@ -671,7 +670,7 @@ function ZeTokenizer(
       if (eof()) {
         token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN, 0);
         finished = true;
-        break;
+        return returnSolidToken(token);
       }
 
       let cstart = _readCache();
@@ -682,15 +681,28 @@ function ZeTokenizer(
       ASSERT(consumedTokenType !== DNF, 'the DNF should not be returned');
       ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
 
-      // Non-whitespace tokens always get returned. Whitespace tokens are conditionally returned when requested.
-      if (!wasWhite || (returnTokens === RETURN_ANY_TOKENS || (wasComment && returnTokens === RETURN_COMMENT_TOKENS))) {
+      // Non-whitespace tokens always get returned
+      if (!wasWhite) {
         token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
-        break;
+        return returnSolidToken(token);
       }
 
+      // Babel parity demands comments to be returned... Not sure whether the complexity (over checking $white) is worth
+      if (wasComment) {
+        if (returnTokens === RETURN_COMMENT_TOKENS) {
+          token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
+          returnCommentToken(token);
+        }
+      }
+
+      // This is a whitespace token (which may be a comment) that is not yet collected.
       if (collectTokens === COLLECT_TOKENS_ALL) {
         let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         tokenStorage.push(token);
+      }
+
+      if (returnTokens === RETURN_ANY_TOKENS) {
+        return createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
       }
 
       // At this point it has to be some form of whitespace and we're clearly not returning it so we can
@@ -705,20 +717,22 @@ function ZeTokenizer(
       }
     } while (true);
 
-    if (wasWhite) {
-      if (collectTokens === COLLECT_TOKENS_ALL) {
-        tokenStorage.push(token);
-      }
-    } else {
-      ++solidTokenCount;
-      if (collectTokens === COLLECT_TOKENS_SOLID) {
-        tokenStorage.push(token);
-      }
-      consumedNewlinesThisToken = false;
-      consumedCommentSincePrevSolid = false;
-      prevTokenSolid = true;
+    ASSERT(false, 'unreachable');
+  }
+  function returnCommentToken(token) {
+    if (collectTokens === COLLECT_TOKENS_ALL) {
+      tokenStorage.push(token);
     }
-
+    return token;
+  }
+  function returnSolidToken(token) {
+    ++solidTokenCount;
+    if (collectTokens === COLLECT_TOKENS_SOLID) {
+      tokenStorage.push(token);
+    }
+    consumedNewlinesThisToken = false;
+    consumedCommentSincePrevSolid = false;
+    prevTokenSolid = true;
     return token;
   }
 
