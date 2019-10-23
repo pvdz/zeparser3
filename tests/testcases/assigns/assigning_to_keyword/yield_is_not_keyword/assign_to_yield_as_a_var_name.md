@@ -53,7 +53,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNCTUATOR NUMBER_DEC PUNCTUATOR
+       IDENT PUNC_EQ NUMBER_DEC PUNC_SEMI
 `````
 
 ### Strict mode

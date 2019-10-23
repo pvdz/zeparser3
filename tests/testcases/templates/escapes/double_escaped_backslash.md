@@ -70,7 +70,7 @@ ast: {
 }
 
 tokens (5x):
-       TICK_PURE PUNCTUATOR TICK_PURE PUNCTUATOR
+       TICK_PURE PUNC_SEMI TICK_PURE PUNC_SEMI
 `````
 
 ### Strict mode

@@ -47,7 +47,7 @@ throws: Parser error!
   Unexpected dot
 
 export let [..x] = obj;
-            ^------- error
+             ^------- error
 `````
 
 

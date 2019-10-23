@@ -29,7 +29,7 @@ throws: Parser error!
   Unexpected dot
 
 var [..x] = obj;
-     ^------- error
+      ^------- error
 `````
 
 ### Strict mode

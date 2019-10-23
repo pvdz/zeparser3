@@ -47,7 +47,7 @@ throws: Parser error!
   Unexpected dot
 
 export const [..x] = obj;
-              ^------- error
+               ^------- error
 `````
 
 

@@ -56,7 +56,7 @@ ast: {
 }
 
 tokens (5x):
-       PUNCTUATOR TICK_PURE ASI PUNCTUATOR
+       PUNC_CURLY_OPEN TICK_PURE ASI PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

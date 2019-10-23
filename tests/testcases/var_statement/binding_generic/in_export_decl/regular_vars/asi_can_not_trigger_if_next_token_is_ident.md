@@ -48,7 +48,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N pos=14:15 loc=3:2 curc=40 `(`#}
+  Unable to ASI, token: {# PUNC_PAREN_OPEN : nl=N ws=N pos=14:15 loc=3:2 curc=40 `(`#}
 
 export var
 foo()

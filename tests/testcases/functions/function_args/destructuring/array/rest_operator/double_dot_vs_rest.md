@@ -29,7 +29,7 @@ throws: Parser error!
   Unexpected dot
 
 function f([..x]){}
-            ^------- error
+             ^------- error
 `````
 
 ### Strict mode

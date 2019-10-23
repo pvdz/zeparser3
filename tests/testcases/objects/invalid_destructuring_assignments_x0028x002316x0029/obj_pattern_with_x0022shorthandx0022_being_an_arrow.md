@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unexpected character after object literal property name {# PUNCTUATOR : nl=N ws=N pos=4:6 loc=4:1 curc=61 `=>`#}
+  Unexpected character after object literal property name {# PUNC_EQ_GT : nl=N ws=N pos=4:6 loc=4:1 curc=61 `=>`#}
 
 ({b => []} = [2])
     ^------- error

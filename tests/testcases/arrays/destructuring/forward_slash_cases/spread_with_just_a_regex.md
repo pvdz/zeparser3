@@ -54,7 +54,8 @@ ast: {
 }
 
 tokens (6x):
-       PUNCTUATOR PUNCTUATOR REGEXN PUNCTUATOR ASI
+       PUNC_BRACKET_OPEN PUNC_DOT_DOT_DOT REGEXN PUNC_BRACKET_CLOSE
+       ASI
 `````
 
 ### Strict mode

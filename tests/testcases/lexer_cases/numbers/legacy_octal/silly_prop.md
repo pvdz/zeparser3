@@ -59,7 +59,7 @@ ast: {
 }
 
 tokens (5x):
-       NUMBER_OLD PUNCTUATOR IDENT ASI
+       NUMBER_OLD PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode

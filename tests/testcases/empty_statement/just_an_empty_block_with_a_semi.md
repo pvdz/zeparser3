@@ -42,7 +42,7 @@ ast: {
 }
 
 tokens (4x):
-       PUNCTUATOR PUNCTUATOR PUNCTUATOR
+       PUNC_SEMI PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

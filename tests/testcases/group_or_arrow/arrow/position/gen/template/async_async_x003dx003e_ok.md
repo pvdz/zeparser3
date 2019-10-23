@@ -79,7 +79,7 @@ ast: {
 }
 
 tokens (8x):
-       TICK_HEAD IDENT IDENT PUNCTUATOR IDENT TICK_TAIL ASI
+       TICK_HEAD IDENT IDENT PUNC_EQ_GT IDENT TICK_TAIL ASI
 `````
 
 ### Strict mode

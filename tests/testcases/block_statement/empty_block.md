@@ -38,7 +38,7 @@ ast: {
 }
 
 tokens (3x):
-       PUNCTUATOR PUNCTUATOR
+       PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

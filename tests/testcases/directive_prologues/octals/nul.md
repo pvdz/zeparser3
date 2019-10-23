@@ -57,7 +57,7 @@ ast: {
 }
 
 tokens (5x):
-       STRING_DOUBLE PUNCTUATOR STRING_DOUBLE ASI
+       STRING_DOUBLE PUNC_SEMI STRING_DOUBLE ASI
 `````
 
 ### Strict mode

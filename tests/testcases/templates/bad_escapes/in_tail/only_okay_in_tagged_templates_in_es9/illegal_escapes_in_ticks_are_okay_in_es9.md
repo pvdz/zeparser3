@@ -73,7 +73,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT TICK_HEAD IDENT TICK_BAD_TAIL PUNCTUATOR
+       IDENT TICK_HEAD IDENT TICK_BAD_TAIL PUNC_SEMI
 `````
 
 ### Strict mode

@@ -55,7 +55,7 @@ ast: {
 }
 
 tokens (5x):
-       REGEXN PUNCTUATOR IDENT PUNCTUATOR
+       REGEXN PUNC_COMMA IDENT PUNC_SEMI
 `````
 
 ### Strict mode

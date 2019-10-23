@@ -61,7 +61,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT STRING_DOUBLE PUNCTUATOR
+       IDENT IDENT STRING_DOUBLE PUNC_SEMI
 `````
 
 

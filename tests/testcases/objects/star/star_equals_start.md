@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Encountered `*=` in a position where expecting to parse a member
+  Unexpected token, wanted to parse a start of a property in an object literal/pattern
 
 ({*=f(){}})
   ^------- error

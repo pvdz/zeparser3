@@ -112,11 +112,12 @@ import {
   ASSERT,
 } from './utils.mjs';
 
-// First 5 bits are not flags (!), they are "leaf" token types (decimal number, template tail).
+// First LEAF_BITS bits are not flags (!), they are "leaf" token types (decimal number, template tail).
 // Other bits are flags, used to augment for super groups (string, number, template)
-// (If the number of leafs exceeds 5 bits then it'll be 6 bits which reduces the number of avaliable flags)
+// (If the number of leafs exceeds LEAF_BITS bits then it'll reduce the number of available bitwise flags)
+const LEAF_BITS = 7;
 let __$leaf = 0;
-let __$group = 4;
+let __$group = LEAF_BITS - 1; // offset 0
 
 // Groups get their own bit. This makes it easier to quickly check for a set of token types (string, string | number)
 // Additionally, modifiers get their own bit. Like bigint suffix or bad escapes. Generally these should apply to more
@@ -151,7 +152,6 @@ const $L_NUMBER_DEC = ++__$leaf;
 const $L_NUMBER_BIN = ++__$leaf;
 const $L_NUMBER_OCT = ++__$leaf;
 const $L_NUMBER_OLD = ++__$leaf;
-const $L_PUNCTUATOR = ++__$leaf;
 const $L_REGEXN = ++__$leaf;
 const $L_REGEXU = ++__$leaf;
 const $L_STRING_SINGLE = ++__$leaf;
@@ -163,7 +163,65 @@ const $L_TICK_PURE = ++__$leaf;
 const $L_EOF = ++__$leaf;
 const $L_ASI = ++__$leaf;
 const $L_ERROR = ++__$leaf;
-ASSERT(__$leaf < 32, 'cannot use more than 32 leafs but have ' + __$leaf);
+
+// Punctuators
+
+const $L_EXCL =  ++__$leaf;
+const $L_EXCL_EQ =  ++__$leaf;
+const $L_EXCL_EQ_EQ =  ++__$leaf;
+const $L_PERCENT =  ++__$leaf;
+const $L_PERCENT_EQ =  ++__$leaf;
+const $L_AND =  ++__$leaf;
+const $L_AND_AND =  ++__$leaf;
+const $L_AND_EQ =  ++__$leaf;
+const $L_PAREN_OPEN =  ++__$leaf;
+const $L_PAREN_CLOSE =  ++__$leaf;
+const $L_STAR =  ++__$leaf;
+const $L_STAR_STAR =  ++__$leaf;
+const $L_STAR_EQ =  ++__$leaf;
+const $L_STAR_STAR_EQ =  ++__$leaf;
+const $L_PLUS =  ++__$leaf;
+const $L_PLUS_PLUS =  ++__$leaf;
+const $L_PLUS_EQ =  ++__$leaf;
+const $L_COMMA =  ++__$leaf;
+const $L_MIN =  ++__$leaf;
+const $L_MIN_MIN =  ++__$leaf;
+const $L_MIN_EQ =  ++__$leaf;
+const $L_MIN_MIN_GT =  ++__$leaf;
+const $L_DOT =  ++__$leaf;
+const $L_DOT_DOT_DOT =  ++__$leaf;
+const $L_DIV =  ++__$leaf;
+const $L_DIV_EQ =  ++__$leaf;
+const $L_COLON =  ++__$leaf;
+const $L_SEMI =  ++__$leaf;
+const $L_LT =  ++__$leaf;
+const $L_LT_LT =  ++__$leaf;
+const $L_LT_EQ =  ++__$leaf;
+const $L_LT_LT_EQ =  ++__$leaf;
+const $L_LT_EXCL_MIN_MIN =  ++__$leaf;
+const $L_EQ =  ++__$leaf;
+const $L_EQ_EQ =  ++__$leaf;
+const $L_EQ_EQ_EQ =  ++__$leaf;
+const $L_EQ_GT =  ++__$leaf;
+const $L_GT =  ++__$leaf;
+const $L_GT_GT =  ++__$leaf;
+const $L_GT_GT_GT =  ++__$leaf;
+const $L_GT_EQ =  ++__$leaf;
+const $L_GT_GT_EQ =  ++__$leaf;
+const $L_GT_GT_GT_EQ =  ++__$leaf;
+const $L_QMARK =  ++__$leaf;
+const $L_BRACKET_OPEN =  ++__$leaf;
+const $L_BRACKET_CLOSE =  ++__$leaf;
+const $L_CARET =  ++__$leaf;
+const $L_CARET_EQ =  ++__$leaf;
+const $L_CURLY_OPEN =  ++__$leaf;
+const $L_OR =  ++__$leaf;
+const $L_OR_OR =  ++__$leaf;
+const $L_OR_EQ =  ++__$leaf;
+const $L_CURLY_CLOSE =  ++__$leaf;
+const $L_TILDE =  ++__$leaf;
+
+ASSERT(__$leaf < (1<<LEAF_BITS), 'cannot use more than LEAF_BITS bits (' + (LEAF_BITS<<2) + ') of leafs but have ' + __$leaf);
 
 // These are the token types and you should be able to do strict comparison against specific token types with
 // `curtok` or `token.type`. Every constant maps to a single number which is a combination of a bitwise field and
@@ -188,7 +246,60 @@ const $NUMBER_BIG_HEX = $L_NUMBER_HEX | $G_NUMBER | $G_NUMBER_BIG_INT;
 const $NUMBER_BIG_DEC = $L_NUMBER_DEC | $G_NUMBER | $G_NUMBER_BIG_INT;
 const $NUMBER_BIG_BIN = $L_NUMBER_BIN | $G_NUMBER | $G_NUMBER_BIG_INT;
 const $NUMBER_BIG_OCT = $L_NUMBER_OCT | $G_NUMBER | $G_NUMBER_BIG_INT;
-const $PUNCTUATOR = $L_PUNCTUATOR | $G_PUNCTUATOR;
+const $PUNC_EXCL = $L_EXCL | $G_PUNCTUATOR;
+const $PUNC_EXCL_EQ = $L_EXCL_EQ | $G_PUNCTUATOR;
+const $PUNC_EXCL_EQ_EQ = $L_EXCL_EQ_EQ | $G_PUNCTUATOR;
+const $PUNC_PERCENT = $L_PERCENT | $G_PUNCTUATOR;
+const $PUNC_PERCENT_EQ = $L_PERCENT_EQ | $G_PUNCTUATOR;
+const $PUNC_AND = $L_AND | $G_PUNCTUATOR;
+const $PUNC_AND_AND = $L_AND_AND | $G_PUNCTUATOR;
+const $PUNC_AND_EQ = $L_AND_EQ | $G_PUNCTUATOR;
+const $PUNC_PAREN_OPEN = $L_PAREN_OPEN | $G_PUNCTUATOR;
+const $PUNC_PAREN_CLOSE = $L_PAREN_CLOSE | $G_PUNCTUATOR;
+const $PUNC_STAR = $L_STAR | $G_PUNCTUATOR;
+const $PUNC_STAR_STAR = $L_STAR_STAR | $G_PUNCTUATOR;
+const $PUNC_STAR_EQ = $L_STAR_EQ | $G_PUNCTUATOR;
+const $PUNC_STAR_STAR_EQ = $L_STAR_STAR_EQ | $G_PUNCTUATOR;
+const $PUNC_PLUS = $L_PLUS | $G_PUNCTUATOR;
+const $PUNC_PLUS_PLUS = $L_PLUS_PLUS | $G_PUNCTUATOR;
+const $PUNC_PLUS_EQ = $L_PLUS_EQ | $G_PUNCTUATOR;
+const $PUNC_COMMA = $L_COMMA | $G_PUNCTUATOR;
+const $PUNC_MIN = $L_MIN | $G_PUNCTUATOR;
+const $PUNC_MIN_MIN = $L_MIN_MIN | $G_PUNCTUATOR;
+const $PUNC_MIN_EQ = $L_MIN_EQ | $G_PUNCTUATOR;
+const $PUNC_MIN_MIN_GT = $L_MIN_MIN_GT | $G_PUNCTUATOR;
+const $PUNC_DOT = $L_DOT | $G_PUNCTUATOR;
+const $PUNC_DOT_DOT_DOT = $L_DOT_DOT_DOT | $G_PUNCTUATOR;
+const $PUNC_DIV = $L_DIV | $G_PUNCTUATOR;
+const $PUNC_DIV_EQ = $L_DIV_EQ | $G_PUNCTUATOR;
+const $PUNC_COLON = $L_COLON | $G_PUNCTUATOR;
+const $PUNC_SEMI = $L_SEMI | $G_PUNCTUATOR;
+const $PUNC_LT = $L_LT | $G_PUNCTUATOR;
+const $PUNC_LT_LT = $L_LT_LT | $G_PUNCTUATOR;
+const $PUNC_LT_EQ = $L_LT_EQ | $G_PUNCTUATOR;
+const $PUNC_LT_LT_EQ = $L_LT_LT_EQ | $G_PUNCTUATOR;
+const $PUNC_LT_EXCL_MIN_MIN = $L_LT_EXCL_MIN_MIN | $G_PUNCTUATOR;
+const $PUNC_EQ = $L_EQ | $G_PUNCTUATOR;
+const $PUNC_EQ_EQ = $L_EQ_EQ | $G_PUNCTUATOR;
+const $PUNC_EQ_EQ_EQ = $L_EQ_EQ_EQ | $G_PUNCTUATOR;
+const $PUNC_EQ_GT = $L_EQ_GT | $G_PUNCTUATOR;
+const $PUNC_GT = $L_GT | $G_PUNCTUATOR;
+const $PUNC_GT_GT = $L_GT_GT | $G_PUNCTUATOR;
+const $PUNC_GT_GT_GT = $L_GT_GT_GT | $G_PUNCTUATOR;
+const $PUNC_GT_EQ = $L_GT_EQ | $G_PUNCTUATOR;
+const $PUNC_GT_GT_EQ = $L_GT_GT_EQ | $G_PUNCTUATOR;
+const $PUNC_GT_GT_GT_EQ = $L_GT_GT_GT_EQ | $G_PUNCTUATOR;
+const $PUNC_QMARK = $L_QMARK | $G_PUNCTUATOR;
+const $PUNC_BRACKET_OPEN = $L_BRACKET_OPEN | $G_PUNCTUATOR;
+const $PUNC_BRACKET_CLOSE = $L_BRACKET_CLOSE | $G_PUNCTUATOR;
+const $PUNC_CARET = $L_CARET | $G_PUNCTUATOR;
+const $PUNC_CARET_EQ = $L_CARET_EQ | $G_PUNCTUATOR;
+const $PUNC_CURLY_OPEN = $L_CURLY_OPEN | $G_PUNCTUATOR;
+const $PUNC_OR = $L_OR | $G_PUNCTUATOR;
+const $PUNC_OR_OR = $L_OR_OR | $G_PUNCTUATOR;
+const $PUNC_OR_EQ = $L_OR_EQ | $G_PUNCTUATOR;
+const $PUNC_CURLY_CLOSE = $L_CURLY_CLOSE | $G_PUNCTUATOR;
+const $PUNC_TILDE = $L_TILDE | $G_PUNCTUATOR;
 const $REGEXN = $L_REGEXN | $G_REGEX; // No u-flag
 const $REGEXU = $L_REGEXU | $G_REGEX; // With u-flag ("strict mode" for regular expressions)
 const $STRING_SINGLE = $L_STRING_SINGLE | $G_STRING;
@@ -227,7 +338,7 @@ function isStringToken(type) {
   return (type & $G_STRING) === $G_STRING;
 }
 function isPunctuatorToken(type) {
-  return type === $PUNCTUATOR;
+  return (type & $G_PUNCTUATOR) === $G_PUNCTUATOR;
 }
 function isRegexToken(type) {
   return (type & $G_REGEX) === $G_REGEX;
@@ -277,7 +388,60 @@ const ALL_TOKEN_TYPES = [
   $NUMBER_BIG_DEC,
   $NUMBER_BIG_BIN,
   $NUMBER_BIG_OCT,
-  $PUNCTUATOR,
+  $PUNC_EXCL,
+  $PUNC_EXCL_EQ,
+  $PUNC_EXCL_EQ_EQ,
+  $PUNC_PERCENT,
+  $PUNC_PERCENT_EQ,
+  $PUNC_AND,
+  $PUNC_AND_AND,
+  $PUNC_AND_EQ,
+  $PUNC_PAREN_OPEN,
+  $PUNC_PAREN_CLOSE,
+  $PUNC_STAR,
+  $PUNC_STAR_STAR,
+  $PUNC_STAR_EQ,
+  $PUNC_STAR_STAR_EQ,
+  $PUNC_PLUS,
+  $PUNC_PLUS_PLUS,
+  $PUNC_PLUS_EQ,
+  $PUNC_COMMA,
+  $PUNC_MIN,
+  $PUNC_MIN_MIN,
+  $PUNC_MIN_EQ,
+  $PUNC_MIN_MIN_GT,
+  $PUNC_DOT,
+  $PUNC_DOT_DOT_DOT,
+  $PUNC_DIV,
+  $PUNC_DIV_EQ,
+  $PUNC_COLON,
+  $PUNC_SEMI,
+  $PUNC_LT,
+  $PUNC_LT_LT,
+  $PUNC_LT_EQ,
+  $PUNC_LT_LT_EQ,
+  $PUNC_LT_EXCL_MIN_MIN,
+  $PUNC_EQ,
+  $PUNC_EQ_EQ,
+  $PUNC_EQ_EQ_EQ,
+  $PUNC_EQ_GT,
+  $PUNC_GT,
+  $PUNC_GT_GT,
+  $PUNC_GT_GT_GT,
+  $PUNC_GT_EQ,
+  $PUNC_GT_GT_EQ,
+  $PUNC_GT_GT_GT_EQ,
+  $PUNC_QMARK,
+  $PUNC_BRACKET_OPEN,
+  $PUNC_BRACKET_CLOSE,
+  $PUNC_CARET,
+  $PUNC_CARET_EQ,
+  $PUNC_CURLY_OPEN,
+  $PUNC_OR,
+  $PUNC_OR_OR,
+  $PUNC_OR_EQ,
+  $PUNC_CURLY_CLOSE,
+  $PUNC_TILDE,
   $REGEXN,
   $REGEXU,
   $STRING_SINGLE,
@@ -638,6 +802,8 @@ function ZeTokenizer(
   }
   // </SCRUB ASSERTS>
 
+
+
   let startForError = 0;
   function nextTokenWithLexer(lexer, lexerFlags) {
     ASSERT(nextTokenWithLexer.length === arguments.length, 'arg count');
@@ -776,17 +942,17 @@ function ZeTokenizer(
       case $$SPACE_20: // note: many spaces are caught by immediate newline checks (see parseCR and parseVerifiedNewline)
         return parseSpace();
       case $$COMMA_2C:
-        return $PUNCTUATOR;
+        return $PUNC_COMMA;
       case $$COLON_3A:
-        return $PUNCTUATOR;
+        return $PUNC_COLON;
       case $$PAREN_R_29:
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_CLOSE;
       case $$PAREN_L_28:
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$DOT_2E:
         return parseLeadingDot(); // . ... .25
       case $$SEMI_3B:
-        return $PUNCTUATOR;
+        return $PUNC_SEMI;
       case $$IS_3D:
         return parseEqual(); // = == === =>
       case $$LF_0A:
@@ -805,7 +971,7 @@ function ZeTokenizer(
       case $$0_30:
         return parseLeadingZero(lexerFlags);
       case $$QMARK_3F:
-        return $PUNCTUATOR;
+        return $PUNC_QMARK;
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -831,7 +997,7 @@ function ZeTokenizer(
       case $$$_24:
         return parseIdentifierRest('$');
       case $$PERCENT_25:
-        return parseCompoundAssignment(); // % %=
+        return parseCompoundAssignment($$PERCENT_25); // % %=
       case $$FF_0C:
         wasWhite = true;
         return $SPACE;
@@ -839,14 +1005,14 @@ function ZeTokenizer(
         wasWhite = true;
         return $SPACE;
       case $$CURLY_L_7B:
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$CURLY_R_7D:
         if ((lexerFlags & LF_IN_TEMPLATE) === LF_IN_TEMPLATE) return parseTemplateString(lexerFlags, PARSING_SANS_TICK);
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
       case $$SQUARE_L_5B:
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
       case $$SQUARE_R_5D:
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_CLOSE;
       case $$LODASH_5F:
         return parseIdentifierRest('_');
       case $$OR_7C:
@@ -856,9 +1022,9 @@ function ZeTokenizer(
       case $$GT_3E:
         return parseGtPunctuator(); // > >> >>> >= >>= >>>=
       case $$XOR_5E:
-        return parseCompoundAssignment(); // ^ ^=
+        return parseCompoundAssignment($$XOR_5E); // ^ ^=
       case $$TILDE_7E:
-        return $PUNCTUATOR;
+        return $PUNC_TILDE;
       case $$BACKSLASH_5C:
         return parseBackslash();
       case $$NBSP_A0:
@@ -891,7 +1057,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
 
       case $$CR_0D:
         skip();
@@ -942,7 +1108,7 @@ function ZeTokenizer(
 
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
 
       case $$CR_0D:
         skip();
@@ -992,9 +1158,11 @@ function ZeTokenizer(
         return parseSpace();
 
       case $$PAREN_L_28:
+        skip();
+        return $PUNC_PAREN_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
 
       case $$CR_0D:
         skip();
@@ -1234,7 +1402,7 @@ function ZeTokenizer(
         if (neofd(1) && peekd(1) === $$GT_3E) {
           skipFastWithoutUpdatingCache();
           skip();
-          return $PUNCTUATOR;
+          return $PUNC_EQ_GT;
         }
         break;
 
@@ -1368,10 +1536,10 @@ function ZeTokenizer(
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for import/export)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
       case $$COMMA_2C:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COMMA;
 
       case $$CR_0D:
         skip();
@@ -1457,7 +1625,7 @@ function ZeTokenizer(
         return DNF;
       case $$COMMA_2C:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COMMA;
 
       case $$CR_0D:
         skip();
@@ -1510,7 +1678,7 @@ function ZeTokenizer(
 
       case $$COLON_3A:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COLON;
 
       case $$CR_0D:
         skip();
@@ -1682,10 +1850,14 @@ function ZeTokenizer(
         skip();
         return parseIdentifierRest('_');
       case $$EXCL_21:
+        skip();
+        return $PUNC_EXCL;
       case $$SQUARE_L_5B:
+        skip();
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$DOT_2E: // . ... .25
         skip();
         return parseLeadingDot();
@@ -1695,7 +1867,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$PLUS_2B:
         skip();
         return parseSameOrCompound($$PLUS_2B); // + ++ +=
@@ -1704,7 +1876,7 @@ function ZeTokenizer(
         return parseDash(); // - -- -= -->
       case $$TILDE_7E:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_TILDE;
 
       case $$0_30:
         skip();
@@ -1723,11 +1895,11 @@ function ZeTokenizer(
 
       case $$SEMI_3B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_SEMI;
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for statement start)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
 
       case $$VTAB_0B:
       case $$FF_0C:
@@ -1807,10 +1979,14 @@ function ZeTokenizer(
         skip();
         return parseIdentifierRest('_');
       case $$EXCL_21:
+        skip();
+        return $PUNC_EXCL;
       case $$SQUARE_L_5B:
+        skip();
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$DOT_2E: // . ... .25
         skip();
         return parseLeadingDot();
@@ -1820,7 +1996,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$PLUS_2B:
         skip();
         return parseSameOrCompound($$PLUS_2B); // + ++ +=
@@ -1829,7 +2005,7 @@ function ZeTokenizer(
         return parseDash(); // - -- -= -->
       case $$TILDE_7E:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_TILDE;
 
       case $$0_30:
         skip();
@@ -1911,10 +2087,14 @@ function ZeTokenizer(
         skip();
         return parseIdentifierRest('_');
       case $$EXCL_21:
+        skip();
+        return $PUNC_EXCL;
       case $$SQUARE_L_5B:
+        skip();
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$DOT_2E: // . ... .25
         skip();
         return parseLeadingDot();
@@ -1924,10 +2104,10 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$PAREN_R_29:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_CLOSE;
       case $$PLUS_2B:
         skip();
         return parseSameOrCompound($$PLUS_2B); // + ++ +=
@@ -1936,7 +2116,7 @@ function ZeTokenizer(
         return parseDash(); // - -- -= -->
       case $$TILDE_7E:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_TILDE;
 
       case $$0_30:
         skip();
@@ -2018,10 +2198,14 @@ function ZeTokenizer(
         skip();
         return parseIdentifierRest('_');
       case $$EXCL_21:
+        skip();
+        return $PUNC_EXCL;
       case $$SQUARE_L_5B:
+        skip();
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$DOT_2E: // . ... .25
         skip();
         return parseLeadingDot();
@@ -2031,7 +2215,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$PLUS_2B:
         skip();
         return parseSameOrCompound($$PLUS_2B); // + ++ +=
@@ -2040,7 +2224,7 @@ function ZeTokenizer(
         return parseDash(); // - -- -= -->
       case $$TILDE_7E:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_TILDE;
 
       case $$0_30:
         skip();
@@ -2059,7 +2243,7 @@ function ZeTokenizer(
 
       case $$SEMI_3B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_SEMI;
 
       case $$CR_0D:
         skip();
@@ -2126,10 +2310,14 @@ function ZeTokenizer(
         skip();
         return parseIdentifierRest('_');
       case $$EXCL_21:
+        skip();
+        return $PUNC_EXCL;
       case $$SQUARE_L_5B:
+        skip();
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$DOT_2E: // . ... .25
         skip();
         return parseLeadingDot();
@@ -2139,7 +2327,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$PLUS_2B:
         skip();
         return parseSameOrCompound($$PLUS_2B); // + ++ +=
@@ -2148,7 +2336,7 @@ function ZeTokenizer(
         return parseDash(); // - -- -= -->
       case $$TILDE_7E:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_TILDE;
 
       case $$0_30:
         skip();
@@ -2166,9 +2354,11 @@ function ZeTokenizer(
         return parseDecimal();
 
       case $$SQUARE_R_5D:
+        skip();
+        return $PUNC_BRACKET_CLOSE;
       case $$COMMA_2C:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COMMA;
 
       case $$CR_0D:
         skip();
@@ -2244,7 +2434,7 @@ function ZeTokenizer(
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for objkey start, must close object before closing the quasi)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
 
       case $$SQUOTE_27:
         skip();
@@ -2262,7 +2452,7 @@ function ZeTokenizer(
 
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
 
       case $$DOT_2E:
         skip();
@@ -2369,10 +2559,10 @@ function ZeTokenizer(
 
       case $$COLON_3A:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COLON;
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$$_24:
         skip();
         return parseIdentifierRest('$');
@@ -2390,10 +2580,10 @@ function ZeTokenizer(
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for objkey start, must close object before closing the quasi)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
       case $$SQUOTE_27:
         skip();
         return parseSingleString(lexerFlags);
@@ -2402,7 +2592,7 @@ function ZeTokenizer(
         return parseDoubleString(lexerFlags);
       case $$COMMA_2C:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COMMA;
       case $$DOT_2E:
         // (only numbers would be valid here)
         skip();
@@ -2514,10 +2704,10 @@ function ZeTokenizer(
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only called for objkey start, must close object before closing the quasi)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
 
       case $$SQUOTE_27:
         skip();
@@ -2527,7 +2717,7 @@ function ZeTokenizer(
         return parseDoubleString(lexerFlags);
       case $$SEMI_3B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_SEMI;
       case $$DOT_2E:
         // (only numbers would be valid here)
         skip();
@@ -2578,7 +2768,7 @@ function ZeTokenizer(
         // This should only happen for the edge case `class x {static(){}}` because the parser will consume
         // the `static` keyword and then parse the start of a member as if it hasn't parsed a start yet.
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
 
       default:
         if (c > 0x7f) {
@@ -2632,7 +2822,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$$_24:
         skip();
         return parseIdentifierRest('$');
@@ -2645,7 +2835,7 @@ function ZeTokenizer(
         return parseStar(); // * *= ** **=
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
       case $$SQUOTE_27:
         skip();
         return parseSingleString(lexerFlags);
@@ -2772,7 +2962,7 @@ function ZeTokenizer(
       case $$CURLY_R_7D: // `switch (x) {}`
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only inside switch, must close switch before closing the quasi)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
 
       case $$CR_0D:
         skip();
@@ -2844,10 +3034,10 @@ function ZeTokenizer(
 
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
 
       case $$CR_0D:
         skip();
@@ -2925,13 +3115,13 @@ function ZeTokenizer(
 
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$PAREN_R_29:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_CLOSE;
       case $$DOT_2E: // . ... .25
         skip();
         return parseLeadingDot();
@@ -2993,10 +3183,10 @@ function ZeTokenizer(
 
       case $$COLON_3A:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COLON;
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
 
       case $$CR_0D:
         skip();
@@ -3054,7 +3244,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
 
       case $$$_24:
         skip();
@@ -3124,7 +3314,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$STAR_2A:
         skip();
         return parseStar(); // * *= ** **=
@@ -3210,7 +3400,7 @@ function ZeTokenizer(
 
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
       case $$STAR_2A:
         skip();
         return parseStar(); // * *= ** **=
@@ -3279,10 +3469,10 @@ function ZeTokenizer(
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only inside switch, must close switch before closing the quasi)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
       case $$COMMA_2C:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_COMMA;
 
       case $$CR_0D:
         skip();
@@ -3340,7 +3530,7 @@ function ZeTokenizer(
 
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
 
       case $$$_24:
         skip();
@@ -3411,7 +3601,7 @@ function ZeTokenizer(
       case $$CURLY_R_7D:
         ASSERT((lexerFlags & LF_IN_TEMPLATE) !== LF_IN_TEMPLATE, 'should not be possible to be inside template (only inside switch, must close switch before closing the quasi)');
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_CLOSE;
 
       case $$$_24:
         skip();
@@ -3490,10 +3680,10 @@ function ZeTokenizer(
         return parseStar(); // * *= ** **=
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$CURLY_L_7B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_CURLY_OPEN;
 
       case $$SQUOTE_27:
         skip();
@@ -3565,7 +3755,7 @@ function ZeTokenizer(
 
       case $$PAREN_L_28:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_PAREN_OPEN;
       case $$A_61:
         if (neofd(5)) {
           if (
@@ -3650,7 +3840,7 @@ function ZeTokenizer(
 
       case $$SQUARE_L_5B:
         skip();
-        return $PUNCTUATOR;
+        return $PUNC_BRACKET_OPEN;
 
       case $$SQUOTE_27:
         skip();
@@ -3827,7 +4017,7 @@ function ZeTokenizer(
   }
 
   function parseLeadingDot() {
-    if (eof()) return $PUNCTUATOR; // will lead to an error in the parser
+    if (eof()) return $PUNC_DOT; // will lead to an error in the parser
 
     let c = peek();
 
@@ -3839,7 +4029,7 @@ function ZeTokenizer(
       return parseNumberFromDot(c);
     }
 
-    return $PUNCTUATOR;
+    return $PUNC_DOT;
   }
   function parseTripleDot() {
     // we just parsed a dot
@@ -3847,7 +4037,7 @@ function ZeTokenizer(
       ASSERT_skip($$DOT_2E);
       ASSERT_skip($$DOT_2E);
     } // the else will ultimately lead to an error in the parser
-    return $PUNCTUATOR;
+    return $PUNC_DOT_DOT_DOT;
   }
   function parseNumberFromDot(c) {
     ASSERT_skip(c);
@@ -4346,18 +4536,54 @@ function ZeTokenizer(
   }
 
   function parseSameOrCompound(c) {
-    // (c is an op like + - & |)
+    ASSERT(parseSameOrCompound.length === arguments.length, 'arg count');
+    ASSERT(c === $$PLUS_2B || c === $$DASH_2D || c === $$AND_26 || c === $$OR_7C, 'enum');
+
+    // `c` is an op, one of: `+`, `&`, `|`, `-`. The dash case already confirmed this is not `-->`.
     // c cc c=
 
     if (neof()) {
       let d = peek();
       if (d === c) {
         ASSERT_skip(c); // @@
-      } else if (d === $$IS_3D) {
+        switch (c) {
+          case $$PLUS_2B:
+            return $PUNC_PLUS_PLUS;
+          case $$DASH_2D:
+            return $PUNC_MIN_MIN;
+          case $$AND_26:
+            return $PUNC_AND_AND;
+          case $$OR_7C:
+            return $PUNC_OR_OR;
+        }
+        return ASSERT(false, 'unreachable'), $ERROR;
+      }
+      if (d === $$IS_3D) {
         ASSERT_skip($$IS_3D); // @=
+        switch (c) {
+          case $$PLUS_2B:
+            return $PUNC_PLUS_EQ;
+          case $$DASH_2D:
+            return $PUNC_MIN_EQ;
+          case $$AND_26:
+            return $PUNC_AND_EQ;
+          case $$OR_7C:
+            return $PUNC_OR_EQ;
+        }
+        return ASSERT(false, 'unreachable'), $ERROR;
       }
     }
-    return $PUNCTUATOR;
+    switch (c) {
+      case $$PLUS_2B:
+        return $PUNC_PLUS;
+      case $$DASH_2D:
+        return $PUNC_MIN;
+      case $$AND_26:
+        return $PUNC_AND;
+      case $$OR_7C:
+        return $PUNC_OR;
+    }
+    return ASSERT(false, 'unreachable'), $ERROR;
   }
 
   function parseTemplateString(lexerFlags, fromTick) {
@@ -4694,17 +4920,18 @@ function ZeTokenizer(
   function parseExcl() {
     // != !==
 
-    if (eof()) return $PUNCTUATOR;
+    if (eof()) return $PUNC_EXCL;
 
     if (peeky($$IS_3D)) {
       ASSERT_skip($$IS_3D); // !=
       if (neof() && peeky($$IS_3D)) {
         ASSERT_skip($$IS_3D); // !==
+        return $PUNC_EXCL_EQ_EQ;
       }
-      return $PUNCTUATOR;
+      return $PUNC_EXCL_EQ;
     }
 
-    return $PUNCTUATOR;
+    return $PUNC_EXCL;
   }
 
   function parseStar() {
@@ -4716,12 +4943,15 @@ function ZeTokenizer(
         ASSERT_skip($$STAR_2A); // **
         if (neof() && peeky($$IS_3D)) {
           ASSERT_skip($$IS_3D); // **=
+          return $PUNC_STAR_STAR_EQ;
         }
+        return $PUNC_STAR_STAR;
       } else if (c === $$IS_3D) {
         ASSERT_skip($$IS_3D); // *=
+        return $PUNC_STAR_EQ;
       }
     }
-    return $PUNCTUATOR;
+    return $PUNC_STAR;
   }
 
   function parseIdentifierRest(prevStr) {
@@ -5000,13 +5230,20 @@ function ZeTokenizer(
     return c >= $$0_30 && c <= $$9_39;
   }
 
-  function parseCompoundAssignment() {
-    // % %= ^ ^=
+  function parseCompoundAssignment(c) {
+    ASSERT(parseCompoundAssignment.length === arguments.length, 'arg count');
+    ASSERT(c === $$PERCENT_25 || c === $$XOR_5E, 'enum');
+
+    // `c` is one of: `%`, `^`
+    // c c=
 
     if (neof() && peeky($$IS_3D)) {
       ASSERT_skip($$IS_3D); // @=
+      if (c === $$XOR_5E) return $PUNC_CARET_EQ;
+      return $PUNC_PERCENT_EQ;
     }
-    return $PUNCTUATOR;
+    if (c === $$XOR_5E) return $PUNC_CARET;
+    return $PUNC_PERCENT;
   }
 
   function parseFwdSlashMustBeComment() {
@@ -5031,7 +5268,7 @@ function ZeTokenizer(
   function parseFwdSlash(lexerFlags) {
     if (eof()) {
       // I don't think there's any way this can lead to a valid parse... but let the parser deal with that.
-      return $PUNCTUATOR;
+      return $PUNC_DIV;
     }
 
     let c = peek();
@@ -5055,8 +5292,9 @@ function ZeTokenizer(
       // div
       if (c === $$IS_3D) {
         ASSERT_skip($$IS_3D); // /=
+        return $PUNC_DIV_EQ;
       }
-      return $PUNCTUATOR;
+      return $PUNC_DIV;
     }
   }
   function parseCommentSingle() {
@@ -5124,12 +5362,15 @@ function ZeTokenizer(
         ASSERT_skip($$IS_3D); // ==
         if (neof() && peeky($$IS_3D)) {
           ASSERT_skip($$IS_3D); // ===
+          return $PUNC_EQ_EQ_EQ;
         }
+        return $PUNC_EQ_EQ;
       } else if (c === $$GT_3E) {
         ASSERT_skip($$GT_3E); // =>
+        return $PUNC_EQ_GT;
       }
     }
-    return $PUNCTUATOR;
+    return $PUNC_EQ;
   }
 
   function parseLt() {
@@ -5143,15 +5384,19 @@ function ZeTokenizer(
     if (neof()) {
       let c = peek();
       if (c === $$IS_3D) {
-        ASSERT_skip($$IS_3D); // >=
-      } else if (c === $$LT_3C) {
-        ASSERT_skip($$LT_3C); // >>
+        ASSERT_skip($$IS_3D); // <=
+        return $PUNC_LT_EQ;
+      }
+      if (c === $$LT_3C) {
+        ASSERT_skip($$LT_3C); // <<
         if (neof() && peeky($$IS_3D)) {
-          ASSERT_skip($$IS_3D); // >>=
+          ASSERT_skip($$IS_3D); // <<=
+          return $PUNC_LT_LT_EQ;
         }
+        return $PUNC_LT_LT;
       }
     }
-    return $PUNCTUATOR;
+    return $PUNC_LT;
   }
 
   function parseGtPunctuator() {
@@ -5160,22 +5405,29 @@ function ZeTokenizer(
       let c = peek();
       if (c === $$IS_3D) {
         ASSERT_skip($$IS_3D); // >=
-      } else if (c === $$GT_3E) {
+        return $PUNC_GT_EQ;
+      }
+      if (c === $$GT_3E) {
         ASSERT_skip($$GT_3E); // >>
         if (neof()) {
           c = peek();
           if (c === $$IS_3D) {
             ASSERT_skip($$IS_3D); // >>=
-          } else if (c === $$GT_3E) {
+            return $PUNC_GT_GT_EQ;
+          }
+          if (c === $$GT_3E) {
             ASSERT_skip($$GT_3E); // >>>
             if (neof() && peeky($$IS_3D)) {
               ASSERT_skip($$IS_3D); // >>>=
+              return $PUNC_GT_GT_GT_EQ;
             }
+            return $PUNC_GT_GT_GT;
           }
         }
+        return $PUNC_GT_GT;
       }
     }
-    return $PUNCTUATOR;
+    return $PUNC_GT;
   }
 
   function parseNewlineSolo() {
@@ -7943,7 +8195,60 @@ function toktypeToString(type, _, ignoreUnknown) {
     case $NUMBER_BIG_DEC: return 'NUMBER_BIG_DEC';
     case $NUMBER_BIG_BIN: return 'NUMBER_BIG_BIN';
     case $NUMBER_BIG_OCT: return 'NUMBER_BIG_OCT';
-    case $PUNCTUATOR: return 'PUNCTUATOR';
+    case $PUNC_EXCL: return 'PUNC_EXCL';
+    case $PUNC_EXCL_EQ: return 'PUNC_EXCL_EQ';
+    case $PUNC_EXCL_EQ_EQ: return 'PUNC_EXCL_EQ_EQ';
+    case $PUNC_PERCENT: return 'PUNC_PERCENT';
+    case $PUNC_PERCENT_EQ: return 'PUNC_PERCENT_EQ';
+    case $PUNC_AND: return 'PUNC_AND';
+    case $PUNC_AND_AND: return 'PUNC_AND_AND';
+    case $PUNC_AND_EQ: return 'PUNC_AND_EQ';
+    case $PUNC_PAREN_OPEN: return 'PUNC_PAREN_OPEN';
+    case $PUNC_PAREN_CLOSE: return 'PUNC_PAREN_CLOSE';
+    case $PUNC_STAR: return 'PUNC_STAR';
+    case $PUNC_STAR_STAR: return 'PUNC_STAR_STAR';
+    case $PUNC_STAR_EQ: return 'PUNC_STAR_EQ';
+    case $PUNC_STAR_STAR_EQ: return 'PUNC_STAR_STAR_EQ';
+    case $PUNC_PLUS: return 'PUNC_PLUS';
+    case $PUNC_PLUS_PLUS: return 'PUNC_PLUS_PLUS';
+    case $PUNC_PLUS_EQ: return 'PUNC_PLUS_EQ';
+    case $PUNC_COMMA: return 'PUNC_COMMA';
+    case $PUNC_MIN: return 'PUNC_MIN';
+    case $PUNC_MIN_MIN: return 'PUNC_MIN_MIN';
+    case $PUNC_MIN_EQ: return 'PUNC_MIN_EQ';
+    case $PUNC_MIN_MIN_GT: return 'PUNC_MIN_MIN_GT';
+    case $PUNC_DOT: return 'PUNC_DOT';
+    case $PUNC_DOT_DOT_DOT: return 'PUNC_DOT_DOT_DOT';
+    case $PUNC_DIV: return 'PUNC_DIV';
+    case $PUNC_DIV_EQ: return 'PUNC_DIV_EQ';
+    case $PUNC_COLON: return 'PUNC_COLON';
+    case $PUNC_SEMI: return 'PUNC_SEMI';
+    case $PUNC_LT: return 'PUNC_LT';
+    case $PUNC_LT_LT: return 'PUNC_LT_LT';
+    case $PUNC_LT_EQ: return 'PUNC_LT_EQ';
+    case $PUNC_LT_LT_EQ: return 'PUNC_LT_LT_EQ';
+    case $PUNC_LT_EXCL_MIN_MIN: return 'PUNC_LT_EXCL_MIN_MIN';
+    case $PUNC_EQ: return 'PUNC_EQ';
+    case $PUNC_EQ_EQ: return 'PUNC_EQ_EQ';
+    case $PUNC_EQ_EQ_EQ: return 'PUNC_EQ_EQ_EQ';
+    case $PUNC_EQ_GT: return 'PUNC_EQ_GT';
+    case $PUNC_GT: return 'PUNC_GT';
+    case $PUNC_GT_GT: return 'PUNC_GT_GT';
+    case $PUNC_GT_GT_GT: return 'PUNC_GT_GT_GT';
+    case $PUNC_GT_EQ: return 'PUNC_GT_EQ';
+    case $PUNC_GT_GT_EQ: return 'PUNC_GT_GT_EQ';
+    case $PUNC_GT_GT_GT_EQ: return 'PUNC_GT_GT_GT_EQ';
+    case $PUNC_QMARK: return 'PUNC_QMARK';
+    case $PUNC_BRACKET_OPEN: return 'PUNC_BRACKET_OPEN';
+    case $PUNC_BRACKET_CLOSE: return 'PUNC_BRACKET_CLOSE';
+    case $PUNC_CARET: return 'PUNC_CARET';
+    case $PUNC_CARET_EQ: return 'PUNC_CARET_EQ';
+    case $PUNC_CURLY_OPEN: return 'PUNC_CURLY_OPEN';
+    case $PUNC_OR: return 'PUNC_OR';
+    case $PUNC_OR_OR: return 'PUNC_OR_OR';
+    case $PUNC_OR_EQ: return 'PUNC_OR_EQ';
+    case $PUNC_CURLY_CLOSE: return 'PUNC_CURLY_CLOSE';
+    case $PUNC_TILDE: return 'PUNC_TILDE';
     case $REGEXN: return 'REGEXN';
     case $REGEXU: return 'REGEXU';
     case $STRING_SINGLE: return 'STRING_SINGLE';
@@ -8017,7 +8322,60 @@ export {
   $NUMBER_BIG_DEC,
   $NUMBER_BIG_BIN,
   $NUMBER_BIG_OCT,
-  $PUNCTUATOR,
+  $PUNC_EXCL,
+  $PUNC_EXCL_EQ,
+  $PUNC_EXCL_EQ_EQ,
+  $PUNC_PERCENT,
+  $PUNC_PERCENT_EQ,
+  $PUNC_AND,
+  $PUNC_AND_AND,
+  $PUNC_AND_EQ,
+  $PUNC_PAREN_OPEN,
+  $PUNC_PAREN_CLOSE,
+  $PUNC_STAR,
+  $PUNC_STAR_STAR,
+  $PUNC_STAR_EQ,
+  $PUNC_STAR_STAR_EQ,
+  $PUNC_PLUS,
+  $PUNC_PLUS_PLUS,
+  $PUNC_PLUS_EQ,
+  $PUNC_COMMA,
+  $PUNC_MIN,
+  $PUNC_MIN_MIN,
+  $PUNC_MIN_EQ,
+  $PUNC_MIN_MIN_GT,
+  $PUNC_DOT,
+  $PUNC_DOT_DOT_DOT,
+  $PUNC_DIV,
+  $PUNC_DIV_EQ,
+  $PUNC_COLON,
+  $PUNC_SEMI,
+  $PUNC_LT,
+  $PUNC_LT_LT,
+  $PUNC_LT_EQ,
+  $PUNC_LT_LT_EQ,
+  $PUNC_LT_EXCL_MIN_MIN,
+  $PUNC_EQ,
+  $PUNC_EQ_EQ,
+  $PUNC_EQ_EQ_EQ,
+  $PUNC_EQ_GT,
+  $PUNC_GT,
+  $PUNC_GT_GT,
+  $PUNC_GT_GT_GT,
+  $PUNC_GT_EQ,
+  $PUNC_GT_GT_EQ,
+  $PUNC_GT_GT_GT_EQ,
+  $PUNC_QMARK,
+  $PUNC_BRACKET_OPEN,
+  $PUNC_BRACKET_CLOSE,
+  $PUNC_CARET,
+  $PUNC_CARET_EQ,
+  $PUNC_CURLY_OPEN,
+  $PUNC_OR,
+  $PUNC_OR_OR,
+  $PUNC_OR_EQ,
+  $PUNC_CURLY_CLOSE,
+  $PUNC_TILDE,
   $REGEXN,
   $REGEXU,
   $STRING_SINGLE,

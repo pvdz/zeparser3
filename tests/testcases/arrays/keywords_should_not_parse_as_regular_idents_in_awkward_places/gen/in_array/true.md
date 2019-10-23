@@ -51,7 +51,7 @@ ast: {
 }
 
 tokens (5x):
-       PUNCTUATOR IDENT PUNCTUATOR ASI
+       PUNC_BRACKET_OPEN IDENT PUNC_BRACKET_CLOSE ASI
 `````
 
 ### Strict mode

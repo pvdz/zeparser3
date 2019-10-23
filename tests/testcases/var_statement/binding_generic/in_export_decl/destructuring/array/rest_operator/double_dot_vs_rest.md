@@ -48,7 +48,7 @@ throws: Parser error!
   Unexpected dot
 
 export var [..x] = obj;
-            ^------- error
+             ^------- error
 `````
 
 

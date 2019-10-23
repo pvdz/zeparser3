@@ -46,7 +46,7 @@ ast: {
 }
 
 tokens (3x):
-       STRING_SINGLE PUNCTUATOR
+       STRING_SINGLE PUNC_SEMI
 `````
 
 ### Strict mode

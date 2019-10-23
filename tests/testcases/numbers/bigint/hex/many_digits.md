@@ -56,7 +56,7 @@ ast: {
 }
 
 tokens (5x):
-       NUMBER_BIG_HEX PUNCTUATOR NUMBER_DEC ASI
+       NUMBER_BIG_HEX PUNC_PLUS NUMBER_DEC ASI
 `````
 
 ### Strict mode

@@ -56,7 +56,7 @@ ast: {
 }
 
 tokens (5x):
-       NUMBER_BIN PUNCTUATOR NUMBER_DEC ASI
+       NUMBER_BIN PUNC_PLUS NUMBER_DEC ASI
 `````
 
 ### Strict mode

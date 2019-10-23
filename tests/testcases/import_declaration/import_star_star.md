@@ -48,7 +48,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Encountered `**` in a position where expecting to parse an import namespace
+  Export source must be string
 
 import ** from 'f';
        ^------- error

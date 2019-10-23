@@ -54,7 +54,7 @@ ast: {
 }
 
 tokens (5x):
-       PUNCTUATOR TICK_PURE PUNCTUATOR PUNCTUATOR
+       PUNC_PAREN_OPEN TICK_PURE PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 
 ### Strict mode

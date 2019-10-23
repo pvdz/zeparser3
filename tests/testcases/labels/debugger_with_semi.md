@@ -37,7 +37,7 @@ ast: {
 }
 
 tokens (3x):
-       IDENT PUNCTUATOR
+       IDENT PUNC_SEMI
 `````
 
 ### Strict mode

@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N pos=11:13 loc=4:2 curc=61 `=>`#}
+  Unable to ASI, token: {# PUNC_EQ_GT : nl=N ws=N pos=11:13 loc=4:2 curc=61 `=>`#}
 
 async
  () => x

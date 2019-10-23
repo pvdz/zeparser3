@@ -62,7 +62,7 @@ ast: {
 }
 
 tokens (6x):
-       TICK_HEAD PUNCTUATOR PUNCTUATOR TICK_TAIL ASI
+       TICK_HEAD PUNC_CURLY_OPEN PUNC_CURLY_CLOSE TICK_TAIL ASI
 `````
 
 ### Strict mode

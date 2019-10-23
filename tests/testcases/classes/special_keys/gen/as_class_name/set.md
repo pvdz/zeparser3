@@ -50,7 +50,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR
+       IDENT IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

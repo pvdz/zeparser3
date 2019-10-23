@@ -48,7 +48,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Encountered `**` in a position where expecting to parse an import namespace
+  Can only import star or object after default
 
 import a, ** from 'f';
           ^------- error

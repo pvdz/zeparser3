@@ -62,7 +62,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR REGEXN ASI
+       IDENT IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE REGEXN ASI
 `````
 
 ### Strict mode

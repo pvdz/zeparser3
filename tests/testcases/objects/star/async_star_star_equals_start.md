@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Encountered `**=` in a position where expecting to parse an async member
+  Unexpected character after object literal property name {# PUNC_STAR_STAR_EQ : nl=N ws=N pos=8:11 loc=8:1 curc=42 `**=`#}
 
 ({async **=f(){}})
         ^------- error

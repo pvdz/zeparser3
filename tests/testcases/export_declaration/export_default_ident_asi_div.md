@@ -77,7 +77,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT IDENT IDENT PUNCTUATOR IDENT ASI
+       IDENT IDENT IDENT PUNC_DIV IDENT ASI
 `````
 
 

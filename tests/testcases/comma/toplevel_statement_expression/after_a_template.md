@@ -69,7 +69,7 @@ ast: {
 }
 
 tokens (5x):
-       TICK_PURE PUNCTUATOR TICK_PURE ASI
+       TICK_PURE PUNC_COMMA TICK_PURE ASI
 `````
 
 ### Strict mode

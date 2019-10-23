@@ -70,7 +70,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT PUNCTUATOR IDENT PUNCTUATOR NUMBER_DEC ASI
+       IDENT IDENT PUNC_EQ_GT IDENT PUNC_EQ NUMBER_DEC ASI
 `````
 
 ### Strict mode

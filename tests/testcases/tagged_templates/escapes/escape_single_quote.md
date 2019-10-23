@@ -63,7 +63,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT TICK_PURE PUNCTUATOR
+       IDENT TICK_PURE PUNC_SEMI
 `````
 
 ### Strict mode

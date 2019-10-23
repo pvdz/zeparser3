@@ -90,7 +90,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT TICK_PURE PUNCTUATOR IDENT TICK_PURE PUNCTUATOR
+       IDENT TICK_PURE PUNC_SEMI IDENT TICK_PURE PUNC_SEMI
 `````
 
 ### Strict mode

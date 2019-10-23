@@ -58,7 +58,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNCTUATOR PUNCTUATOR ASI
+       IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE ASI
 `````
 
 

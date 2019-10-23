@@ -55,7 +55,7 @@ ast: {
 }
 
 tokens (5x):
-       NUMBER_DEC PUNCTUATOR NUMBER_DEC PUNCTUATOR
+       NUMBER_DEC PUNC_COMMA NUMBER_DEC PUNC_SEMI
 `````
 
 ### Strict mode

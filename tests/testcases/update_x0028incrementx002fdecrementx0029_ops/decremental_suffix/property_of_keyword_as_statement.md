@@ -57,7 +57,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT PUNCTUATOR IDENT PUNCTUATOR ASI
+       IDENT PUNC_DOT IDENT PUNC_MIN_MIN ASI
 `````
 
 ### Strict mode

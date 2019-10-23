@@ -45,7 +45,7 @@ ast: {
 }
 
 tokens (3x):
-       NUMBER_HEX PUNCTUATOR
+       NUMBER_HEX PUNC_SEMI
 `````
 
 ### Strict mode

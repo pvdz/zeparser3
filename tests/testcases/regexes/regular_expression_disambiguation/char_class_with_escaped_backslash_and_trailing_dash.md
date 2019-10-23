@@ -90,7 +90,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT PUNCTUATOR REGEXN PUNCTUATOR IDENT ASI
+       IDENT PUNC_EQ REGEXN PUNC_DOT IDENT ASI
 `````
 
 

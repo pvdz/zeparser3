@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N pos=7:8 loc=7:1 curc=41 `)`#}
+  Unable to ASI, token: {# PUNC_PAREN_CLOSE : nl=N ws=N pos=7:8 loc=7:1 curc=41 `)`#}
 
 let a, );
        ^------- error

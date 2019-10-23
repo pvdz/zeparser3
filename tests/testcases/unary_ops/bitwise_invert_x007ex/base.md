@@ -48,7 +48,7 @@ ast: {
 }
 
 tokens (4x):
-       PUNCTUATOR IDENT ASI
+       PUNC_TILDE IDENT ASI
 `````
 
 ### Strict mode
