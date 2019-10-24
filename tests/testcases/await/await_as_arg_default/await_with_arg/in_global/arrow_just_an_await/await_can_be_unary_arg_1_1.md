@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 98 (curc: `b`, token: `bar`)
+  Missing closing paren `)` for group, found `bar` instead
 
 (foo = +await bar) => {}
               ^------- error

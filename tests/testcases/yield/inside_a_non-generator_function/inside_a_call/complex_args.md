@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 120 (curc: `x`, token: `x`)
+  Expecting closing paren `)` for the call, found `x` instead
 
 function f(){ call(yield x + y); }
                          ^------- error

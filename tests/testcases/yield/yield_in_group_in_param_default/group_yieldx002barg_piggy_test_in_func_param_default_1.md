@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 122 (curc: `z`, token: `z`)
+  Missing closing paren `)` for group, found `z` instead
 
 function f(x=(yield z)=y){}
                     ^------- error

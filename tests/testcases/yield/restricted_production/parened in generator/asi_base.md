@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 120 (curc: `x`, token: `x`)
+  Missing closing paren `)` for group, found `x` instead
 
 function *f() {
   (

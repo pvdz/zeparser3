@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 102 (curc: `f`, token: `function`)
+  Missing closing paren `)` for group, found `function` instead
 
 (async
  function(){})

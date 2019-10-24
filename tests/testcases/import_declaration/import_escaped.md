@@ -43,8 +43,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for the ident `as` or comma or `}`, found `\` (92 / 0x5c) instead
+throws: Parser error!
+  Unexpected token while parsing export object
 
 export {a \u0061s b} from "x";
           ^------- error

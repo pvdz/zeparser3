@@ -44,8 +44,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for a character that starts an expression, found `]` (93 / 0x5d) instead
+throws: Parser error!
+  The rest/spread operator is missing an argument
 
 export var [...] = obj;
                ^------- error

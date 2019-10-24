@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)
+  Missing closing paren `)` for group, found `y` instead
 
 function f() {   class x { foo(x=new (await y)()){} }   }
                                             ^------- error

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 93 (`]`) but was 120 (curc: `x`, token: `x`)
+  Expected the closing bracket `]` for the array, found `x` instead
 
 async function f(){   function fh([+ await x]) { "use strict"; }   }
                                            ^------- error

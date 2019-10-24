@@ -43,8 +43,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for an ident or closing curly, found `.` (46 / 0x2e) instead
+throws: Parser error!
+  Export object cannot have spread
 
 var foo, bar; export {foo, ...bar}
                            ^------- error

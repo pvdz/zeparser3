@@ -90,8 +90,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for a character that starts an expression, found `}` (125 / 0x7d) instead
+throws: Parser error!
+  Cannot use `await` as var when goal=module but found `await` outside an async function
 
 ({"key": await} = null)
               ^------- error

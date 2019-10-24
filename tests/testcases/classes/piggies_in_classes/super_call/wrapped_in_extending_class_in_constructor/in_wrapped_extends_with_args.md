@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)
+  Expecting closing paren `)` for the call, found `y` instead
 
 class outer extends S { constructor(){  class x extends feh(super() y) { }  }}
                                                                     ^------- error

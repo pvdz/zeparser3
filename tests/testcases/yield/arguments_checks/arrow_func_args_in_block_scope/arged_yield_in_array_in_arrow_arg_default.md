@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)
+  Expected the closing bracket `]` for the array, found `y` instead
 
 { (x = [yield y]) => z }
               ^------- error

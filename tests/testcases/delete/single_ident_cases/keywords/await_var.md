@@ -66,8 +66,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for a character that starts an expression, found `;` (59 / 0x3b) instead
+throws: Parser error!
+  Cannot use `await` as var when goal=module but found `await` outside an async function
 
 delete await;
             ^------- error

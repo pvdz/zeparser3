@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 125 (`}`) but was 97 (curc: `a`, token: `a`)
+  Expected the closing curly `}` for an object, found `a` instead
 
 s = {"foo": yield a = x} = x
                   ^------- error

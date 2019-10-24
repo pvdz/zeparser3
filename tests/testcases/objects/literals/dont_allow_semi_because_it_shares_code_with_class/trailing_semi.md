@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 125 (`}`) but was 59 (curc: `;`, token: `;`)
+  Expected the closing curly `}` for an object, found `;` instead
 
 ({x:y;})
      ^------- error

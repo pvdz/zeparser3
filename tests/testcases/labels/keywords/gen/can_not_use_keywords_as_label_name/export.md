@@ -45,8 +45,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for an ident, star, or opening curly, found `:` (58 / 0x3a) instead
+throws: Parser error!
+  Unknown export type [:] (note: you can only export individual vars through `export {:};`)
 
 export: x
       ^------- error

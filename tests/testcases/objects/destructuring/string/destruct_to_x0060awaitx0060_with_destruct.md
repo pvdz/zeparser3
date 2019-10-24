@@ -106,8 +106,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for a character that starts an expression, found `=` (61 / 0x3d) instead
+throws: Parser error!
+  Cannot use `await` as var when goal=module but found `await` outside an async function
 
 s = {"foo": await = x} = x
                   ^------- error

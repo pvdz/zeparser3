@@ -48,8 +48,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for an ident, star, or opening curly, found `/` (47 / 0x2f) instead
+throws: Parser error!
+  Unknown export type [/] (note: you can only export individual vars through `export {/};`)
 
 export
 /x/

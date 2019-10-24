@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 93 (`]`) but was 43 (curc: `+`, token: `++`)
+  Expected the closing bracket `]` for the array, found `++` instead
 
 z=[b
 ++c];

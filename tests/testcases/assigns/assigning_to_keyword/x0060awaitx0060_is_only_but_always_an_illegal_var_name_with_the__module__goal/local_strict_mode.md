@@ -98,8 +98,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for a character that starts an expression, found `=` (61 / 0x3d) instead
+throws: Parser error!
+  Cannot use `await` as var when goal=module but found `await` outside an async function
 
 function f() { "use strict"; (await = "sentinal 7533336"); }
                                     ^------- error

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 125 (`}`) but was 120 (curc: `x`, token: `x`)
+  Expected the closing curly `}` for an object, found `x` instead
 
 async function f(){   function fh({x: ! await x}) { "use strict"; }   }
                                               ^------- error

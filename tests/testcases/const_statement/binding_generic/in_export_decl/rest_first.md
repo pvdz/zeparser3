@@ -49,8 +49,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for the start of a binding, found `.` (46 / 0x2e) instead
+throws: Parser error!
+  Expected identifier, or array/object destructuring, next token is: {# PUNC_DOT_DOT_DOT : nl=N ws=N pos=13:16 loc=13:1 curc=46 `...`#}
 
 export const ...a = 1;
              ^------- error

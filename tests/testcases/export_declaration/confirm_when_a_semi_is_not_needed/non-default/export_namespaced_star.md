@@ -45,8 +45,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for the ident `from`, found `a` (97 / 0x61) instead
+throws: Parser error!
+  Next token should be the ident `from` but was `as`
 
 export * as x from "x" foo
          ^------- error

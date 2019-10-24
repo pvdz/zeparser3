@@ -43,8 +43,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for a colon or paren open, found `}` (125 / 0x7d) instead
+throws: Parser error!
+  A computed property name must be followed by a colon or paren
 
 export const {[x]};
                  ^------- error

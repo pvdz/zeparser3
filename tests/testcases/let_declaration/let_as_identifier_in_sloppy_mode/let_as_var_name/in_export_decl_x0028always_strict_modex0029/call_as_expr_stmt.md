@@ -55,8 +55,8 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Tokenizer error!
-    Was looking for the start of a binding, found `(` (40 / 0x28) instead
+throws: Parser error!
+  Expected identifier, or array/object destructuring, next token is: {# PUNC_PAREN_OPEN : nl=N ws=N pos=10:11 loc=10:1 curc=40 `(`#}
 
 export let();
           ^------- error

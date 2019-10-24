@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Was looking for a character that starts a statement, found `@` (64 / 0x40) instead
+    Unknown input
 
 @
 ^------- error
