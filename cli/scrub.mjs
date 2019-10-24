@@ -358,6 +358,9 @@ function ExpressionStatement(node) {
     if (stmt === '(1001);') return ';';
     return stmt;
   }
+  // if (node.directive === undefined && node.expression.type === 'Literal' && typeof node.expression.value === 'string') {
+  //   return '';
+  // }
   let stmt = $(node.expression) + ';';
   if (stmt === '1001;') return ';';
   return stmt;
@@ -376,6 +379,9 @@ function ForStatement(node) {
 }
 function FunctionDeclaration(node) {
   assert(node.type, 'FunctionDeclaration');
+  if (node.id && node.id.type === 'Identifier' && node.id.name.startsWith('ASSERT')) {
+    return '';
+  }
   return (node.async ? 'async ' : '') + 'function' + (node.generator ? '*' : '') + (node.id ? ' ' + $(node.id) : '') + '(' + node.params.map($).join(', ') + ') {' + node.body.body.map($).join('\n') + '}';
 }
 function FunctionExpression(node) {
