@@ -1,0 +1,65 @@
+{
+  "es6.tiny": {
+    "path": "ignore/perf/es6.tiny.js",
+    "mode": "module",
+    "baseline": {
+      "zepar": 3,
+      "babel": 4,
+      "acorn": 3
+    }
+  },
+  "es5.js1k": {
+    "path": "ignore/perf/es5.js1k.js",
+    "mode": "web",
+    "baseline": {
+      "zepar": 123,
+      "babel": 138,
+      "acorn": 118
+    }
+  },
+  "es6.material-ui-core": {
+    "path": "ignore/perf/es6.material-ui-core.js",
+    "mode": "web",
+    "baseline": {
+      "zepar": 452,
+      "babel": 631,
+      "acorn": 405
+    }
+  },
+  "es6.angular-compiler": {
+    "path": "ignore/perf/es6.angular-compiler.js",
+    "mode": "module",
+    "baseline": {
+      "zepar": 537,
+      "babel": 670,
+      "acorn": 487
+    }
+  },
+  "es5.moment-with-locales": {
+    "path": "ignore/perf/es5.moment-with-locales.js",
+    "mode": "web",
+    "baseline": {
+      "zepar": 267,
+      "babel": 315,
+      "acorn": 234
+    }
+  },
+  "es6.mljs": {
+    "path": "ignore/perf/es6.mljs.js",
+    "mode": "module",
+    "baseline": {
+      "zepar": 352,
+      "babel": 459,
+      "acorn": 314
+    }
+  },
+  "es5.webkit": {
+    "path": "ignore/perf/es5.webkit.npm.1.0.0.js",
+    "mode": "web",
+    "baseline": {
+      "zepar": 22988,
+      "babel": 28159,
+      "acorn": 21955
+    }
+  }
+}

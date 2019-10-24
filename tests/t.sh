@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Can override this through `--node-bin path/here`
+# I need to override this path when calling `./t p` through `sudo` for perf (`cset` & `chrt`), which mandate root.
+NODE_BIN=$(which node) # This may exit non-zero. That's fine.
+
 set -e # Exit on error
 
 ACTION=''
@@ -12,6 +16,7 @@ ES=''
 NODE=''
 ANNEXB=''
 BUILD=''
+NO_BUILDING=''
 PSFIX=''
 HF=''
 NOCOMP=''
@@ -19,6 +24,9 @@ NOMIN=''
 INSPECT=''
 DEVTOOLS=''
 PRETTIER=''
+PERFONE=''
+RESET=''
+RECORD=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -43,7 +51,10 @@ ZeParser test runner help:
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
  hf            Log stats through HeatFiler (wip), can be used in conjunction with almost anything
- p             Run on two large js files (1mb) tucked away in ./ignore to get tentative parse times on them
+ p             Run benchmarks (everything in same node instance)
+ p1            Same as ./t p except it attempts to run node as stable as possible (can run much slower than usual! With reduced variance)
+ p2            My shortcut for working with p1 with sudo :p
+ p3            Undo system settings applied in p3
  z             Create build
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
@@ -61,11 +72,15 @@ ZeParser test runner help:
  --node        Fuzzer: compare pass/fail to node by creating a new function and checking if it throws
  --consise     Do not dump AST and printer output to stdout. Only works with -i or -f (or anything that uses those)
  --build       Use the build (./t z) instead of dev sources for ZeParser in this call
+ --nb          Don't actually create a build for cases where this otherwise would happen (prevents sudo trouble :)
  --no-compat   For `z`; Replace the compat flags for Acorn and Babel to `false` so the minifier eliminates the dead code
  --no-min      For `z`; Do not run Terser (minifier) on build output
  --pretty      For `z`; Run prettier on the build afterwards (useful with `--no-min`)
  --inspect     Run with `node --inspect-brk` to debug node in the chrome devtools. Use `--devtools` to auto-profile.
  --devtools    Call `console.profile()` before and after the core parse step (not all actions support this)
+ --reset       For perf, force resets baseline to whatever the current result
+ --record      For perf, updates baseline if better
+ --node-bin <path> Specify the path to the node binary to run, defaults to the answer of `which node`
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -156,6 +171,17 @@ ZeParser test runner help:
     p)
       ACTION='perf'
       ;;
+    p1)
+      echo "Asking v8 to run single thread, no caching, etc"
+      ACTION='perf'
+      PERFONE='yes'
+      ;;
+    p2)
+      ACTION='perf2'
+      ;;
+    p3)
+      ACTION='perf3'
+      ;;
 
     --sloppy)       MODE='--sloppy'       ;;
     --strict)       MODE='--strict'       ;;
@@ -173,9 +199,12 @@ ZeParser test runner help:
     --concise)      EXTRA='--concise'     ;;
     -b);&
     --build)        BUILD='-b'            ;;
+    --nb)           NO_BUILDING='on'      ;;
     --no-compat)    NOCOMP='--no-compat'  ;;
     --no-min)       NOMIN='--no-min'      ;;
     --pretty)       PRETTIER='yes'        ;;
+    --reset)        RESET='--reset'       ;;
+    --record)       RECORD='--record'     ;;
     --prefix)
         PSFIX='--prefix'
         shift
@@ -191,6 +220,11 @@ ZeParser test runner help:
         INSPECT_ZEPAR='--devtools'
         ;;
     --devtools)     DEVTOOLS='--devtools' ;;
+    --node-bin)
+        shift
+        NODE_BIN=$1
+        echo "Using '${NODE_BIN}' as node binary"
+        ;;
 
     6)  ES='--es6'  ;;
     7)  ES='--es7'  ;;
@@ -217,14 +251,13 @@ if [[ "${HF}" = "yes" ]]; then
     if [[ ! -z "${BUILD}" ]]; then
       set -x
 
-      echo "Creating build without compat code and without minification"
-      node --experimental-modules cli/build.mjs --no-compat --no-min
-
-      echo "Remove the artifacts through Prettier"
-      node_modules/.bin/prettier --write ../zeparser3/build/build_w_ast.mjs
+      if [[ -z "${NO_BUILDING}" ]]; then
+        echo "Creating pretty build without compat code and without minification"
+        ./t z --no-compat --no-min --pretty --node-bin ${NODE_BIN}
+      fi
 
       # Transform the build file inline
-      node --experimental-modules ../heatfiler/bin/cli.mjs --file ../zeparser3/build/build_w_ast.mjs --inline --post-node --interval-sync 1000000
+      ${NODE_BIN} --experimental-modules ../heatfiler/bin/cli.mjs --file ../zeparser3/build/build_w_ast.mjs --inline --post-node --interval-sync 1000000
     else
       HAS_SRC_CHANGES=$(git diff src)
       if [[ ! -z "${HAS_SRC_CHANGES}" ]]; then
@@ -236,11 +269,11 @@ if [[ "${HF}" = "yes" ]]; then
       set -x
 
       # Transform the code inline (rely on git to restore it)
-      node --experimental-modules ../heatfiler/bin/cli.mjs --dir ../zeparser3/src --inline --post-node --interval-sync 1000000
+      ${NODE_BIN} --experimental-modules ../heatfiler/bin/cli.mjs --dir ../zeparser3/src --inline --post-node --interval-sync 1000000
     fi
 
     # Start the HF server which accepts stats, serves stats, and serves the HF UI as a tiny webserver
-    node --experimental-modules ../heatfiler/bin/cli.mjs --serve --shhh &
+    ${NODE_BIN} --experimental-modules ../heatfiler/bin/cli.mjs --serve --shhh &
 
     # Get pid of server, it should be running in the background and we want to kill it when this script exits
     HFPID=$!
@@ -256,38 +289,97 @@ set -x
 
 case "${ACTION}" in
     test262)
-      node ${INSPECT_NODE} --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules tests/test262.mjs ${ACORN} ${BABEL} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
     ;;
 
     fuzz)
-      node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD} ${PSFIX} "${ARG}" ${INSPECT_ZEPAR}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/fuzz/zefuzz.mjs ${EXTRA} ${NODE} ${ANNEXB} ${BUILD} ${PSFIX} "${ARG}" ${INSPECT_ZEPAR}
     ;;
 
     build)
-      node ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR}
       if [[ ! -z "${PRETTIER}" ]]; then
           node_modules/.bin/prettier build/build_w_ast.mjs --write
       fi
     ;;
 
+    perf2)
+      ./t z --no-compat
+      set -x
+      # WARNING! DO NOT JUST USE UNLESS YOU VERIFIED THIS WORKS FOR YOU!
+      # I use this to stabilize my system for perf.
+      # - It turns off turbo mode
+      # - It shuts down the 7th core, which is a fake core based on core 3
+      # - It turns off power scaling
+      # - It shields cpu 3 so I can use that core exclusively to spawn new node processes
+      # (See https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux )
+      sudo su -c "echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo"
+      sudo su -c "echo 1 > /sys/devices/system/cpu/cpu7/online"
+      sudo su -c "echo performance > /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor"
+      sudo cset shield --cpu=3 -k on
+
+      # https://unix.stackexchange.com/questions/349908/how-to-get-all-processes-running-on-each-cpu-core-in-ubuntu
+      echo "Wainting 5 seconds so most processes hopefully leave the cpu core"
+      sleep 5
+      CORENUM=3; ps -e -o pid,psr,cpu,cmd | grep -E  "^[[:space:]][[:digit:]]+[[:space:]]+${CORENUM}"
+
+      sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb
+      ;;
+    perf3)
+      sudo su -c "echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo"
+      sudo su -c "echo 1 > /sys/devices/system/cpu/cpu7/online"
+      sudo su -c "echo powersave > /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor"
+      sudo cset shield -r
+      ;;
     perf)
+      echo "Yay, perf! :D"
+      if [[ ! -z "${BUILD}" ]]; then
+        if [[ -z "${NO_BUILDING}" ]]; then
+          echo "Creating build without compat"
+          ./t z --no-compat --node-bin ${NODE_BIN}
+        fi
+      fi
+
+      echo "Going to do a test run first..."
+
+      # Infinite loop through all benchmarks. Once the end is reached, start over.
+      # A new node process is called for each individual parse step. This attempts to eliminate cross test gc polution
       if [[ -z "${INSPECT_NODE}" ]]; then
-        node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS}
+        STABLE_V8=
+        if [[ ! -z "${PERFONE}" ]]; then # Regular node invokes
+          STABLE_V8="--single-threaded --single-threaded-gc --predictable --predictable-gc-schedule --compilation-cache"
+        fi
+        NODE_NO_WARNINGS=1 "${NODE_BIN}" ${INSPECT_NODE} ${STABLE_V8} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS} ${RESET} ${RECORD} n 1
+        set +x
+        I=1
+        while true
+        do
+          # The process will exit 1 when the last benchmark is executed and the n param is given. Let's hope so :D
+          NODE_NO_WARNINGS=1 "${NODE_BIN}" ${INSPECT_NODE} ${STABLE_V8} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS} --no-header ${RESET} ${RECORD} n "${I}" || I=0
+          if [[ "${I}" -eq "0" ]]; then
+            RESET=''
+          fi
+          I=$(( $I + 1 ))
+          sleep 0.1 # Yield for OS to cleanup (adds stability to the data)
+        done
+        set +x
       else
         if [[ ! -z "${BUILD}" ]]; then
-          ./t z --no-compat --no-min
-          node_modules/.bin/prettier build/build_w_ast.mjs --write
+          if [[ -z "${NO_BUILDING}" ]]; then
+            ./t z --no-compat --no-min --pretty --node-bin ${NODE_BIN}
+          fi
         fi
-        node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS}
+
+        ${NODE_BIN} ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS}
       fi
     ;;
 
     hf)
-      node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR}
     ;;
 
     *)
-      node ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
     ;;
 esac
 set +x
