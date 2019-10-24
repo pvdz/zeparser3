@@ -490,30 +490,30 @@ const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about globa
 
 let $_start_i = 0;
 const START_SPACE = $_start_i++;
+const START_ID = $_start_i++;
 const START_NL_SOLO = $_start_i++;
 const START_CR = $_start_i++;
-const START_EXCL = $_start_i++;
 const START_SSTRING = $_start_i++;
 const START_DSTRING = $_start_i++;
-const START_ZERO = $_start_i++;
 const START_DECIMAL = $_start_i++;
+const START_DOT = $_start_i++;
+const START_CURLY_CLOSE = $_start_i++;
+const START_EQ = $_start_i++;
+const START_DIV = $_start_i++;
+const START_PLUS = $_start_i++;
+const START_MIN = $_start_i++;
+const START_ZERO = $_start_i++;
 const START_TEMPLATE = $_start_i++;
-const START_ID = $_start_i++;
+const START_EXCL = $_start_i++;
 const START_PERCENT = $_start_i++;
 const START_AND = $_start_i++;
 const START_STAR = $_start_i++;
-const START_PLUS = $_start_i++;
-const START_MIN = $_start_i++;
-const START_DOT = $_start_i++;
-const START_DIV = $_start_i++;
 const START_CARET = $_start_i++;
 const START_LT = $_start_i++;
-const START_EQ = $_start_i++;
 const START_GT = $_start_i++;
-const START_BSLASH = $_start_i++;
 const START_OR = $_start_i++;
-const START_CURLY_CLOSE = $_start_i++;
 const START_UNICODE = $_start_i++;
+const START_BSLASH = $_start_i++;
 const START_ERROR = $_start_i++;
 ASSERT(ALL_GEES.every(type => type > $_start_i), 'the G start at bit 7 or whatever so should all be larger because this is how we distinct a single-char-token hit from a start-needs-refinement result');
 ASSERT(ALL_TOKEN_TYPES.every(type => type > $_start_i), 'all tokens must be higher than the start numbers because they are all combinations with at least one G. this is important so we can distinguish them when reading the token start');
@@ -1122,60 +1122,57 @@ function ZeTokenizer(
     // It is important to note that each case is incremental from zero to n. This should lead to the switch being
     // optimized to a jump table with O(1) lookup. (TODO: verify this is the case. Add a test to prevent regressions.)
     switch (s) {
-      case START_NL_SOLO:
-        return parseNewlineSolo();
       case START_SPACE:
         return parseSpace();
+      case START_ID:
+        return parseIdentifierRest(String.fromCharCode(c));
+      case START_NL_SOLO:
+        return parseNewlineSolo();
       case START_CR:
         return parseCR(); // cr crlf
-      case START_EXCL:
-        return parseExcl(); // != !==
       case START_SSTRING:
         return parseSingleString(lexerFlags);
       case START_DSTRING:
         return parseDoubleString(lexerFlags);
-      case START_ZERO:
-        return parseLeadingZero(lexerFlags);
       case START_DECIMAL:
         return parseDecimal();
+      case START_DOT:
+        return parseLeadingDot();
+      case START_CURLY_CLOSE:
+        if ((lexerFlags & LF_IN_TEMPLATE) === LF_IN_TEMPLATE) return parseTemplateString(lexerFlags, PARSING_SANS_TICK);
+        return $PUNC_CURLY_CLOSE;
+      case START_EQ:
+        return parseEqual(); // = == === =>
+      case START_DIV:
+        return parseFwdSlash(lexerFlags); // / /= //.. /*..*/
+      case START_PLUS:
+        return parseSameOrCompound($$PLUS_2B); // + ++ +=
+      case START_MIN:
+        return parseDash(); // - -- -= -->
+      case START_ZERO:
+        return parseLeadingZero(lexerFlags);
       case START_TEMPLATE:
         return parseTemplateString(lexerFlags, PARSING_FROM_TICK);
-      case START_ID:
-        return parseIdentifierRest(String.fromCharCode(c));
+      case START_EXCL:
+        return parseExcl(); // != !==
       case START_PERCENT:
         return parseCompoundAssignment($$PERCENT_25); // % %=
       case START_AND:
         return parseSameOrCompound(c); // & && &=
       case START_STAR:
         return parseStar(); // * *= ** **=
-      case START_PLUS:
-        return parseSameOrCompound($$PLUS_2B); // + ++ +=
-      case START_MIN:
-        return parseDash(); // - -- -= -->
-      case START_DOT:
-        return parseLeadingDot();
-      case START_DIV:
-        return parseFwdSlash(lexerFlags); // / /= //.. /*..*/
       case START_CARET:
         return parseCompoundAssignment($$XOR_5E); // ^ ^=
       case START_LT:
         return parseLt(); // < << <= <<= <!--
-      case START_EQ:
-        return parseEqual(); // = == === =>
       case START_GT:
         return parseGtPunctuator(); // > >> >>> >= >>= >>>=
-      case START_BSLASH:
-        return parseBackslash(); // An ident that starts with a unicode escape can be valid
       case START_OR:
         return parseSameOrCompound(c); // | || |=
-      case START_CURLY_CLOSE:
-        if ((lexerFlags & LF_IN_TEMPLATE) === LF_IN_TEMPLATE) return parseTemplateString(lexerFlags, PARSING_SANS_TICK);
-        return $PUNC_CURLY_CLOSE;
-      case START_UNICODE: {
-        let r = parseOtherUnicode(c);
-        if (r === $ERROR) break;
-        return r;
-      }
+      case START_UNICODE:
+        return parseOtherUnicode(c);
+      case START_BSLASH:
+        return parseBackslash(); // An ident that starts with a unicode escape can be valid
     }
 
     THROW('Unknown input');
