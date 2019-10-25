@@ -1205,8 +1205,6 @@ function ZeTokenizer(
       , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
-    let str = '';
-    let canon = '';
     if (isStringToken(type)) {
       let len = (stop - start) - 2; // 2=quotes
       if (lastCanonizedString.length !== len) {
@@ -1227,36 +1225,15 @@ function ZeTokenizer(
     }
 
     if (isTickToken(type)) {
-      let len = (stop - start) - 2; // 2 (or 3) for the template begin/end chars
+      let closeWrapperLen = (type === $TICK_HEAD || type === $TICK_BODY || type === $TICK_BAD_HEAD || type === $TICK_BAD_BODY ? 2 : 1);
+      let len = (stop - start) - (1 + closeWrapperLen); // 2 (or 3) for the template begin/end chars
 
-      // Mostly necessary for AST output.
-      // There are some `constructor` and `__proto__` checks that use it
-      if (type === $TICK_PURE) {
-        canon = '`' + lastCanonizedString + '`';
-      } else if (type === $TICK_HEAD) {
-        canon = '`' + lastCanonizedString + '${';
-      } else if (type === $TICK_BODY) {
-        canon = '}' + lastCanonizedString + '${';
-      } else if (type === $TICK_TAIL) {
-        canon = '}' + lastCanonizedString + '`';
-      } else if (type === $TICK_BAD_PURE) {
-        canon = '`' + lastCanonizedString + '`';
-      } else if (type === $TICK_BAD_HEAD) {
-        canon = '`' + lastCanonizedString + '${';
-      } else if (type === $TICK_BAD_BODY) {
-        canon = '}' + lastCanonizedString + '${';
-      } else if (type === $TICK_BAD_TAIL) {
-        canon = '}' + lastCanonizedString + '`';
-      } else {
-        ASSERT(false, 'tick should be enum');
+      if (lastCanonizedString.length !== len) {
+        // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
+        // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
+        return _createToken(type, start, stop, column, line, nl, ws, c, slice(start + 1, stop - closeWrapperLen), lastCanonizedString);
       }
-
-      // str = canon;
-      // if (canon.length !== len) {
-      //   // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
-      //   // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
-      // }
-      return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), canon);
+      return _createToken(type, start, stop, column, line, nl, ws, c, lastCanonizedString, lastCanonizedString);
     }
     return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), '');
   }
@@ -1395,7 +1372,7 @@ function ZeTokenizer(
             return $ERROR;
           }
 
-          lastCanonizedString += input.slice(pointerOffset, pointer - 1);
+          lastCanonizedString += slice(pointerOffset, pointer - 1);
 
           return marker === $$DQUOTE_22 ? $STRING_DOUBLE : $STRING_SINGLE;
         }
@@ -1408,7 +1385,7 @@ function ZeTokenizer(
         // This range only needs to check the backslash, which unfortunately occurs in the middle of the range
 
         if (c === $$BACKSLASH_5C) { // This seems to hit quite frequently, relative to this function
-          lastCanonizedString += input.slice(pointerOffset, pointer);
+          lastCanonizedString += slice(pointerOffset, pointer);
           // The canonized value will be updated too
           badEscape = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || badEscape;
           pointerOffset = pointer;
@@ -1876,56 +1853,55 @@ function ZeTokenizer(
     // - `...${expr}...`               // tick_head and tick_tail, no body
     // - `...${expr}...${expr}...`     // tick_head, tick_body (the middle part), and tick_tail
 
+    let lastOffset = pointer;
     let badEscapes = false;
-    let c;
     while (neof()) {
       // while we will want to consume at least one more byte for proper strings,
       // there could be a malformed string and we wouldnt want to consume the newline
-      c = peek();
-
+      let c = peek();
       // do ${ first, that way we can just use the peeked char in case it's a dud, without revisiting
       while (c === $$$_24) {
         ASSERT_skip($$$_24);
         if (eof()) {
           if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unclosed template string';
+          lastCanonizedString += slice(lastOffset, pointer);
           return $ERROR;
         }
         c = peek();
 
         if (c === $$CURLY_L_7B) {
+          lastCanonizedString += slice(lastOffset, pointer - 1);
           ASSERT_skip($$CURLY_L_7B);
           return badEscapes ? (fromTick ? $TICK_BAD_HEAD : $TICK_BAD_BODY) : (fromTick ? $TICK_HEAD : $TICK_BODY);
         }
-
-        lastCanonizedString += '$';
       }
 
       if (c === $$TICK_60) {
+        lastCanonizedString += slice(lastOffset, pointer);
         ASSERT_skip($$TICK_60);
         return badEscapes ? (fromTick ? $TICK_BAD_PURE : $TICK_BAD_TAIL) : (fromTick ? $TICK_PURE : $TICK_TAIL);
       }
 
       if (c === $$CR_0D) {
         ASSERT_skip($$CR_0D);
-        lastCanonizedString += '\r';
         // crlf is considered one line for the sake of reporting line-numbers
         if (neof() && peeky($$LF_0A)) {
-          lastCanonizedString += '\n';
           ASSERT_skip($$LF_0A);
         }
         incrementLine();
       } else if (isLfPsLs(c)) {
         ASSERT_skip(c);
-        lastCanonizedString += String.fromCharCode(c);
         incrementLine();
       } else if (c === $$BACKSLASH_5C) {
+        lastCanonizedString += slice(lastOffset, pointer);
         badEscapes = parseStringEscape(lexerFlags, FOR_TEMPLATE) || badEscapes;
+        lastOffset = pointer;
       } else {
-        lastCanonizedString += String.fromCharCode(c);
         ASSERT_skip(c);
       }
     }
 
+    lastCanonizedString += slice(lastOffset, pointer);
     if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unclosed template literal';
     return $ERROR;
   }
@@ -2281,7 +2257,7 @@ function ZeTokenizer(
           let wide = isIdentRestChr(c, pointer);
           if (wide === INVALID_IDENT_CHAR) break;
           if (wide === VALID_DOUBLE_CHAR) {
-            prevStr += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
+            prevStr += slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
             skipFastWithoutUpdatingCache();
             skip();
           } else {
@@ -2402,7 +2378,7 @@ function ZeTokenizer(
           if (wide === INVALID_IDENT_CHAR) break;
           if (wide === VALID_DOUBLE_CHAR) {
             uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'name contained a character that is only a valid identifier with u-flag');
-            prevStr += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
+            prevStr += slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
             skipFastWithoutUpdatingCache();
             skip();
           }
@@ -3427,7 +3403,7 @@ function ZeTokenizer(
         }
       }
 
-      let firstCharStr = (wide === VALID_DOUBLE_CHAR) ? input.slice(pointer - 2, pointer) : String.fromCharCode(c);
+      let firstCharStr = (wide === VALID_DOUBLE_CHAR) ? slice(pointer - 2, pointer) : String.fromCharCode(c);
 
       if (peeky($$GT_3E)) {
         // name is one character

@@ -8096,18 +8096,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // https://github.com/estree/estree/issues/90#issuecomment-109140678
     // The raw value should normalize newlines (\r \r\n) to \n, but not \u000a
     // The cooked value should convert escapes to literals but skip further normalization
-    let quasiValue = tickToken.str.slice(1, (wasTail === IS_QUASI_TAIL) ? -1 : -2);
+    let quasiValue = tickToken.str;
     if (acornCompat || babelCompat || templateNewlineNormalization) {
       // This normalization is almost lossy as you can't (trivially) reconstruct the original template now
       quasiValue = quasiValue.replace(/\r\n?/g, '\n');
     }
-    let cookedValue = noCooked ? null : tickToken.canon.slice(1, (wasTail === IS_QUASI_TAIL) ? -1 : -2);
+    let cookedValue = noCooked ? null : tickToken.canon;
 
     AST_openCustom('quasis', {
       type: 'TemplateElement',
       loc: AST_getBaseLocTemplate(tickToken),
       tail: wasTail === IS_QUASI_TAIL,
       value: {
+        // raw: (tickToken === $TICK_HEAD || tickToken === $TICK_BAD_HEAD ? '`' : '}') + quasiValue + (tickToken === $TICK_BODY || tickToken === $TICK_BAD_BODY ? '${' : '`'),
         raw: quasiValue,
         cooked: cookedValue,
       },
