@@ -493,8 +493,7 @@ const START_SPACE = $_start_i++;
 const START_ID = $_start_i++;
 const START_NL_SOLO = $_start_i++;
 const START_CR = $_start_i++;
-const START_SSTRING = $_start_i++;
-const START_DSTRING = $_start_i++;
+const START_STRING = $_start_i++;
 const START_DECIMAL = $_start_i++;
 const START_DOT = $_start_i++;
 const START_CURLY_CLOSE = $_start_i++;
@@ -554,12 +553,12 @@ const tokenStartJumpTable = [
   START_ERROR,            // 0x1F   yes   US
   START_SPACE,            // 0x20   yes   space
   START_EXCL,             // 0x21   no3   ! :: ! != !==
-  START_DSTRING,          // 0x22   no*   "
+  START_STRING,           // 0x22   no*   "
   START_ERROR,            // 0x23   yes   #
   START_ID,               // 0x24   no*   $
   START_PERCENT,          // 0x25   no2   % :: % %=
   START_AND,              // 0x26   no3   & :: & && &=
-  START_SSTRING,          // 0x27   no*   '
+  START_STRING,           // 0x27   no*   '
   $PUNC_PAREN_OPEN,       // 0x28   yes   (
   $PUNC_PAREN_CLOSE,      // 0x29   yes   )
   START_STAR,             // 0x2A   no4   * :: * ** *= **=
@@ -651,7 +650,7 @@ const tokenStartJumpTable = [
   // START_ERROR,            // 0x7F   yes   DEL
 ];
 let ALL_START_TYPES;
-ASSERT(ALL_START_TYPES = [START_SPACE, START_NL_SOLO, START_CR, START_EXCL, START_SSTRING, START_DSTRING, START_ZERO, START_DECIMAL, START_TEMPLATE, START_ID, START_PERCENT, START_AND, START_STAR, START_PLUS, START_MIN, START_DOT, START_DIV, START_CARET, START_LT, START_EQ, START_GT, START_BSLASH, START_OR, START_CURLY_CLOSE, START_UNICODE, START_ERROR]);
+ASSERT(ALL_START_TYPES = [START_SPACE, START_NL_SOLO, START_CR, START_EXCL, START_STRING, START_ZERO, START_DECIMAL, START_TEMPLATE, START_ID, START_PERCENT, START_AND, START_STAR, START_PLUS, START_MIN, START_DOT, START_DIV, START_CARET, START_LT, START_EQ, START_GT, START_BSLASH, START_OR, START_CURLY_CLOSE, START_UNICODE, START_ERROR]);
 function getTokenStart(c) {
   ASSERT(getTokenStart.length == arguments.length, 'arg count');
   ASSERT(c >= 0, 'nothing generates negatives for chars');
@@ -1130,10 +1129,8 @@ function ZeTokenizer(
         return parseNewlineSolo();
       case START_CR:
         return parseCR(); // cr crlf
-      case START_SSTRING:
-        return parseSingleString(lexerFlags);
-      case START_DSTRING:
-        return parseDoubleString(lexerFlags);
+      case START_STRING:
+        return parseAnyString(c, lexerFlags);
       case START_DECIMAL:
         return parseDecimal();
       case START_DOT:
@@ -1330,20 +1327,8 @@ function ZeTokenizer(
     return $NL_SOLO;
   }
 
-  function parseSingleString(lexerFlags) {
-    ASSERT(arguments.length === 1, 'need 1 arg');
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
-    return parseAnyString($$SQUOTE_27, $STRING_SINGLE, lexerFlags);
-  }
-  function parseDoubleString(lexerFlags) {
-    ASSERT(arguments.length === 1, 'need 1 arg');
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
-    return parseAnyString($$DQUOTE_22, $STRING_DOUBLE, lexerFlags);
-  }
-  function parseAnyString(marker, tokenType, lexerFlags) {
-    ASSERT(arguments.length === 3, 'need 3 args');
+  function parseAnyString(marker, lexerFlags) {
+    ASSERT(parseAnyString.length === arguments.length, 'need 3 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let badEscape = false;
@@ -1384,7 +1369,7 @@ function ZeTokenizer(
             return $ERROR;
           }
 
-          return tokenType;
+          return marker === $$DQUOTE_22 ? $STRING_DOUBLE : $STRING_SINGLE;
         }
 
         hadNewline = hadNewline || c === $$LF_0A || c === $$CR_0D;
