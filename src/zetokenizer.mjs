@@ -1205,14 +1205,30 @@ function ZeTokenizer(
       , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
-    let str = slice(isStringToken(type) ? start + 1 : start, isStringToken(type) ? stop - 1 : stop);
-
+    let str = '';
     let canon = '';
-    if (type === $IDENT) canon = lastParsedIdent;
-    else if (isStringToken(type)) {
-      canon = lastCanonizedString;
+    if (isStringToken(type)) {
+      let len = (stop - start) - 2; // 2=quotes
+      if (lastCanonizedString.length !== len) {
+        // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
+        // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
+        return _createToken(type, start, stop, column, line, nl, ws, c, slice(start + 1, stop - 1), lastCanonizedString);
+      }
+      return _createToken(type, start, stop, column, line, nl, ws, c, lastCanonizedString, lastCanonizedString);
     }
-    else if (isTickToken(type)) {
+    if (isIdentToken(type)) {
+      let len = stop - start;
+      if (lastParsedIdent.length !== len) {
+        // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
+        // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
+        return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), lastParsedIdent);
+      }
+      return _createToken(type, start, stop, column, line, nl, ws, c, lastParsedIdent, lastParsedIdent);
+    }
+
+    if (isTickToken(type)) {
+      let len = (stop - start) - 2; // 2 (or 3) for the template begin/end chars
+
       // Mostly necessary for AST output.
       // There are some `constructor` and `__proto__` checks that use it
       if (type === $TICK_PURE) {
@@ -1234,7 +1250,17 @@ function ZeTokenizer(
       } else {
         ASSERT(false, 'tick should be enum');
       }
+
+      // str = canon;
+      // if (canon.length !== len) {
+      //   // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
+      //   // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
+      // }
+      return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), canon);
     }
+    return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), '');
+  }
+  function _createToken(type, start, stop, column, line, nl, ws, c, str, canon) {
 
     let token = {
       // <SCRUB DEV>
@@ -1331,13 +1357,13 @@ function ZeTokenizer(
     ASSERT(parseAnyString.length === arguments.length, 'need 3 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
+    let pointerOffset = pointer;
     let badEscape = false;
     let hadNewline = false;
-    let c;
     while (neof()) {
       // while we will want to consume at least one more byte for proper strings,
       // there could be a malformed string and we wouldnt want to consume the newline
-      c = peek();
+      let c = peek();
 
       /*
         There are a handful of chars that we must verify for strings;
@@ -1369,23 +1395,24 @@ function ZeTokenizer(
             return $ERROR;
           }
 
+          lastCanonizedString += input.slice(pointerOffset, pointer - 1);
+
           return marker === $$DQUOTE_22 ? $STRING_DOUBLE : $STRING_SINGLE;
         }
 
         hadNewline = hadNewline || c === $$LF_0A || c === $$CR_0D;
 
-        // lastCanonizedString += String.fromCharCode(c);
-        lastCanonizedString += input[pointer];
         ASSERT_skip(c);
       } else if (c <= 0x7e) {
         // This catches all the other ascii characters
         // This range only needs to check the backslash, which unfortunately occurs in the middle of the range
 
         if (c === $$BACKSLASH_5C) { // This seems to hit quite frequently, relative to this function
+          lastCanonizedString += input.slice(pointerOffset, pointer);
           // The canonized value will be updated too
           badEscape = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || badEscape;
+          pointerOffset = pointer;
         } else {
-          lastCanonizedString += input[pointer];
           // lastCanonizedString += String.fromCharCode(c);
           ASSERT_skip(c);
         }
@@ -1393,8 +1420,6 @@ function ZeTokenizer(
         // This is anything non-ascii
         // This range (which is fairly uncommon at time of writing) needs to check the 2028 and 2029 "newlines"
 
-        lastCanonizedString += input[pointer];
-        // lastCanonizedString += String.fromCharCode(c);
         ASSERT_skip(c);
         if (isPsLs(c)) {
           // This is a bit of a weird case for strings.
