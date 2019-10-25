@@ -313,8 +313,8 @@ case "${ACTION}" in
       # - It turns off power scaling
       # - It shields cpu 3 so I can use that core exclusively to spawn new node processes
       # (See https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux )
-      sudo su -c "echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo"
-      sudo su -c "echo 1 > /sys/devices/system/cpu/cpu7/online"
+      sudo su -c "echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo"
+      sudo su -c "echo 0 > /sys/devices/system/cpu/cpu7/online"
       sudo su -c "echo performance > /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor"
       sudo cset shield --cpu=3 -k on
 
@@ -323,7 +323,7 @@ case "${ACTION}" in
       sleep 5
       CORENUM=3; ps -e -o pid,psr,cpu,cmd | grep -E  "^[[:space:]][[:digit:]]+[[:space:]]+${CORENUM}"
 
-      sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb
+      sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb ${RECORD} ${RESET}
       ;;
     perf3)
       sudo su -c "echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo"
