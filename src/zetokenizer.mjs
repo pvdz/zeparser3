@@ -996,7 +996,6 @@ function ZeTokenizer(
 
     lastPotentialRegexError = ''; // reset at start of a new token
     lastReportableTokenizerError = ''; // reset at start of a new token
-    lastCanonizedString = ''; // also used by templates
 
     // These vars are relevant for between anything that gets location data in the AST
     do {
@@ -1333,6 +1332,8 @@ function ZeTokenizer(
   function parseAnyString(marker, lexerFlags) {
     ASSERT(parseAnyString.length === arguments.length, 'need 3 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+
+    lastCanonizedString = '';
 
     let pointerOffset = pointer;
     let badEscape = false;
@@ -1852,6 +1853,8 @@ function ZeTokenizer(
     // - `...`                         // "pure", no expression components
     // - `...${expr}...`               // tick_head and tick_tail, no body
     // - `...${expr}...${expr}...`     // tick_head, tick_body (the middle part), and tick_tail
+
+    lastCanonizedString = '';
 
     let lastOffset = pointer;
     let badEscapes = false;
