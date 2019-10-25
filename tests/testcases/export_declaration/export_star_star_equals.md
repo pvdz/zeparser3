@@ -48,7 +48,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Unknown export type [**=] (note: you can only export individual vars through `export {**=};`)
+  Unknown export type `**=` (note: you can only export individual vars through `export {foo};`)
 
 export **= from 'f';
        ^------- error

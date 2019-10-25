@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# STRING_DOUBLE : nl=N ws=N pos=20:25 loc=6:2 curc=34 `"bar"`#}
+  Unable to ASI, token: {# STRING_DOUBLE : nl=N ws=N pos=20:25 loc=6:2 curc=34 `bar`#}
 
 function f(){
 "foo" "bar"

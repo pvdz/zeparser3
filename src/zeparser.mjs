@@ -263,6 +263,7 @@ import ZeTokenizer, {
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
+  tokenStrForError,
   L,
   T,
   ASSERT_pushCanonPoison,
@@ -879,7 +880,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     // It's difficult to make this generic but for idents and literals it's doable
     ASSERT(node, 'should be set by one of the branches');
-    ASSERT(token.str.includes('\n') || token.str.includes('\r') || token.str.includes('\u2028') || token.str.includes('\u2029') || node.loc.end.column - node.loc.start.column === token.str.length, 'for literals the location should only span exactly the length of the lit', node.loc);
+    ASSERT(token.str.includes('\n') || token.str.includes('\r') || token.str.includes('\u2028') || token.str.includes('\u2029') || node.loc.end.column - node.loc.start.column === (token.stop - token.start), 'for literals the location should only span exactly the length of the lit', node.loc, token);
   }
   function AST_getStringNode(token, fromDirective) {
     ASSERT(AST_getStringNode.length === arguments.length, 'arg count');
@@ -887,6 +888,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (babelCompat) return AST_babelGetStringNode(token, fromDirective);
 
     // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
+
+    let q = "'";
+    if (token.type === $STRING_DOUBLE) q = '"';
 
     return {
       type: 'Literal',
@@ -901,8 +905,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         },
         source: sourceField, // File containing the code being parsed. Source maps may use this.
       },
-      value: token.canon.slice(1, -1),
-      raw: token.str,
+      value: token.canon,
+      raw: q + token.str + q,
     };
   }
   function AST_setStringLiteral(astProp, token, fromDirective) {
@@ -1283,8 +1287,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let canon = token.canon;
     let str = token.str;
-    let strUnquoted = str.slice(1, -1);
-    let value = fromDirective ? strUnquoted : canon.slice(1, -1);
+    let value = fromDirective ? str : canon;
+    let q = "'";
+    if (token.type === $STRING_DOUBLE) q = '"';
 
     return {
       type: 'StringLiteral',
@@ -1301,7 +1306,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       },
       value: value,
       extra: {
-        raw: str,
+        raw: q + str + q,
         rawValue: value,
       },
     };
@@ -1674,7 +1679,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // The next token must be a paren
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_PAREN_OPEN) {
-      THROW('Expected to parse an opening paren, found `' + curtok.str + '`');
+      THROW('Expected to parse an opening paren, found `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipToCurlyOpen(lexerFlags) {
@@ -1682,7 +1687,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // If it's not a curly then it falls back to the regular lexer. This function will validate the string afterwards.
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_CURLY_OPEN) {
-      THROW('Expected to parse an opening curly, found `' + curtok.str + '`');
+      THROW('Expected to parse an opening curly, found `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipParenOpenCurlyOpen(lexerFlags) {
@@ -1696,7 +1701,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipAny(lexerFlags);
 
     if (curtok.str !== 'from') {
-      THROW('Next token should be the ident `from` but was `' + curtok.str +'`');
+      THROW('Next token should be the ident `from` but was `' + tokenStrForError(curtok) + '`');
     }
     ASSERT(isIdentToken(curtok.type), 'a token whose value "from" should be an ident');
   }
@@ -1705,7 +1710,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
     skipAny(lexerFlags);
     if (!isStringToken(curtok.type)) {
-      THROW('Next token should be a string but was `' + curtok.str +'`');
+      THROW('Next token should be a string but was `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipToIdent(lexerFlags) {
@@ -1713,21 +1718,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
     skipAny(lexerFlags);
     if (!isIdentToken(curtok.type)) {
-      THROW('Next token should be an ident but was `' + curtok.str +'`');
+      THROW('Next token should be an ident but was `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipArrow(lexerFlags) {
     // Next token must be an arrow, with possibly some whitespace
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_EQ_GT) {
-      THROW('Next token should be `=>` but was `' + curtok.str +'`');
+      THROW('Next token should be `=>` but was `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipAs(lexerFlags) {
     // Next token must be `as`, with some whitespace
     skipAny(lexerFlags);
     if (curtok.str !== 'as') {
-      THROW('Next token should be `as` but was `' + curtok.str +'`');
+      THROW('Next token should be `as` but was `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipAsCommaCurlyClose(lexerFlags) {
@@ -1744,14 +1749,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Next token must be `:`, with possibly some whitespace
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_COLON) {
-      THROW('Next token should be `:` but was `' + curtok.str +'`');
+      THROW('Next token should be `:` but was `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipTarget(lexerFlags) {
     // Next token must be `target`, with unlikely some whitespace
     skipAny(lexerFlags);
     if (curtok.str !== 'target') {
-      THROW('Next token should be `target` but was `' + curtok.str +'`');
+      THROW('Next token should be `target` but was `' + tokenStrForError(curtok) + '`');
     }
   }
   function skipStatementStart(lexerFlags) {
@@ -2521,7 +2526,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // There was no tail, no op, no comma, so this was ASI, I hope. Or an error.
         // This is a directive. It may be nonsense, but it's a string in the head so it's a directive.
 
-        let dir = stringToken.str.slice(1, -1);
+        let dir = stringToken.str;
 
         // Check all directives for octals because strict mode may be enabled by a directive later in the same block
         // and that would still cause a previous sibling directive with octal escape to be an error.
@@ -2686,7 +2691,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT_skipExpressionStart('(', lexerFlags);
     parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, headProp);
-    if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing closing paren of statement header, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing closing paren of statement header, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipStatementStart(')', lexerFlags);
   }
 
@@ -3337,7 +3342,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       paramsSimple = parseBindings(lexerFlags, scoop, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, setToken, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
       AST_destruct('params');
       ASSERT(curtok.type !== $PUNC_COMMA, 'the trailing func comma case should already be caught by now');
-      if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing function param definition closing parenthesis, found `' + curtok.str + '` instead');
+      if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing function param definition closing parenthesis, found `' + tokenStrForError(curtok) + '` instead');
       ASSERT_skipToCurlyOpen(')', lexerFlags);
     }
 
@@ -3366,7 +3371,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     parseBodyPartsWithDirectives(lexerFlagsNoTemplate, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, paramsSimple, dupeParamErrorToken, functionNameTokenToVerify, NOT_GLOBAL_TOPLEVEL, FDS_VAR, 'body');
 
-    if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing function body closing curly, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing function body closing curly, found `' + tokenStrForError(curtok) + '` instead');
     if (blockType === IS_EXPRESSION) {
       // arrow with block, function expression
       ASSERT_skipDiv('}', lexerFlags);
@@ -3981,7 +3986,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.type === $IDENT && curtok.nl === false) {
       let labelToken = curtok;
       if (!findLabel(labelSet, labelToken.str, FROM_BREAK)) {
-        THROW('The label (`' + labelToken.str + '`) for this `break` was not defined in the current label set, which is illegal');
+        THROW('The label (`' + tokenStrForError(labelToken) + '`) for this `break` was not defined in the current label set, which is illegal');
       }
       ASSERT_skipStatementStart($IDENT, lexerFlags);
 
@@ -4182,7 +4187,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
     // note that functions and classes DO get ASI
     parseNestedBodyPart((curtok.type !== $PUNC_CURLY_OPEN ? lexerFlags : lexerFlags) | LF_IN_ITERATION, scoop, labelSet, NOT_LABELLED, FDS_ILLEGAL, PARENT_NOT_LABEL, 'body');
-    if (curtok.str !== 'while') THROW('A `do` must be followed by a `while`, but found `' + curtok.str + '` instead');
+    if (curtok.str !== 'while') THROW('A `do` must be followed by a `while`, but found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipToParenOpen('while', lexerFlags);
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
@@ -4439,7 +4444,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           addBindingToExports(exportedBindings, exportedName);
           needsSemi = false;
         } else {
-          THROW('Unknown export type [' + curtok.str +  '] (note: you can only export individual vars through `export {foo};)');
+          THROW('Unknown export type `' + tokenStrForError(curtok) + '` (note: you can only export individual vars through `export {foo};)');
         }
         AST_set('source', null);
       }
@@ -4478,7 +4483,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else {
         // `export foo;`
-        THROW('Unknown export type [' + curtok.str +  '] (note: you can only export individual vars through `export {'+curtok.str+'};`)');
+        THROW('Unknown export type `' + tokenStrForError(curtok) + '` (note: you can only export individual vars through `export {foo};`)');
       }
 
       // ASSERT(needsSemi, 'only certain `export default ...` cases could omit a semi, not this one');
@@ -4601,12 +4606,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (hasNoFlag(lexerFlags, LF_IN_ASYNC)) THROW('Can only use `for-await` inside an async function');
       ASSERT_skipToParenOpen('await', lexerFlags);
     } else if (curtok.type !== $PUNC_PAREN_OPEN) {
-      THROW('Missing opening paren of the `for` header, found `' + curtok.str + '` instead');
+      THROW('Missing opening paren of the `for` header, found `' + tokenStrForError(curtok) + '` instead');
     }
     ASSERT_skipExpressionStartSemi('(', lexerFlags); // TODO: expr start includes var/let/const as idents, also: `for (;;);`
     parseForHeader(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), forToken, scoop, awaitable, astProp);
     if (curtok.type !== $PUNC_PAREN_CLOSE) {
-      THROW('Missing closing paren of the `for` header, found `' + curtok.str + '` instead');
+      THROW('Missing closing paren of the `for` header, found `' + tokenStrForError(curtok) + '` instead');
     }
     ASSERT_skipStatementStart(')', lexerFlags);
     if (curtok.type === $EOF) THROW('Missing `for` child statement');
@@ -5018,7 +5023,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: `for (a,b of c) d;`
         THROW('Comma not allowed in left side of `for-in`/`for-of` header');
       }
-      THROW('Missing first semi in `for` header, found `' + curtok.str + '` instead');
+      THROW('Missing first semi in `for` header, found `' + tokenStrForError(curtok) + '` instead');
     }
 
     if (hasAllFlags(destructible, MUST_DESTRUCT)) {
@@ -5033,7 +5038,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'test');
       if (curtok.type !== $PUNC_SEMI) {
-        THROW('Missing second semi in `for` header, found `' + curtok.str + '` instead');
+        THROW('Missing second semi in `for` header, found `' + tokenStrForError(curtok) + '` instead');
       }
     }
 
@@ -5358,7 +5363,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.type === $PUNC_COMMA) ASSERT_skipIdentCurlyClose(',', lexerFlags);
       else if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Unexpected character while parsing export object');
     }
-    if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing import definition closing curly, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing import definition closing curly, found `' + tokenStrForError(curtok) + '` instead');
     // - `import {...} from 'x'`
     //               ^
     ASSERT_skipToFrom('}', lexerFlags);
@@ -5373,7 +5378,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //        ^
     let starToken = curtok;
     ASSERT_skipAs('*', lexerFlags);
-    if (curtok.str !== 'as') THROW('Expected the keyword `as`, instead found `' + curtok.str + '`');
+    if (curtok.str !== 'as') THROW('Expected the keyword `as`, instead found `' + tokenStrForError(curtok) + '`');
     ASSERT_skipToIdent('as', lexerFlags);
     let localToken = curtok;
     // next must be `from` (default must come first, if present, and object can not be used together with star)
@@ -5441,13 +5446,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ['await', 'yield', 'arguments', 'eval', 'implements', 'interface', 'let', 'package',  'private', 'protected', 'public', 'static'].includes(curtok.str)
       ) {
         // This must be an error now. ASI was not applicable but the var was (still) not a valid binding ident, so *boom*
-        THROW('Attempted to create a `let` binding on special reserved keyword `' + curtok.str + '` but: ' + identBindingErrorMsg);
+        THROW('Attempted to create a `let` binding on special reserved keyword `' + tokenStrForError(curtok) + '` but: ' + identBindingErrorMsg);
       }
       else {
         if (hasAnyFlag(lexerFlags, LF_NO_ASI)) {
-          THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + curtok.str + '`) and ASI does not apply here');
+          THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + tokenStrForError(curtok) + '`) and ASI does not apply here');
         }
-        THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + curtok.str + '`)');
+        THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + tokenStrForError(curtok) + '`)');
         ASSERT(false, 'unreachable');
       }
     } else if (curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN) {
@@ -5574,12 +5579,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: in what valid case is LF_IN_TEMPLATE relevant? switch cant appear directly in a template
     let lexerFlagsForSwitch = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_IN_GLOBAL | LF_NO_ASI);
     parseStatementHeader(lexerFlagsForSwitch, 'discriminant');
-    if (curtok.type !== $PUNC_CURLY_OPEN) THROW('Missing opening curly of `switch` body, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_CURLY_OPEN) THROW('Missing opening curly of `switch` body, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipSwitchBody($$CURLY_L_7B, lexerFlagsForSwitch);
 
     parseSwitchCases(lexerFlagsForSwitch | LF_IN_SWITCH, SCOPE_addLayer(scoop, SCOPE_LAYER_SWITCH, 'parseSwitchStatement'), labelSet, 'cases');
 
-    if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing the closing curly of the switch body, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing the closing curly of the switch body, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipStatementStart('}', lexerFlags);
     AST_close('SwitchStatement');
   }
@@ -5730,10 +5735,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         if (curtok.type === $PUNC_COMMA) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
         if (curtok.type === $PUNC_EQ) THROW('Catch clause parameter does not support default values');
-        if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing right paren for the catch clause, found `' + curtok.str + '` instead');
+        if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing right paren for the catch clause, found `' + tokenStrForError(curtok) + '` instead');
         ASSERT_skipToCurlyOpen(')', lexerFlags);
       } else {
-        THROW('Missing start of catch clause (`(`) or start of catch body (`{`), found `' + curtok.str + '` instead')
+        THROW('Missing start of catch clause (`(`) or start of catch body (`{`), found `' + tokenStrForError(curtok) + '` instead')
       }
 
       ASSERT(curtok.type === $PUNC_CURLY_OPEN, 'should have thrown if curtok.c is not curly at this point');
@@ -8170,7 +8175,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let nowAssignable = parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, 'property');
     // - `foo[await bar]`
     assignable = mergeAssignable(nowAssignable, assignable); // pass on piggies (yield, await, etc)
-    if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Expected the closing bracket `]` for a dynamic property, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Expected the closing bracket `]` for a dynamic property, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipDiv(']', lexerFlags);
     AST_close('MemberExpression');
     return parseValueTail(lexerFlags, valueFirstToken, setAssignable(assignable), isNewArg, NOT_LHSE, astProp); // member expressions are assignable
@@ -8360,7 +8365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('Targeted language version does not support trailing call arg comma');
         }
       } while (true);
-      if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Expecting closing paren `)` for the call, found `' + curtok.str + '` instead');
+      if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Expecting closing paren `)` for the call, found `' + tokenStrForError(curtok) + '` instead');
       ASSERT_skipDiv(')', lexerFlags);
     }
     return sansFlag(assignable, PIGGY_BACK_WAS_ARROW);
@@ -8863,7 +8868,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_close('SequenceExpression');
           assignable = setNotAssignable(assignable);
         }
-        if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Expected the closing paren `)` for the group, found `' + curtok.str + '` instead');
+        if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Expected the closing paren `)` for the group, found `' + tokenStrForError(curtok) + '` instead');
         ASSERT_skipDiv(')', lexerFlags);
 
         if (asyncToken !== UNDEF_ASYNC) {
@@ -8971,7 +8976,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtok.type !== $PUNC_PAREN_CLOSE) {
       // (I think this check is redundant ...)
-      THROW('Missing closing paren `)` for group, found `' + curtok.str + '` instead');
+      THROW('Missing closing paren `)` for group, found `' + tokenStrForError(curtok) + '` instead');
     }
     ASSERT_skipDiv(')', lexerFlags);
 
@@ -9541,7 +9546,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (notAssignable(leftAssignable)) {
             // [x]: `[true = x] = x`
             // [x]: `[true = x]`
-            THROW('Cannot assign or destruct to keyword [' + identToken.str + ']');
+            THROW('Cannot assign or destruct to keyword `' + tokenStrForError(identToken) + '`');
           }
 
           // [v]: `let [x = a, y = b] = o`
@@ -9809,7 +9814,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtok.type !== $PUNC_BRACKET_CLOSE) {
       // (I think this check is redundant)
-      THROW('Expected the closing bracket `]` for the array, found `' + curtok.str + '` instead');
+      THROW('Expected the closing bracket `]` for the array, found `' + tokenStrForError(curtok) + '` instead');
     }
     ASSERT_skipDiv(']', lexerFlags); // a forward slash after ] has to be a division
     AST_close('ArrayExpression');
@@ -9925,7 +9930,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (isExpression === IS_EXPRESSION) {
       if (curtok.type !== $PUNC_CURLY_CLOSE) {
-        THROW('Expected the closing curly `}` for an object, found `' + curtok.str + '` instead');
+        THROW('Expected the closing curly `}` for an object, found `' + tokenStrForError(curtok) + '` instead');
       }
       ASSERT_skipDiv('}', lexerFlags); // ({...} / foo)
     } else {
@@ -10018,7 +10023,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
         // `{"__proto__": 1, __proto__: 2}` is still an error, only for key:value (not shorthand or methods)
         if (options_webCompat === WEB_COMPAT_ON) {
-          if (litToken.str.slice(1, -1) === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
+          if (litToken.str === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
         }
 
         destructible |= parseObjectPropertyValueAfterColon(lexerFlags, startOfKeyToken, litToken, bindingType, assignableForPiggies, destructible, scoop, exportedNames, exportedBindings, astProp);
@@ -10085,7 +10090,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: find a testcase where the setNotAssignable state fails...
       assignableForPiggies = setNotAssignable(nowAssignable | assignableForPiggies);
       if (curtok.type !== $PUNC_BRACKET_CLOSE) {
-        THROW('Missing closing square bracket for computed property name, found `' + curtok.str +'` instead');
+        THROW('Missing closing square bracket for computed property name, found `' + tokenStrForError(curtok) + '` instead');
       }
       ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
@@ -10185,7 +10190,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipExpressionStart('[', lexerFlags);
         let assignablePiggies1 = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
         if (curtok.type !== $PUNC_BRACKET_CLOSE) {
-          THROW('Missing closing square bracket for computed property member name, found `' + curtok.str +'` instead');
+          THROW('Missing closing square bracket for computed property member name, found `' + tokenStrForError(curtok) + '` instead');
         }
         ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
@@ -10802,7 +10807,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipExpressionStart('[', lexerFlags);
         let assignablePiggies = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
         assignable = mergeAssignable(assignablePiggies, assignable);
-        if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Missing right square bracket for computed property, found `' + curtok.str + '` instead');
+        if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Missing right square bracket for computed property, found `' + tokenStrForError(curtok) + '` instead');
         ASSERT_skipToParenOpen(']', lexerFlags);
         parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, undefined, bracketOpenToken, astProp);
       } else {
@@ -10878,7 +10883,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let assignablePiggies = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
       assignable = mergeAssignable(assignablePiggies, assignable);
       if (curtok.type !== $PUNC_BRACKET_CLOSE) {
-        THROW('Missing closing square bracket for computed property name, found `' + curtok.str +'` instead');
+        THROW('Missing closing square bracket for computed property name, found `' + tokenStrForError(curtok) + '` instead');
       }
       ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
@@ -11115,7 +11120,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       innerLexerFlags = sansFlag(innerLexerFlags, LF_SUPER_CALL);
     }
 
-    if (curtok.type !== $PUNC_CURLY_OPEN) THROW('Expected the opening curly `{` of a class body, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_CURLY_OPEN) THROW('Expected the opening curly `{` of a class body, found `' + tokenStrForError(curtok) + '` instead');
 
     // _now_ enable super props, super call is already set up correctly
     // Note that computed props will not get this state from the current class (but potentially from an outer class)
@@ -11544,7 +11549,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function *f(){  class x{[yield foo](a){}}  }`
     ASSERT(hasNoFlag(nowAssignable, PIGGY_BACK_SAW_YIELD_VARNAME), 'all parts of class are strict so yield can never be varname');
     // - `(fail = class A {[await](){}; "x"(){}}) => {}`
-    if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Missing right square bracket for computed member, found `' + curtok.str + '` instead');
+    if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Missing right square bracket for computed member, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipToParenOpen(']', lexerFlags);
 
     // - `{[foo](){}}`
@@ -11597,7 +11602,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (
         isStringToken(keyToken.type) &&
-        keyToken.canon.slice(1, -1) === 'prototype'
+        keyToken.canon === 'prototype'
       ) {
         THROW('Static class methods can not be called `prototype`');
       }
@@ -11624,7 +11629,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // And for strings it is the unquoted canonical value of the string (so "constructor" and 'constructor' + escapes)
         (
           isStringToken(keyToken.type) &&
-          keyToken.canon.slice(1, -1) === 'constructor' // .canon will have any escapes properly unescaped
+          keyToken.canon === 'constructor' // .canon will have any escapes properly unescaped
         )
       )
     ) {
@@ -12410,7 +12415,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: move this to outside of this branch?
       // [x]: `{get 123: x}`
       // [x]: `{async foo: x}`
-      THROW('Expected to parse a paren of the method now but found `' + curtok.str + '`');
+      THROW('Expected to parse a paren of the method now but found `' + tokenStrForError(curtok) + '`');
 
       // // This is an error path because generators must be methods
       // if (allowAsyncFunctions) {

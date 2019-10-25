@@ -1208,12 +1208,12 @@ function ZeTokenizer(
       , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
-    let str = slice(start, stop);
+    let str = slice(isStringToken(type) ? start + 1 : start, isStringToken(type) ? stop - 1 : stop);
 
     let canon = '';
     if (type === $IDENT) canon = lastParsedIdent;
     else if (isStringToken(type)) {
-      canon = str[0] + lastCanonizedString + str[0];
+      canon = lastCanonizedString;
     }
     else if (isTickToken(type)) {
       // Mostly necessary for AST output.
@@ -5473,6 +5473,14 @@ function T(type) {
   return 'T<' + toktypeToString(type) + '>';
 }
 
+function tokenStrForError(token) {
+  if (isStringToken(token)) {
+    if (token.type === $STRING_DOUBLE) return '"' + token.str + '"';
+    return "'" + token.str + "'";
+  }
+  return token.str;
+}
+
 export default ZeTokenizer;
 export {
   $G_WHITE,
@@ -5626,6 +5634,7 @@ export {
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
+  tokenStrForError,
   toktypeToString,
   T,
   ASSERT_pushCanonPoison,
