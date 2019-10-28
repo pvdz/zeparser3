@@ -1271,8 +1271,8 @@ function ZeTokenizer(
         token,
         'canon',
         {
-          get: () => disableCanonPoison[0] || ASSERT(false, 'do not read .canon on non-ident tokens'),
-          set: () => disableCanonPoison[0] || ASSERT(false, 'do not write to .canon on non-ident tokens')
+          get: () => disableCanonPoison[0] || ASSERT(false, 'do not read .canon on non-ident tokens (' + token + ')'),
+          set: () => disableCanonPoison[0] || ASSERT(false, 'do not write to .canon on non-ident tokens (' + token + ')')
         }
       ),
       '(debugging)'
