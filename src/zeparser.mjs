@@ -1187,6 +1187,101 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
     }
   }
+  function AST_destructArrowParams(toplevelComma, asyncToken, arrowStartToken, astProp) {
+    ASSERT(AST_destructArrowParams.length === arguments.length, 'arg count');
+
+    AST_wrapClosedIntoArrayCustom(astProp, {
+      type: 'ArrowFunctionExpression',
+      loc: AST_getBaseLoc(arrowStartToken),
+      params: undefined,
+      id: null,
+      generator: false,
+      async: asyncToken !== UNDEF_ASYNC,
+      expression: undefined, // TODO: init to bool
+      body: undefined,
+    }, 'params', arrowStartToken);
+
+    let top = _path[_path.length - 1];
+    if (toplevelComma) {
+      ASSERT(top.params instanceof Array, 'these params should be an array');
+      let params = top.params[top.params.length - 1];
+      ASSERT(params.type === 'SequenceExpression', 'if toplevelComma then this is a sequence', astProp, params);
+      ASSERT(params.expressions instanceof Array, 'if toplevelComma then node is a sequence and .expressions should be an array');
+      top.params = params.expressions;
+    }
+    ASSERT(Array.isArray(top.params), 'params should now be an array in any case');
+    let params = top.params;
+    for (let i=0; i<params.length; ++i) {
+      AST__destruct(params[i]);
+    }
+
+  }
+  function AST_convertArrayToPattern(token, astProp) {
+    ASSERT(AST_convertArrayToPattern.length === arguments.length, 'arg count');
+
+    if (token.type === $PUNC_EQ) {
+      let node = _path[_path.length - 1][astProp];
+      if (node.length !== undefined) {
+        ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+        node = node[node.length - 1];
+      }
+      if (node.type === 'ArrayExpression' || node.type === 'ObjectExpression') {
+        AST_destruct(astProp);
+      }
+    }
+  }
+  function AST_throwIfIllegalUpdateArg(astProp) {
+    ASSERT(AST_throwIfIllegalUpdateArg.length === arguments.length, 'arg count');
+
+    // Using the AST for this because in the current propagation system we can only tell whether the parsed part
+    // is assignable or not, and in this reading something that can be destructured can be assigned to.
+
+    let prev = _path[_path.length - 1] && _path[_path.length - 1][astProp];
+
+    // Note: the for-case is nasty because when parsing the lhs the AST is not yet populated with a `for` statement
+    // because that particular node type depends on `in`, `of`, or a semi. So the AST could be an array (block body)
+    if (
+      !prev ||
+      (
+        prev instanceof Array ?
+          // - `for (x--;;);`
+          !prev.length || (prev[prev.length - 1].type !== 'Identifier' && prev[prev.length - 1].type !== 'MemberExpression') :
+          // - `[]++`
+          (prev.type !== 'Identifier' && prev.type !== 'MemberExpression')
+      )
+    ) {
+      // - `++[]`
+      // - `--f()`
+      // - `++this`
+      // - `[]++`
+      // - `f()--`
+      // - `this++`
+      THROW('Can only increment or decrement an identifier or member expression');
+    }
+  }
+  function AST_patchAsyncCall(asyncToken, astProp) {
+    ASSERT(AST_patchAsyncCall.length === arguments.length, 'arg count');
+
+    let node = _path[_path.length - 1];
+    let args = node[astProp];
+    if (args instanceof Array) args = args[0];
+    ASSERT(args, 'should have parsed someting v1');
+    if (args.type === 'SequenceExpression') args = args.expressions;
+    else args = [args];
+    ASSERT(args, 'should have parsed someting v2');
+    if (node[astProp] instanceof Array) node[astProp] = [];
+    else node[astProp] = undefined;
+
+    // TODO: verify the args
+
+    ASSERT(_path[_path.length - 1][astProp]  instanceof Array || !void(_path[_path.length - 1][astProp] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
+    AST_setNode(astProp, {
+      type: 'CallExpression',
+      loc: AST_getClosedLoc(asyncToken),
+      callee: AST_getIdentNode(asyncToken),
+      arguments: args,
+    });
+  }
   function AST_babelDirectives() {
     // Remove Directive nodes from the body and generate them in a special directives array
     // https://babeljs.io/docs/en/babel-parser#output
@@ -6843,19 +6938,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionFromAssignmentOp(lexerFlags, firstAssignmentToken, lhsAssignable, astProp) {
     ASSERT(parseExpressionFromAssignmentOp.length === arguments.length, 'arg count');
-    // <SCRUB AST>
-    // Conditionally convert the lhs in the AST to a Pattern
-    if (curtok.type === $PUNC_EQ) {
-      let node = _path[_path.length - 1][astProp];
-      if (node.length !== undefined) {
-        ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
-        node = node[node.length - 1];
-      }
-      if (node.type === 'ArrayExpression' || node.type === 'ObjectExpression') {
-        AST_destruct(astProp);
-      }
-    }
-    // </SCRUB AST>
+
+    AST_convertArrayToPattern(curtok, astProp)
 
     // Note: assignment to object/array is caught elsewhere
     AST_wrapClosedCustom(astProp, {
@@ -7795,17 +7879,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     });
     let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, NOT_LHSE, 'argument');
 
-    // <SCRUB AST>
-    // Using the AST for this because in the current propagation system we can only tell whether the parsed part
-    // is assignable or not, and in this reading something that can be destructured can be assigned to.
-    let argNode = _path[_path.length - 1] && _path[_path.length - 1].argument;
-    if (!argNode || (argNode.type !== 'Identifier' && argNode.type !== 'MemberExpression')) {
-      // - `++[]`
-      // - `--f()`
-      // - `++this`
-      THROW('Can only pre-increment or pre-decrement an identifier or member expression');
-    }
-    // </SCRUB AST>
+    AST_throwIfIllegalUpdateArg('argument');
 
     AST_close('UpdateExpression');
 
@@ -8299,28 +8373,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Cannot inc/dec a non-assignable value as postfix');
     }
 
-    // <SCRUB AST>
-    // Using the AST for this because in the current propagation system we can only tell whether the parsed part
-    // is assignable or not, and in this reading something that can be destructured can be assigned to.
-    let prev = _path[_path.length - 1] && _path[_path.length - 1][astProp];
-    // Note: the for-case is nasty because when parsing the lhs the AST is not yet populated with a `for` statement
-    // because that particular node type depends on `in`, `of`, or a semi. So the AST could be an array (block body)
-    if (
-      !prev ||
-      (
-        prev instanceof Array ?
-          // - `for (x--;;);`
-          !prev.length || (prev[prev.length - 1].type !== 'Identifier' && prev[prev.length - 1].type !== 'MemberExpression') :
-          // - `[]++`
-          (prev.type !== 'Identifier' && prev.type !== 'MemberExpression')
-      )
-    ) {
-      // - `[]++`
-      // - `f()--`
-      // - `this++`
-      THROW('Can only post-increment or post-decrement an identifier or member expression');
-    }
-    // </SCRUB AST>
+    AST_throwIfIllegalUpdateArg(astProp);
 
     let operator = curtok.str;
     ASSERT_skipDiv($G_PUNCTUATOR, lexerFlags);
@@ -9281,27 +9334,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `async \n (a, b, c);`
         //                      ^
 
-        // <SCRUB AST>
-        let node = _path[_path.length - 1];
-        let args = node[astProp];
-        if (args instanceof Array) args = args[0];
-        ASSERT(args, 'should have parsed someting v1');
-        if (args.type === 'SequenceExpression') args = args.expressions;
-        else args = [args];
-        ASSERT(args, 'should have parsed someting v2');
-        if (node[astProp] instanceof Array) node[astProp] = [];
-        else node[astProp] = undefined;
-
-        // TODO: verify the args
-
-        ASSERT(_path[_path.length - 1][astProp]  instanceof Array || !void(_path[_path.length - 1][astProp] = undefined), '(there is an assert that confirms that the property is undefined and we expect this not to be the case here)');
-        AST_setNode(astProp, {
-          type: 'CallExpression',
-          loc: AST_getClosedLoc(asyncToken),
-          callee: AST_getIdentNode(asyncToken),
-          arguments: args,
-        });
-        // </SCRUB AST>
+        AST_patchAsyncCall(asyncToken, astProp);
       }
 
       let assignable = parseValueTail(lexerFlags, asyncToken, NOT_ASSIGNABLE, NOT_NEW_ARG, NOT_LHSE, astProp);
@@ -9377,32 +9410,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
-    // <SCRUB AST>
-    AST_wrapClosedIntoArrayCustom(astProp, {
-      type: 'ArrowFunctionExpression',
-      loc: AST_getBaseLoc(arrowStartToken),
-      params: undefined,
-      id: null,
-      generator: false,
-      async: asyncToken !== UNDEF_ASYNC,
-      expression: undefined, // TODO: init to bool
-      body: undefined,
-    }, 'params', arrowStartToken);
-
-    let top = _path[_path.length - 1];
-    if (toplevelComma) {
-      ASSERT(top.params instanceof Array, 'these params should be an array');
-      let params = top.params[top.params.length - 1];
-      ASSERT(params.type === 'SequenceExpression', 'if toplevelComma then this is a sequence', astProp, params);
-      ASSERT(params.expressions instanceof Array, 'if toplevelComma then node is a sequence and .expressions should be an array');
-      top.params = params.expressions;
-    }
-    ASSERT(Array.isArray(top.params), 'params should now be an array in any case');
-    let params = top.params;
-    for (let i=0; i<params.length; ++i) {
-      AST__destruct(params[i]);
-    }
-    // </SCRUB AST>
+    AST_destructArrowParams(toplevelComma, asyncToken, arrowStartToken, astProp);
 
     parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, wasSimple);
 

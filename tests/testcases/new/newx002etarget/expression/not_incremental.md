@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can only pre-increment or pre-decrement an identifier or member expression
+  Can only increment or decrement an identifier or member expression
 
 function f(){ ++new.target }
                            ^------- error
