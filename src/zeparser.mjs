@@ -1619,115 +1619,439 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     skipAny(lexerFlags);
   }
+
   function ASSERT_skipToParenOpen(what, lexerFlags) {
     skipToParenOpen(lexerFlags);
+  }
+  function skipToParenOpen(lexerFlags) {
+    // The next token must be a paren
+    skipAny(lexerFlags);
+    if (curtok.type !== $PUNC_PAREN_OPEN) {
+      THROW('Expected to parse an opening paren, found `' + tokenStrForError(curtok) + '`');
+    }
   }
   function ASSERT_skipToCurlyOpen(what, lexerFlags) {
     skipToCurlyOpen(lexerFlags);
   }
+  function skipToCurlyOpen(lexerFlags) {
+    // The next token must be a curly, possibly preceded by some whitespace
+    // If it's not a curly then it falls back to the regular lexer. This function will validate the string afterwards.
+    skipAny(lexerFlags);
+    if (curtok.type !== $PUNC_CURLY_OPEN) {
+      THROW('Expected to parse an opening curly, found `' + tokenStrForError(curtok) + '`');
+    }
+  }
   function ASSERT_skipParenOpenCurlyOpen(what, lexerFlags) {
     skipParenOpenCurlyOpen(lexerFlags);
+  }
+  function skipParenOpenCurlyOpen(lexerFlags) {
+    // The next token must be a curly open or paren open, possibly preceded by some whitespace
+    skipAny(lexerFlags);
+    ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN || curtok.type === $PUNC_CURLY_OPEN, 'limited options, expecting { (', curtok);
   }
   function ASSERT_skipToFrom(what, lexerFlags) {
     skipToFrom(lexerFlags);
   }
+  function skipToFrom(lexerFlags) {
+    // The next token must be the ident "from", possibly preceded by some whitespace
+    // If it's not "from" then it falls back to the regular lexer. This function will validate the string afterwards.
+    skipAny(lexerFlags);
+
+    if (curtok.str !== 'from') {
+      THROW('Next token should be the ident `from` but was `' + tokenStrForError(curtok) + '`');
+    }
+    ASSERT(isIdentToken(curtok.type), 'a token whose value "from" should be an ident');
+  }
   function ASSERT_skipToString(what, lexerFlags) {
     skipToString(lexerFlags);
+  }
+  function skipToString(lexerFlags) {
+    // The next token must be a string, possibly preceded by some whitespace
+    // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
+    skipAny(lexerFlags);
+    if (!isStringToken(curtok.type)) {
+      THROW('Next token should be a string but was `' + tokenStrForError(curtok) + '`');
+    }
   }
   function ASSERT_skipToIdent(what, lexerFlags) {
     skipToIdent(lexerFlags);
   }
+  function skipToIdent(lexerFlags) {
+    // The next token must be a string, possibly preceded by some whitespace
+    // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
+    skipAny(lexerFlags);
+    if (!isIdentToken(curtok.type)) {
+      THROW('Next token should be an ident but was `' + tokenStrForError(curtok) + '`');
+    }
+  }
   function ASSERT_skipArrow(what, lexerFlags) {
     skipArrow(lexerFlags);
+  }
+  function skipArrow(lexerFlags) {
+    // Next token must be an arrow, with possibly some whitespace
+    skipAny(lexerFlags);
+    if (curtok.type !== $PUNC_EQ_GT) {
+      THROW('Next token should be `=>` but was `' + tokenStrForError(curtok) + '`');
+    }
   }
   function ASSERT_skipAs(what, lexerFlags) {
     skipAs(lexerFlags);
   }
+  function skipAs(lexerFlags) {
+    // Next token must be `as`, with some whitespace
+    skipAny(lexerFlags);
+    if (curtok.str !== 'as') {
+      THROW('Next token should be `as` but was `' + tokenStrForError(curtok) + '`');
+    }
+  }
   function ASSERT_skipAsCommaCurlyClose(what, lexerFlags) {
     skipAsCommaCurlyClose(lexerFlags);
+  }
+  function skipAsCommaCurlyClose(lexerFlags) {
+    // Next token must be `as`, comma, or `}`, with some whitespace
+    skipAny(lexerFlags);
+    ASSERT_VALID(curtok.str === 'as' || curtok.type === $PUNC_COMMA || curtok.type === $PUNC_CURLY_CLOSE, 'limited options, wanted `as` , }', curtok);
   }
   function ASSERT_skipAsCommaFrom(what, lexerFlags) {
     skipAsCommaFrom(lexerFlags);
   }
+  function skipAsCommaFrom(lexerFlags) {
+    // Next token must be `as`, with some whitespace
+    skipAny(lexerFlags);
+    ASSERT_VALID(curtok.str === 'as' || curtok.str === 'from' || curtok.type === $PUNC_COMMA, 'limited options, expecting `as` `from` comma', curtok);
+  }
   function ASSERT_skipColon(what, lexerFlags) {
     skipColon(lexerFlags);
+  }
+  function skipColon(lexerFlags) {
+    // Next token must be `:`, with possibly some whitespace
+    skipAny(lexerFlags);
+    if (curtok.type !== $PUNC_COLON) {
+      THROW('Next token should be `:` but was `' + tokenStrForError(curtok) + '`');
+    }
   }
   function ASSERT_skipTarget(what, lexerFlags) {
     skipTarget(lexerFlags);
   }
+  function skipTarget(lexerFlags) {
+    // Next token must be `target`, with unlikely some whitespace
+    skipAny(lexerFlags);
+    if (curtok.str !== 'target') {
+      THROW('Next token should be `target` but was `' + tokenStrForError(curtok) + '`');
+    }
+  }
   function ASSERT_skipStatementStart(what, lexerFlags) {
     skipStatementStart(lexerFlags);
+  }
+  function skipStatementStart(lexerFlags) {
+    // Next token must start a statement
+    skipRex(lexerFlags);
+    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
+
+    // Note: this assumes the statement header is followed by a sub-statement. This is not true for `do-while`. However
+    // for that case what follows is either a new statement or the end of a block. So it should still parse the same.
+
+    // Note: this is the assertion from expressionStart + semi and closing curly
+    ASSERT_VALID(
+      isIdentToken(curtok.type) ||
+      isStringToken(curtok.type) ||
+      isTemplateStart(curtok.type) ||
+      isNumberToken(curtok.type) ||
+      isRegexToken(curtok.type) ||
+      curtok.type === $PUNC_EXCL ||
+      curtok.type === $PUNC_BRACKET_OPEN ||
+      curtok.type === $PUNC_CURLY_OPEN ||
+      curtok.type === $PUNC_PAREN_OPEN ||
+      curtok.type === $PUNC_PLUS ||
+      curtok.type === $PUNC_MIN ||
+      curtok.type === $PUNC_PLUS_PLUS ||
+      curtok.type === $PUNC_MIN_MIN ||
+      curtok.type === $PUNC_TILDE ||
+      curtok.type === $PUNC_SEMI ||
+      curtok.type === $PUNC_CURLY_CLOSE ||
+      curtok.type === $EOF || // do-while at at eof. do while is not a problem otherwise... (I think)
+      false, 'expecting the start of a statement, a wide but limited set of valid tokens ' + curtok);
   }
   function ASSERT_skipExpressionStart(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
     skipExpressionStart(lexerFlags);
   }
+  function skipExpressionStart(lexerFlags) {
+    // Next token must start an expression
+    skipRex(lexerFlags);
+    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
+    ASSERT_VALID(
+      isIdentToken(curtok.type) ||
+      isStringToken(curtok.type) ||
+      isTemplateStart(curtok.type) ||
+      isNumberToken(curtok.type) ||
+      isRegexToken(curtok.type) ||
+      curtok.type === $PUNC_EXCL ||
+      curtok.type === $PUNC_BRACKET_OPEN ||
+      curtok.type === $PUNC_CURLY_OPEN ||
+      curtok.type === $PUNC_PAREN_OPEN ||
+      curtok.type === $PUNC_PLUS ||
+      curtok.type === $PUNC_MIN ||
+      curtok.type === $PUNC_PLUS_PLUS ||
+      curtok.type === $PUNC_MIN_MIN ||
+      curtok.type === $PUNC_TILDE ||
+      curtok.type === $PUNC_DOT_DOT_DOT ||
+      false, 'expecting the start of an expression, a wide but limited set of valid tokens');
+  }
   function ASSERT_skipExpressionStartGrouped(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
     skipExpressionStartGrouped(lexerFlags);
+  }
+  function skipExpressionStartGrouped(lexerFlags) {
+    // Next token must start an expression or `)`
+    skipRex(lexerFlags);
+    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
+    ASSERT_VALID(
+      isIdentToken(curtok.type) ||
+      isStringToken(curtok.type) ||
+      isTemplateStart(curtok.type) ||
+      isNumberToken(curtok.type) ||
+      isRegexToken(curtok.type) ||
+      curtok.type === $PUNC_EXCL ||
+      curtok.type === $PUNC_BRACKET_OPEN ||
+      curtok.type === $PUNC_CURLY_OPEN ||
+      curtok.type === $PUNC_PAREN_OPEN ||
+      curtok.type === $PUNC_PLUS ||
+      curtok.type === $PUNC_MIN ||
+      curtok.type === $PUNC_PLUS_PLUS ||
+      curtok.type === $PUNC_MIN_MIN ||
+      curtok.type === $PUNC_TILDE ||
+      curtok.type === $PUNC_DOT_DOT_DOT ||
+      curtok.type === $PUNC_PAREN_CLOSE ||
+      false, 'expecting the start of an expression or `)`, a wide but limited set of valid tokens');
   }
   function ASSERT_skipExpressionStartSemi(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
     skipExpressionStartSemi(lexerFlags);
   }
+  function skipExpressionStartSemi(lexerFlags) {
+    // Next token must start an expression or `;`
+    skipRex(lexerFlags);
+    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
+    ASSERT_VALID(
+      isIdentToken(curtok.type) ||
+      isStringToken(curtok.type) ||
+      isTemplateStart(curtok.type) ||
+      isNumberToken(curtok.type) ||
+      isRegexToken(curtok.type) ||
+      curtok.type === $PUNC_EXCL ||
+      curtok.type === $PUNC_BRACKET_OPEN ||
+      curtok.type === $PUNC_CURLY_OPEN ||
+      curtok.type === $PUNC_PAREN_OPEN ||
+      curtok.type === $PUNC_PLUS ||
+      curtok.type === $PUNC_MIN ||
+      curtok.type === $PUNC_PLUS_PLUS ||
+      curtok.type === $PUNC_MIN_MIN ||
+      curtok.type === $PUNC_TILDE ||
+      curtok.type === $PUNC_DOT_DOT_DOT ||
+      curtok.type === $PUNC_SEMI ||
+      false, 'expecting the start of an expression or `;`, a wide but limited set of valid tokens');
+  }
   function ASSERT_skipExpressionStartSquareCloseComma(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
     skipExpressionStartSquareCloseComma(lexerFlags);
+  }
+  function skipExpressionStartSquareCloseComma(lexerFlags) {
+    // Next token must start an expression or `]` or `,`
+    skipRex(lexerFlags);
+    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
+    ASSERT_VALID(
+      isIdentToken(curtok.type) ||
+      isStringToken(curtok.type) ||
+      isTemplateStart(curtok.type) ||
+      isNumberToken(curtok.type) ||
+      isRegexToken(curtok.type) ||
+      curtok.type === $PUNC_EXCL ||
+      curtok.type === $PUNC_BRACKET_OPEN ||
+      curtok.type === $PUNC_CURLY_OPEN ||
+      curtok.type === $PUNC_PAREN_OPEN ||
+      curtok.type === $PUNC_PLUS ||
+      curtok.type === $PUNC_MIN ||
+      curtok.type === $PUNC_PLUS_PLUS ||
+      curtok.type === $PUNC_MIN_MIN ||
+      curtok.type === $PUNC_TILDE ||
+      curtok.type === $PUNC_DOT_DOT_DOT ||
+      curtok.type === $PUNC_COMMA ||
+      curtok.type === $PUNC_BRACKET_CLOSE ||
+      false, 'expecting the start of an expression or `,` or `]`, a wide but limited set of valid tokens');
   }
   function ASSERT_skipToAfterNew(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
     skipToAfterNew(lexerFlags);
   }
+  function skipToAfterNew(lexerFlags) {
+    // Next token must start an expression or `.` (for `new.target`)
+    // (Note that the expressionStart lexer will check for `...` and `.` so we can just use that)
+    skipRex(lexerFlags);
+    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
+    ASSERT_VALID(
+      isIdentToken(curtok.type) ||
+      isStringToken(curtok.type) ||
+      isTemplateStart(curtok.type) ||
+      isNumberToken(curtok.type) ||
+      isRegexToken(curtok.type) ||
+      curtok.type === $PUNC_EXCL ||
+      curtok.type === $PUNC_BRACKET_OPEN ||
+      curtok.type === $PUNC_CURLY_OPEN ||
+      curtok.type === $PUNC_PAREN_OPEN ||
+      curtok.type === $PUNC_PLUS ||
+      curtok.type === $PUNC_MIN ||
+      curtok.type === $PUNC_PLUS_PLUS ||
+      curtok.type === $PUNC_MIN_MIN ||
+      curtok.type === $PUNC_TILDE ||
+      curtok.type === $PUNC_DOT_DOT_DOT || // should lead to an error, but the lexer can certainly return it
+      curtok.type === $PUNC_DOT ||
+      false, 'expecting the start of an expression or `.`, a wide but limited set of valid tokens');
+  }
   function ASSERT_skipObjectMemberStart(what, lexerFlags) {
     skipObjectMemberStart(lexerFlags);
+  }
+  function skipObjectMemberStart(lexerFlags) {
+    // Next token is the first of an object member (after `{` or comma of an objlit)
+    skipAny(lexerFlags);
   }
   function ASSERT_skipObjectMemberRest(what, lexerFlags) {
     skipObjectMemberRest(lexerFlags);
   }
+  function skipObjectMemberRest(lexerFlags) {
+    // Next token must be able to follow an object member rest
+    skipAny(lexerFlags);
+  }
   function ASSERT_skipClassMemberStart(what, lexerFlags) {
     skipClassMemberStart(lexerFlags);
+  }
+  function skipClassMemberStart(lexerFlags) {
+    // Next token is the first of a class member (after `{` or semi-colon of a class body)
+    skipAny(lexerFlags);
   }
   function ASSERT_skipClassMemberRest(what, lexerFlags) {
     skipClassMemberRest(lexerFlags);
   }
+  function skipClassMemberRest(lexerFlags) {
+    // Next token must be able to follow the first token of a class member
+    skipAny(lexerFlags);
+  }
   function ASSERT_skipSwitchBody(what, lexerFlags) {
     skipSwitchBody(lexerFlags);
+  }
+  function skipSwitchBody(lexerFlags) {
+    // Next token must be `case`, `default`, or `}`, with likely some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID(curtok.str === 'case' || curtok.str === 'default' || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted case default }', curtok);
   }
   function ASSERT_skipBindingStart(what, lexerFlags) {
     skipBindingStart(lexerFlags);
   }
+  function skipBindingStart(lexerFlags) {
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID(isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_DOT_DOT_DOT, 'not many options, wanted ident ... [ {', curtok);
+  }
   function ASSERT_skipBindingStartGrouped(what, lexerFlags) {
     skipBindingStartGrouped(lexerFlags);
+  }
+  function skipBindingStartGrouped(lexerFlags) {
+    // Same as bindingStart but it may also encounter a closing parenthesis (params)
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID(isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_DOT_DOT_DOT || curtok.type === $PUNC_PAREN_CLOSE, 'not many options, wanted ident ... [ { )', curtok);
   }
   function ASSERT_skipColonParenOpen(what, lexerFlags) {
     skipColonParenOpen(lexerFlags);
   }
+  function skipColonParenOpen(lexerFlags) {
+    // Next token must be `:`, or `(`, with unlikely some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( curtok.type === $PUNC_COLON || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted : (', curtok);
+  }
   function ASSERT_skipIdentParenOpen(what, lexerFlags) {
     skipIdentParenOpen(lexerFlags);
+  }
+  function skipIdentParenOpen(lexerFlags) {
+    // Next token must be ident, or `(`, with maybe some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident (', curtok);
   }
   function ASSERT_skipIdentStarParenOpen(what, lexerFlags) {
     skipIdentStarParenOpen(lexerFlags);
   }
+  function skipIdentStarParenOpen(lexerFlags) {
+    // Next token must be ident, `*`, or `(`, with maybe some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident * (', curtok);
+  }
   function ASSERT_skipIdentStarCurlyOpen(what, lexerFlags) {
     skipIdentStarCurlyOpen(lexerFlags);
+  }
+  function skipIdentStarCurlyOpen(lexerFlags) {
+    // Next token must be ident, `*`, or `{`, with maybe some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_CURLY_OPEN, 'not many options, wanted ident * {', curtok);
   }
   function ASSERT_skipCommaCurlyClose(what, lexerFlags) {
     skipCommaCurlyClose(lexerFlags);
   }
+  function skipCommaCurlyClose(lexerFlags) {
+    // Next token must be comma or `}`, with maybe some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( curtok.type === $PUNC_COMMA || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted , }', curtok);
+  }
   function ASSERT_skipIdentCurlyOpen(what, lexerFlags) {
     skipIdentCurlyOpen(lexerFlags);
+  }
+  function skipIdentCurlyOpen(lexerFlags) {
+    // Next token must be ident, or `{`, with maybe some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_CURLY_OPEN, 'not many options, wanted ident {', curtok);
   }
   function ASSERT_skipIdentCurlyClose(what, lexerFlags) {
     skipIdentCurlyClose(lexerFlags);
   }
+  function skipIdentCurlyClose(lexerFlags) {
+    // Next token must be ident, or `}`, with maybe some whitespace
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted ident }', curtok);
+  }
   function ASSERT_skipIdentStarCurlyOpenParenOpenString(what, lexerFlags) {
     skipIdentStarCurlyOpenParenOpenString(lexerFlags);
+  }
+  function skipIdentStarCurlyOpenParenOpenString(lexerFlags) {
+    // Next token is whatever is valid after the `import` keyword (ident, star, curly open, string, or paren open)
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_PAREN_OPEN || isStringToken(curtok.type), 'not many options, wanted ident string * { (', curtok);
   }
   function ASSERT_skipAwaitParenOpen(what, lexerFlags) {
     skipAwaitParenOpen(lexerFlags);
   }
+  function skipAwaitParenOpen(lexerFlags) {
+    // Next token must be `await`, or `(`. For example, after the `for` keyword
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident (', curtok);
+  }
   function ASSERT_skipIdentStringNumberSquareOpen(what, lexerFlags) {
     skipIdentStringNumberSquareOpen(lexerFlags);
+  }
+  function skipIdentStringNumberSquareOpen(lexerFlags) {
+    // Token after the star of an object/class method shorthand
+    skipAny(lexerFlags);
+    // Since the rest has to check it anyways we don't need to validate it here
+    // Note: big int is okay here...
+    ASSERT_VALID( isIdentToken(curtok.type) || isStringToken(curtok.type) || isNumberToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN, 'not many options, wanted ident number string [', curtok);
   }
 
   function skipIdentSafeSlowAndExpensive(lexerFlags, leftHandSideExpression) {
@@ -1769,329 +2093,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       default:
         ASSERT_skipDiv($IDENT, lexerFlags);
     }
-  }
-  function skipToParenOpen(lexerFlags) {
-    // The next token must be a paren
-    skipAny(lexerFlags);
-    if (curtok.type !== $PUNC_PAREN_OPEN) {
-      THROW('Expected to parse an opening paren, found `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipToCurlyOpen(lexerFlags) {
-    // The next token must be a curly, possibly preceded by some whitespace
-    // If it's not a curly then it falls back to the regular lexer. This function will validate the string afterwards.
-    skipAny(lexerFlags);
-    if (curtok.type !== $PUNC_CURLY_OPEN) {
-      THROW('Expected to parse an opening curly, found `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipParenOpenCurlyOpen(lexerFlags) {
-    // The next token must be a curly open or paren open, possibly preceded by some whitespace
-    skipAny(lexerFlags);
-    ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN || curtok.type === $PUNC_CURLY_OPEN, 'limited options, expecting { (', curtok);
-  }
-  function skipToFrom(lexerFlags) {
-    // The next token must be the ident "from", possibly preceded by some whitespace
-    // If it's not "from" then it falls back to the regular lexer. This function will validate the string afterwards.
-    skipAny(lexerFlags);
-
-    if (curtok.str !== 'from') {
-      THROW('Next token should be the ident `from` but was `' + tokenStrForError(curtok) + '`');
-    }
-    ASSERT(isIdentToken(curtok.type), 'a token whose value "from" should be an ident');
-  }
-  function skipToString(lexerFlags) {
-    // The next token must be a string, possibly preceded by some whitespace
-    // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
-    skipAny(lexerFlags);
-    if (!isStringToken(curtok.type)) {
-      THROW('Next token should be a string but was `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipToIdent(lexerFlags) {
-    // The next token must be a string, possibly preceded by some whitespace
-    // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
-    skipAny(lexerFlags);
-    if (!isIdentToken(curtok.type)) {
-      THROW('Next token should be an ident but was `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipArrow(lexerFlags) {
-    // Next token must be an arrow, with possibly some whitespace
-    skipAny(lexerFlags);
-    if (curtok.type !== $PUNC_EQ_GT) {
-      THROW('Next token should be `=>` but was `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipAs(lexerFlags) {
-    // Next token must be `as`, with some whitespace
-    skipAny(lexerFlags);
-    if (curtok.str !== 'as') {
-      THROW('Next token should be `as` but was `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipAsCommaCurlyClose(lexerFlags) {
-    // Next token must be `as`, comma, or `}`, with some whitespace
-    skipAny(lexerFlags);
-    ASSERT_VALID(curtok.str === 'as' || curtok.type === $PUNC_COMMA || curtok.type === $PUNC_CURLY_CLOSE, 'limited options, wanted `as` , }', curtok);
-  }
-  function skipAsCommaFrom(lexerFlags) {
-    // Next token must be `as`, with some whitespace
-    skipAny(lexerFlags);
-    ASSERT_VALID(curtok.str === 'as' || curtok.str === 'from' || curtok.type === $PUNC_COMMA, 'limited options, expecting `as` `from` comma', curtok);
-  }
-  function skipColon(lexerFlags) {
-    // Next token must be `:`, with possibly some whitespace
-    skipAny(lexerFlags);
-    if (curtok.type !== $PUNC_COLON) {
-      THROW('Next token should be `:` but was `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipTarget(lexerFlags) {
-    // Next token must be `target`, with unlikely some whitespace
-    skipAny(lexerFlags);
-    if (curtok.str !== 'target') {
-      THROW('Next token should be `target` but was `' + tokenStrForError(curtok) + '`');
-    }
-  }
-  function skipStatementStart(lexerFlags) {
-    // Next token must start a statement
-    skipRex(lexerFlags);
-    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
-
-    // Note: this assumes the statement header is followed by a sub-statement. This is not true for `do-while`. However
-    // for that case what follows is either a new statement or the end of a block. So it should still parse the same.
-
-    // Note: this is the assertion from expressionStart + semi and closing curly
-    ASSERT_VALID(
-      isIdentToken(curtok.type) ||
-      isStringToken(curtok.type) ||
-      isTemplateStart(curtok.type) ||
-      isNumberToken(curtok.type) ||
-      isRegexToken(curtok.type) ||
-      curtok.type === $PUNC_EXCL ||
-      curtok.type === $PUNC_BRACKET_OPEN ||
-      curtok.type === $PUNC_CURLY_OPEN ||
-      curtok.type === $PUNC_PAREN_OPEN ||
-      curtok.type === $PUNC_PLUS ||
-      curtok.type === $PUNC_MIN ||
-      curtok.type === $PUNC_PLUS_PLUS ||
-      curtok.type === $PUNC_MIN_MIN ||
-      curtok.type === $PUNC_TILDE ||
-      curtok.type === $PUNC_SEMI ||
-      curtok.type === $PUNC_CURLY_CLOSE ||
-      curtok.type === $EOF || // do-while at at eof. do while is not a problem otherwise... (I think)
-      false, 'expecting the start of a statement, a wide but limited set of valid tokens ' + curtok);
-  }
-  function skipExpressionStart(lexerFlags) {
-    // Next token must start an expression
-    skipRex(lexerFlags);
-    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
-    ASSERT_VALID(
-      isIdentToken(curtok.type) ||
-      isStringToken(curtok.type) ||
-      isTemplateStart(curtok.type) ||
-      isNumberToken(curtok.type) ||
-      isRegexToken(curtok.type) ||
-      curtok.type === $PUNC_EXCL ||
-      curtok.type === $PUNC_BRACKET_OPEN ||
-      curtok.type === $PUNC_CURLY_OPEN ||
-      curtok.type === $PUNC_PAREN_OPEN ||
-      curtok.type === $PUNC_PLUS ||
-      curtok.type === $PUNC_MIN ||
-      curtok.type === $PUNC_PLUS_PLUS ||
-      curtok.type === $PUNC_MIN_MIN ||
-      curtok.type === $PUNC_TILDE ||
-      curtok.type === $PUNC_DOT_DOT_DOT ||
-      false, 'expecting the start of an expression, a wide but limited set of valid tokens');
-  }
-  function skipExpressionStartGrouped(lexerFlags) {
-    // Next token must start an expression or `)`
-    skipRex(lexerFlags);
-    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
-    ASSERT_VALID(
-      isIdentToken(curtok.type) ||
-      isStringToken(curtok.type) ||
-      isTemplateStart(curtok.type) ||
-      isNumberToken(curtok.type) ||
-      isRegexToken(curtok.type) ||
-      curtok.type === $PUNC_EXCL ||
-      curtok.type === $PUNC_BRACKET_OPEN ||
-      curtok.type === $PUNC_CURLY_OPEN ||
-      curtok.type === $PUNC_PAREN_OPEN ||
-      curtok.type === $PUNC_PLUS ||
-      curtok.type === $PUNC_MIN ||
-      curtok.type === $PUNC_PLUS_PLUS ||
-      curtok.type === $PUNC_MIN_MIN ||
-      curtok.type === $PUNC_TILDE ||
-      curtok.type === $PUNC_DOT_DOT_DOT ||
-      curtok.type === $PUNC_PAREN_CLOSE ||
-      false, 'expecting the start of an expression or `)`, a wide but limited set of valid tokens');
-  }
-  function skipExpressionStartSemi(lexerFlags) {
-    // Next token must start an expression or `;`
-    skipRex(lexerFlags);
-    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
-    ASSERT_VALID(
-      isIdentToken(curtok.type) ||
-      isStringToken(curtok.type) ||
-      isTemplateStart(curtok.type) ||
-      isNumberToken(curtok.type) ||
-      isRegexToken(curtok.type) ||
-      curtok.type === $PUNC_EXCL ||
-      curtok.type === $PUNC_BRACKET_OPEN ||
-      curtok.type === $PUNC_CURLY_OPEN ||
-      curtok.type === $PUNC_PAREN_OPEN ||
-      curtok.type === $PUNC_PLUS ||
-      curtok.type === $PUNC_MIN ||
-      curtok.type === $PUNC_PLUS_PLUS ||
-      curtok.type === $PUNC_MIN_MIN ||
-      curtok.type === $PUNC_TILDE ||
-      curtok.type === $PUNC_DOT_DOT_DOT ||
-      curtok.type === $PUNC_SEMI ||
-      false, 'expecting the start of an expression or `;`, a wide but limited set of valid tokens');
-  }
-  function skipExpressionStartSquareCloseComma(lexerFlags) {
-    // Next token must start an expression or `]` or `,`
-    skipRex(lexerFlags);
-    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
-    ASSERT_VALID(
-      isIdentToken(curtok.type) ||
-      isStringToken(curtok.type) ||
-      isTemplateStart(curtok.type) ||
-      isNumberToken(curtok.type) ||
-      isRegexToken(curtok.type) ||
-      curtok.type === $PUNC_EXCL ||
-      curtok.type === $PUNC_BRACKET_OPEN ||
-      curtok.type === $PUNC_CURLY_OPEN ||
-      curtok.type === $PUNC_PAREN_OPEN ||
-      curtok.type === $PUNC_PLUS ||
-      curtok.type === $PUNC_MIN ||
-      curtok.type === $PUNC_PLUS_PLUS ||
-      curtok.type === $PUNC_MIN_MIN ||
-      curtok.type === $PUNC_TILDE ||
-      curtok.type === $PUNC_DOT_DOT_DOT ||
-      curtok.type === $PUNC_COMMA ||
-      curtok.type === $PUNC_BRACKET_CLOSE ||
-      false, 'expecting the start of an expression or `,` or `]`, a wide but limited set of valid tokens');
-  }
-  function skipToAfterNew(lexerFlags) {
-    // Next token must start an expression or `.` (for `new.target`)
-    // (Note that the expressionStart lexer will check for `...` and `.` so we can just use that)
-    skipRex(lexerFlags);
-    // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
-    ASSERT_VALID(
-      isIdentToken(curtok.type) ||
-      isStringToken(curtok.type) ||
-      isTemplateStart(curtok.type) ||
-      isNumberToken(curtok.type) ||
-      isRegexToken(curtok.type) ||
-      curtok.type === $PUNC_EXCL ||
-      curtok.type === $PUNC_BRACKET_OPEN ||
-      curtok.type === $PUNC_CURLY_OPEN ||
-      curtok.type === $PUNC_PAREN_OPEN ||
-      curtok.type === $PUNC_PLUS ||
-      curtok.type === $PUNC_MIN ||
-      curtok.type === $PUNC_PLUS_PLUS ||
-      curtok.type === $PUNC_MIN_MIN ||
-      curtok.type === $PUNC_TILDE ||
-      curtok.type === $PUNC_DOT_DOT_DOT || // should lead to an error, but the lexer can certainly return it
-      curtok.type === $PUNC_DOT ||
-      false, 'expecting the start of an expression or `.`, a wide but limited set of valid tokens');
-  }
-  function skipObjectMemberStart(lexerFlags) {
-    // Next token is the first of an object member (after `{` or comma of an objlit)
-    skipAny(lexerFlags);
-  }
-  function skipObjectMemberRest(lexerFlags) {
-    // Next token must be able to follow an object member rest
-    skipAny(lexerFlags);
-  }
-  function skipClassMemberStart(lexerFlags) {
-    // Next token is the first of a class member (after `{` or semi-colon of a class body)
-    skipAny(lexerFlags);
-  }
-  function skipClassMemberRest(lexerFlags) {
-    // Next token must be able to follow the first token of a class member
-    skipAny(lexerFlags);
-  }
-  function skipSwitchBody(lexerFlags) {
-    // Next token must be `case`, `default`, or `}`, with likely some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID(curtok.str === 'case' || curtok.str === 'default' || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted case default }', curtok);
-  }
-  function skipBindingStart(lexerFlags) {
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID(isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_DOT_DOT_DOT, 'not many options, wanted ident ... [ {', curtok);
-  }
-  function skipBindingStartGrouped(lexerFlags) {
-    // Same as bindingStart but it may also encounter a closing parenthesis (params)
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID(isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_DOT_DOT_DOT || curtok.type === $PUNC_PAREN_CLOSE, 'not many options, wanted ident ... [ { )', curtok);
-  }
-  function skipColonParenOpen(lexerFlags) {
-    // Next token must be `:`, or `(`, with unlikely some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( curtok.type === $PUNC_COLON || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted : (', curtok);
-  }
-  function skipIdentParenOpen(lexerFlags) {
-    // Next token must be ident, or `(`, with maybe some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident (', curtok);
-  }
-  function skipIdentStarParenOpen(lexerFlags) {
-    // Next token must be ident, `*`, or `(`, with maybe some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident * (', curtok);
-  }
-  function skipIdentStarCurlyOpen(lexerFlags) {
-    // Next token must be ident, `*`, or `{`, with maybe some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_CURLY_OPEN, 'not many options, wanted ident * {', curtok);
-  }
-  function skipCommaCurlyClose(lexerFlags) {
-    // Next token must be comma or `}`, with maybe some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( curtok.type === $PUNC_COMMA || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted , }', curtok);
-  }
-  function skipIdentCurlyOpen(lexerFlags) {
-    // Next token must be ident, or `{`, with maybe some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_CURLY_OPEN, 'not many options, wanted ident {', curtok);
-  }
-  function skipIdentCurlyClose(lexerFlags) {
-    // Next token must be ident, or `}`, with maybe some whitespace
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted ident }', curtok);
-  }
-  function skipIdentStarCurlyOpenParenOpenString(lexerFlags) {
-    // Next token is whatever is valid after the `import` keyword (ident, star, curly open, string, or paren open)
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_PAREN_OPEN || isStringToken(curtok.type), 'not many options, wanted ident string * { (', curtok);
-  }
-  function skipAwaitParenOpen(lexerFlags) {
-    // Next token must be `await`, or `(`. For example, after the `for` keyword
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident (', curtok);
-  }
-  function skipIdentStringNumberSquareOpen(lexerFlags) {
-    // Token after the star of an object/class method shorthand
-    skipAny(lexerFlags);
-    // Since the rest has to check it anyways we don't need to validate it here
-    // Note: big int is okay here...
-    ASSERT_VALID( isIdentToken(curtok.type) || isStringToken(curtok.type) || isNumberToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN, 'not many options, wanted ident number string [', curtok);
   }
 
   function parseTopLevels(lexerFlags) {
