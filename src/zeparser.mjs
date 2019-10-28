@@ -892,7 +892,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let q = "'";
     if (token.type === $STRING_DOUBLE) q = '"';
 
-    return {
+    ASSERT_pushCanonPoison(true);
+    let node = {
       type: 'Literal',
       loc: {
         start: {
@@ -908,6 +909,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       value: token.canon,
       raw: q + token.str + q,
     };
+    ASSERT_popCanonPoison();
+    return node;
   }
   function AST_setStringLiteral(astProp, token, fromDirective) {
     ASSERT(AST_setStringLiteral.length === arguments.length, 'arg count');
@@ -1488,7 +1491,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function initLexer(lexerFlags) {
     do {
-      skipStatementStart(lexerFlags);
+      skipToStatementStart(lexerFlags);
       if (curtok.type === $ERROR) {
         THROW_TOKEN('Tokenizer error: ' + tok_lexError(), curtok);
       }
@@ -1620,20 +1623,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipAny(lexerFlags);
   }
 
-  function ASSERT_skipToParenOpen(what, lexerFlags) {
-    skipToParenOpen(lexerFlags);
+  function ASSERT_skipToParenOpenOrDie(what, lexerFlags) {
+    skipToParenOpenOrDie(lexerFlags);
   }
-  function skipToParenOpen(lexerFlags) {
+  function skipToParenOpenOrDie(lexerFlags) {
     // The next token must be a paren
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_PAREN_OPEN) {
       THROW('Expected to parse an opening paren, found `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipToCurlyOpen(what, lexerFlags) {
-    skipToCurlyOpen(lexerFlags);
+  function ASSERT_skipToCurlyOpenOrDie(what, lexerFlags) {
+    skipToCurlyOpenOrDie(lexerFlags);
   }
-  function skipToCurlyOpen(lexerFlags) {
+  function skipToCurlyOpenOrDie(lexerFlags) {
     // The next token must be a curly, possibly preceded by some whitespace
     // If it's not a curly then it falls back to the regular lexer. This function will validate the string afterwards.
     skipAny(lexerFlags);
@@ -1649,12 +1652,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipAny(lexerFlags);
     ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN || curtok.type === $PUNC_CURLY_OPEN, 'limited options, expecting { (', curtok);
   }
-  function ASSERT_skipToFrom(what, lexerFlags) {
-    skipToFrom(lexerFlags);
+  function ASSERT_skipToFromOrDie(what, lexerFlags) {
+    skipToFromOrDie(lexerFlags);
   }
-  function skipToFrom(lexerFlags) {
-    // The next token must be the ident "from", possibly preceded by some whitespace
-    // If it's not "from" then it falls back to the regular lexer. This function will validate the string afterwards.
+  function skipToFromOrDie(lexerFlags) {
+    // The next token must be the ident "from"
     skipAny(lexerFlags);
 
     if (curtok.str !== 'from') {
@@ -1662,88 +1664,86 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT(isIdentToken(curtok.type), 'a token whose value "from" should be an ident');
   }
-  function ASSERT_skipToString(what, lexerFlags) {
-    skipToString(lexerFlags);
+  function ASSERT_skipToStringOrDie(what, lexerFlags) {
+    skipToStringOrDie(lexerFlags);
   }
-  function skipToString(lexerFlags) {
-    // The next token must be a string, possibly preceded by some whitespace
-    // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
+  function skipToStringOrDie(lexerFlags) {
+    // The next token must be a string
     skipAny(lexerFlags);
     if (!isStringToken(curtok.type)) {
       THROW('Next token should be a string but was `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipToIdent(what, lexerFlags) {
-    skipToIdent(lexerFlags);
+  function ASSERT_skipToIdentOrDie(what, lexerFlags) {
+    skipToIdentOrDie(lexerFlags);
   }
-  function skipToIdent(lexerFlags) {
-    // The next token must be a string, possibly preceded by some whitespace
-    // If it's not a string then it falls back to the regular lexer. This function will validate the string afterwards.
+  function skipToIdentOrDie(lexerFlags) {
+    // The next token must be a string
     skipAny(lexerFlags);
     if (!isIdentToken(curtok.type)) {
       THROW('Next token should be an ident but was `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipArrow(what, lexerFlags) {
-    skipArrow(lexerFlags);
+  function ASSERT_skipToArrowOrDie(what, lexerFlags) {
+    skipToArrowOrDie(lexerFlags);
   }
-  function skipArrow(lexerFlags) {
-    // Next token must be an arrow, with possibly some whitespace
+  function skipToArrowOrDie(lexerFlags) {
+    // Next token must be an arrow
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_EQ_GT) {
       THROW('Next token should be `=>` but was `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipAs(what, lexerFlags) {
-    skipAs(lexerFlags);
+  function ASSERT_skipToAsOrDie(what, lexerFlags) {
+    skipToAsOrDie(lexerFlags);
   }
-  function skipAs(lexerFlags) {
-    // Next token must be `as`, with some whitespace
+  function skipToAsOrDie(lexerFlags) {
+    // Next token must be `as`
     skipAny(lexerFlags);
     if (curtok.str !== 'as') {
       THROW('Next token should be `as` but was `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipAsCommaCurlyClose(what, lexerFlags) {
-    skipAsCommaCurlyClose(lexerFlags);
+  function ASSERT_skipToAsCommaCurlyClose(what, lexerFlags) {
+    skipToAsCommaCurlyClose(lexerFlags);
   }
-  function skipAsCommaCurlyClose(lexerFlags) {
-    // Next token must be `as`, comma, or `}`, with some whitespace
+  function skipToAsCommaCurlyClose(lexerFlags) {
+    // Next token must be `as`, comma, or `}`
     skipAny(lexerFlags);
     ASSERT_VALID(curtok.str === 'as' || curtok.type === $PUNC_COMMA || curtok.type === $PUNC_CURLY_CLOSE, 'limited options, wanted `as` , }', curtok);
   }
-  function ASSERT_skipAsCommaFrom(what, lexerFlags) {
-    skipAsCommaFrom(lexerFlags);
+  function ASSERT_skipToAsCommaFrom(what, lexerFlags) {
+    skipToAsCommaFrom(lexerFlags);
   }
-  function skipAsCommaFrom(lexerFlags) {
+  function skipToAsCommaFrom(lexerFlags) {
     // Next token must be `as`, with some whitespace
     skipAny(lexerFlags);
     ASSERT_VALID(curtok.str === 'as' || curtok.str === 'from' || curtok.type === $PUNC_COMMA, 'limited options, expecting `as` `from` comma', curtok);
   }
-  function ASSERT_skipColon(what, lexerFlags) {
-    skipColon(lexerFlags);
+  function ASSERT_skipToColonOrDie(what, lexerFlags) {
+    skipToColonOrDie(lexerFlags);
   }
-  function skipColon(lexerFlags) {
+  function skipToColonOrDie(lexerFlags) {
     // Next token must be `:`, with possibly some whitespace
     skipAny(lexerFlags);
     if (curtok.type !== $PUNC_COLON) {
       THROW('Next token should be `:` but was `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipTarget(what, lexerFlags) {
-    skipTarget(lexerFlags);
+  function ASSERT_skipToTargetOrDie(what, lexerFlags) {
+    skipToTargetOrDie(lexerFlags);
   }
-  function skipTarget(lexerFlags) {
+  function skipToTargetOrDie(lexerFlags) {
     // Next token must be `target`, with unlikely some whitespace
     skipAny(lexerFlags);
     if (curtok.str !== 'target') {
       THROW('Next token should be `target` but was `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipStatementStart(what, lexerFlags) {
-    skipStatementStart(lexerFlags);
+  function ASSERT_skipToStatementStart(what, lexerFlags) {
+    skipToStatementStart(lexerFlags);
   }
-  function skipStatementStart(lexerFlags) {
+  function skipToStatementStart(lexerFlags) {
     // Next token must start a statement
     skipRex(lexerFlags);
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
@@ -1772,11 +1772,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       curtok.type === $EOF || // do-while at at eof. do while is not a problem otherwise... (I think)
       false, 'expecting the start of a statement, a wide but limited set of valid tokens ' + curtok);
   }
-  function ASSERT_skipExpressionStart(what, lexerFlags) {
+  function ASSERT_skipToExpressionStart(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
-    skipExpressionStart(lexerFlags);
+    skipToExpressionStart(lexerFlags);
   }
-  function skipExpressionStart(lexerFlags) {
+  function skipToExpressionStart(lexerFlags) {
     // Next token must start an expression
     skipRex(lexerFlags);
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
@@ -1798,11 +1798,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       curtok.type === $PUNC_DOT_DOT_DOT ||
       false, 'expecting the start of an expression, a wide but limited set of valid tokens');
   }
-  function ASSERT_skipExpressionStartGrouped(what, lexerFlags) {
+  function ASSERT_skipToExpressionStartGrouped(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
-    skipExpressionStartGrouped(lexerFlags);
+    skipToExpressionStartGrouped(lexerFlags);
   }
-  function skipExpressionStartGrouped(lexerFlags) {
+  function skipToExpressionStartGrouped(lexerFlags) {
     // Next token must start an expression or `)`
     skipRex(lexerFlags);
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
@@ -1825,11 +1825,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       curtok.type === $PUNC_PAREN_CLOSE ||
       false, 'expecting the start of an expression or `)`, a wide but limited set of valid tokens');
   }
-  function ASSERT_skipExpressionStartSemi(what, lexerFlags) {
+  function ASSERT_skipToExpressionStartSemi(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
-    skipExpressionStartSemi(lexerFlags);
+    skipToExpressionStartSemi(lexerFlags);
   }
-  function skipExpressionStartSemi(lexerFlags) {
+  function skipToExpressionStartSemi(lexerFlags) {
     // Next token must start an expression or `;`
     skipRex(lexerFlags);
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
@@ -1852,11 +1852,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       curtok.type === $PUNC_SEMI ||
       false, 'expecting the start of an expression or `;`, a wide but limited set of valid tokens');
   }
-  function ASSERT_skipExpressionStartSquareCloseComma(what, lexerFlags) {
+  function ASSERT_skipToExpressionStartSquareCloseComma(what, lexerFlags) {
     ASSERT(typeof lexerFlags === 'number');
-    skipExpressionStartSquareCloseComma(lexerFlags);
+    skipToExpressionStartSquareCloseComma(lexerFlags);
   }
-  function skipExpressionStartSquareCloseComma(lexerFlags) {
+  function skipToExpressionStartSquareCloseComma(lexerFlags) {
     // Next token must start an expression or `]` or `,`
     skipRex(lexerFlags);
     // No validation. Too expensive. Instead trust that the fallback scanner will still work. This is just a hint.
@@ -1908,145 +1908,117 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       curtok.type === $PUNC_DOT ||
       false, 'expecting the start of an expression or `.`, a wide but limited set of valid tokens');
   }
-  function ASSERT_skipObjectMemberStart(what, lexerFlags) {
-    skipObjectMemberStart(lexerFlags);
+  function ASSERT_skipToSwitchBody(what, lexerFlags) {
+    skipToSwitchBody(lexerFlags);
   }
-  function skipObjectMemberStart(lexerFlags) {
-    // Next token is the first of an object member (after `{` or comma of an objlit)
-    skipAny(lexerFlags);
-  }
-  function ASSERT_skipObjectMemberRest(what, lexerFlags) {
-    skipObjectMemberRest(lexerFlags);
-  }
-  function skipObjectMemberRest(lexerFlags) {
-    // Next token must be able to follow an object member rest
-    skipAny(lexerFlags);
-  }
-  function ASSERT_skipClassMemberStart(what, lexerFlags) {
-    skipClassMemberStart(lexerFlags);
-  }
-  function skipClassMemberStart(lexerFlags) {
-    // Next token is the first of a class member (after `{` or semi-colon of a class body)
-    skipAny(lexerFlags);
-  }
-  function ASSERT_skipClassMemberRest(what, lexerFlags) {
-    skipClassMemberRest(lexerFlags);
-  }
-  function skipClassMemberRest(lexerFlags) {
-    // Next token must be able to follow the first token of a class member
-    skipAny(lexerFlags);
-  }
-  function ASSERT_skipSwitchBody(what, lexerFlags) {
-    skipSwitchBody(lexerFlags);
-  }
-  function skipSwitchBody(lexerFlags) {
+  function skipToSwitchBody(lexerFlags) {
     // Next token must be `case`, `default`, or `}`, with likely some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(curtok.str === 'case' || curtok.str === 'default' || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted case default }', curtok);
   }
-  function ASSERT_skipBindingStart(what, lexerFlags) {
-    skipBindingStart(lexerFlags);
+  function ASSERT_skipToBindingStart(what, lexerFlags) {
+    skipToBindingStart(lexerFlags);
   }
-  function skipBindingStart(lexerFlags) {
+  function skipToBindingStart(lexerFlags) {
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_DOT_DOT_DOT, 'not many options, wanted ident ... [ {', curtok);
   }
-  function ASSERT_skipBindingStartGrouped(what, lexerFlags) {
-    skipBindingStartGrouped(lexerFlags);
+  function ASSERT_skipToBindingStartGrouped(what, lexerFlags) {
+    skipToBindingStartGrouped(lexerFlags);
   }
-  function skipBindingStartGrouped(lexerFlags) {
+  function skipToBindingStartGrouped(lexerFlags) {
     // Same as bindingStart but it may also encounter a closing parenthesis (params)
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID(isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_DOT_DOT_DOT || curtok.type === $PUNC_PAREN_CLOSE, 'not many options, wanted ident ... [ { )', curtok);
   }
-  function ASSERT_skipColonParenOpen(what, lexerFlags) {
-    skipColonParenOpen(lexerFlags);
+  function ASSERT_skipToColonParenOpen(what, lexerFlags) {
+    skipToColonParenOpen(lexerFlags);
   }
-  function skipColonParenOpen(lexerFlags) {
+  function skipToColonParenOpen(lexerFlags) {
     // Next token must be `:`, or `(`, with unlikely some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( curtok.type === $PUNC_COLON || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted : (', curtok);
   }
-  function ASSERT_skipIdentParenOpen(what, lexerFlags) {
-    skipIdentParenOpen(lexerFlags);
+  function ASSERT_skipToIdentParenOpen(what, lexerFlags) {
+    skipToIdentParenOpen(lexerFlags);
   }
-  function skipIdentParenOpen(lexerFlags) {
+  function skipToIdentParenOpen(lexerFlags) {
     // Next token must be ident, or `(`, with maybe some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident (', curtok);
   }
-  function ASSERT_skipIdentStarParenOpen(what, lexerFlags) {
-    skipIdentStarParenOpen(lexerFlags);
+  function ASSERT_skipToIdentStarParenOpen(what, lexerFlags) {
+    skipToIdentStarParenOpen(lexerFlags);
   }
-  function skipIdentStarParenOpen(lexerFlags) {
+  function skipToIdentStarParenOpen(lexerFlags) {
     // Next token must be ident, `*`, or `(`, with maybe some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident * (', curtok);
   }
-  function ASSERT_skipIdentStarCurlyOpen(what, lexerFlags) {
-    skipIdentStarCurlyOpen(lexerFlags);
+  function ASSERT_skipToIdentStarCurlyOpen(what, lexerFlags) {
+    skipToIdentStarCurlyOpen(lexerFlags);
   }
-  function skipIdentStarCurlyOpen(lexerFlags) {
+  function skipToIdentStarCurlyOpen(lexerFlags) {
     // Next token must be ident, `*`, or `{`, with maybe some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_CURLY_OPEN, 'not many options, wanted ident * {', curtok);
   }
-  function ASSERT_skipCommaCurlyClose(what, lexerFlags) {
-    skipCommaCurlyClose(lexerFlags);
+  function ASSERT_skipToCommaCurlyClose(what, lexerFlags) {
+    skipToCommaCurlyClose(lexerFlags);
   }
-  function skipCommaCurlyClose(lexerFlags) {
+  function skipToCommaCurlyClose(lexerFlags) {
     // Next token must be comma or `}`, with maybe some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( curtok.type === $PUNC_COMMA || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted , }', curtok);
   }
-  function ASSERT_skipIdentCurlyOpen(what, lexerFlags) {
-    skipIdentCurlyOpen(lexerFlags);
+  function ASSERT_skipToIdentCurlyOpen(what, lexerFlags) {
+    skipToIdentCurlyOpen(lexerFlags);
   }
-  function skipIdentCurlyOpen(lexerFlags) {
+  function skipToIdentCurlyOpen(lexerFlags) {
     // Next token must be ident, or `{`, with maybe some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_CURLY_OPEN, 'not many options, wanted ident {', curtok);
   }
-  function ASSERT_skipIdentCurlyClose(what, lexerFlags) {
-    skipIdentCurlyClose(lexerFlags);
+  function ASSERT_skipToIdentCurlyClose(what, lexerFlags) {
+    skipToIdentCurlyClose(lexerFlags);
   }
-  function skipIdentCurlyClose(lexerFlags) {
+  function skipToIdentCurlyClose(lexerFlags) {
     // Next token must be ident, or `}`, with maybe some whitespace
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_CURLY_CLOSE, 'not many options, wanted ident }', curtok);
   }
-  function ASSERT_skipIdentStarCurlyOpenParenOpenString(what, lexerFlags) {
-    skipIdentStarCurlyOpenParenOpenString(lexerFlags);
+  function ASSERT_skipToIdentStarCurlyOpenParenOpenString(what, lexerFlags) {
+    skipToIdentStarCurlyOpenParenOpenString(lexerFlags);
   }
-  function skipIdentStarCurlyOpenParenOpenString(lexerFlags) {
+  function skipToIdentStarCurlyOpenParenOpenString(lexerFlags) {
     // Next token is whatever is valid after the `import` keyword (ident, star, curly open, string, or paren open)
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_STAR || curtok.type === $PUNC_CURLY_OPEN || curtok.type === $PUNC_PAREN_OPEN || isStringToken(curtok.type), 'not many options, wanted ident string * { (', curtok);
   }
-  function ASSERT_skipAwaitParenOpen(what, lexerFlags) {
-    skipAwaitParenOpen(lexerFlags);
+  function ASSERT_skipToAwaitParenOpen(what, lexerFlags) {
+    skipToAwaitParenOpen(lexerFlags);
   }
-  function skipAwaitParenOpen(lexerFlags) {
+  function skipToAwaitParenOpen(lexerFlags) {
     // Next token must be `await`, or `(`. For example, after the `for` keyword
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
     ASSERT_VALID( isIdentToken(curtok.type) || curtok.type === $PUNC_PAREN_OPEN, 'not many options, wanted ident (', curtok);
   }
-  function ASSERT_skipIdentStringNumberSquareOpen(what, lexerFlags) {
-    skipIdentStringNumberSquareOpen(lexerFlags);
+  function ASSERT_skipToIdentStringNumberSquareOpen(what, lexerFlags) {
+    skipToIdentStringNumberSquareOpen(lexerFlags);
   }
-  function skipIdentStringNumberSquareOpen(lexerFlags) {
+  function skipToIdentStringNumberSquareOpen(lexerFlags) {
     // Token after the star of an object/class method shorthand
     skipAny(lexerFlags);
     // Since the rest has to check it anyways we don't need to validate it here
@@ -2067,7 +2039,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'void':
         if (leftHandSideExpression === ONLY_LHSE) THROW('A unary expression is not allowed here');
         // These are keywords that wrap expressions which start with regexes
-        ASSERT_skipExpressionStart($IDENT, lexerFlags);
+        ASSERT_skipToExpressionStart($IDENT, lexerFlags);
         break;
       case 'new':
         // Wraps expressions which start with regexes
@@ -2077,7 +2049,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'await':
         if (goalMode === GOAL_MODULE || hasAnyFlag(lexerFlags, LF_IN_ASYNC)) {
           if (leftHandSideExpression === ONLY_LHSE) THROW('An `await` expression is not allowed here');
-          ASSERT_skipExpressionStart($IDENT, lexerFlags);
+          ASSERT_skipToExpressionStart($IDENT, lexerFlags);
         } else {
           ASSERT_skipDiv('await', lexerFlags); // TODO: bin-op or tail-op or asi-continuation or `)` `]` `}`
         }
@@ -2782,13 +2754,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseStatementHeader(lexerFlags, headProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
     ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE), 'I think template resets itself');
+    ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN, 'all callers should have called `skipToParenOpenOrDie()` which should verify this invariant');
 
-    ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN, 'all callers should have called `skipToParenOpen()` which should verify this invariant');
-
-    ASSERT_skipExpressionStart('(', lexerFlags);
+    ASSERT_skipToExpressionStart('(', lexerFlags);
     parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, headProp);
     if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing closing paren of statement header, found `' + tokenStrForError(curtok) + '` instead');
-    ASSERT_skipStatementStart(')', lexerFlags);
+    ASSERT_skipToStatementStart(')', lexerFlags);
   }
 
   function parseSemiOrAsi(lexerFlags) {
@@ -2822,7 +2793,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (curtok.type === $PUNC_SEMI) {
-      ASSERT_skipStatementStart(';', lexerFlags);
+      ASSERT_skipToStatementStart(';', lexerFlags);
     } else {
       ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI), 'this case should have been caught sooner');
       // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
@@ -2941,7 +2912,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
      x=async function(){}
      o={async foo(){}}
     */
-    ASSERT_skipIdentStarParenOpen('function', lexerFlags); // TODO: why is this called for an async generator expression? maybe rename this func?
+    ASSERT_skipToIdentStarParenOpen('function', lexerFlags); // TODO: why is this called for an async generator expression? maybe rename this func?
     let starToken = UNDEF_STAR;
     if (curtok.type === $PUNC_STAR) {
       starToken = curtok;
@@ -2949,7 +2920,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: `foo: function *f(){}`
         THROW_TOKEN('Labelled function statements must be plain functions, not generators', starToken);
       }
-      ASSERT_skipIdentParenOpen('*', lexerFlags);
+      ASSERT_skipToIdentParenOpen('*', lexerFlags);
       if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
         THROW_TOKEN('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018', asyncToken);
       }
@@ -3077,7 +3048,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let starToken = UNDEF_STAR;
     if (curtok.type === $PUNC_STAR) {
       starToken = curtok;
-      ASSERT_skipIdentParenOpen('*', lexerFlags);
+      ASSERT_skipToIdentParenOpen('*', lexerFlags);
       if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
         THROW('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018');
       }
@@ -3244,7 +3215,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(innerScoop._ = 'func scope');
 
       let identToken = curtok;
-      ASSERT_skipToParenOpen($IDENT, lexerFlags);
+      ASSERT_skipToParenOpenOrDie($IDENT, lexerFlags);
       AST_setIdent('id', identToken);
     } else if (isFuncDecl === IS_FUNC_DECL && optionalIdent === IDENT_REQUIRED) {
       THROW('Function decl missing required ident');
@@ -3407,7 +3378,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.type !== $PUNC_PAREN_OPEN) {
       THROW('Must have func arguments next but did not find `(`');
     }
-    ASSERT_skipBindingStartGrouped($$PAREN_L_28, lexerFlags);
+    ASSERT_skipToBindingStartGrouped($$PAREN_L_28, lexerFlags);
 
     // - `function f(a){}`
     //               ^
@@ -3422,7 +3393,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //               ^
         THROW('Setters must have exactly one parameter');
       }
-      ASSERT_skipToCurlyOpen(')', lexerFlags);
+      ASSERT_skipToCurlyOpenOrDie(')', lexerFlags);
     }
     else if (getToken !== UNDEF_GET) {
       // - `x = {get f(x){}}`
@@ -3439,7 +3410,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_destruct('params');
       ASSERT(curtok.type !== $PUNC_COMMA, 'the trailing func comma case should already be caught by now');
       if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing function param definition closing parenthesis, found `' + tokenStrForError(curtok) + '` instead');
-      ASSERT_skipToCurlyOpen(')', lexerFlags);
+      ASSERT_skipToCurlyOpenOrDie(')', lexerFlags);
     }
 
     return paramsSimple;
@@ -3457,7 +3428,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION);
 
     let curlyToken = curtok;
-    ASSERT_skipStatementStart('{', lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}`  TODO: next must be statement start or `}`
+    ASSERT_skipToStatementStart('{', lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}`  TODO: next must be statement start or `}`
     AST_open('body', {
       type: 'BlockStatement',
       loc: AST_getBaseLoc(curlyToken),
@@ -3474,7 +3445,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       ASSERT(blockType === IS_STATEMENT, 'either expression or not');
       // function declaration
-      ASSERT_skipStatementStart('}', lexerFlags);
+      ASSERT_skipToStatementStart('}', lexerFlags);
     }
     AST_close('BlockStatement');
 
@@ -4036,7 +4007,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI); // TODO: validate these. Are they for arrow inside a template?
 
     let curlyToken = curtok;
-    ASSERT_skipStatementStart('{', lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}` TODO: next must be statement start, or `}`
+    ASSERT_skipToStatementStart('{', lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}` TODO: next must be statement start, or `}`
     if (babelCompat) {
       // (All BlockStatements receive the `directives` property in the Babel AST... even when it can't have any directives.)
       AST_open(astProp, {
@@ -4044,7 +4015,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         loc: AST_getBaseLoc(curlyToken),
         directives: [],
         body: [],
-      });
+      });skipToStatementStart
     } else {
       AST_open(astProp, {
         type: 'BlockStatement',
@@ -4057,7 +4028,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseNestedBodyPart(lexerFlagsNoTemplate, scoop, labelSet, NOT_LABELLED, FDS_LEX, PARENT_NOT_LABEL,'body');
     }
     if (curtok.type === $EOF) THROW('Unexpected EOF while parsing a block');
-    ASSERT_skipStatementStart('{', lexerFlags);
+    ASSERT_skipToStatementStart('{', lexerFlags);
     AST_close('BlockStatement');
 
     if (curtok.type === $PUNC_EQ) {
@@ -4070,7 +4041,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_LABELSET(labelSet);
 
     let breakToken = curtok;
-    ASSERT_skipStatementStart('break', lexerFlags); // Note: the statement start would also parse an ident
+    ASSERT_skipToStatementStart('break', lexerFlags); // Note: the statement start would also parse an ident
 
     // A `break` may be followed by another identifier which must then be a valid label.
     // Otherwise it's just a `break` to the nearest breakable (most likely).
@@ -4084,7 +4055,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (!findLabel(labelSet, labelToken.str, FROM_BREAK)) {
         THROW('The label (`' + tokenStrForError(labelToken) + '`) for this `break` was not defined in the current label set, which is illegal');
       }
-      ASSERT_skipStatementStart($IDENT, lexerFlags);
+      ASSERT_skipToStatementStart($IDENT, lexerFlags);
 
       if (curtok.nl === true && isRegexToken(curtok.type)) {
         // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
@@ -4174,7 +4145,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseConstStatement.length === arguments.length, 'arg count');
 
     let constToken = curtok;
-    ASSERT_skipBindingStart('const', lexerFlags);
+    ASSERT_skipToBindingStart('const', lexerFlags);
 
     if (isLabelled === IS_LABELLED || fdState === FDS_ILLEGAL || fdState === FDS_IFELSE) {
       THROW('Cannot parse a class declaration here, only expecting statements here');
@@ -4191,7 +4162,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasNoFlag(lexerFlags, LF_IN_ITERATION)) THROW('Can only `continue` inside a loop');
 
     let continueToken = curtok;
-    ASSERT_skipStatementStart('continue', lexerFlags); // Note: statement start also includes an ident
+    ASSERT_skipToStatementStart('continue', lexerFlags); // Note: statement start also includes an ident
 
     // a continue may be followed by another identifier which must then be a valid label.
     // otherwise it's just a continue to the nearest loop (most likely).
@@ -4215,7 +4186,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('This `continue` had a label (`' + labelName + '`) that was not defined in the current label set as the direct parent of a loop, which would be required');
       }
 
-      ASSERT_skipStatementStart($IDENT, lexerFlags);
+      ASSERT_skipToStatementStart($IDENT, lexerFlags);
       if (curtok.nl === true && isRegexToken(curtok.type)) {
         // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
         // Must be in loop, we checked this at the beginning
@@ -4252,7 +4223,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseDebuggerStatement(lexerFlags, astProp) {
     let debuggerToken = curtok;
-    ASSERT_skipStatementStart('debugger', lexerFlags);
+    ASSERT_skipToStatementStart('debugger', lexerFlags);
     if (isRegexToken(curtok.type)) {
       if (curtok.nl === false) THROW('Missing semi-colon after debugger keyword');
       // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
@@ -4273,7 +4244,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_LABELSET(labelSet);
 
     let doToken = curtok;
-    ASSERT_skipStatementStart('do', lexerFlags); // Note: most likely is a block...
+    ASSERT_skipToStatementStart('do', lexerFlags); // Note: most likely is a block...
     AST_open(astProp, {
       type: 'DoWhileStatement',
       loc: AST_getBaseLoc(doToken),
@@ -4284,7 +4255,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note that functions and classes DO get ASI
     parseNestedBodyPart((curtok.type !== $PUNC_CURLY_OPEN ? lexerFlags : lexerFlags) | LF_IN_ITERATION, scoop, labelSet, NOT_LABELLED, FDS_ILLEGAL, PARENT_NOT_LABEL, 'body');
     if (curtok.str !== 'while') THROW('A `do` must be followed by a `while`, but found `' + tokenStrForError(curtok) + '` instead');
-    ASSERT_skipToParenOpen('while', lexerFlags);
+    ASSERT_skipToParenOpenOrDie('while', lexerFlags);
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
     // > semicolon is missing. This change aligns the specification with the actual behaviour of most existing implementations.
@@ -4338,7 +4309,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isGlobalToplevel === NOT_GLOBAL_TOPLEVEL) THROW('The `export` keyword is only supported at the top level');
 
     let exportToken = curtok;
-    ASSERT_skipIdentStarCurlyOpen('export', lexerFlags);
+    ASSERT_skipToIdentStarCurlyOpen('export', lexerFlags);
 
     let needsSemi = true; // only classes and function decls don't get this. var/let/const semi's are parsed elsewhere
 
@@ -4348,7 +4319,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         loc: AST_getBaseLoc(exportToken),
         declaration: undefined,
       });
-      ASSERT_skipExpressionStart('default', lexerFlags); // Note: or a declaration, but that would start with ident, so is subsumed here... (footgun in 3... 2... 1...)
+      ASSERT_skipToExpressionStart('default', lexerFlags); // Note: or a declaration, but that would start with ident, so is subsumed here... (footgun in 3... 2... 1...)
 
       // https://tc39.github.io/ecma262/#sec-exports-static-semantics-exportednames
       // https://tc39.github.io/ecma262/#sec-exports-static-semantics-exportedbindings
@@ -4457,10 +4428,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // export * from "x"
       //        ^
 
-      ASSERT_skipToFrom('*', lexerFlags); // Will throw if next token is not "from"
-      ASSERT_skipToString('from', lexerFlags); // Will throw if next token is not a string
+      ASSERT_skipToFromOrDie('*', lexerFlags); // Will throw if next token is not "from"
+      ASSERT_skipToStringOrDie('from', lexerFlags); // Will throw if next token is not a string
       let sourceToken = curtok;
-      ASSERT_skipStatementStart($G_STRING, lexerFlags);
+      ASSERT_skipToStatementStart($G_STRING, lexerFlags);
 
       parseSemiOrAsi(lexerFlags);
 
@@ -4496,12 +4467,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         if (curtok.str === 'from') {
           // drop the tmp lists
-          ASSERT_skipToString('from', lexerFlags);
+          ASSERT_skipToStringOrDie('from', lexerFlags);
           // TODO: what happens to dupe exported bindings or exported names here?
-          if (!isStringToken(curtok.type)) THROW('Export source must be a string');
           let fromToken = curtok;
 
-          ASSERT_skipStatementStart($G_STRING, lexerFlags);
+          ASSERT_skipToStatementStart($G_STRING, lexerFlags);
           AST_setStringLiteral('source', fromToken, false);
         } else {
           AST_set('source', null);
@@ -4513,7 +4483,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curtok.c === $$V_76 && curtok.str === 'var') {
         // export var <bindings>
         let varToken = curtok;
-        ASSERT_skipBindingStart('var' , lexerFlags);
+        ASSERT_skipToBindingStart('var' , lexerFlags);
         parseAnyVarDeclaration(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         AST_set('source', null);
         needsSemi = false
@@ -4521,7 +4491,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curtok.c === $$L_6C && curtok.str === 'let') {
         // export let <bindings>
         let letToken = curtok;
-        ASSERT_skipBindingStart('let' , lexerFlags);
+        ASSERT_skipToBindingStart('let' , lexerFlags);
         parseAnyVarDeclaration(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         AST_set('source', null);
         needsSemi = false
@@ -4530,7 +4500,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curtok.str === 'const') {
           // export const <bindings>
           let constToken = curtok;
-          ASSERT_skipBindingStart('const' , lexerFlags);
+          ASSERT_skipToBindingStart('const' , lexerFlags);
           parseAnyVarDeclaration(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
           needsSemi = false
         } else if (curtok.str === 'class') {
@@ -4614,18 +4584,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseExportObject(lexerFlags, tmpExportedNames, tmpExportedBindings) {
     ASSERT(parseExportObject.length === arguments.length, 'arg count');
     // - `export {...} from 'x'`
-    ASSERT_skipIdentCurlyClose('{', lexerFlags);
+    ASSERT_skipToIdentCurlyClose('{', lexerFlags);
     while (curtok.type === $IDENT) {
       let nameToken = curtok; // left of the `as`
       let exportedNameToken = curtok; // right of the `as`, if present at all, otherwise same as name
-      ASSERT_skipAsCommaCurlyClose($IDENT, lexerFlags);
+      ASSERT_skipToAsCommaCurlyClose($IDENT, lexerFlags);
       // while the `nameToken` should be a valid non-keyword identifier, it also has to be bound and as such we
       // don't have to check it here since we already apply bind checks anyways and binding would apply this check
       if (curtok.type === $IDENT && curtok.str === 'as') { // `export {x as y}` NOT `export {x:y}`
-        ASSERT_skipToIdent('as', lexerFlags);
+        ASSERT_skipToIdentOrDie('as', lexerFlags);
         // note: the exported _name_ can be any identifier, keywords included
         exportedNameToken = curtok;
-        ASSERT_skipCommaCurlyClose($IDENT, lexerFlags);
+        ASSERT_skipToCommaCurlyClose($IDENT, lexerFlags);
       }
 
       addNameToExports(tmpExportedNames, exportedNameToken.str);
@@ -4638,7 +4608,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         exported: AST_getIdentNode(exportedNameToken),
       });
 
-      if (curtok.type === $PUNC_COMMA) ASSERT_skipIdentCurlyClose(',', lexerFlags);
+      if (curtok.type === $PUNC_COMMA) ASSERT_skipToIdentCurlyClose(',', lexerFlags);
       else if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Unexpected token while parsing export object');
     }
     ASSERT_VALID(curtok.type === $PUNC_CURLY_CLOSE || curtok.str !== '}', 'curly close must be punc');
@@ -4648,7 +4618,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === ':') THROW('Export object uses `as` to alias (`{a as y}`), not colon (`{a: y}`)');
       THROW('Export object can only have "shorthand" `{x}` or "as" `{x as y}');
     }
-    ASSERT_skipStatementStart('{', lexerFlags);
+    ASSERT_skipToStatementStart('{', lexerFlags);
   }
 
   function parseForStatement(lexerFlags, scoop, labelSet, astProp) {
@@ -4695,21 +4665,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FOR_HEADER, 'parseForStatement(header)');
 
     let forToken = curtok;
-    ASSERT_skipAwaitParenOpen('for', lexerFlags); // TODO: next must be `(` or `await`
+    ASSERT_skipToAwaitParenOpen('for', lexerFlags); // TODO: next must be `(` or `await`
     let awaitable = curtok.type === $IDENT && curtok.str === 'await';
     if (awaitable) {
       if (!allowAsyncGenerators) THROW('The `for await` syntax is not supported by the currently targeted language version');
       if (hasNoFlag(lexerFlags, LF_IN_ASYNC)) THROW('Can only use `for-await` inside an async function');
-      ASSERT_skipToParenOpen('await', lexerFlags);
+      ASSERT_skipToParenOpenOrDie('await', lexerFlags);
     } else if (curtok.type !== $PUNC_PAREN_OPEN) {
       THROW('Missing opening paren of the `for` header, found `' + tokenStrForError(curtok) + '` instead');
     }
-    ASSERT_skipExpressionStartSemi('(', lexerFlags); // TODO: expr start includes var/let/const as idents, also: `for (;;);`
+    ASSERT_skipToExpressionStartSemi('(', lexerFlags); // TODO: expr start includes var/let/const as idents, also: `for (;;);`
     parseForHeader(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), forToken, scoop, awaitable, astProp);
     if (curtok.type !== $PUNC_PAREN_CLOSE) {
       THROW('Missing closing paren of the `for` header, found `' + tokenStrForError(curtok) + '` instead');
     }
-    ASSERT_skipStatementStart(')', lexerFlags);
+    ASSERT_skipToStatementStart(')', lexerFlags);
     if (curtok.type === $EOF) THROW('Missing `for` child statement');
     parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, labelSet, NOT_LABELLED, FDS_ILLEGAL, PARENT_NOT_LABEL, 'body');
     AST_close(['ForStatement', 'ForInStatement', 'ForOfStatement']);
@@ -4748,7 +4718,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           //         ^
           // - `for (var x;;);`
           let varToken = curtok;
-          ASSERT_skipBindingStart('var' , lexerFlags);
+          ASSERT_skipToBindingStart('var' , lexerFlags);
           parseAnyVarDeclaration(lexerFlags | LF_IN_FOR_LHS, varToken, scoop, BINDING_TYPE_VAR, FROM_FOR_HEADER, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
           // No need to dupe-check scope here
           assignable = initAssignable(assignable); // var decls are assignable
@@ -4873,7 +4843,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           //         ^
           // - `for (const x;;);`
           let constToken = curtok;
-          ASSERT_skipBindingStart('const' , lexerFlags); // TODO: next must be ident or destructuring [{
+          ASSERT_skipToBindingStart('const' , lexerFlags); // TODO: next must be ident or destructuring [{
           parseAnyVarDeclaration(lexerFlags | LF_IN_FOR_LHS, constToken, scoop, BINDING_TYPE_CONST, FROM_FOR_HEADER, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
           assignable = initAssignable(assignable); // const decl is assignable
           break;
@@ -5011,7 +4981,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           body: undefined,
         }, 'left');
         if (notAssignable(assignable)) THROW('Left part of for-of must be assignable');
-        ASSERT_skipExpressionStart('of', lexerFlags);
+        ASSERT_skipToExpressionStart('of', lexerFlags);
         // `for (a of b=c) ..`
         // Note that this rhs is an AssignmentExpression, _not_ a SequenceExpression
         parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
@@ -5036,7 +5006,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Left part of for-in must be assignable');
           // }
         }
-        ASSERT_skipExpressionStart('in', lexerFlags);
+        ASSERT_skipToExpressionStart('in', lexerFlags);
         // `for (a in b=c) ..`
         parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         return;
@@ -5127,7 +5097,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Cannot use lhs as regular for-loop because it must destruct');
     }
 
-    ASSERT_skipExpressionStartSemi(';', lexerFlags);
+    ASSERT_skipToExpressionStartSemi(';', lexerFlags);
 
     if (curtok.type === $PUNC_SEMI) {
       AST_set('test', null);
@@ -5138,7 +5108,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    ASSERT_skipExpressionStartGrouped(';', lexerFlags); // the second semi may immediately be followed by `)`
+    ASSERT_skipToExpressionStartGrouped(';', lexerFlags); // the second semi may immediately be followed by `)`
 
     if (curtok.type === $PUNC_PAREN_CLOSE) {
       AST_set('update', null);
@@ -5296,7 +5266,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_LABELSET(labelSet);
 
     let ifToken = curtok;
-    ASSERT_skipToParenOpen('if', lexerFlags);
+    ASSERT_skipToParenOpenOrDie('if', lexerFlags);
     AST_open(astProp, {
       type: 'IfStatement',
       loc: AST_getBaseLoc(ifToken),
@@ -5314,7 +5284,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseStatementHeader(lexerFlags, 'test');
     parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_IFELSE, PARENT_NOT_LABEL, 'consequent');
     if (curtok.type === $IDENT && curtok.str === 'else') {
-      ASSERT_skipStatementStart('else', lexerFlags);
+      ASSERT_skipToStatementStart('else', lexerFlags);
       parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_IFELSE, PARENT_NOT_LABEL, 'alternate');
     } else {
       AST_set('alternate', null);
@@ -5340,8 +5310,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let importToken = curtok;
 
-    // TODO: use ASSERT_skipToParenOpen in non-global. In global it can be an import declaration so we can't do it there
-    ASSERT_skipIdentStarCurlyOpenParenOpenString('import', lexerFlags);
+    ASSERT_skipToIdentStarCurlyOpenParenOpenString('import', lexerFlags);
     if (curtok.type === $PUNC_PAREN_OPEN) {
       // This must be dynamic `import()` or an error
       return parseDynamicImportStatement(lexerFlags, importToken, astProp);
@@ -5370,7 +5339,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //         ^
         // import x, {...} from 'x'
         //         ^
-        ASSERT_skipIdentStarCurlyOpen(',', lexerFlags);  // TODO: next must be `*` or `{` or ident
+        ASSERT_skipToIdentStarCurlyOpen(',', lexerFlags);  // TODO: next must be `*` or `{` or ident
         if (curtok.type === $PUNC_STAR) {
           // import x, * as z from 'x'
           parseImportNamespace(lexerFlags, scoop);
@@ -5384,7 +5353,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('Missing export source');
       } else {
         // `import x from 'x'`
-        ASSERT_skipToString('from', lexerFlags);
+        ASSERT_skipToStringOrDie('from', lexerFlags);
       }
     } else if (curtok.type === $PUNC_STAR) {
       // import * as y from 'x'
@@ -5397,13 +5366,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // import {a as c,b} from 'x'
       // import {a,b,} from 'x'
       parseImportObject(lexerFlags, scoop);
+    } else {
+      // - `import "foo"`
+      //           ^^^^^
+      // - `import \n / x`
+      //              ^
+
+      if (!isStringToken(curtok.type)) {
+        THROW('Expected a valid token after the `import` keyword, found `' + curtok.str + '` instead');
+      }
     }
 
-    // `import 'foo'` is valid but otherwise this is an error
-    if (!isStringToken(curtok.type)) THROW('Export source must be string');
+    // `import 'foo'` is valid but otherwise this is an error (validated by skipToStringOrDie)
+    ASSERT(isStringToken(curtok.type), 'skipToStringOrDie should throw if the next token is not a string, all branches should have enforced it');
 
     let sourceToken = curtok;
-    ASSERT_skipStatementStart($G_STRING, lexerFlags); // semi or asi
+    ASSERT_skipToStatementStart($G_STRING, lexerFlags); // semi or asi
     AST_setStringLiteral('source', sourceToken, false);
     parseSemiOrAsi(lexerFlags);
     AST_close('ImportDeclaration');
@@ -5418,7 +5396,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let identToken = curtok;
     fatalBindingIdentCheck(identToken, BINDING_TYPE_CONST, lexerFlags);
     SCOPE_addLexBinding(scoop, identToken.str, BINDING_TYPE_LET, FDS_LEX); // TODO: confirm `let`
-    ASSERT_skipAsCommaFrom($IDENT, lexerFlags);
+    ASSERT_skipToAsCommaFrom($IDENT, lexerFlags);
 
     AST_setNode('specifiers', {
       type: 'ImportDefaultSpecifier',
@@ -5431,20 +5409,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // - `import {...} from 'x'`
     //           ^
-    ASSERT_skipIdentCurlyClose('{', lexerFlags);
+    ASSERT_skipToIdentCurlyClose('{', lexerFlags);
     while (curtok.type === $IDENT) {
       let nameToken = curtok; // left of the `as` token
       let localToken = curtok; // right of the `as` token, otherwise same as nameToken
-      ASSERT_skipAsCommaCurlyClose($IDENT, lexerFlags);
+      ASSERT_skipToAsCommaCurlyClose($IDENT, lexerFlags);
 
       // https://tc39.github.io/ecma262/#sec-createimportbinding
       // The concrete Environment Record method CreateImportBinding for module Environment Records creates a new initialized
       // immutable indirect binding for the name N. A binding must not already exist in this Environment Record for N.
 
       if (curtok.str === 'as') {
-        ASSERT_skipToIdent('as', lexerFlags);
+        ASSERT_skipToIdentOrDie('as', lexerFlags);
         localToken = curtok;
-        ASSERT_skipCommaCurlyClose($IDENT, lexerFlags);
+        ASSERT_skipToCommaCurlyClose($IDENT, lexerFlags);
       }
       fatalBindingIdentCheck(localToken, BINDING_TYPE_CONST, lexerFlags);
       SCOPE_addLexBinding(scoop, localToken.str, BINDING_TYPE_LET, FDS_ILLEGAL); // TODO: confirm `let`
@@ -5456,16 +5434,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         local: AST_getIdentNode(localToken),
       });
 
-      if (curtok.type === $PUNC_COMMA) ASSERT_skipIdentCurlyClose(',', lexerFlags);
+      if (curtok.type === $PUNC_COMMA) ASSERT_skipToIdentCurlyClose(',', lexerFlags);
       else if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Unexpected character while parsing export object');
     }
     if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing import definition closing curly, found `' + tokenStrForError(curtok) + '` instead');
     // - `import {...} from 'x'`
     //               ^
-    ASSERT_skipToFrom('}', lexerFlags);
-
-    if (curtok.str !== 'from') THROW('Missing export source');
-    ASSERT_skipToString('from', lexerFlags);
+    ASSERT_skipToFromOrDie('}', lexerFlags);
+    ASSERT_skipToStringOrDie('from', lexerFlags);
   }
   function parseImportNamespace(lexerFlags, scoop) {
     ASSERT(parseImportNamespace.length === arguments.length, 'arg count');
@@ -5473,12 +5449,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // import * as x from 'y'
     //        ^
     let starToken = curtok;
-    ASSERT_skipAs('*', lexerFlags);
-    if (curtok.str !== 'as') THROW('Expected the keyword `as`, instead found `' + tokenStrForError(curtok) + '`');
-    ASSERT_skipToIdent('as', lexerFlags);
+    ASSERT_skipToAsOrDie('*', lexerFlags);
+    ASSERT_skipToIdentOrDie('as', lexerFlags);
     let localToken = curtok;
     // next must be `from` (default must come first, if present, and object can not be used together with star)
-    ASSERT_skipToFrom($IDENT, lexerFlags);
+    ASSERT_skipToFromOrDie($IDENT, lexerFlags);
     fatalBindingIdentCheck(localToken, BINDING_TYPE_CONST, lexerFlags);
     SCOPE_addLexBinding(scoop, localToken.str, BINDING_TYPE_LET, FDS_ILLEGAL); // TODO: confirm `let`
 
@@ -5488,8 +5463,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       local: AST_getIdentNode(localToken),
     });
 
-    ASSERT(curtok.str === 'from', 'already validated by skipToFrom, above');
-    ASSERT_skipToString('from', lexerFlags);
+    ASSERT(curtok.str === 'from', 'already validated by skipToFromOrDie, above');
+    ASSERT_skipToStringOrDie('from', lexerFlags);
   }
 
   function parseLetDeclaration(lexerFlags, letToken, scoop, labelSet, fdState, nestedLabels, astProp) {
@@ -5633,7 +5608,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!allowGlobalReturn && hasAllFlags(lexerFlags, LF_IN_GLOBAL)) THROW('Not configured to parse `return` statement in global, bailing');
 
     let returnToken = curtok;
-    ASSERT_skipStatementStart('return', lexerFlags); // Either an expression on the same line or a statement on the next (which includes exprs)
+    ASSERT_skipToStatementStart('return', lexerFlags); // Either an expression on the same line or a statement on the next (which includes exprs)
     AST_open(astProp, {
       type: 'ReturnStatement',
       loc: AST_getBaseLoc(returnToken),
@@ -5664,7 +5639,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_LABELSET(labelSet);
 
     let switchToken = curtok;
-    ASSERT_skipToParenOpen('switch', lexerFlags);
+    ASSERT_skipToParenOpenOrDie('switch', lexerFlags);
     AST_open(astProp, {
       type: 'SwitchStatement',
       loc: AST_getBaseLoc(switchToken),
@@ -5676,12 +5651,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let lexerFlagsForSwitch = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_IN_GLOBAL | LF_NO_ASI);
     parseStatementHeader(lexerFlagsForSwitch, 'discriminant');
     if (curtok.type !== $PUNC_CURLY_OPEN) THROW('Missing opening curly of `switch` body, found `' + tokenStrForError(curtok) + '` instead');
-    ASSERT_skipSwitchBody($$CURLY_L_7B, lexerFlagsForSwitch);
+    ASSERT_skipToSwitchBody($$CURLY_L_7B, lexerFlagsForSwitch);
 
     parseSwitchCases(lexerFlagsForSwitch | LF_IN_SWITCH, SCOPE_addLayer(scoop, SCOPE_LAYER_SWITCH, 'parseSwitchStatement'), labelSet, 'cases');
 
     if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing the closing curly of the switch body, found `' + tokenStrForError(curtok) + '` instead');
-    ASSERT_skipStatementStart('}', lexerFlags);
+    ASSERT_skipToStatementStart('}', lexerFlags);
     AST_close('SwitchStatement');
   }
   function parseSwitchCases(lexerFlags, scoop, labelSet, astProp) {
@@ -5692,7 +5667,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     while (true) {
       if (curtok.str === 'case') {
         let caseToken = curtok;
-        ASSERT_skipExpressionStart('case', lexerFlags);
+        ASSERT_skipToExpressionStart('case', lexerFlags);
         AST_open(astProp, {
           type: 'SwitchCase',
           loc: AST_getBaseLoc(caseToken),
@@ -5701,7 +5676,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         });
         parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'test');
         if (curtok.type !== $PUNC_COLON) THROW('Missing colon after case expr');
-        ASSERT_skipStatementStart(':', lexerFlags);
+        ASSERT_skipToStatementStart(':', lexerFlags);
         while (curtok.type !== $EOF && curtok.type !== $PUNC_CURLY_CLOSE && (curtok.type !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
           parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_LEX, PARENT_NOT_LABEL, 'consequent');
         }
@@ -5710,15 +5685,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hadDefault) THROW('Found second `default` in same switch');
         hadDefault = true;
         let defaultToken = curtok;
-        ASSERT_skipColon('default', lexerFlags);
+        ASSERT_skipToColonOrDie('default', lexerFlags);
         AST_open(astProp, {
           type: 'SwitchCase',
           loc: AST_getBaseLoc(defaultToken),
           test: null, // yes, null
           consequent: [],
         });
-        if (curtok.type !== $PUNC_COLON) THROW('Missing colon after default');
-        ASSERT_skipStatementStart(':', lexerFlags);
+        ASSERT_skipToStatementStart(':', lexerFlags);
         while (curtok.type !== $EOF && curtok.type !== $PUNC_CURLY_CLOSE && (curtok.type !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
           parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_LEX, PARENT_NOT_LABEL, 'consequent');
         }
@@ -5731,7 +5705,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseThrowStatement(lexerFlags, astProp) {
     let throwToken = curtok;
-    ASSERT_skipExpressionStart('throw', lexerFlags); // The arg is mandatory so next token cannot start a statement
+    ASSERT_skipToExpressionStart('throw', lexerFlags); // The arg is mandatory so next token cannot start a statement
     AST_open(astProp, {
       type: 'ThrowStatement',
       loc: AST_getBaseLoc(throwToken),
@@ -5749,7 +5723,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_LABELSET(labelSet);
 
     let tryToken = curtok;
-    ASSERT_skipToCurlyOpen('try', lexerFlags);
+    ASSERT_skipToCurlyOpenOrDie('try', lexerFlags);
     AST_open(astProp, {
       type: 'TryStatement',
       loc: AST_getBaseLoc(tryToken),
@@ -5825,14 +5799,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [v]: `try {} catch (e) {}`
         //                     ^
 
-        ASSERT_skipBindingStart('(', lexerFlags); // Cannot be `)` so don't check for it
+        ASSERT_skipToBindingStart('(', lexerFlags); // Cannot be `)` so don't check for it
         if (curtok.type === $PUNC_PAREN_CLOSE) THROW('The catch clause must have a binding');
         parseBinding(lexerFlags | LF_NO_ASI, curtok, catchHeadScoop, BINDING_TYPE_CATCH_OTHER, FROM_CATCH, ASSIGNMENT_IS_DEFAULT, UNDEF_EXPORTS, UNDEF_EXPORTS, 'param');
 
         if (curtok.type === $PUNC_COMMA) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
         if (curtok.type === $PUNC_EQ) THROW('Catch clause parameter does not support default values');
         if (curtok.type !== $PUNC_PAREN_CLOSE) THROW('Missing right paren for the catch clause, found `' + tokenStrForError(curtok) + '` instead');
-        ASSERT_skipToCurlyOpen(')', lexerFlags);
+        ASSERT_skipToCurlyOpenOrDie(')', lexerFlags);
       } else {
         THROW('Missing start of catch clause (`(`) or start of catch body (`{`), found `' + tokenStrForError(curtok) + '` instead')
       }
@@ -5848,7 +5822,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.c === $$F_66 && curtok.str === 'finally') {
       // parseFinally
       hasEither = true;
-      ASSERT_skipToCurlyOpen('finally', lexerFlags);
+      ASSERT_skipToCurlyOpenOrDie('finally', lexerFlags);
       let finallyScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FINALLY, 'parseTryStatement(finally)');
       parseBlockStatement(lexerFlags, finallyScoop, labelSet, 'finalizer');
     } else {
@@ -5862,7 +5836,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseVarStatement(lexerFlags, scoop, astProp) {
     let varToken = curtok;
-    ASSERT_skipBindingStart('var', lexerFlags);
+    ASSERT_skipToBindingStart('var', lexerFlags);
     parseAnyVarDeclaration(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
   }
 
@@ -5871,7 +5845,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_LABELSET(labelSet);
 
     let whileToken = curtok;
-    ASSERT_skipToParenOpen('while', lexerFlags);
+    ASSERT_skipToParenOpenOrDie('while', lexerFlags);
     AST_open(astProp, {
       type: 'WhileStatement',
       loc: AST_getBaseLoc(whileToken),
@@ -5989,14 +5963,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Cannot asi inside `delete (...)`, the `in` restriction stuff does not apply inside the arg
     lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS);
     let parenToken = curtok;
-    ASSERT_skipExpressionStartGrouped('(', lexerFlags); // `delete (/x/.y)`, for bonus points
+    ASSERT_skipToExpressionStartGrouped('(', lexerFlags); // `delete (/x/.y)`, for bonus points
     while (curtok.type === $PUNC_PAREN_OPEN) {
       ++parens;
       parenToken = curtok;
       pees.push(curtok);
 
       // Note: next is expression start or `)` in case of `delete (()=>{})`
-      ASSERT_skipExpressionStartGrouped('(', lexerFlags); // `delete (/x/.y)`, for bonus points
+      ASSERT_skipToExpressionStartGrouped('(', lexerFlags); // `delete (/x/.y)`, for bonus points
     }
     // Now parse a group and pass it a special flag that changes the semantics of the return value
     // It's an ugly hack :( all caused by `delete ((((a, b) => c).d))` being hard to custom parse
@@ -6162,7 +6136,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     labelSet = wrapLabelSet(labelSet, 'labelled statement');
     labelSet['#' + labelName] = true;
-    ASSERT_skipStatementStart(':', lexerFlags);
+    ASSERT_skipToStatementStart(':', lexerFlags);
 
     if (fdState === FDS_IFELSE) {
       // a "labelled func decl" is never allowed as if/else child
@@ -6223,7 +6197,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseEmptyStatement(lexerFlags, astProp) {
     let semiToken = curtok;
-    ASSERT_skipStatementStart(';', lexerFlags);
+    ASSERT_skipToStatementStart(';', lexerFlags);
     AST_setNode(astProp, {
       type: 'EmptyStatement',
       loc: AST_getClosedLoc(semiToken),
@@ -6237,7 +6211,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) THROW('The `with` statement is not allowed in strict mode');
 
     let withToken = curtok;
-    ASSERT_skipToParenOpen('with', lexerFlags);
+    ASSERT_skipToParenOpenOrDie('with', lexerFlags);
     AST_open(astProp, {
       type: 'WithStatement',
       loc: AST_getBaseLoc(withToken),
@@ -6325,7 +6299,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
       }
       if (curtok.type !== $PUNC_COMMA) break;
-      ASSERT_skipBindingStartGrouped(',', lexerFlags);
+      ASSERT_skipToBindingStartGrouped(',', lexerFlags);
       if (curtok.type === $PUNC_PAREN_CLOSE) {
         // `function f(a,)`
         // (arrows do not go through here)
@@ -6458,7 +6432,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtok.type === $PUNC_EQ) {
       if (bindingOrigin === FROM_CATCH) THROW('Catch clause can not have init / default');
-      ASSERT_skipExpressionStart('=', lexerFlags); // x(foo=/bar/){}
+      ASSERT_skipToExpressionStart('=', lexerFlags); // x(foo=/bar/){}
       paramSimple = PARAM_WAS_COMPLEX_HAD_INIT; // if this is an arg the arg is not "simple"
       if (defaultsOption === ASSIGNMENT_IS_DEFAULT) {
         if ((paramSimple === PARAM_WAS_SIMPLE || paramSimple === PARAM_WAS_NON_STRICT_SIMPLE) && bindingOrigin === FROM_CATCH) THROW('The catch clause cannot have a default');
@@ -6911,7 +6885,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `async package => {"use strict"}`
       isSimple = PARAMS_SOME_NONSTRICT;
     }
-    ASSERT_skipArrow($IDENT, lexerFlags); // this was `async <curtok>` and curtok is not a keyword
+    ASSERT_skipToArrowOrDie($IDENT, lexerFlags); // this was `async <curtok>` and curtok is not a keyword
 
     let assignable = parseArrowParenlessFromPunc(lexerFlags, asyncToken, identToken, allowAssignment, isSimple, asyncToken, astProp);
 
@@ -6950,7 +6924,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       operator: curtok.str,
       right: undefined,
     }, 'left');
-    ASSERT_skipExpressionStart(curtok.str, lexerFlags);
+    ASSERT_skipToExpressionStart(curtok.str, lexerFlags);
 
     let rhsAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
     AST_close('AssignmentExpression');
@@ -7008,7 +6982,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       operator: opToken.str,
       right: undefined,
     }, 'left');
-    ASSERT_skipExpressionStart(opToken, lexerFlags);
+    ASSERT_skipToExpressionStart(opToken, lexerFlags);
     let rightExprStartToken = curtok;
     let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, NOT_LHSE, 'right');
 
@@ -7041,7 +7015,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       consequent: undefined,
       alternate: undefined,
     }, 'test');
-    ASSERT_skipExpressionStart('?', lexerFlags);
+    ASSERT_skipToExpressionStart('?', lexerFlags);
     // you can have an assignment between `?` and `:` but not after `:`
     // the `in` is allowed between as well because there can be no ambiguity
     // TODO: add testcase where NO_ASI is necessary. Not sure it is but can't determine that it is not. Go fuzzer?
@@ -7050,7 +7024,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.type === $PUNC_COMMA) THROW('Can not use comma inside ternary expressions');
       THROW('Unexpected character inside ternary');
     }
-    ASSERT_skipExpressionStart(':', lexerFlags);
+    ASSERT_skipToExpressionStart(':', lexerFlags);
     let rhsAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'alternate');
     AST_close('ConditionalExpression');
 
@@ -7093,7 +7067,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(__parseExpressions.length === arguments.length, 'arg count');
     // current node should already be a SequenceExpression here. it wont be closed here either
     do {
-      ASSERT_skipExpressionStart(',', lexerFlags);
+      ASSERT_skipToExpressionStart(',', lexerFlags);
       let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
       assignableForPiggies |= nowAssignable; // make sure to propagate the await/yield flags
     } while (curtok.type === $PUNC_COMMA);
@@ -7749,8 +7723,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - TODO: `function f(x=() => new.target) {}`
       THROW('Must be inside/nested a regular function to use `new.target`');
     }
-    ASSERT_skipTarget('.', lexerFlags); // already asserted the dot. For now, the valid followup is `target`
-    ASSERT(curtok.str === 'target', 'the target skipper should have asserted this');
+    ASSERT_skipToTargetOrDie('.', lexerFlags); // already asserted the dot. For now, the valid followup is `target`
     let propertyToken = curtok;
     ASSERT_skipDiv('target', lexerFlags); // new.target / foo
 
@@ -7825,7 +7798,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let unaryToken = curtok;
     let identName = curtok.str;
-    ASSERT_skipExpressionStart(unaryToken.str, lexerFlags); // next can be regex (`+/x/.y`), though it's very unlikely
+    ASSERT_skipToExpressionStart(unaryToken.str, lexerFlags); // next can be regex (`+/x/.y`), though it's very unlikely
 
     if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
 
@@ -7870,7 +7843,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     let puncToken = curtok;
-    ASSERT_skipExpressionStart($G_PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
+    ASSERT_skipToExpressionStart($G_PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
     AST_open(astProp, {
       type: 'UpdateExpression',
       loc: AST_getBaseLoc(puncToken),
@@ -7972,7 +7945,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('A newline after `yield` is illegal for `yield *`');
     }
 
-    ASSERT_skipExpressionStart('*', lexerFlags); // next is any value
+    ASSERT_skipToExpressionStart('*', lexerFlags); // next is any value
     let valueStartToken = curtok;
     let assignable = parseValue(lexerFlags, allowAssignment, NOT_NEW_ARG, NOT_LHSE, astProp); // arg required, no newline restrictions
     parseExpressionFromOp(lexerFlags, valueStartToken, assignable, astProp);
@@ -8162,7 +8135,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.type === $TICK_PURE || curtok.type === $TICK_TAIL || curtok.type === $TICK_BAD_PURE || curtok.type === $TICK_BAD_TAIL) {
       skipDiv(lexerFlags); // First token after template is division
     } else if (curtok.type === $TICK_HEAD || curtok.type === $TICK_BODY || curtok.type === $TICK_BAD_HEAD || curtok.type === $TICK_BAD_BODY) {
-      ASSERT_skipExpressionStart($G_TICK, lexerFlags); // First token in template expression can be regex
+      ASSERT_skipToExpressionStart($G_TICK, lexerFlags); // First token in template expression can be regex
       hasDoubleStart = true; // the raw string of the token starts with the two-char delimiter `${` instead of one
     } else {
       THROW_TOKEN('The first token after the template expression should be a continuation of the template', tickToken);
@@ -8225,7 +8198,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseValueTailDotProperty(lexerFlags, valueFirstToken, assignable, isNewArg, astProp) {
     // parseMemberExpression dot
-    ASSERT_skipToIdent('.', lexerFlags);
+    ASSERT_skipToIdentOrDie('.', lexerFlags);
     let identToken = curtok;
     ASSERT_skipDiv($IDENT, lexerFlags); // x.y / z is division
     AST_setNode(astProp, {
@@ -8247,7 +8220,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       property: undefined,
       computed: true,
     }, 'object');
-    ASSERT_skipExpressionStart('[', lexerFlags);
+    ASSERT_skipToExpressionStart('[', lexerFlags);
     let nowAssignable = parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, 'property');
     // - `foo[await bar]`
     assignable = mergeAssignable(nowAssignable, assignable); // pass on piggies (yield, await, etc)
@@ -8388,7 +8361,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseCallArgs(lexerFlags, astProp) {
-    ASSERT_skipExpressionStartGrouped('(', lexerFlags);
+    ASSERT_skipToExpressionStartGrouped('(', lexerFlags);
     // [v]: `for (x(y in z);;);`
     lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS);
 
@@ -8399,7 +8372,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       do {
         if (curtok.type === $PUNC_DOT_DOT_DOT) {
           let spreadToken = curtok;
-          ASSERT_skipExpressionStart('...', lexerFlags);
+          ASSERT_skipToExpressionStart('...', lexerFlags);
           AST_open(astProp, {
             type: 'SpreadElement',
             loc: AST_getBaseLoc(spreadToken),
@@ -8413,7 +8386,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = mergeAssignable(nowAssignable, assignable);
         }
         if (curtok.type !== $PUNC_COMMA) break;
-        ASSERT_skipExpressionStartGrouped(',', lexerFlags);
+        ASSERT_skipToExpressionStartGrouped(',', lexerFlags);
         if (curtok.type === $PUNC_PAREN_CLOSE) {
           // `x(a,b,)`
           if (allowTrailingFunctionComma) break;
@@ -8469,7 +8442,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       });
     }
 
-    ASSERT_skipExpressionStart('(', lexerFlags); // The arg to dynamic import is mandatory and an arbitrary expr
+    ASSERT_skipToExpressionStart('(', lexerFlags); // The arg to dynamic import is mandatory and an arbitrary expr
     // Note: the import call arg sets the +IN flag in the grammar (can't use `in` operator). So that's why we set it too
     let assignable = parseExpression(lexerFlags | LF_IN_FOR_LHS, ASSIGN_EXPR_IS_OK, acornCompat ? 'source' : 'arguments');
     if (curtok.type !== $PUNC_PAREN_CLOSE) {
@@ -8504,7 +8477,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, paramsSimple) {
     ASSERT(arguments.length === parseArrowFromPunc.length, 'arg count');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
-    ASSERT_skipExpressionStart('=>', lexerFlags); // the `{` for a block is subsumed in the expr-start lexer hint
+    ASSERT_skipToExpressionStart('=>', lexerFlags); // the `{` for a block is subsumed in the expr-start lexer hint
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     ASSERT(_path[_path.length - 1] && _path[_path.length - 1].params, 'params should be wrapped in arrow node now');
@@ -8598,7 +8571,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_ASSIGN_EXPR(allowAssignment);
     let parenToken = curtok;
 
-    ASSERT_skipExpressionStartGrouped('(', lexerFlags); // Patterns are subsumed by exprs when it comes to skip
+    ASSERT_skipToExpressionStartGrouped('(', lexerFlags); // Patterns are subsumed by exprs when it comes to skip
     return _parseGroupToplevels(lexerFlags, parenToken, asyncStmtOrExpr, allowAssignment, NOT_DELETE_ARG, asyncToken, newlineAfterAsync, leftHandSideExpression, astProp);
   }
   function _parseGroupToplevels(lexerFlagsBeforeParen, parenToken, asyncStmtOrExpr, allowAssignmentForGroupToBeArrow, isDeleteArg, asyncToken, newlineAfterAsync, leftHandSideExpression, astProp) {
@@ -8671,11 +8644,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         );
       }
 
-      ASSERT_skipArrow(')', lexerFlags);
-
-      if (curtok.type !== $PUNC_EQ_GT) {
-        THROW('Empty group must indicate an arrow, async(), or call()');
-      }
+      ASSERT_skipToArrowOrDie(')', lexerFlags);
 
       if (leftHandSideExpression === ONLY_LHSE) THROW_TOKEN('Arrow not allowed in this position', asyncToken === UNDEF_ASYNC ? parenToken : asyncToken);
 
@@ -8955,7 +8924,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.type !== $PUNC_COMMA) break;
 
       // Note: since this can also be an arrow header, the next token may be a `)` as well as expr start
-      ASSERT_skipExpressionStartGrouped(',', lexerFlags);
+      ASSERT_skipToExpressionStartGrouped(',', lexerFlags);
 
       if (curtok.type === $PUNC_PAREN_CLOSE) {
         // [x]: `(a,)`
@@ -9495,7 +9464,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let lexerFlags = sansFlag(lexerFlagsBeforeParen, LF_IN_FOR_LHS);
 
     let arrayOpenToken = curtok;
-    ASSERT_skipExpressionStartSquareCloseComma('[', lexerFlags);
+    ASSERT_skipToExpressionStartSquareCloseComma('[', lexerFlags);
     AST_open(_astProp, {
       type: 'ArrayExpression',
       loc: AST_getBaseLoc(arrayOpenToken),
@@ -9508,7 +9477,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // skip leading commas
     while (curtok.type === $PUNC_COMMA) {
-      ASSERT_skipExpressionStartSquareCloseComma(',', lexerFlags);
+      ASSERT_skipToExpressionStartSquareCloseComma(',', lexerFlags);
       AST_add(astProp, null);
     }
 
@@ -9579,7 +9548,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             operator: '=',
             right: undefined,
           }, 'left');
-          ASSERT_skipExpressionStart('=', lexerFlags);
+          ASSERT_skipToExpressionStart('=', lexerFlags);
           // The rhs of the assignment is irrelevant beyond yield/await flags
           let rightAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
           AST_close('AssignmentExpression');
@@ -9759,7 +9728,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               operator: '=',
               right: undefined,
             }, 'left');
-            ASSERT_skipExpressionStart('=', lexerFlags);
+            ASSERT_skipToExpressionStart('=', lexerFlags);
             // pick up the flags from assignable and put them in destructible
             // - `= await bar`
             // - `= yield`
@@ -9808,9 +9777,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.type !== $PUNC_COMMA) break; // end of the array
       // skip one because a trailing comma does not add a `null` to the ast
 
-      ASSERT_skipExpressionStartSquareCloseComma(',', lexerFlags);
+      ASSERT_skipToExpressionStartSquareCloseComma(',', lexerFlags);
       while (curtok.type === $PUNC_COMMA) {
-        ASSERT_skipExpressionStartSquareCloseComma(',', lexerFlags);
+        ASSERT_skipToExpressionStartSquareCloseComma(',', lexerFlags);
         AST_add(astProp, null);
       }
 
@@ -9895,7 +9864,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let lexerFlags = sansFlag(outerLexerFlags, LF_IN_FOR_LHS | LF_IN_TEMPLATE);
 
-    ASSERT_skipObjectMemberStart('{', lexerFlags);
+    ASSERT_skipAny('{', lexerFlags);
 
     let destructible = MIGHT_DESTRUCT; // innocent until proven guilty? may or may not destruct
 
@@ -9932,7 +9901,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= currentDestruct;
 
       if (curtok.type !== $PUNC_COMMA) break;
-      ASSERT_skipObjectMemberStart(',', lexerFlags);
+      ASSERT_skipAny(',', lexerFlags);
     }
 
     // restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
@@ -9945,7 +9914,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipDiv('}', lexerFlags); // ({...} / foo)
     } else {
       if (curtok.type === $EOF) THROW('Unexpected EOF while parsing an object literal or pattern');
-      ASSERT_skipStatementStart('}', lexerFlags);
+      ASSERT_skipToStatementStart('}', lexerFlags);
     }
 
     return sansFlag(destructible, PIGGY_BACK_WAS_PROTO);
@@ -10016,7 +9985,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       //     ^
       // - `({15: bar}) => x`
       let litToken = curtok;
-      ASSERT_skipColonParenOpen(litToken.str, lexerFlags);
+      ASSERT_skipToColonParenOpen(litToken.str, lexerFlags);
 
       if (curtok.type === $PUNC_COLON) {
         // Any key-colon combo is destructible, the "value" determines assign/binding/both destructibility:
@@ -10094,7 +10063,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       let curlyToken = curtok;
       // skip computed key part first because we need to figure out whether we're parsing a method
-      ASSERT_skipExpressionStart('[', lexerFlags);
+      ASSERT_skipToExpressionStart('[', lexerFlags);
       let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
       // pass yield/await flags here (note that the assignability itself is irrelevant for this expr)
       // TODO: find a testcase where the setNotAssignable state fails...
@@ -10102,7 +10071,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.type !== $PUNC_BRACKET_CLOSE) {
         THROW('Missing closing square bracket for computed property name, found `' + tokenStrForError(curtok) + '` instead');
       }
-      ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
+      ASSERT_skipToColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
       if (curtok.type === $PUNC_COLON) {
         // Computed keys do not affect destructibility
@@ -10129,7 +10098,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           value: undefined,
           shorthand: false,
         }, 'key');
-        ASSERT_skipExpressionStart(':', lexerFlags); // skip after so the end-column is correct
+        ASSERT_skipToExpressionStart(':', lexerFlags); // skip after so the end-column is correct
         destructible = _parseObjectPropertyValueAfterColon(lexerFlags, undefined, bindingType, IS_ASSIGNABLE, destructible, scoop, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         AST_close(NODE_NAME_PROPERTY);
       }
@@ -10164,12 +10133,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= CANT_DESTRUCT;
 
       let starToken = curtok;
-      ASSERT_skipIdentStringNumberSquareOpen('*', lexerFlags);
+      ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
 
       if (curtok.type === $IDENT) {
         // - `({*ident(){}})`
         let identToken = curtok;
-        ASSERT_skipToParenOpen($IDENT, lexerFlags);
+        ASSERT_skipToParenOpenOrDie($IDENT, lexerFlags);
 
         // - `({*ident(){}})`
         // - `({*get(){}})`       // ok (not a getter!)
@@ -10185,7 +10154,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `({*15(){}})`
         let litToken = curtok;
 
-        ASSERT_skipToParenOpen(litToken.str, lexerFlags);
+        ASSERT_skipToParenOpenOrDie(litToken.str, lexerFlags);
         AST_setLiteral(astProp, litToken);
 
         let destructPiggies = parseObjectLikeMethodAfterKey(lexerFlags, UNDEF_ASYNC, starToken, UNDEF_GET, UNDEF_SET, litToken, undefined, astProp);
@@ -10197,12 +10166,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         let bracketOpenToken = curtok;
         // skip dynamic part first because we need to assert that we're parsing a method
-        ASSERT_skipExpressionStart('[', lexerFlags);
+        ASSERT_skipToExpressionStart('[', lexerFlags);
         let assignablePiggies1 = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
         if (curtok.type !== $PUNC_BRACKET_CLOSE) {
           THROW('Missing closing square bracket for computed property member name, found `' + tokenStrForError(curtok) + '` instead');
         }
-        ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
+        ASSERT_skipToColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
         let assignablePiggies2 = parseObjectMethod(lexerFlags, UNDEF_ASYNC, starToken, UNDEF_GET, UNDEF_SET, undefined, bracketOpenToken, astProp);
 
@@ -10285,7 +10254,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         operator: '=',
         right: undefined,
       }, 'left');
-      ASSERT_skipExpressionStart('=', lexerFlags); // a forward slash after = has to be a division
+      ASSERT_skipToExpressionStart('=', lexerFlags); // a forward slash after = has to be a division
       // pick up the flags from assignable and put them in destructible
       // - `({x} = await bar) => {}`
       // - `async function a(){     ({r} = await bar) => {}     }`
@@ -10334,7 +10303,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       AST_setLiteral('key', keyToken);
     }
-    ASSERT_skipExpressionStart(':', lexerFlags);
+    ASSERT_skipToExpressionStart(':', lexerFlags);
 
     destructible = _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp);
 
@@ -10585,7 +10554,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string', 'astprop string');
 
     let propLeadingIdentToken = curtok;
-    ASSERT_skipObjectMemberRest($IDENT, lexerFlags);
+    ASSERT_skipAny($IDENT, lexerFlags);
 
     if (allowAsyncFunctions) {
       // Note: `{async\n(){}}` is legal in sloppy so we do have to check the paren
@@ -10698,7 +10667,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           operator: '=',
           right: undefined,
         }, 'left');
-        ASSERT_skipExpressionStart('=', lexerFlags); // a forward slash after = has to be a regex
+        ASSERT_skipToExpressionStart('=', lexerFlags); // a forward slash after = has to be a regex
         let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         assignable = mergeAssignable(nowAssignable, assignable);
         AST_close('AssignmentExpression');
@@ -10767,7 +10736,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       let identToken2 = curtok;
-      ASSERT_skipToParenOpen($IDENT, lexerFlags);
+      ASSERT_skipToParenOpenOrDie($IDENT, lexerFlags);
       AST_setIdent(astProp, identToken2);
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, identToken2, undefined, astProp);
 
@@ -10794,31 +10763,31 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // Skip the star
       starToken = curtok;
-      ASSERT_skipIdentStringNumberSquareOpen('*', lexerFlags);
+      ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
 
       if (curtok.type === $IDENT) {
         // `{   async *foo(){}   }`
         //             ^^^
         // `{   async *prototype(){}   }`
         let identToken2 = curtok;
-        ASSERT_skipToParenOpen($IDENT, lexerFlags);
+        ASSERT_skipToParenOpenOrDie($IDENT, lexerFlags);
         AST_setIdent(astProp, identToken2);
         parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, identToken2, undefined, astProp);
       } else if (isNumberStringToken(curtok.type)) {
         // `{   async *300(){}   }`
         // `{   async *"foo"(){}   }`
         let litToken = curtok;
-        ASSERT_skipToParenOpen(litToken.str, lexerFlags);
+        ASSERT_skipToParenOpenOrDie(litToken.str, lexerFlags);
         AST_setLiteral(astProp, litToken);
         parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, litToken, undefined, astProp);
       } else if (curtok.type === $PUNC_BRACKET_OPEN) {
         // `{   async *[foo](){}   }`
         let bracketOpenToken = curtok;
-        ASSERT_skipExpressionStart('[', lexerFlags);
+        ASSERT_skipToExpressionStart('[', lexerFlags);
         let assignablePiggies = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
         assignable = mergeAssignable(assignablePiggies, assignable);
         if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Missing right square bracket for computed property, found `' + tokenStrForError(curtok) + '` instead');
-        ASSERT_skipToParenOpen(']', lexerFlags);
+        ASSERT_skipToParenOpenOrDie(']', lexerFlags);
         parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, undefined, bracketOpenToken, astProp);
       } else {
         THROW('Expected to parse the key of a generator method but found something unexpected', curtok);
@@ -10853,7 +10822,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       let litToken = curtok;
-      ASSERT_skipToParenOpen(litToken.str, lexerFlags);
+      ASSERT_skipToParenOpenOrDie(litToken.str, lexerFlags);
       AST_setLiteral(astProp, litToken);
 
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, litToken, undefined, astProp);
@@ -10889,13 +10858,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // skip dynamic part first because we need to assert that we're parsing a method
       let bracketOpenToken = curtok;
-      ASSERT_skipExpressionStart('[', lexerFlags);
+      ASSERT_skipToExpressionStart('[', lexerFlags);
       let assignablePiggies = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
       assignable = mergeAssignable(assignablePiggies, assignable);
       if (curtok.type !== $PUNC_BRACKET_CLOSE) {
         THROW('Missing closing square bracket for computed property name, found `' + tokenStrForError(curtok) + '` instead');
       }
-      ASSERT_skipColonParenOpen($$SQUARE_R_5D, lexerFlags);
+      ASSERT_skipToColonParenOpen($$SQUARE_R_5D, lexerFlags);
 
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, undefined, bracketOpenToken, astProp);
     }
@@ -11002,7 +10971,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_FOR_LHS | LF_IN_TEMPLATE | LF_NO_ASI);
 
     let classToken = curtok;
-    ASSERT_skipIdentCurlyOpen('class', lexerFlags);
+    ASSERT_skipToIdentCurlyOpen('class', lexerFlags);
     AST_open(astProp, {
       type: 'ClassDeclaration',
       loc: AST_getBaseLoc(classToken),
@@ -11076,7 +11045,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       bindingName = curtok.str;
       SCOPE_addLexBinding(scoop, bindingName, BINDING_TYPE_CLASS, FDS_ILLEGAL);
       let idToken = curtok;
-      ASSERT_skipIdentCurlyOpen($IDENT, lexerFlags); // TODO: this could explicitly check for `extends` but I think this is fine
+      ASSERT_skipToIdentCurlyOpen($IDENT, lexerFlags); // TODO: this could explicitly check for `extends` but I think this is fine
       AST_setIdent('id', idToken);
     }
     else if (optionalIdent === IDENT_REQUIRED) {
@@ -11112,7 +11081,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // The spec calls this the "ClassHeritage" production. It is a leftHandSide expression (!), which is a call or new
       // expression, so certain things are can't happen (like await).
       // Note: the extends arg uses the outer lexer flags (yield/await state is propagated in the grammar), still strict
-      ASSERT_skipExpressionStart('extends', outerLexerFlags);
+      ASSERT_skipToExpressionStart('extends', outerLexerFlags);
       // - `class x extends {} {}`             is valid so we can't just scan for `{` and throw a nice error
       // - `async function f(fail = class y extends (await f) {}){}`  (should be an error...?)
       // - `class x extends ()=>{} {}`         error because the extends cannot be an arrow
@@ -11175,9 +11144,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //           ^
     // - `(class = x)`
     //           ^
-    ASSERT_skipClassMemberStart('{', lexerFlags);
+    ASSERT_skipAny('{', lexerFlags);
     while (curtok.type === $PUNC_SEMI) {
-      ASSERT_skipClassMemberStart(';', lexerFlags);
+      ASSERT_skipAny(';', lexerFlags);
     }
 
     // We must throw an error if a constructor was declared more than once, canonical, string keys included
@@ -11196,7 +11165,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructibleForPiggies |= destructNow;
 
       while (curtok.type === $PUNC_SEMI) {
-        ASSERT_skipClassMemberStart(';', lexerFlags);
+        ASSERT_skipAny(';', lexerFlags);
       }
     }
 
@@ -11211,7 +11180,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `class x {} /foo/`
       // - `class x {} 06`
       if (curtok.type === $EOF) THROW('Unexpected EOF while parsing a class body');
-      ASSERT_skipStatementStart('}', originalOuterLexerFlags);
+      ASSERT_skipToStatementStart('}', originalOuterLexerFlags);
     }
 
     // note: generator and async state is not reset because computed method names still use the outer state
@@ -11280,7 +11249,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       staticToken = curtok;
       // = `class x { static / foo(){} }`
-      ASSERT_skipClassMemberStart('static', lexerFlags); // The token after `static` can only be the same set of tokens valid at the start of a member (including `static` itself)
+      ASSERT_skipAny('static', lexerFlags);
 
       if (curtok.type === $PUNC_PAREN_OPEN) {
         // The `static` ident here is the name of a method, not a modifier
@@ -11316,7 +11285,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `class x {*[expr](){}}`
 
       starToken = curtok;
-      ASSERT_skipIdentStringNumberSquareOpen('*', lexerFlags);
+      ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
 
       if (curtok.type === $IDENT) {
         // - `class x {*ident(){}}`
@@ -11344,7 +11313,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curtok.type === $PUNC_SEMI) {
       // - `class x {;}`
       // these semi's dont contribute anything to the AST (lossy)
-      ASSERT_skipClassMemberStart(';', lexerFlags);
+      ASSERT_skipAny(';', lexerFlags);
     }
     else {
       // - `class x {<?>`
@@ -11364,7 +11333,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
 
     let identToken = curtok;
-    ASSERT_skipClassMemberRest($IDENT, lexerFlags);
+    ASSERT_skipAny($IDENT, lexerFlags);
 
     if (allowAsyncFunctions) {
       if (curtok.type !== $PUNC_PAREN_OPEN && curtok.nl === true && identToken.str === 'async') {
@@ -11436,7 +11405,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // - `class x {async *key(){}})
             //                   ^
             starToken = curtok;
-            ASSERT_skipIdentStringNumberSquareOpen('*', lexerFlags);
+            ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
           }
           break;
         default:
@@ -11490,7 +11459,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
 
     let keyToken = curtok; // Note: constructor is tested elsewhere
-    ASSERT_skipToParenOpen($IDENT, lexerFlags);
+    ASSERT_skipToParenOpenOrDie($IDENT, lexerFlags);
     return _parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, keyToken, astProp);
   }
   function _parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, keyToken, astProp) {
@@ -11521,7 +11490,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
 
     let litToken = curtok;
-    ASSERT_skipToParenOpen(litToken.str, lexerFlags);
+    ASSERT_skipToParenOpenOrDie(litToken.str, lexerFlags);
     AST_setLiteral(astProp, litToken);
 
     // [v]: `class A {"x"(){}}`
@@ -11549,7 +11518,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
 
     let bracketOpenToken = curtok;
-    ASSERT_skipExpressionStart('[', lexerFlags);
+    ASSERT_skipToExpressionStart('[', lexerFlags);
 
     // Note: the expression of computed keys of class methods are parsed with the context before the class
     // So the context is not guaranteed to be strict.
@@ -11560,7 +11529,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(hasNoFlag(nowAssignable, PIGGY_BACK_SAW_YIELD_VARNAME), 'all parts of class are strict so yield can never be varname');
     // - `(fail = class A {[await](){}; "x"(){}}) => {}`
     if (curtok.type !== $PUNC_BRACKET_CLOSE) THROW('Missing right square bracket for computed member, found `' + tokenStrForError(curtok) + '` instead');
-    ASSERT_skipToParenOpen(']', lexerFlags);
+    ASSERT_skipToParenOpenOrDie(']', lexerFlags);
 
     // - `{[foo](){}}`
     // - `class {[foo](){}}`
@@ -11865,7 +11834,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
     let spreadToken = curtok;
-    ASSERT_skipExpressionStart('...', lexerFlags);
+    ASSERT_skipToExpressionStart('...', lexerFlags);
 
     if (curtok.type === $PUNC_DOT_DOT_DOT) THROW('Can not rest twice');
     AST_open(astProp, {
@@ -12296,7 +12265,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           operator: '=',
           right: undefined,
         }, 'left');
-        ASSERT_skipExpressionStart('=', lexerFlags);
+        ASSERT_skipToExpressionStart('=', lexerFlags);
         let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         assignable = mergeAssignable(nowAssignable, assignable);
         AST_close('AssignmentExpression');

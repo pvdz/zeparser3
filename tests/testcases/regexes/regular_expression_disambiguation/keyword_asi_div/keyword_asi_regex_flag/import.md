@@ -51,7 +51,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Export source must be string
+  Expected a valid token after the `import` keyword, found `/` instead
 
 import
 /x/g
