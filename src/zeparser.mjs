@@ -1644,10 +1644,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Expected to parse an opening curly, found `' + tokenStrForError(curtok) + '`');
     }
   }
-  function ASSERT_skipParenOpenCurlyOpen(what, lexerFlags) {
-    skipParenOpenCurlyOpen(lexerFlags);
+  function ASSERT_skipToParenOpenCurlyOpen(what, lexerFlags) {
+    skipToParenOpenCurlyOpen(lexerFlags);
   }
-  function skipParenOpenCurlyOpen(lexerFlags) {
+  function skipToParenOpenCurlyOpen(lexerFlags) {
     // The next token must be a curly open or paren open, possibly preceded by some whitespace
     skipAny(lexerFlags);
     ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN || curtok.type === $PUNC_CURLY_OPEN, 'limited options, expecting { (', curtok);
@@ -5740,7 +5740,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // parseCatch
       hasEither = true;
       let catchToken = curtok;
-      ASSERT_skipParenOpenCurlyOpen('catch', lexerFlags);
+      ASSERT_skipToParenOpenCurlyOpen('catch', lexerFlags);
       AST_open('handler', {
         type: 'CatchClause',
         loc: AST_getBaseLoc(catchToken),
@@ -10185,7 +10185,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else {
       // ({<?>
-      THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern');
+      THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern, got `' + curtok.str + '`');
     }
 
     // pick up the flags from assignable and put them in destructible
@@ -11317,7 +11317,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else {
       // - `class x {<?>`
-      THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern');
+      THROW('Unexpected token, wanted to parse a start of a property in an class literal/pattern');
     }
 
     // pick up the flags from assignable and put them in destructible
