@@ -103,7 +103,7 @@ ast: {
 
 tokens (15x):
        IDENT PUNC_LT IDENT PUNC_LT_EQ IDENT PUNC_GT IDENT PUNC_GT_EQ
-       IDENT IDENT IDENT IDENT IDENT ASI
+       IDENT ID_in IDENT ID_instanceof IDENT ASI
 `````
 
 ### Strict mode

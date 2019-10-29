@@ -76,7 +76,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT PUNC_EQ_GT IDENT TICK_PURE ASI
+       ID_async PUNC_EQ_GT IDENT TICK_PURE ASI
 `````
 
 ### Strict mode

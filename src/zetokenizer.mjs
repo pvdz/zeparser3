@@ -115,7 +115,7 @@ import {
 // First LEAF_BITS bits are not flags (!), they are "leaf" token types (decimal number, template tail).
 // Other bits are flags, used to augment for super groups (string, number, template)
 // (If the number of leafs exceeds LEAF_BITS bits then it'll reduce the number of available bitwise flags)
-const LEAF_BITS = 7;
+const LEAF_BITS = 8;
 let __$leaf = 0;
 let __$group = LEAF_BITS - 1; // offset 0
 
@@ -127,6 +127,7 @@ const $G_WHITE = (1 << ++__$group);
 const $G_NEWLINE = (1 << ++__$group);
 const $G_COMMENT = (1 << ++__$group);
 const $G_IDENT = (1 << ++__$group);
+const $G_IDENT_HAD_ESCAPE = (1 << ++__$group); // Used to invalidate idents which are canonical keywords but contain unicode escapes (which is not allowed)
 const $G_NUMBER = (1 << ++__$group);
 const $G_NUMBER_BIG_INT = (1 << ++__$group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
 const $G_PUNCTUATOR = (1 << ++__$group);
@@ -166,6 +167,66 @@ const $L_TICK_PURE = ++__$leaf;
 const $L_EOF = ++__$leaf;
 const $L_ASI = ++__$leaf;
 const $L_ERROR = ++__$leaf;
+
+// Important Idents
+
+const $L_ID_none = ++__$leaf;
+const $L_ID_arguments = ++__$leaf;
+const $L_ID_as = ++__$leaf;
+const $L_ID_async = ++__$leaf;
+const $L_ID_await = ++__$leaf;
+const $L_ID_break = ++__$leaf;
+const $L_ID_case = ++__$leaf;
+const $L_ID_catch = ++__$leaf;
+const $L_ID_class = ++__$leaf;
+const $L_ID_const = ++__$leaf;
+const $L_ID_constructor = ++__$leaf;
+const $L_ID_continue = ++__$leaf;
+const $L_ID_debugger = ++__$leaf;
+const $L_ID_default = ++__$leaf;
+const $L_ID_delete = ++__$leaf;
+const $L_ID_do = ++__$leaf;
+const $L_ID_else = ++__$leaf;
+const $L_ID_enum = ++__$leaf;
+const $L_ID_eval = ++__$leaf;
+const $L_ID_export = ++__$leaf;
+const $L_ID_extends = ++__$leaf;
+const $L_ID_false = ++__$leaf;
+const $L_ID_finally = ++__$leaf;
+const $L_ID_for = ++__$leaf;
+const $L_ID_from = ++__$leaf;
+const $L_ID_function = ++__$leaf;
+const $L_ID_get = ++__$leaf;
+const $L_ID_if = ++__$leaf;
+const $L_ID_implements = ++__$leaf;
+const $L_ID_import = ++__$leaf;
+const $L_ID_in = ++__$leaf;
+const $L_ID_instanceof = ++__$leaf;
+const $L_ID_interface = ++__$leaf;
+const $L_ID_let = ++__$leaf;
+const $L_ID_new = ++__$leaf;
+const $L_ID_null = ++__$leaf;
+const $L_ID_of = ++__$leaf;
+const $L_ID_package = ++__$leaf;
+const $L_ID_private = ++__$leaf;
+const $L_ID_protected = ++__$leaf;
+const $L_ID_public = ++__$leaf;
+const $L_ID_return = ++__$leaf;
+const $L_ID_set = ++__$leaf;
+const $L_ID_static = ++__$leaf;
+const $L_ID_super = ++__$leaf;
+const $L_ID_switch = ++__$leaf;
+const $L_ID_target = ++__$leaf;
+const $L_ID_this = ++__$leaf;
+const $L_ID_throw = ++__$leaf;
+const $L_ID_true = ++__$leaf;
+const $L_ID_try = ++__$leaf;
+const $L_ID_typeof = ++__$leaf;
+const $L_ID_var = ++__$leaf;
+const $L_ID_void = ++__$leaf;
+const $L_ID_while = ++__$leaf;
+const $L_ID_with = ++__$leaf;
+const $L_ID_yield = ++__$leaf;
 
 // Punctuators
 
@@ -224,7 +285,7 @@ const $L_OR_EQ =  ++__$leaf;
 const $L_CURLY_CLOSE =  ++__$leaf;
 const $L_TILDE =  ++__$leaf;
 
-ASSERT(__$leaf < (1<<LEAF_BITS), 'cannot use more than LEAF_BITS bits (' + (LEAF_BITS<<2) + ') of leafs but have ' + __$leaf);
+ASSERT(__$leaf < (1<<LEAF_BITS), 'cannot use more than LEAF_BITS (' + LEAF_BITS + ') bits of space (' + (1<<LEAF_BITS) + ') but am requesting ' + __$leaf);
 
 // These are the token types and you should be able to do strict comparison against specific token types with
 // `curtok` or `token.type`. Every constant maps to a single number which is a combination of a bitwise field and
@@ -240,6 +301,62 @@ const $COMMENT_SINGLE = $L_COMMENT_SINGLE | $G_COMMENT;
 const $COMMENT_MULTI = $L_COMMENT_MULTI | $G_COMMENT;
 const $COMMENT_HTML = $L_COMMENT_HTML | $G_COMMENT;
 const $IDENT = $L_IDENT | $G_IDENT;
+const $ID_arguments = $L_ID_arguments | $G_IDENT;
+const $ID_as = $L_ID_as | $G_IDENT;
+const $ID_async = $L_ID_async | $G_IDENT;
+const $ID_await = $L_ID_await | $G_IDENT;
+const $ID_break = $L_ID_break | $G_IDENT;
+const $ID_case = $L_ID_case | $G_IDENT;
+const $ID_catch = $L_ID_catch | $G_IDENT;
+const $ID_class = $L_ID_class | $G_IDENT;
+const $ID_const = $L_ID_const | $G_IDENT;
+// const $ID_constructor=  | $G_IDENT; // This is only used/special for class members, which do not consider any other ident special. Not worth the effort.
+const $ID_continue = $L_ID_continue | $G_IDENT;
+const $ID_debugger = $L_ID_debugger | $G_IDENT;
+const $ID_default = $L_ID_default | $G_IDENT;
+const $ID_delete = $L_ID_delete | $G_IDENT;
+const $ID_do = $L_ID_do | $G_IDENT;
+const $ID_else = $L_ID_else | $G_IDENT;
+const $ID_enum = $L_ID_enum | $G_IDENT;
+const $ID_eval = $L_ID_eval | $G_IDENT;
+const $ID_export = $L_ID_export | $G_IDENT;
+const $ID_extends = $L_ID_extends | $G_IDENT;
+const $ID_false = $L_ID_false | $G_IDENT;
+const $ID_finally = $L_ID_finally | $G_IDENT;
+const $ID_for = $L_ID_for | $G_IDENT;
+const $ID_from = $L_ID_from | $G_IDENT;
+const $ID_function = $L_ID_function | $G_IDENT;
+const $ID_get = $L_ID_get | $G_IDENT;
+const $ID_if = $L_ID_if | $G_IDENT;
+const $ID_implements = $L_ID_implements | $G_IDENT;
+const $ID_import = $L_ID_import | $G_IDENT;
+const $ID_in = $L_ID_in | $G_IDENT;
+const $ID_instanceof = $L_ID_instanceof | $G_IDENT;
+const $ID_interface = $L_ID_interface | $G_IDENT;
+const $ID_let = $L_ID_let | $G_IDENT;
+const $ID_new = $L_ID_new | $G_IDENT;
+const $ID_null = $L_ID_null | $G_IDENT;
+const $ID_of = $L_ID_of | $G_IDENT;
+const $ID_package = $L_ID_package | $G_IDENT;
+const $ID_private = $L_ID_private | $G_IDENT;
+const $ID_protected = $L_ID_protected | $G_IDENT;
+const $ID_public = $L_ID_public | $G_IDENT;
+const $ID_return = $L_ID_return | $G_IDENT;
+const $ID_set = $L_ID_set | $G_IDENT;
+const $ID_static = $L_ID_static | $G_IDENT;
+const $ID_super = $L_ID_super | $G_IDENT;
+const $ID_switch = $L_ID_switch | $G_IDENT;
+const $ID_target = $L_ID_target | $G_IDENT;
+const $ID_this = $L_ID_this | $G_IDENT;
+const $ID_throw = $L_ID_throw | $G_IDENT;
+const $ID_true = $L_ID_true | $G_IDENT;
+const $ID_try = $L_ID_try | $G_IDENT;
+const $ID_typeof = $L_ID_typeof | $G_IDENT;
+const $ID_var = $L_ID_var | $G_IDENT;
+const $ID_void = $L_ID_void | $G_IDENT;
+const $ID_while = $L_ID_while | $G_IDENT;
+const $ID_with = $L_ID_with | $G_IDENT;
+const $ID_yield = $L_ID_yield | $G_IDENT;
 const $NUMBER_HEX = $L_NUMBER_HEX | $G_NUMBER;
 const $NUMBER_DEC = $L_NUMBER_DEC | $G_NUMBER;
 const $NUMBER_BIN = $L_NUMBER_BIN | $G_NUMBER;
@@ -319,6 +436,104 @@ const $EOF = $L_EOF | $G_OTHER;
 const $ASI = $L_ASI | $G_OTHER;
 const $ERROR = $L_ERROR | $G_OTHER;
 
+const KEYWORD_TRIE = { 97:
+    { 114:
+        { 103:
+            { 117:
+                { 109:
+                    { 101: { 110: { 116: { 115: { hit: $ID_arguments } } } } } } } },
+      115: { 121: { 110: { 99: { hit: $ID_async } } }, hit: $ID_as },
+      119: { 97: { 105: { 116: { hit: $ID_await } } } } },
+  98: { 114: { 101: { 97: { 107: { hit: $ID_break } } } } },
+  99:
+    { 97:
+        { 115: { 101: { hit: $ID_case } },
+          116: { 99: { 104: { hit: $ID_catch } } } },
+      108: { 97: { 115: { 115: { hit: $ID_class } } } },
+      111:
+        { 110:
+            { 115: { 116: { hit: $ID_const }                  },
+              116: { 105: { 110: { 117: { 101: { hit: $ID_continue } } } } } } } },
+  100:
+    { 101:
+        { 98:
+            { 117: { 103: { 103: { 101: { 114: { hit: $ID_debugger } } } } } },
+          102: { 97: { 117: { 108: { 116: { hit: $ID_default } } } } },
+          108: { 101: { 116: { 101: { hit: $ID_delete } } } } },
+      111: { hit: $ID_do } },
+  101:
+    { 108: { 115: { 101: { hit: $ID_else } } },
+      110: { 117: { 109: { hit: $ID_enum } } },
+      118: { 97: { 108: { hit: $ID_eval } } },
+      120:
+        { 112: { 111: { 114: { 116: { hit: $ID_export } } } },
+          116: { 101: { 110: { 100: { 115: { hit: $ID_extends } } } } } } },
+  102:
+    { 97: { 108: { 115: { 101: { hit: $ID_false } } } },
+      105:
+        { 110: { 97: { 108: { 108: { 121: { hit: $ID_finally } } } } } },
+      111: { 114: { hit: $ID_for } },
+      114: { 111: { 109: { hit: $ID_from } } },
+      117:
+        { 110:
+            { 99: { 116: { 105: { 111: { 110: { hit: $ID_function } } } } } } } },
+  103: { 101: { 116: { hit: $ID_get } } },
+  105:
+    { 102: { hit: $ID_if },
+      109:
+        { 112:
+            { 108:
+                { 101:
+                    { 109:
+                        { 101: { 110: { 116: { 115: { hit: $ID_implements } } } } } } },
+              111: { 114: { 116: { hit: $ID_import } } } } },
+      110:
+        { 115:
+            { 116:
+                { 97:
+                    { 110:
+                        { 99: { 101: { 111: { 102: { hit: $ID_instanceof } } } } } } } },
+          116:
+            { 101:
+                { 114: { 102: { 97: { 99: { 101: { hit: $ID_interface } } } } } } },
+          hit: $ID_in } },
+  108: { 101: { 116: { hit: $ID_let } } },
+  110: {
+    101: { 119: { hit: $ID_new } },
+    117: { 108: { 108: { hit: $ID_null }, }, },
+  },
+  111: { 102: { hit: $ID_of } },
+  112:
+    { 97:
+        { 99: { 107: { 97: { 103: { 101: { hit: $ID_package } } } } } },
+      114:
+        { 105: { 118: { 97: { 116: { 101: { hit: $ID_private } } } } },
+          111:
+            { 116:
+                { 101: { 99: { 116: { 101: { 100: { hit: $ID_protected } } } } } } } },
+      117: { 98: { 108: { 105: { 99: { hit: $ID_public } } } } } },
+  114:
+    { 101: { 116: { 117: { 114: { 110: { hit: $ID_return } } } } } },
+  115:
+    { 101: { 116: { hit: $ID_set } },
+      116: { 97: { 116: { 105: { 99: { hit: $ID_static } } } } },
+      117: { 112: { 101: { 114: { hit: $ID_super } } } },
+      119: { 105: { 116: { 99: { 104: { hit: $ID_switch } } } } } },
+  116:
+    { 97: { 114: { 103: { 101: { 116: { hit: $ID_target } } } } },
+      104:
+        { 105: { 115: { hit: $ID_this } },
+          114: { 111: { 119: { hit: $ID_throw } } } },
+      114: { 117: { 101: { hit: $ID_true } }, 121: { hit: $ID_try } },
+      121: { 112: { 101: { 111: { 102: { hit: $ID_typeof } } } } } },
+  118:
+    { 97: { 114: { hit: $ID_var } },
+      111: { 105: { 100: { hit: $ID_void } } } },
+  119:
+    { 104: { 105: { 108: { 101: { hit: $ID_while } } } },
+      105: { 116: { 104: { hit: $ID_with } } } },
+  121: { 105: { 101: { 108: { 100: { hit: $ID_yield } } } } } };
+
 function isWhiteToken(type) {
   return (type & $G_WHITE) === $G_WHITE;
 }
@@ -329,7 +544,7 @@ function isCommentToken(type) {
   return (type & $G_COMMENT) === $G_COMMENT;
 }
 function isIdentToken(type) {
-  return type === $IDENT;
+  return (type & $G_IDENT) === $G_IDENT;
 }
 function isNumberToken(type) {
   return (type & $G_NUMBER) === $G_NUMBER;
@@ -384,6 +599,61 @@ ASSERT(ALL_TOKEN_TYPES = [
   $COMMENT_MULTI,
   $COMMENT_HTML,
   $IDENT,
+  $ID_arguments,
+  $ID_as,
+  $ID_async,
+  $ID_await,
+  $ID_break,
+  $ID_case,
+  $ID_catch,
+  $ID_class,
+  $ID_const,
+  $ID_continue,
+  $ID_debugger,
+  $ID_default,
+  $ID_delete,
+  $ID_do,
+  $ID_else,
+  $ID_enum,
+  $ID_eval,
+  $ID_export,
+  $ID_extends,
+  $ID_false,
+  $ID_finally,
+  $ID_for,
+  $ID_from,
+  $ID_function,
+  $ID_get,
+  $ID_if,
+  $ID_implements,
+  $ID_import,
+  $ID_in,
+  $ID_instanceof,
+  $ID_interface,
+  $ID_let,
+  $ID_new,
+  $ID_null,
+  $ID_of,
+  $ID_package,
+  $ID_private,
+  $ID_protected,
+  $ID_public,
+  $ID_return,
+  $ID_set,
+  $ID_static,
+  $ID_super,
+  $ID_switch,
+  $ID_target,
+  $ID_this,
+  $ID_throw,
+  $ID_true,
+  $ID_try,
+  $ID_typeof,
+  $ID_var,
+  $ID_void,
+  $ID_while,
+  $ID_with,
+  $ID_yield,
   $NUMBER_HEX,
   $NUMBER_DEC,
   $NUMBER_BIN,
@@ -491,6 +761,7 @@ const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about globa
 let $_start_i = 0;
 const START_SPACE = $_start_i++;
 const START_ID = $_start_i++;
+const START_KEY = $_start_i++; // Any lower case (even the ones that can't start a keyword). Used to scan for keywords.
 const START_NL_SOLO = $_start_i++;
 const START_CR = $_start_i++;
 const START_STRING = $_start_i++;
@@ -616,32 +887,32 @@ const tokenStartJumpTable = [
   START_CARET,            // 0x5E   no2   ^ :: ^ ^=
   START_ID,               // 0x5F   no*   _ (lodash)
   START_TEMPLATE,         // 0x60   no*   ` :: `...${ `...`
-  START_ID,               // 0x61   no*   a
-  START_ID,               // 0x62   no*   b
-  START_ID,               // 0x63   no*   c
-  START_ID,               // 0x64   no*   d
-  START_ID,               // 0x65   no*   e
-  START_ID,               // 0x66   no*   f
-  START_ID,               // 0x67   no*   g
-  START_ID,               // 0x68   no*   h
-  START_ID,               // 0x69   no*   i
-  START_ID,               // 0x6A   no*   j
-  START_ID,               // 0x6B   no*   k
-  START_ID,               // 0x6C   no*   l
-  START_ID,               // 0x6D   no*   m
-  START_ID,               // 0x6E   no*   n
-  START_ID,               // 0x6F   no*   o
-  START_ID,               // 0x70   no*   p
-  START_ID,               // 0x71   no*   q
-  START_ID,               // 0x72   no*   r
-  START_ID,               // 0x73   no*   s
-  START_ID,               // 0x74   no*   t
-  START_ID,               // 0x75   no*   u
-  START_ID,               // 0x76   no*   v
-  START_ID,               // 0x77   no*   w
-  START_ID,               // 0x78   no*   x
-  START_ID,               // 0x79   no*   y
-  START_ID,               // 0x7A   no*   z
+  START_KEY,               // 0x61   no*   a
+  START_KEY,               // 0x62   no*   b
+  START_KEY,               // 0x63   no*   c
+  START_KEY,               // 0x64   no*   d
+  START_KEY,               // 0x65   no*   e
+  START_KEY,               // 0x66   no*   f
+  START_KEY,               // 0x67   no*   g
+  START_KEY,               // 0x68   no*   h
+  START_KEY,               // 0x69   no*   i
+  START_KEY,               // 0x6A   no*   j
+  START_KEY,               // 0x6B   no*   k
+  START_KEY,               // 0x6C   no*   l
+  START_KEY,               // 0x6D   no*   m
+  START_KEY,               // 0x6E   no*   n
+  START_KEY,               // 0x6F   no*   o
+  START_KEY,               // 0x70   no*   p
+  START_KEY,               // 0x71   no*   q
+  START_KEY,               // 0x72   no*   r
+  START_KEY,               // 0x73   no*   s
+  START_KEY,               // 0x74   no*   t
+  START_KEY,               // 0x75   no*   u
+  START_KEY,               // 0x76   no*   v
+  START_KEY,               // 0x77   no*   w
+  START_KEY,               // 0x78   no*   x
+  START_KEY,               // 0x79   no*   y
+  START_KEY,               // 0x7A   no*   z
   $PUNC_CURLY_OPEN,       // 0x7B   yes   {
   START_OR,               // 0x7C   no3   | :: | || |=
   START_CURLY_CLOSE,      // 0x7D   no3   } :: } }...` }...${
@@ -650,7 +921,7 @@ const tokenStartJumpTable = [
   // START_ERROR,            // 0x7F   yes   DEL
 ];
 let ALL_START_TYPES;
-ASSERT(ALL_START_TYPES = [START_SPACE, START_NL_SOLO, START_CR, START_EXCL, START_STRING, START_ZERO, START_DECIMAL, START_TEMPLATE, START_ID, START_PERCENT, START_AND, START_STAR, START_PLUS, START_MIN, START_DOT, START_DIV, START_CARET, START_LT, START_EQ, START_GT, START_BSLASH, START_OR, START_CURLY_CLOSE, START_UNICODE, START_ERROR]);
+ASSERT(ALL_START_TYPES = [START_SPACE, START_NL_SOLO, START_CR, START_EXCL, START_STRING, START_ZERO, START_DECIMAL, START_TEMPLATE, START_ID, START_KEY, START_PERCENT, START_AND, START_STAR, START_PLUS, START_MIN, START_DOT, START_DIV, START_CARET, START_LT, START_EQ, START_GT, START_BSLASH, START_OR, START_CURLY_CLOSE, START_UNICODE, START_ERROR]);
 function getTokenStart(c) {
   ASSERT(getTokenStart.length == arguments.length, 'arg count');
   ASSERT(c >= 0, 'nothing generates negatives for chars');
@@ -1124,6 +1395,8 @@ function ZeTokenizer(
         return parseSpace();
       case START_ID:
         return parseIdentifierRest(String.fromCharCode(c));
+      case START_KEY:
+        return parsePotentialKeyword(c);
       case START_NL_SOLO:
         return parseNewlineSolo();
       case START_CR:
@@ -1264,7 +1537,7 @@ function ZeTokenizer(
     };
     ASSERT(
       disableCanonPoison[0] ||
-      type === $IDENT ||
+      isIdentToken(type) ||
       isStringToken(type) ||
       isTickToken(type) ||
       !void Object.defineProperty(
@@ -2399,6 +2672,96 @@ function ZeTokenizer(
     return uflagStatus;
   }
 
+  function parsePotentialKeyword(c) {
+    ASSERT(parsePotentialKeyword.length === arguments.length, 'arg count');
+    ASSERT(c === input.charCodeAt(pointer - 1), 'c should have been peekSkipped');
+
+    // c = input[pointer-1]
+    // Keep reading chars until;
+    // - eof
+    // - next char is not a start_key
+    // - next char is not found in the trie
+
+    let trie = KEYWORD_TRIE[c];
+    let start = pointer - 1; // c was peekSkipped
+    let n = start + 1;
+    if (trie === undefined) return parseIdentifierRest(slice(start, n));
+    do {
+      if (n >= len) return eofAfterPotentialKeyword(trie, n, start);
+      let d = input.charCodeAt(n++);
+      if (d < $$A_61 || d > $$Z_7A) return endOfPotentialKeyword(trie, d, n, start);
+      // Next step in trie
+      trie = trie[d];
+      if (trie === undefined) return parseIdentRestNotKeyword(d, n, start);
+    } while (true);
+    ASSERT(false, 'unreachable');
+  }
+  function parseIdentRestNotKeyword(d, n, start) {
+      pointer = n - 1;
+      cache = d;
+      return parseIdentifierRest(slice(start, n - 1));
+  }
+  function eofAfterPotentialKeyword(trie, n, start) {
+    // EOF
+    ASSERT(trie !== undefined, 'checked before and at end of loop');
+
+    pointer = n - 1;
+    skip();
+    lastParsedIdent = slice(start, n);
+
+    if (trie.hit !== undefined) {
+      ASSERT(ALL_TOKEN_TYPES.includes(trie.hit), 'trie leafs should be valid types');
+      ASSERT(isIdentToken(trie.hit), 'trie leafs should contain ident types');
+      return trie.hit;
+    }
+    return $IDENT;
+  }
+  function endOfPotentialKeyword(trie, d, n, start) {
+    let s = getTokenStart(d);
+    // Only valid "starts" for ident are id, key, numbers, and certain unicodes
+    if (s === START_ID || s === START_DECIMAL || s === START_ZERO) {
+      pointer = n - 1;
+      cache = d;
+      return parseIdentifierRest(slice(start, n - 1));
+    }
+    if (s === START_UNICODE) {
+      // maybe rest id
+      pointer = n - 1;
+      cache = d;
+      // This is potentially double the work but I already consider this very much a cold path
+      let wide = isIdentRestChr(d, n - 1);
+      if (wide === INVALID_IDENT_CHAR) {
+        // This ends the ident and it is a keyword
+        lastParsedIdent = slice(start, n - 1);
+        return trie.hit;
+      }
+      return parseIdentifierRest(slice(start, n - 1));
+    }
+    if (s === START_BSLASH) {
+      pointer = n - 1;
+      cache = d;
+      // A keyword followed by a backslash escape is either the end of a keyword (leading into an error) or not a keyword ident. Let's not worry about that here.
+      return parseIdentifierRest(slice(start, n - 1));
+    }
+
+    // So this must be the end of the identifier. Either we found a keyword, or we didn't :)
+
+    if (trie.hit !== undefined) {
+      // End of id, this was a keyword
+      pointer = n - 1;
+      cache = d;
+      lastParsedIdent = slice(start, n - 1);
+      ASSERT(ALL_TOKEN_TYPES.includes(trie.hit), 'trie leafs should be valid types');
+      ASSERT(isIdentToken(trie.hit), 'trie leafs should contain ident types');
+      return trie.hit;
+    }
+
+    lastParsedIdent = slice(start, n - 1);
+    pointer = n - 1;
+    cache = d;
+    return $IDENT;
+  }
+
   function readNextCodepointAsStringExpensive(c, offset, forError) {
     ASSERT(readNextCodepointAsStringExpensive.length === arguments.length, 'arg count');
     ASSERT(typeof c === 'number', 'cnum', c);
@@ -2435,7 +2798,7 @@ function ZeTokenizer(
   function isIdentStart(c, offsetOfC) {
     ASSERT(isIdentStart.length === arguments.length, 'all args');
     let s = getTokenStart(c);
-    if (s === START_ID) return VALID_SINGLE_CHAR;
+    if (s === START_ID || s === START_KEY) return VALID_SINGLE_CHAR;
     if (s !== START_UNICODE) return INVALID_IDENT_CHAR;
     // now we have to do an expensive... but proper unicode check
     return veryExpensiveUnicodeCheck(c, offsetOfC, ID_START_REGEX);
@@ -2443,7 +2806,7 @@ function ZeTokenizer(
   function isIdentRestChr(c, offsetOfC) {
     ASSERT(isIdentRestChr.length === arguments.length, 'all args');
     let s = getTokenStart(c);
-    if (s === START_ID) return VALID_SINGLE_CHAR;
+    if (s === START_ID || s === START_KEY) return VALID_SINGLE_CHAR;
     if (s === START_DECIMAL) return VALID_SINGLE_CHAR;
     if (s === START_ZERO) return VALID_SINGLE_CHAR;
     if (s !== START_UNICODE) return INVALID_IDENT_CHAR;
@@ -5371,6 +5734,61 @@ function toktypeToString(type, _, ignoreUnknown) {
     case $COMMENT_MULTI: return 'COMMENT_MULTI';
     case $COMMENT_HTML: return 'COMMENT_HTML';
     case $IDENT: return 'IDENT';
+    case $ID_arguments: return 'ID_arguments';
+    case $ID_as: return 'ID_as';
+    case $ID_async: return 'ID_async';
+    case $ID_await: return 'ID_await';
+    case $ID_break: return 'ID_break';
+    case $ID_case: return 'ID_case';
+    case $ID_catch: return 'ID_catch';
+    case $ID_class: return 'ID_class';
+    case $ID_const: return 'ID_const';
+    case $ID_continue: return 'ID_continue';
+    case $ID_debugger: return 'ID_debugger';
+    case $ID_default: return 'ID_default';
+    case $ID_delete: return 'ID_delete';
+    case $ID_do: return 'ID_do';
+    case $ID_else: return 'ID_else';
+    case $ID_enum: return 'ID_enum';
+    case $ID_eval: return 'ID_eval';
+    case $ID_export: return 'ID_export';
+    case $ID_extends: return 'ID_extends';
+    case $ID_false: return 'ID_false';
+    case $ID_finally: return 'ID_finally';
+    case $ID_for: return 'ID_for';
+    case $ID_from: return 'ID_from';
+    case $ID_function: return 'ID_function';
+    case $ID_get: return 'ID_get';
+    case $ID_if: return 'ID_if';
+    case $ID_implements: return 'ID_implements';
+    case $ID_import: return 'ID_import';
+    case $ID_in: return 'ID_in';
+    case $ID_instanceof: return 'ID_instanceof';
+    case $ID_interface: return 'ID_interface';
+    case $ID_let: return 'ID_let';
+    case $ID_new: return 'ID_new';
+    case $ID_null: return 'ID_null';
+    case $ID_of: return 'ID_of';
+    case $ID_package: return 'ID_package';
+    case $ID_private: return 'ID_private';
+    case $ID_protected: return 'ID_protected';
+    case $ID_public: return 'ID_public';
+    case $ID_return: return 'ID_return';
+    case $ID_set: return 'ID_set';
+    case $ID_static: return 'ID_static';
+    case $ID_super: return 'ID_super';
+    case $ID_switch: return 'ID_switch';
+    case $ID_target: return 'ID_target';
+    case $ID_this: return 'ID_this';
+    case $ID_throw: return 'ID_throw';
+    case $ID_true: return 'ID_true';
+    case $ID_try: return 'ID_try';
+    case $ID_typeof: return 'ID_typeof';
+    case $ID_var: return 'ID_var';
+    case $ID_void: return 'ID_void';
+    case $ID_while: return 'ID_while';
+    case $ID_with: return 'ID_with';
+    case $ID_yield: return 'ID_yield';
     case $NUMBER_HEX: return 'NUMBER_HEX';
     case $NUMBER_DEC: return 'NUMBER_DEC';
     case $NUMBER_BIN: return 'NUMBER_BIN';
@@ -5454,6 +5872,37 @@ function toktypeToString(type, _, ignoreUnknown) {
   if (ignoreUnknown) return 'UNKNOWN[' + type + ']';
   throw new Error('toktypeToString: UNKNOWN[' + JSON.stringify(type) + ']')
 }
+function START(type) {
+  switch (type) {
+    case START_SPACE: return 'START_SPACE';
+    case START_ID: return 'START_ID';
+    case START_KEY: return 'START_KEY';
+    case START_NL_SOLO: return 'START_NL_SOLO';
+    case START_CR: return 'START_CR';
+    case START_STRING: return 'START_STRING';
+    case START_DECIMAL: return 'START_DECIMAL';
+    case START_DOT: return 'START_DOT';
+    case START_CURLY_CLOSE: return 'START_CURLY_CLOSE';
+    case START_EQ: return 'START_EQ';
+    case START_DIV: return 'START_DIV';
+    case START_PLUS: return 'START_PLUS';
+    case START_MIN: return 'START_MIN';
+    case START_ZERO: return 'START_ZERO';
+    case START_TEMPLATE: return 'START_TEMPLATE';
+    case START_EXCL: return 'START_EXCL';
+    case START_PERCENT: return 'START_PERCENT';
+    case START_AND: return 'START_AND';
+    case START_STAR: return 'START_STAR';
+    case START_CARET: return 'START_CARET';
+    case START_LT: return 'START_LT';
+    case START_GT: return 'START_GT';
+    case START_OR: return 'START_OR';
+    case START_UNICODE: return 'START_UNICODE';
+    case START_BSLASH: return 'START_BSLASH';
+    case START_ERROR: return 'START_ERROR';
+  }
+  return 'S<' + T(type) + '>';
+}
 
 function T(type) {
   ASSERT(typeof type === 'number', 'expecting valid type', type);
@@ -5506,6 +5955,61 @@ export {
   $COMMENT_MULTI,
   $COMMENT_HTML,
   $IDENT,
+  $ID_arguments,
+  $ID_as,
+  $ID_async,
+  $ID_await,
+  $ID_break,
+  $ID_case,
+  $ID_catch,
+  $ID_class,
+  $ID_const,
+  $ID_continue,
+  $ID_debugger,
+  $ID_default,
+  $ID_delete,
+  $ID_do,
+  $ID_else,
+  $ID_enum,
+  $ID_eval,
+  $ID_export,
+  $ID_extends,
+  $ID_false,
+  $ID_finally,
+  $ID_for,
+  $ID_from,
+  $ID_function,
+  $ID_get,
+  $ID_if,
+  $ID_implements,
+  $ID_import,
+  $ID_in,
+  $ID_instanceof,
+  $ID_interface,
+  $ID_let,
+  $ID_new,
+  $ID_null,
+  $ID_of,
+  $ID_package,
+  $ID_private,
+  $ID_protected,
+  $ID_public,
+  $ID_return,
+  $ID_set,
+  $ID_static,
+  $ID_super,
+  $ID_switch,
+  $ID_target,
+  $ID_this,
+  $ID_throw,
+  $ID_true,
+  $ID_try,
+  $ID_typeof,
+  $ID_var,
+  $ID_void,
+  $ID_while,
+  $ID_with,
+  $ID_yield,
   $NUMBER_HEX,
   $NUMBER_DEC,
   $NUMBER_BIN,

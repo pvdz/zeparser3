@@ -60,8 +60,8 @@ ast: {
 }
 
 tokens (8x):
-       PUNC_PAREN_OPEN IDENT REGEXN PUNC_DOT IDENT PUNC_PAREN_CLOSE
-       PUNC_SEMI
+       PUNC_PAREN_OPEN ID_delete REGEXN PUNC_DOT IDENT
+       PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 
 ### Strict mode

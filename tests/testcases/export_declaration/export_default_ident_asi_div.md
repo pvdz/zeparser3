@@ -77,7 +77,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT IDENT IDENT PUNC_DIV IDENT ASI
+       ID_export ID_default IDENT PUNC_DIV IDENT ASI
 `````
 
 

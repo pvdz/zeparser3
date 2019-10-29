@@ -55,7 +55,7 @@ ast: {
 }
 
 tokens (5x):
-       NUMBER_HEX IDENT IDENT ASI
+       NUMBER_HEX ID_in IDENT ASI
 `````
 
 ### Strict mode

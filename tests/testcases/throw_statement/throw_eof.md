@@ -42,7 +42,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT IDENT ASI
+       ID_throw IDENT ASI
 `````
 
 ### Strict mode

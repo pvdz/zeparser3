@@ -67,8 +67,8 @@ ast: {
 }
 
 tokens (8x):
-       IDENT PUNC_PAREN_OPEN REGEXN PUNC_PAREN_CLOSE PUNC_DIV IDENT
-       ASI
+       ID_import PUNC_PAREN_OPEN REGEXN PUNC_PAREN_CLOSE PUNC_DIV
+       IDENT ASI
 `````
 
 ### Strict mode

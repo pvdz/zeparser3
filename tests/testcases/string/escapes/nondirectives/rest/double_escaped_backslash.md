@@ -61,7 +61,8 @@ ast: {
 }
 
 tokens (7x):
-       IDENT PUNC_SEMI STRING_DOUBLE PUNC_SEMI STRING_DOUBLE PUNC_SEMI
+       ID_debugger PUNC_SEMI STRING_DOUBLE PUNC_SEMI STRING_DOUBLE
+       PUNC_SEMI
 `````
 
 ### Strict mode

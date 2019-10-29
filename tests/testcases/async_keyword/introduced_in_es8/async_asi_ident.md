@@ -54,7 +54,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT ASI IDENT ASI
+       ID_async ASI IDENT ASI
 `````
 
 ### Strict mode

@@ -43,7 +43,7 @@ ast: {
 }
 
 tokens (5x):
-       PUNC_CURLY_OPEN IDENT PUNC_SEMI PUNC_CURLY_CLOSE
+       PUNC_CURLY_OPEN ID_debugger PUNC_SEMI PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

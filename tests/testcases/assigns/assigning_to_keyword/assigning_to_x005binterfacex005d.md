@@ -53,8 +53,8 @@ ast: {
 }
 
 tokens (7x):
-       PUNC_PAREN_OPEN IDENT PUNC_EQ STRING_DOUBLE PUNC_PAREN_CLOSE
-       ASI
+       PUNC_PAREN_OPEN ID_interface PUNC_EQ STRING_DOUBLE
+       PUNC_PAREN_CLOSE ASI
 `````
 
 ### Strict mode

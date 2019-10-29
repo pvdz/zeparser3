@@ -64,7 +64,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT PUNC_DIV IDENT PUNC_DIV IDENT PUNC_SEMI
+       ID_this PUNC_DIV IDENT PUNC_DIV IDENT PUNC_SEMI
 `````
 
 ### Strict mode

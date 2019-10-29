@@ -72,7 +72,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT IDENT IDENT IDENT IDENT ASI
+       ID_export ID_default IDENT ID_in IDENT ASI
 `````
 
 

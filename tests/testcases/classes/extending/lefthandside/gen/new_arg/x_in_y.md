@@ -59,7 +59,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT IDENT IDENT IDENT ASI
+       ID_new IDENT ID_in IDENT ASI
 `````
 
 ### Strict mode

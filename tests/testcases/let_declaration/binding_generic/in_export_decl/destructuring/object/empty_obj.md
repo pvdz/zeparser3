@@ -78,7 +78,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE PUNC_EQ IDENT
+       ID_export ID_let PUNC_CURLY_OPEN PUNC_CURLY_CLOSE PUNC_EQ IDENT
        PUNC_SEMI
 `````
 

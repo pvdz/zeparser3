@@ -54,7 +54,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT ASI REGEXN ASI
+       ID_debugger ASI REGEXN ASI
 `````
 
 ### Strict mode

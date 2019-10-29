@@ -64,7 +64,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT IDENT IDENT PUNC_DOT IDENT PUNC_CURLY_OPEN
+       ID_class IDENT ID_extends IDENT PUNC_DOT IDENT PUNC_CURLY_OPEN
        PUNC_CURLY_CLOSE
 `````
 

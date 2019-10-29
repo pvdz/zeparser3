@@ -89,7 +89,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT TICK_HEAD IDENT TICK_BODY IDENT TICK_TAIL ASI
+       ID_new IDENT TICK_HEAD IDENT TICK_BODY IDENT TICK_TAIL ASI
 `````
 
 ### Strict mode

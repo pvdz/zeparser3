@@ -50,7 +50,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
+       ID_class ID_async PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

@@ -58,7 +58,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE ASI
+       ID_export PUNC_CURLY_OPEN PUNC_CURLY_CLOSE ASI
 `````
 
 

@@ -68,7 +68,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT REGEXN ASI
+       ID_export ID_default REGEXN ASI
 `````
 
 

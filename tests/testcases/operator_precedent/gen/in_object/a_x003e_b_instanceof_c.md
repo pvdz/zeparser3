@@ -94,7 +94,7 @@ ast: {
 
 tokens (13x):
        IDENT PUNC_EQ PUNC_CURLY_OPEN IDENT PUNC_COLON IDENT PUNC_GT
-       IDENT IDENT IDENT PUNC_CURLY_CLOSE ASI
+       IDENT ID_instanceof IDENT PUNC_CURLY_CLOSE ASI
 `````
 
 ### Strict mode

@@ -53,7 +53,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_MIN NUMBER_DEC ASI
+       ID_await PUNC_MIN NUMBER_DEC ASI
 `````
 
 ### Strict mode

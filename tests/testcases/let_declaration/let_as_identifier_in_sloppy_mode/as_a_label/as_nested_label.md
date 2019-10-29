@@ -72,7 +72,7 @@ ast: {
 }
 
 tokens (7x):
-       IDENT PUNC_COLON IDENT PUNC_COLON IDENT PUNC_SEMI
+       IDENT PUNC_COLON ID_let PUNC_COLON IDENT PUNC_SEMI
 `````
 
 ### Strict mode

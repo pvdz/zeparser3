@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The lhs contained something that is not allowed with `for-in` loops
+  Missing first semi in `for` header, found `in` instead
 
 for (let() in x);
            ^------- error

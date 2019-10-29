@@ -85,7 +85,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_SEMI STRING_DOUBLE ASI
+       ID_debugger PUNC_SEMI STRING_DOUBLE ASI
 `````
 
 

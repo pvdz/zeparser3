@@ -84,8 +84,8 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT PUNC_BRACKET_OPEN PUNC_BRACKET_CLOSE PUNC_EQ IDENT
-       ASI
+       ID_export ID_let PUNC_BRACKET_OPEN PUNC_BRACKET_CLOSE PUNC_EQ
+       IDENT ASI
 `````
 
 

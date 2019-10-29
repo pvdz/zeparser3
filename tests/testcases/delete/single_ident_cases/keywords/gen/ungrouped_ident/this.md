@@ -49,7 +49,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT IDENT ASI
+       ID_delete ID_this ASI
 `````
 
 ### Strict mode

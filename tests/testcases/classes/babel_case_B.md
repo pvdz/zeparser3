@@ -68,8 +68,8 @@ ast: {
 }
 
 tokens (9x):
-       IDENT PUNC_EQ IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE PUNC_DIV
-       IDENT ASI
+       IDENT PUNC_EQ ID_class PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
+       PUNC_DIV IDENT ASI
 `````
 
 ### Strict mode

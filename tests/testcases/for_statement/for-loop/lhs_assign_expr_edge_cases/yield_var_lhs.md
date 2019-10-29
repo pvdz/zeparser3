@@ -48,7 +48,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT PUNC_PAREN_OPEN IDENT PUNC_SEMI PUNC_SEMI
+       ID_for PUNC_PAREN_OPEN ID_yield PUNC_SEMI PUNC_SEMI
        PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 

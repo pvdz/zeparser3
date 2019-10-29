@@ -70,7 +70,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT PUNC_COMMA IDENT IDENT PUNC_EQ_GT PUNC_CURLY_OPEN
+       IDENT PUNC_COMMA ID_async ID_async PUNC_EQ_GT PUNC_CURLY_OPEN
        PUNC_CURLY_CLOSE ASI
 `````
 

@@ -69,7 +69,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT PUNC_DOT IDENT PUNC_COMMA IDENT PUNC_SEMI
+       ID_delete IDENT PUNC_DOT IDENT PUNC_COMMA IDENT PUNC_SEMI
 `````
 
 ### Strict mode

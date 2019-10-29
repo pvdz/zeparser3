@@ -60,7 +60,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT TICK_PURE ASI
+       ID_new TICK_PURE ASI
 `````
 
 ### Strict mode

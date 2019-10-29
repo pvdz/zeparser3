@@ -65,7 +65,8 @@ ast: {
 }
 
 tokens (7x):
-       PUNC_BRACKET_OPEN IDENT PUNC_EQ_GT IDENT PUNC_BRACKET_CLOSE ASI
+       PUNC_BRACKET_OPEN ID_async PUNC_EQ_GT IDENT PUNC_BRACKET_CLOSE
+       ASI
 `````
 
 ### Strict mode

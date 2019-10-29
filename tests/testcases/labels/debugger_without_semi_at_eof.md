@@ -37,7 +37,7 @@ ast: {
 }
 
 tokens (3x):
-       IDENT ASI
+       ID_debugger ASI
 `````
 
 ### Strict mode

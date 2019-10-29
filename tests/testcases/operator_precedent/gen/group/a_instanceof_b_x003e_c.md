@@ -64,7 +64,7 @@ ast: {
 }
 
 tokens (9x):
-       PUNC_PAREN_OPEN IDENT IDENT IDENT PUNC_GT IDENT
+       PUNC_PAREN_OPEN IDENT ID_instanceof IDENT PUNC_GT IDENT
        PUNC_PAREN_CLOSE ASI
 `````
 

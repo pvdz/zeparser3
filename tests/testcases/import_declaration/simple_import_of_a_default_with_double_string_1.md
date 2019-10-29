@@ -72,7 +72,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT IDENT IDENT STRING_DOUBLE ASI
+       ID_import IDENT ID_from STRING_DOUBLE ASI
 `````
 
 

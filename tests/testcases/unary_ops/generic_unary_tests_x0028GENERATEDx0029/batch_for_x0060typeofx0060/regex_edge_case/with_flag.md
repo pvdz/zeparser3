@@ -79,7 +79,8 @@ ast: {
 }
 
 tokens (10x):
-       IDENT IDENT PUNC_DOT IDENT PUNC_DIV IDENT PUNC_DIV IDENT ASI
+       ID_typeof IDENT PUNC_DOT IDENT PUNC_DIV IDENT PUNC_DIV IDENT
+       ASI
 `````
 
 ### Strict mode

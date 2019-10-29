@@ -54,7 +54,7 @@ ast: {
 }
 
 tokens (3x):
-       IDENT ASI
+       ID_let ASI
 `````
 
 ### Strict mode

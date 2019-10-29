@@ -72,7 +72,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT PUNC_EQ IDENT ASI IDENT IDENT PUNC_SEMI
+       ID_var IDENT PUNC_EQ IDENT ASI ID_var IDENT PUNC_SEMI
 `````
 
 ### Strict mode

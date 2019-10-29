@@ -60,7 +60,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT IDENT PUNC_DOT IDENT ASI
+       ID_delete ID_protected PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode

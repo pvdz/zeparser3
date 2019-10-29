@@ -73,8 +73,8 @@ ast: {
 }
 
 tokens (10x):
-       IDENT PUNC_PAREN_OPEN IDENT PUNC_PLUS IDENT IDENT IDENT
-       PUNC_PAREN_CLOSE ASI
+       IDENT PUNC_PAREN_OPEN IDENT PUNC_PLUS ID_async ID_instanceof
+       IDENT PUNC_PAREN_CLOSE ASI
 `````
 
 ### Strict mode

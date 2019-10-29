@@ -68,7 +68,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT STRING_SINGLE PUNC_DOT IDENT PUNC_DOT IDENT ASI
+       ID_new STRING_SINGLE PUNC_DOT IDENT PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode

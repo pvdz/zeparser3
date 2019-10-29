@@ -56,7 +56,8 @@ ast: {
 }
 
 tokens (7x):
-       IDENT IDENT IDENT REGEXN PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
+       ID_class IDENT ID_extends REGEXN PUNC_CURLY_OPEN
+       PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

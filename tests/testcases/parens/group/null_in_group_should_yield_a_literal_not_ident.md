@@ -43,7 +43,7 @@ ast: {
 }
 
 tokens (5x):
-       PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE ASI
+       PUNC_PAREN_OPEN ID_null PUNC_PAREN_CLOSE ASI
 `````
 
 ### Strict mode

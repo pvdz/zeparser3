@@ -60,8 +60,8 @@ ast: {
 }
 
 tokens (10x):
-       IDENT PUNC_COLON IDENT PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE
-       IDENT IDENT ASI
+       IDENT PUNC_COLON ID_while PUNC_PAREN_OPEN IDENT
+       PUNC_PAREN_CLOSE ID_continue IDENT ASI
 `````
 
 ### Strict mode

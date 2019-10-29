@@ -53,7 +53,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_PLUS NUMBER_DEC PUNC_SEMI
+       ID_async PUNC_PLUS NUMBER_DEC PUNC_SEMI
 `````
 
 ### Strict mode

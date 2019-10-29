@@ -60,7 +60,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT IDENT ASI IDENT ASI
+       ID_new ID_yield ASI IDENT ASI
 `````
 
 ### Strict mode

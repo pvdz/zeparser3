@@ -47,7 +47,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT IDENT ASI
+       ID_new ID_eval ASI
 `````
 
 ### Strict mode

@@ -70,7 +70,8 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT IDENT IDENT IDENT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
+       ID_export ID_default ID_class ID_extends IDENT PUNC_CURLY_OPEN
+       PUNC_CURLY_CLOSE
 `````
 
 

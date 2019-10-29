@@ -73,8 +73,8 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT IDENT PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE
-       PUNC_SEMI
+       ID_export ID_default ID_async PUNC_PAREN_OPEN IDENT
+       PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 
 

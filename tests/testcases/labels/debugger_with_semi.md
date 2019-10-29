@@ -37,7 +37,7 @@ ast: {
 }
 
 tokens (3x):
-       IDENT PUNC_SEMI
+       ID_debugger PUNC_SEMI
 `````
 
 ### Strict mode

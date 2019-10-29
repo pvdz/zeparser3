@@ -60,7 +60,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT REGEXN ASI
+       IDENT ID_instanceof REGEXN ASI
 `````
 
 ### Strict mode

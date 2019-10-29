@@ -57,7 +57,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT PUNC_PAREN_OPEN REGEXN PUNC_PAREN_CLOSE ASI
+       ID_import PUNC_PAREN_OPEN REGEXN PUNC_PAREN_CLOSE ASI
 `````
 
 ### Strict mode

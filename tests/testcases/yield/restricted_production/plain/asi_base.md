@@ -55,7 +55,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT ASI IDENT ASI
+       ID_yield ASI IDENT ASI
 `````
 
 ### Strict mode

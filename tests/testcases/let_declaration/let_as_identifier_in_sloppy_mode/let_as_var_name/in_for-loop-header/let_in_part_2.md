@@ -60,7 +60,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT PUNC_PAREN_OPEN PUNC_SEMI IDENT PUNC_SEMI
+       ID_for PUNC_PAREN_OPEN PUNC_SEMI ID_let PUNC_SEMI
        PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 

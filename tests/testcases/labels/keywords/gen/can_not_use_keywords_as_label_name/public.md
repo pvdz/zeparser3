@@ -53,7 +53,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_COLON IDENT ASI
+       ID_public PUNC_COLON IDENT ASI
 `````
 
 ### Strict mode

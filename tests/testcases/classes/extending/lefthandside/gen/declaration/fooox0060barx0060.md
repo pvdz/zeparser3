@@ -71,7 +71,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT IDENT IDENT TICK_PURE PUNC_CURLY_OPEN
+       ID_class IDENT ID_extends IDENT TICK_PURE PUNC_CURLY_OPEN
        PUNC_CURLY_CLOSE
 `````
 

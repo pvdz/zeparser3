@@ -61,7 +61,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT PUNC_STAR IDENT STRING_DOUBLE ASI
+       ID_export PUNC_STAR ID_from STRING_DOUBLE ASI
 `````
 
 

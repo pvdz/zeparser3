@@ -60,7 +60,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT REGEXN PUNC_DOT IDENT PUNC_SEMI
+       ID_delete REGEXN PUNC_DOT IDENT PUNC_SEMI
 `````
 
 ### Strict mode

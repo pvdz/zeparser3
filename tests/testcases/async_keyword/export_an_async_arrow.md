@@ -75,8 +75,8 @@ ast: {
 }
 
 tokens (10x):
-       IDENT IDENT IDENT PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE
-       PUNC_EQ_GT IDENT ASI
+       ID_export ID_default ID_async PUNC_PAREN_OPEN IDENT
+       PUNC_PAREN_CLOSE PUNC_EQ_GT IDENT ASI
 `````
 
 

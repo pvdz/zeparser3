@@ -57,8 +57,8 @@ ast: {
 }
 
 tokens (8x):
-       IDENT PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE PUNC_EQ_GT IDENT
-       ASI
+       ID_async PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE PUNC_EQ_GT
+       IDENT ASI
 `````
 
 ### Strict mode

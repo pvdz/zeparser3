@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unexpected input while parsing the left side of a for-header
+  Missing first semi in `for` header, found `y` instead
 
 for(let of y);
            ^------- error

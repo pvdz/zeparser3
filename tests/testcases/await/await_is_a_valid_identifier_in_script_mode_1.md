@@ -42,7 +42,7 @@ ast: {
 }
 
 tokens (3x):
-       IDENT ASI
+       ID_await ASI
 `````
 
 ### Strict mode

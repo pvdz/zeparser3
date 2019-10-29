@@ -64,7 +64,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT REGEXN PUNC_DOT IDENT ASI
+       ID_new REGEXN PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode

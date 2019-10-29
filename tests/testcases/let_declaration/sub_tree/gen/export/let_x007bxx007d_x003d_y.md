@@ -99,7 +99,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT PUNC_CURLY_OPEN IDENT PUNC_CURLY_CLOSE PUNC_EQ
+       ID_export ID_let PUNC_CURLY_OPEN IDENT PUNC_CURLY_CLOSE PUNC_EQ
        IDENT ASI
 `````
 

@@ -47,7 +47,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT PUNC_SEMI IDENT PUNC_PAREN_OPEN IDENT
+       ID_do ID_continue PUNC_SEMI ID_while PUNC_PAREN_OPEN IDENT
        PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 

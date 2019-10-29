@@ -70,7 +70,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT IDENT IDENT PUNC_GT IDENT ASI
+       ID_typeof IDENT ID_instanceof IDENT PUNC_GT IDENT ASI
 `````
 
 ### Strict mode

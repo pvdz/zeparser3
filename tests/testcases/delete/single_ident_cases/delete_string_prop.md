@@ -59,7 +59,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT STRING_DOUBLE PUNC_DOT IDENT ASI
+       ID_delete STRING_DOUBLE PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode

@@ -77,7 +77,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT PUNC_CURLY_OPEN IDENT PUNC_CURLY_CLOSE IDENT
+       ID_import PUNC_CURLY_OPEN IDENT PUNC_CURLY_CLOSE ID_from
        STRING_DOUBLE ASI
 `````
 

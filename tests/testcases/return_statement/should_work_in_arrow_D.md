@@ -63,7 +63,7 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT PUNC_EQ_GT PUNC_CURLY_OPEN IDENT ASI
+       ID_async IDENT PUNC_EQ_GT PUNC_CURLY_OPEN ID_return ASI
        PUNC_CURLY_CLOSE ASI
 `````
 

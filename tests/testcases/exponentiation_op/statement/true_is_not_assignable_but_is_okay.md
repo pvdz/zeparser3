@@ -55,7 +55,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_STAR_STAR IDENT ASI
+       ID_true PUNC_STAR_STAR IDENT ASI
 `````
 
 ### Strict mode

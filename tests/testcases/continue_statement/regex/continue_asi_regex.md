@@ -70,8 +70,8 @@ ast: {
 }
 
 tokens (11x):
-       IDENT PUNC_PAREN_OPEN IDENT IDENT NUMBER_DEC PUNC_PAREN_CLOSE
-       IDENT ASI REGEXN ASI
+       ID_for PUNC_PAREN_OPEN IDENT ID_of NUMBER_DEC PUNC_PAREN_CLOSE
+       ID_continue ASI REGEXN ASI
 `````
 
 ### Strict mode

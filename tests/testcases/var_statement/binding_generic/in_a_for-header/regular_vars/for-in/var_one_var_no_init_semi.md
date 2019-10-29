@@ -63,8 +63,8 @@ ast: {
 }
 
 tokens (9x):
-       IDENT PUNC_PAREN_OPEN IDENT IDENT IDENT IDENT PUNC_PAREN_CLOSE
-       PUNC_SEMI
+       ID_for PUNC_PAREN_OPEN ID_var IDENT ID_in IDENT
+       PUNC_PAREN_CLOSE PUNC_SEMI
 `````
 
 ### Strict mode

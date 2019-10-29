@@ -77,7 +77,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT IDENT ASI
+       ID_export ID_let IDENT ASI
 `````
 
 

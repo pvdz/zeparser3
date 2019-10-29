@@ -56,7 +56,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT REGEXN ASI
+       ID_delete REGEXN ASI
 `````
 
 ### Strict mode

@@ -57,7 +57,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT PUNC_EQ_GT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE ASI
+       ID_arguments PUNC_EQ_GT PUNC_CURLY_OPEN PUNC_CURLY_CLOSE ASI
 `````
 
 ### Strict mode

@@ -77,8 +77,8 @@ ast: {
 }
 
 tokens (9x):
-       IDENT IDENT IDENT PUNC_PAREN_OPEN IDENT PUNC_PAREN_CLOSE
-       PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
+       ID_async ID_function IDENT PUNC_PAREN_OPEN ID_yield
+       PUNC_PAREN_CLOSE PUNC_CURLY_OPEN PUNC_CURLY_CLOSE
 `````
 
 ### Strict mode

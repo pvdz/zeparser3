@@ -72,7 +72,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT PUNC_STAR IDENT IDENT IDENT STRING_DOUBLE ASI
+       ID_import PUNC_STAR ID_as IDENT ID_from STRING_DOUBLE ASI
 `````
 
 

@@ -55,8 +55,8 @@ ast: {
 }
 
 tokens (8x):
-       IDENT IDENT PUNC_PAREN_OPEN PUNC_PAREN_CLOSE PUNC_CURLY_OPEN
-       PUNC_CURLY_CLOSE ASI
+       ID_new ID_function PUNC_PAREN_OPEN PUNC_PAREN_CLOSE
+       PUNC_CURLY_OPEN PUNC_CURLY_CLOSE ASI
 `````
 
 ### Strict mode

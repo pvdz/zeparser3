@@ -55,7 +55,7 @@ ast: {
 }
 
 tokens (6x):
-       IDENT PUNC_BRACKET_OPEN IDENT PUNC_BRACKET_CLOSE ASI
+       ID_new PUNC_BRACKET_OPEN IDENT PUNC_BRACKET_CLOSE ASI
 `````
 
 ### Strict mode

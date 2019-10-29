@@ -79,7 +79,7 @@ ast: {
 }
 
 tokens (9x):
-       TICK_HEAD IDENT IDENT PUNC_EQ_GT PUNC_CURLY_OPEN
+       TICK_HEAD ID_async ID_async PUNC_EQ_GT PUNC_CURLY_OPEN
        PUNC_CURLY_CLOSE TICK_TAIL ASI
 `````
 

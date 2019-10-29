@@ -52,7 +52,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT IDENT IDENT ASI
+       IDENT ID_instanceof IDENT ASI
 `````
 
 ### Strict mode

@@ -68,7 +68,7 @@ ast: {
 }
 
 tokens (8x):
-       IDENT NUMBER_HEX PUNC_DOT IDENT PUNC_DOT IDENT ASI
+       ID_new NUMBER_HEX PUNC_DOT IDENT PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode

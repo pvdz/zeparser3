@@ -79,7 +79,7 @@ ast: {
 }
 
 tokens (7x):
-       TICK_HEAD IDENT PUNC_EQ_GT IDENT TICK_TAIL ASI
+       TICK_HEAD ID_async PUNC_EQ_GT IDENT TICK_TAIL ASI
 `````
 
 ### Strict mode
