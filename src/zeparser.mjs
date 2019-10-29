@@ -812,7 +812,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string' && astProp !== 'undefined', 'prop should be string');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
     ASSERT(token !== curtok, 'token should be consumed to ensure location data is correct', token, curtok);
-    ASSERT(token.type === $IDENT, 'token must be ident');
+    ASSERT(isIdentToken(token.type), 'token must be ident');
 
     let identNode = AST_getIdentNode(token);
     return AST_setNode(astProp, identNode); // only for ASSERTS
@@ -820,7 +820,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function AST_getIdentNode(token) {
     ASSERT(AST_getIdentNode.length === arguments.length, 'arg count');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', token, typeof token === 'object', token && typeof token.type === 'number');
-    ASSERT(token.type === $IDENT, 'token must be ident');
+    ASSERT(isIdentToken(token.type), 'token must be ident');
 
     // TODO: is a destructuring more efficient pref-wise? `let {canon, col, line, ...} = token`. It may be :)
     let col = token.column;
@@ -2825,7 +2825,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(!void(ASSERT_ASI_REGEX_NEXT = false));
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, isGlobalToplevel, isLabelled, fdState, nestedLabels, astProp);
       return;
     }
@@ -3178,7 +3178,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let functionNameTokenToVerify = NO_ID_TO_VERIFY;
 
     let name = '';
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // properly inherit the async/gen state from the outer scope (func decls) or current function (func expr)
       let bindingFlags = (
         sansFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC)
@@ -3757,7 +3757,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let newlineAfterAsync = curtok.nl === true;
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // - `async foo ...`
       //          ^
       // - `async eval => {}`
@@ -4050,7 +4050,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // `break` with label is only valid if the label exists in the current statement tree
 
     // Note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    if (curtok.type === $IDENT && curtok.nl === false) {
+    if (isIdentToken(curtok.type) && curtok.nl === false) {
       let labelToken = curtok;
       if (!findLabel(labelSet, labelToken.str, FROM_BREAK)) {
         THROW('The label (`' + tokenStrForError(labelToken) + '`) for this `break` was not defined in the current label set, which is illegal');
@@ -4168,7 +4168,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // otherwise it's just a continue to the nearest loop (most likely).
 
     // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    if (curtok.type === $IDENT && curtok.nl === false) {
+    if (isIdentToken(curtok.type) && curtok.nl === false) {
       let labelToken = curtok;
       let labelName = labelToken.str;
       let set = labelSet;
@@ -4585,13 +4585,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseExportObject.length === arguments.length, 'arg count');
     // - `export {...} from 'x'`
     ASSERT_skipToIdentCurlyClose('{', lexerFlags);
-    while (curtok.type === $IDENT) {
+    while (isIdentToken(curtok.type)) {
       let nameToken = curtok; // left of the `as`
       let exportedNameToken = curtok; // right of the `as`, if present at all, otherwise same as name
       ASSERT_skipToAsCommaCurlyClose($IDENT, lexerFlags);
       // while the `nameToken` should be a valid non-keyword identifier, it also has to be bound and as such we
       // don't have to check it here since we already apply bind checks anyways and binding would apply this check
-      if (curtok.type === $IDENT && curtok.str === 'as') { // `export {x as y}` NOT `export {x:y}`
+      if (isIdentToken(curtok.type) && curtok.str === 'as') { // `export {x as y}` NOT `export {x:y}`
         ASSERT_skipToIdentOrDie('as', lexerFlags);
         // note: the exported _name_ can be any identifier, keywords included
         exportedNameToken = curtok;
@@ -4666,7 +4666,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let forToken = curtok;
     ASSERT_skipToAwaitParenOpen('for', lexerFlags); // TODO: next must be `(` or `await`
-    let awaitable = curtok.type === $IDENT && curtok.str === 'await';
+    let awaitable = isIdentToken(curtok.type) && curtok.str === 'await';
     if (awaitable) {
       if (!allowAsyncGenerators) THROW('The `for await` syntax is not supported by the currently targeted language version');
       if (hasNoFlag(lexerFlags, LF_IN_ASYNC)) THROW('Can only use `for-await` inside an async function');
@@ -4705,7 +4705,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let startOfForHeaderToken = curtok;
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // - `for (;;);`
       //         ^
       // - `for (x in y);`
@@ -4733,7 +4733,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           // [v]: `for (let x of y);`
           //                ^
-          if (curtok.type === $IDENT || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN) {
+          if (isIdentToken(curtok.type) || curtok.type === $PUNC_BRACKET_OPEN || curtok.type === $PUNC_CURLY_OPEN) {
             // [v]: `for (let x of y);`
             //                ^
             // [v]: `for (let [x] in y);`
@@ -4849,7 +4849,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           break;
 
         default:
-          ASSERT(curtok.type === $IDENT, 'should be ident');
+          ASSERT(isIdentToken(curtok.type), 'should be ident');
           // TODO: ASSIGN_EXPR_IS_OK might have to be error
           // - `for (b↵++c;;);`
           // - `for (a=>b;;);`
@@ -4964,7 +4964,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `for (x;;);`
     //          ^
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       if (curtok.str === 'of') {
         if (catchforofhack) {
           // [x]: `try {} catch (e) { for (var e of y) {} }`
@@ -5283,7 +5283,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     parseStatementHeader(lexerFlags, 'test');
     parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_IFELSE, PARENT_NOT_LABEL, 'consequent');
-    if (curtok.type === $IDENT && curtok.str === 'else') {
+    if (isIdentToken(curtok.type) && curtok.str === 'else') {
       ASSERT_skipToStatementStart('else', lexerFlags);
       parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_IFELSE, PARENT_NOT_LABEL, 'alternate');
     } else {
@@ -5328,7 +5328,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       source: undefined,
     });
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // import x from 'x'
       //        ^
       // import x, * as z from 'x'
@@ -5410,7 +5410,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `import {...} from 'x'`
     //           ^
     ASSERT_skipToIdentCurlyClose('{', lexerFlags);
-    while (curtok.type === $IDENT) {
+    while (isIdentToken(curtok.type)) {
       let nameToken = curtok; // left of the `as` token
       let localToken = curtok; // right of the `as` token, otherwise same as nameToken
       ASSERT_skipToAsCommaCurlyClose($IDENT, lexerFlags);
@@ -5478,7 +5478,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipDiv('let', lexerFlags); // in `let/foo/g` the `/` is always a division, so parse div
 
     // parsing `let` as a declaration if the next token is an ident, `[`, or `{`
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // - `let x`
       // - `let x, y`
       // - `let x, [y]`
@@ -5677,7 +5677,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'test');
         if (curtok.type !== $PUNC_COLON) THROW('Missing colon after case expr');
         ASSERT_skipToStatementStart(':', lexerFlags);
-        while (curtok.type !== $EOF && curtok.type !== $PUNC_CURLY_CLOSE && (curtok.type !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
+        while (curtok.type !== $EOF && curtok.type !== $PUNC_CURLY_CLOSE && (!isIdentToken(curtok.type) || (curtok.str !== 'case' && curtok.str !== 'default'))) {
           parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_LEX, PARENT_NOT_LABEL, 'consequent');
         }
         AST_close('SwitchCase');
@@ -5693,7 +5693,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           consequent: [],
         });
         ASSERT_skipToStatementStart(':', lexerFlags);
-        while (curtok.type !== $EOF && curtok.type !== $PUNC_CURLY_CLOSE && (curtok.type !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
+        while (curtok.type !== $EOF && curtok.type !== $PUNC_CURLY_CLOSE && (!isIdentToken(curtok.type) || (curtok.str !== 'case' && curtok.str !== 'default'))) {
           parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_LEX, PARENT_NOT_LABEL, 'consequent');
         }
         AST_close('SwitchCase');
@@ -5859,7 +5859,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseIdentLabelOrExpressionStatement(lexerFlags, scoop, labelSet, fdState, nestedLabels, astProp) {
     ASSERT(parseIdentLabelOrExpressionStatement.length === arguments.length, 'arg count');
-    ASSERT(curtok.type === $IDENT, 'should not have consumed the ident yet', T(curtok.type));
+    ASSERT(isIdentToken(curtok.type), 'should not have consumed the ident yet', T(curtok.type));
     ASSERT(typeof astProp === 'string', 'should be string');
     ASSERT_LABELSET(labelSet);
 
@@ -5909,7 +5909,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       argument: undefined,
     });
     let assignable = ASSIGNABLE_UNDETERMINED;
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       assignable = parseDeleteIdent(lexerFlags, astProp);
     } else if (curtok.type === $PUNC_PAREN_OPEN) {
       // This case has to be confirmed not to just wrap an ident in parens
@@ -6043,7 +6043,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let prevtok = curtok;
     parseValueTail(lexerFlags, outerParenToken, assignable, NOT_NEW_ARG, NOT_LHSE, astProp);
     if (curtok === prevtok && canBeErrorCase && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      ASSERT(possibleIdentToken.type === $IDENT, 'this state is verified through piggies and if it wasnt an ident then this should never be reached', possibleIdentToken);
+      ASSERT(isIdentToken(possibleIdentToken.type), 'this state is verified through piggies and if it wasnt an ident then this should never be reached', possibleIdentToken);
       // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
       // strict mode only
       // This is the group-wrapped variant, which still holds the above rule
@@ -6151,7 +6151,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // We have already consumed the colon for the label so the next token must start the child-statement of this label
     // Scan forward to see whether we are about to parse a loop statement. If so we can mark nestedLabels for `continue`
-    if (curtok.type === $IDENT && (
+    if (isIdentToken(curtok.type) && (
       curtok.str === 'for' || curtok.str === 'while' || curtok.str === 'do'
     )) {
       // Either the next statement is invalid or it will be a valid iteration statement
@@ -6235,7 +6235,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `for (let x of y);`
     //             ^
 
-    if (curtok.type !== $IDENT && curtok.type !== $PUNC_BRACKET_OPEN && curtok.type !== $PUNC_CURLY_OPEN) THROW('Expected identifier, or array/object destructuring, next token is: ' + curtok);
+    if (!isIdentToken(curtok.type) && curtok.type !== $PUNC_BRACKET_OPEN && curtok.type !== $PUNC_CURLY_OPEN) THROW('Expected identifier, or array/object destructuring, next token is: ' + curtok);
     let keyword = bindingType === BINDING_TYPE_VAR ? 'var' : bindingType === BINDING_TYPE_LET ? 'let' : 'const';
 
     AST_open(astProp, {
@@ -6358,7 +6358,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let mustHaveInit = false;
     let paramSimple = PARAM_UNDETERMINED; // simple if "valid in es5" (list of idents, no inits)
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // - `var foo = bar;`
       //        ^^^
       let bindingTok = curtok;
@@ -6494,7 +6494,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function fatalBindingIdentCheck(identToken, bindingType, lexerFlags) {
     ASSERT(fatalBindingIdentCheck.length === arguments.length, 'arg count');
-    ASSERT(identToken.type === $IDENT, 'ident check on ident tokens ok', identToken);
+    ASSERT(isIdentToken(identToken.type), 'ident check on ident tokens ok', identToken);
     ASSERT_BINDING_TYPE(bindingType);
 
     let str = nonFatalBindingIdentCheck(identToken, bindingType, lexerFlags);
@@ -6834,7 +6834,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseParenlessArrowAfterAsync.length === arguments.length, 'arg count');
     ASSERT(curtok.str !== 'function', '(Function and newline have already been asserted)');
     ASSERT(curtok.nl === false, '(Function and newline have already been asserted)');
-    ASSERT(curtok.type === $IDENT, 'dont have to skip the ident to assert it having to be an arrow');
+    ASSERT(isIdentToken(curtok.type), 'dont have to skip the ident to assert it having to be an arrow');
     ASSERT_ASSIGN_EXPR(allowAssignment);
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
@@ -7251,7 +7251,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let startToken = curtok;
 
     // return whether the value is assignable (only for regular var names)
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       return parseValueHeadBodyIdent(lexerFlags, isNewArg, BINDING_TYPE_NONE, allowAssignment, leftHandSideExpression, astProp);
     }
     else if (isNumberStringRegex(curtok.type)) {
@@ -7355,7 +7355,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseValueHeadBodyIdent(lexerFlags, isNewArg, bindingType, allowAssignment, leftHandSideExpression, astProp) {
     ASSERT(arguments.length === parseValueHeadBodyIdent.length, 'arg count');
-    ASSERT(curtok.type === $IDENT, 'token should not yet have been consumed because the next token depends on its value and so you cant consume this ahead of time...');
+    ASSERT(isIdentToken(curtok.type), 'token should not yet have been consumed because the next token depends on its value and so you cant consume this ahead of time...');
     ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
@@ -7366,7 +7366,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseValueHeadBodyAfterIdent(lexerFlags, identToken, bindingType, isNewArg, allowAssignment, leftHandSideExpression, astProp) {
     ASSERT(parseValueHeadBodyAfterIdent.length === arguments.length, 'expecting args');
-    ASSERT(identToken.type === $IDENT, 'should have consumed token. make sure you checked whether the token after can be div or regex...');
+    ASSERT(isIdentToken(identToken.type), 'should have consumed token. make sure you checked whether the token after can be div or regex...');
     ASSERT(identToken !== curtok, 'should have consumed this');
     ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
@@ -7775,7 +7775,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `new await x()()`
     // - `new b↵++c;`
 
-    if (curtok.type === $IDENT && curtok.str === 'import') {
+    if (isIdentToken(curtok.type) && curtok.str === 'import') {
       // We'll have to revisit this one when `import.meta` becomes spec, but for now this is fine to prevent here.
       THROW('Cannot use dynamic import as an argument to `new`, the spec simply does not allow it');
     }
@@ -8686,7 +8686,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let mustBeArrow = false; // special case; a `...` must mean arrow, and a trailing comma must mean arrow as well
 
     while (curtok.type !== $PUNC_PAREN_CLOSE) { // top-level group loop, list of ident, array, object, rest, and other expressions
-      if (curtok.type === $IDENT) {
+      if (isIdentToken(curtok.type)) {
         // - (x)
         // - (x = y)
         // - (x, y)
@@ -9486,7 +9486,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     while (curtok.type !== $PUNC_BRACKET_CLOSE) {
       let elementStartToken = curtok;
-      if (curtok.type === $IDENT) {
+      if (isIdentToken(curtok.type)) {
         // - `[x]`
         //     ^
         // - `[x, y]`
@@ -9953,7 +9953,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `{async *key(){}}`
     // - `{...value}`      (this seems to be able to allow any value token including regexes, literals, idents)
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // (This branch is the only case that can lead to objlit prop shorthand iif the next char is `}` or `,` or `=`)
       // All forms can have trailing comma but it will lead to an error in a rest pattern
 
@@ -10135,7 +10135,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let starToken = curtok;
       ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
 
-      if (curtok.type === $IDENT) {
+      if (isIdentToken(curtok.type)) {
         // - `({*ident(){}})`
         let identToken = curtok;
         ASSERT_skipToParenOpenOrDie($IDENT, lexerFlags);
@@ -10298,7 +10298,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       value: undefined,
       shorthand: false,
     });
-    if (keyToken.type === $IDENT) {
+    if (isIdentToken(keyToken.type)) {
       AST_setIdent('key', keyToken);
     } else {
       AST_setLiteral('key', keyToken);
@@ -10314,7 +10314,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop, exportedNames, exportedBindings, astProp) {
     ASSERT(_parseObjectPropertyValueAfterColon.length === arguments.length, 'arg count');
     let valueFirstToken = curtok;
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // - `{ident: ident}`
       //            ^
       // - `{12: ident ...`
@@ -10378,7 +10378,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // - `({ *g1() {   return {x: yield}  }})`
             // - `({x:function(){"use strict";}})`
             destructible |= CANT_DESTRUCT;
-          } else if (keyToken && keyToken.type === $IDENT) {
+          } else if (keyToken && isIdentToken(keyToken.type)) {
             // "valid exports"
             // - `[a, {b:d}, c] = obj`
             // If this isn't an export of some kind then the exportedNames and bindings are null so don't worry :)
@@ -10550,7 +10550,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseObjectLikePartFromIdent(lexerFlags, startOfPropToken, scoop, bindingType, exportedNames, exportedBindings, astProp) {
     ASSERT(parseObjectLikePartFromIdent.length === arguments.length, 'arg count');
-    ASSERT(curtok.type === $IDENT, 'should be at ident');
+    ASSERT(isIdentToken(curtok.type), 'should be at ident');
     ASSERT(typeof astProp === 'string', 'astprop string');
 
     let propLeadingIdentToken = curtok;
@@ -10714,7 +10714,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       ASSERT(curtok.type !== $PUNC_EQ, 'this struct does not allow init/defaults');
     }
-    else if (curtok.type === $IDENT) {
+    else if (isIdentToken(curtok.type)) {
       // getter/setter/async shorthand method
       // - ({async ident(){}})
       // - ({get ident(){}})
@@ -10765,7 +10765,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       starToken = curtok;
       ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
 
-      if (curtok.type === $IDENT) {
+      if (isIdentToken(curtok.type)) {
         // `{   async *foo(){}   }`
         //             ^^^
         // `{   async *prototype(){}   }`
@@ -11029,7 +11029,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // note: default exports has optional ident but should still not skip `extends` here
     // but it is not a valid class name anyways (which is superseded by a generic keyword check)
-    if (curtok.type === $IDENT && curtok.str !== 'extends') {
+    if (isIdentToken(curtok.type) && curtok.str !== 'extends') {
       // The class name is to be considered a `const` inside the class, but a `let` outside of the class
       // https://tc39.github.io/ecma262/#sec-runtime-semantics-classdefinitionevaluation
       // > If hasNameProperty is false, perform SetFunctionName(value, className).
@@ -11076,7 +11076,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // The constructor flag is kept for outer because it still applies to computed key expressions
     let innerLexerFlags = sansFlag(outerLexerFlags, LF_IN_CONSTRUCTOR);
 
-    if (curtok.type === $IDENT && curtok.str === 'extends') {
+    if (isIdentToken(curtok.type) && curtok.str === 'extends') {
       // parseExtends, parseClassExtends, parseHeritage, parseClassHeritage
       // The spec calls this the "ClassHeritage" production. It is a leftHandSide expression (!), which is a call or new
       // expression, so certain things are can't happen (like await).
@@ -11233,7 +11233,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let asyncToken = UNDEF_ASYNC;
     let starToken = UNDEF_STAR;
 
-    if (curtok.type === $IDENT && curtok.str === 'static') {
+    if (isIdentToken(curtok.type) && curtok.str === 'static') {
       // In the following cases, "key" can be substituted with any of the four keys (ident, string, number, computed)
       // - `class x {static get key(){}}`
       //             ^
@@ -11260,7 +11260,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       ASSERT(curtok.str !== 'static' || staticToken.str === 'static');
       destructible = parseClassMethodFromIdent(lexerFlags, outerLexerFlags, scoop, bindingType, staticToken, exportedNames, exportedBindings, astProp);
     }
@@ -11287,7 +11287,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       starToken = curtok;
       ASSERT_skipToIdentStringNumberSquareOpen('*', lexerFlags);
 
-      if (curtok.type === $IDENT) {
+      if (isIdentToken(curtok.type)) {
         // - `class x {*ident(){}}`
         //              ^
         // - `class x {*ident(){}}`
@@ -11434,7 +11434,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= parseClassMethodComputedKey(lexerFlags, outerLexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
       } else if (isNumberStringToken(curtok.type)) {
         destructible |= parseClassMethodLiteralKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
-      } else if (curtok.type === $IDENT) {
+      } else if (isIdentToken(curtok.type)) {
         destructible |= parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
       } else {
         // Stuff like incompatible modifiers, obj lit syntax, invalid tokens, etc
@@ -11451,7 +11451,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp) {
     ASSERT(parseClassMethodIdentKey.length === arguments.length, 'arg count');
-    ASSERT(curtok.type === $IDENT, 'curtok.type is ident', curtok);
+    ASSERT(isIdentToken(curtok.type), 'curtok.type is ident', curtok);
     ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT(starToken === UNDEF_STAR || starToken.type === $PUNC_STAR, 'gen token');
@@ -11470,7 +11470,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(keyToken !== undefined, 'key is token');
-    ASSERT(keyToken.type === $IDENT, 'key is ident');
+    ASSERT(isIdentToken(keyToken.type), 'key is ident');
 
     AST_setIdent(astProp, keyToken);
 
@@ -11551,7 +11551,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
     ASSERT(!bracketOpenToken || bracketOpenToken.type === $PUNC_BRACKET_OPEN, 'bracketOpenToken should be [', bracketOpenToken);
-    ASSERT(keyToken === undefined || (keyToken.type === $IDENT || isNumberStringToken(keyToken.type)), 'keyToken is a number, string or ident', ''+keyToken);
+    ASSERT(keyToken === undefined || (isIdentToken(keyToken.type) || isNumberStringToken(keyToken.type)), 'keyToken is a number, string or ident', ''+keyToken);
     ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN, 'Should be at the start of the method parameter definition');
 
     verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, true);
@@ -11576,7 +11576,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
                   keyToken;
 
     if (keyToken !== undefined && staticToken !== UNDEF_STATIC) {
-      if (keyToken.type === $IDENT && keyToken.canon === 'prototype') {
+      if (isIdentToken(keyToken.type) && keyToken.canon === 'prototype') {
         THROW('Static class methods can not be called `prototype`');
       }
       else if (
@@ -11598,7 +11598,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // https://tc39.github.io/ecma262/#sec-identifier-names-static-semantics-stringvalue
         // Note: the "constructor" check is determined by the "StringValue" of ident, which is the canonical value
         (
-          keyToken.type === $IDENT &&
+          isIdentToken(keyToken.type) &&
           keyToken.canon === 'constructor' // .canon will have any escapes properly unescaped
         ) ||
         // > LiteralPropertyName: StringLiteral
@@ -11893,7 +11893,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let destructible = MIGHT_DESTRUCT;
     let assignable = initAssignable(); // required for parsing the tail of the arg
-    if (curtok.type === $IDENT) {
+    if (isIdentToken(curtok.type)) {
       // - `[...x];`
       // - `[...x/y];`
       // - `[...x, y];`       // cant destruct (array rest must be last)
@@ -12295,7 +12295,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
-    ASSERT(keyToken === undefined || (keyToken.type === $IDENT || isNumberStringToken(keyToken.type)), 'keyToken is a number, string or ident', ''+keyToken);
+    ASSERT(keyToken === undefined || (isIdentToken(keyToken.type) || isNumberStringToken(keyToken.type)), 'keyToken is a number, string or ident', ''+keyToken);
     ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN);
 
     let parenToken = curtok;
