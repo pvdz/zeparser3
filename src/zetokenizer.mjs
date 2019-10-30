@@ -170,7 +170,7 @@ const $L_ERROR = ++__$leaf;
 
 // Important Idents
 
-const $L_ID_none = ++__$leaf;
+// const $L_ID_none = ++__$leaf;
 const $L_ID_arguments = ++__$leaf;
 const $L_ID_as = ++__$leaf;
 const $L_ID_async = ++__$leaf;
@@ -180,7 +180,7 @@ const $L_ID_case = ++__$leaf;
 const $L_ID_catch = ++__$leaf;
 const $L_ID_class = ++__$leaf;
 const $L_ID_const = ++__$leaf;
-const $L_ID_constructor = ++__$leaf;
+// const $L_ID_constructor = ++__$leaf;
 const $L_ID_continue = ++__$leaf;
 const $L_ID_debugger = ++__$leaf;
 const $L_ID_default = ++__$leaf;
@@ -436,103 +436,99 @@ const $EOF = $L_EOF | $G_OTHER;
 const $ASI = $L_ASI | $G_OTHER;
 const $ERROR = $L_ERROR | $G_OTHER;
 
-const KEYWORD_TRIE = { 97:
-    { 114:
-        { 103:
-            { 117:
-                { 109:
-                    { 101: { 110: { 116: { 115: { hit: $ID_arguments } } } } } } } },
-      115: { 121: { 110: { 99: { hit: $ID_async } } }, hit: $ID_as },
-      119: { 97: { 105: { 116: { hit: $ID_await } } } } },
-  98: { 114: { 101: { 97: { 107: { hit: $ID_break } } } } },
-  99:
-    { 97:
-        { 115: { 101: { hit: $ID_case } },
-          116: { 99: { 104: { hit: $ID_catch } } } },
-      108: { 97: { 115: { 115: { hit: $ID_class } } } },
-      111:
-        { 110:
-            { 115: { 116: { hit: $ID_const }                  },
-              116: { 105: { 110: { 117: { 101: { hit: $ID_continue } } } } } } } },
-  100:
-    { 101:
-        { 98:
-            { 117: { 103: { 103: { 101: { 114: { hit: $ID_debugger } } } } } },
-          102: { 97: { 117: { 108: { 116: { hit: $ID_default } } } } },
-          108: { 101: { 116: { 101: { hit: $ID_delete } } } } },
-      111: { hit: $ID_do } },
-  101:
-    { 108: { 115: { 101: { hit: $ID_else } } },
-      110: { 117: { 109: { hit: $ID_enum } } },
-      118: { 97: { 108: { hit: $ID_eval } } },
-      120:
-        { 112: { 111: { 114: { 116: { hit: $ID_export } } } },
-          116: { 101: { 110: { 100: { 115: { hit: $ID_extends } } } } } } },
-  102:
-    { 97: { 108: { 115: { 101: { hit: $ID_false } } } },
-      105:
-        { 110: { 97: { 108: { 108: { 121: { hit: $ID_finally } } } } } },
-      111: { 114: { hit: $ID_for } },
-      114: { 111: { 109: { hit: $ID_from } } },
-      117:
-        { 110:
-            { 99: { 116: { 105: { 111: { 110: { hit: $ID_function } } } } } } } },
-  103: { 101: { 116: { hit: $ID_get } } },
-  105:
-    { 102: { hit: $ID_if },
-      109:
-        { 112:
-            { 108:
-                { 101:
-                    { 109:
-                        { 101: { 110: { 116: { 115: { hit: $ID_implements } } } } } } },
-              111: { 114: { 116: { hit: $ID_import } } } } },
-      110:
-        { 115:
-            { 116:
-                { 97:
-                    { 110:
-                        { 99: { 101: { 111: { 102: { hit: $ID_instanceof } } } } } } } },
-          116:
-            { 101:
-                { 114: { 102: { 97: { 99: { 101: { hit: $ID_interface } } } } } } },
+const KEYWORD_TRIE = { 0:
+    { 17:
+        { 6:
+            { 20:
+                { 12: { 4: { 13: { 19: { 18: { hit: $ID_arguments } } } } } } } },
+      18: { 24: { 13: { 2: { hit: $ID_async } } }, hit: $ID_as },
+      22: { 0: { 8: { 19: { hit: $ID_await } } } } },
+  1: { 17: { 4: { 0: { 10: { hit: $ID_break } } } } },
+  2:
+    { 0:
+        { 18: { 4: { hit: $ID_case } },
+          19: { 2: { 7: { hit: $ID_catch } } } },
+      11: { 0: { 18: { 18: { hit: $ID_class } } } },
+      14:
+        { 13:
+            { 18: { 19: { hit: $ID_const } },
+              19: { 8: { 13: { 20: { 4: { hit: $ID_continue } } } } } } } },
+  3:
+    { 4:
+        { 1:
+            { 20: { 6: { 6: { 4: { 17: { hit: $ID_debugger } } } } } },
+          5: { 0: { 20: { 11: { 19: { hit: $ID_default } } } } },
+          11: { 4: { 19: { 4: { hit: $ID_delete } } } } },
+      14: { hit: $ID_do } },
+  4:
+    { 11: { 18: { 4: { hit: $ID_else } } },
+      13: { 20: { 12: { hit: $ID_enum } } },
+      21: { 0: { 11: { hit: $ID_eval } } },
+      23:
+        { 15: { 14: { 17: { 19: { hit: $ID_export } } } },
+          19: { 4: { 13: { 3: { 18: { hit: $ID_extends } } } } } } },
+  5:
+    { 0: { 11: { 18: { 4: { hit: $ID_false } } } },
+      8:
+        { 13: { 0: { 11: { 11: { 24: { hit: $ID_finally } } } } } },
+      14: { 17: { hit: $ID_for } },
+      17: { 14: { 12: { hit: $ID_from } } },
+      20:
+        { 13:
+            { 2: { 19: { 8: { 14: { 13: { hit: $ID_function } } } } } } } },
+  6: { 4: { 19: { hit: $ID_get } } },
+  8:
+    { 5: { hit: $ID_if },
+      12:
+        { 15:
+            { 11:
+                { 4:
+                    { 12: { 4: { 13: { 19: { 18: { hit: $ID_implements } } } } } } },
+              14: { 17: { 19: { hit: $ID_import } } } } },
+      13:
+        { 18:
+            { 19:
+                { 0:
+                    { 13: { 2: { 4: { 14: { 5: { hit: $ID_instanceof } } } } } } } },
+          19:
+            { 4:
+                { 17: { 5: { 0: { 2: { 4: { hit: $ID_interface } } } } } } },
           hit: $ID_in } },
-  108: { 101: { 116: { hit: $ID_let } } },
-  110: {
-    101: { 119: { hit: $ID_new } },
-    117: { 108: { 108: { hit: $ID_null }, }, },
-  },
-  111: { 102: { hit: $ID_of } },
-  112:
-    { 97:
-        { 99: { 107: { 97: { 103: { 101: { hit: $ID_package } } } } } },
-      114:
-        { 105: { 118: { 97: { 116: { 101: { hit: $ID_private } } } } },
-          111:
-            { 116:
-                { 101: { 99: { 116: { 101: { 100: { hit: $ID_protected } } } } } } } },
-      117: { 98: { 108: { 105: { 99: { hit: $ID_public } } } } } },
-  114:
-    { 101: { 116: { 117: { 114: { 110: { hit: $ID_return } } } } } },
-  115:
-    { 101: { 116: { hit: $ID_set } },
-      116: { 97: { 116: { 105: { 99: { hit: $ID_static } } } } },
-      117: { 112: { 101: { 114: { hit: $ID_super } } } },
-      119: { 105: { 116: { 99: { 104: { hit: $ID_switch } } } } } },
-  116:
-    { 97: { 114: { 103: { 101: { 116: { hit: $ID_target } } } } },
-      104:
-        { 105: { 115: { hit: $ID_this } },
-          114: { 111: { 119: { hit: $ID_throw } } } },
-      114: { 117: { 101: { hit: $ID_true } }, 121: { hit: $ID_try } },
-      121: { 112: { 101: { 111: { 102: { hit: $ID_typeof } } } } } },
-  118:
-    { 97: { 114: { hit: $ID_var } },
-      111: { 105: { 100: { hit: $ID_void } } } },
-  119:
-    { 104: { 105: { 108: { 101: { hit: $ID_while } } } },
-      105: { 116: { 104: { hit: $ID_with } } } },
-  121: { 105: { 101: { 108: { 100: { hit: $ID_yield } } } } } };
+  11: { 4: { 19: { hit: $ID_let } } },
+  13:
+    { 4: { 22: { hit: $ID_new } },
+      20: { 11: { 11: { hit: $ID_null } } } },
+  14: { 5: { hit: $ID_of } },
+  15:
+    { 0:
+        { 2: { 10: { 0: { 6: { 4: { hit: $ID_package } } } } } },
+      17:
+        { 8: { 21: { 0: { 19: { 4: { hit: $ID_private } } } } },
+          14:
+            { 19:
+                { 4: { 2: { 19: { 4: { 3: { hit: $ID_protected } } } } } } } },
+      20: { 1: { 11: { 8: { 2: { hit: $ID_public } } } } } },
+  17:
+    { 4: { 19: { 20: { 17: { 13: { hit: $ID_return } } } } } },
+  18:
+    { 4: { 19: { hit: $ID_set } },
+      19: { 0: { 19: { 8: { 2: { hit: $ID_static } } } } },
+      20: { 15: { 4: { 17: { hit: $ID_super } } } },
+      22: { 8: { 19: { 2: { 7: { hit: $ID_switch } } } } } },
+  19:
+    { 0: { 17: { 6: { 4: { 19: { hit: $ID_target } } } } },
+      7:
+        { 8: { 18: { hit: $ID_this } },
+          17: { 14: { 22: { hit: $ID_throw } } } },
+      17: { 20: { 4: { hit: $ID_true } }, 24: { hit: $ID_try } },
+      24: { 15: { 4: { 14: { 5: { hit: $ID_typeof } } } } } },
+  21:
+    { 0: { 17: { hit: $ID_var } },
+      14: { 8: { 3: { hit: $ID_void } } } },
+  22:
+    { 7: { 8: { 11: { 4: { hit: $ID_while } } } },
+      8: { 19: { 7: { hit: $ID_with } } } },
+  24: { 8: { 4: { 11: { 3: { hit: $ID_yield } } } } } };
 
 function isWhiteToken(type) {
   return (type & $G_WHITE) === $G_WHITE;
@@ -2685,7 +2681,7 @@ function ZeTokenizer(
     // - next char is not a start_key
     // - next char is not found in the trie
 
-    let trie = KEYWORD_TRIE[c];
+    let trie = KEYWORD_TRIE[c - $$A_61];
     let start = pointer - 1; // c was peekSkipped
     let n = start + 1;
     if (trie === undefined) return parseIdentifierRest(slice(start, n));
@@ -2694,7 +2690,7 @@ function ZeTokenizer(
       let d = input.charCodeAt(n++);
       if (d < $$A_61 || d > $$Z_7A) return endOfPotentialKeyword(trie, d, n, start);
       // Next step in trie
-      trie = trie[d];
+      trie = trie[d - $$A_61];
       if (trie === undefined) return parseIdentRestNotKeyword(d, n, start);
     } while (true);
     ASSERT(false, 'unreachable');
