@@ -751,6 +751,7 @@ const LF_NO_ASI = 1 << ++__$lf_flag; // can you asi if you must? used for async.
 const LF_STRICT_MODE = 1 << ++__$lf_flag;
 const LF_SUPER_CALL = 1 << ++__$lf_flag; // can call `super()`
 const LF_SUPER_PROP = 1 << ++__$lf_flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
+const LF_NOT_KEYWORD = 1 << ++__$lf_flag; // skip keyword check for next ident parse (like member expression property)
 ASSERT(__$lf_flag < 32, 'cannot use more than 32 flags');
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
@@ -1006,6 +1007,10 @@ function L(flags) {
   if (flags & LF_SUPER_PROP) {
     flags ^= LF_SUPER_PROP;
     s.push('LF_SUPER_PROP');
+  }
+  if (flags & LF_NOT_KEYWORD) {
+    flags ^= LF_NOT_KEYWORD;
+    s.push('LF_NOT_KEYWORD');
   }
   if (flags) {
     throw new Error('UNKNOWN_FLAGS: ' + flags.toString(2) + ' (was: ' + bak.toString(2) + '), so far: [' + s.join('|') + ']');
@@ -1396,6 +1401,7 @@ function ZeTokenizer(
       case START_ID:
         return parseIdentifierRest(String.fromCharCode(c));
       case START_KEY:
+        if ((lexerFlags & LF_NOT_KEYWORD) === LF_NOT_KEYWORD) return parseIdentifierRest(String.fromCharCode(c));
         return parsePotentialKeyword(c);
       case START_NL_SOLO:
         return parseNewlineSolo();
@@ -6117,6 +6123,7 @@ export {
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,
+  LF_NOT_KEYWORD,
   INITIAL_LEXER_FLAGS,
   L,
 

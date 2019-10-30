@@ -309,6 +309,7 @@ import ZeTokenizer, {
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,
+  LF_NOT_KEYWORD,
   INITIAL_LEXER_FLAGS,
 
   RETURN_ANY_TOKENS,
@@ -8203,7 +8204,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseValueTailDotProperty(lexerFlags, valueFirstToken, assignable, isNewArg, astProp) {
     // parseMemberExpression dot
-    ASSERT_skipToIdentOrDie('.', lexerFlags);
+
+    ASSERT_skipToIdentOrDie('.', lexerFlags | LF_NOT_KEYWORD);
     let identToken = curtok;
     ASSERT_skipDiv($G_IDENT, lexerFlags); // x.y / z is division
     AST_setNode(astProp, {

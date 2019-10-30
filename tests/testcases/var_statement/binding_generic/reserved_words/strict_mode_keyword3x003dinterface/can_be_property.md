@@ -52,7 +52,7 @@ ast: {
 }
 
 tokens (5x):
-       IDENT PUNC_DOT ID_interface ASI
+       IDENT PUNC_DOT IDENT ASI
 `````
 
 ### Strict mode
