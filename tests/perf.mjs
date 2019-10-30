@@ -64,6 +64,9 @@ const RESET = '\x1b[0m';
     // A million corner cases
     await read(data['es5.js1k']),
 
+    // Minified tightly controlled es3 build output (from a snapshot that's 3+ years old)
+    await read(data['es3.fb.js']),
+
     // From babel repo
     await read(data['es6.material-ui-core']),
     await read(data['es6.angular-compiler']),
