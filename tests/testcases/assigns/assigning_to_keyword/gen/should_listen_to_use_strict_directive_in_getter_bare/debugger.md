@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNC_EQ : nl=N ws=N pos=50:51 loc=13:4 curc=61 `=`#}
+  Unable to ASI, token: {# PUNC_EQ : nl=N ws=N pos=50:51 loc=13:4 `=`#}
 
 foo = {
   get x(){

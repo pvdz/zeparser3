@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# ID_while : nl=N ws=N pos=13:18 loc=13:1 curc=119 `while`#}
+  Unable to ASI, token: {# ID_while : nl=N ws=N pos=13:18 loc=13:1 `while`#}
 
 do a + b / c while (x);
              ^------- error

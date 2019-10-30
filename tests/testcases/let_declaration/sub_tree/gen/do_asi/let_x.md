@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N ws=N pos=7:8 loc=7:1 curc=120 `x`#}
+  Unable to ASI, token: {# IDENT : nl=N ws=N pos=7:8 loc=7:1 `x`#}
 
 do let x
        ^------- error

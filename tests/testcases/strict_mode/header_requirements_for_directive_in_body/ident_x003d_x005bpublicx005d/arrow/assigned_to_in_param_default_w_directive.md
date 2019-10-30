@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNC_EQ_GT : nl=N ws=N pos=15:17 loc=15:1 curc=61 `=>`#}
+  Unable to ASI, token: {# PUNC_EQ_GT : nl=N ws=N pos=15:17 loc=15:1 `=>`#}
 
 f(x=public=10) => { "use strict"; }
                ^------- error

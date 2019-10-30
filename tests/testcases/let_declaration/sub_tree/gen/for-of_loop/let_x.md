@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N ws=N pos=17:18 loc=17:1 curc=120 `x`#}
+  Unable to ASI, token: {# IDENT : nl=N ws=N pos=17:18 loc=17:1 `x`#}
 
 for (a of b) let x
                  ^------- error

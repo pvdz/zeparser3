@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Expected identifier, or array/object destructuring, next token is: {# PUNC_EQ : nl=N ws=N pos=39:40 loc=8:3 curc=61 `=`#}
+  Expected identifier, or array/object destructuring, next token is: {# PUNC_EQ : nl=N ws=N pos=39:40 loc=8:3 `=`#}
 
 function f() {
   "use strict";

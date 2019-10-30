@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNC_EQ : nl=N ws=N pos=26:27 loc=11:2 curc=61 `=`#}
+  Unable to ASI, token: {# PUNC_EQ : nl=N ws=N pos=26:27 loc=11:2 `=`#}
 
 function *f(){
   debugger = 1;

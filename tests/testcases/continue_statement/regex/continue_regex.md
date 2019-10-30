@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# REGEXN : nl=N ws=N pos=21:24 loc=21:1 curc=47 `/x/`#}
+  Unable to ASI, token: {# REGEXN : nl=N ws=N pos=21:24 loc=21:1 `/x/`#}
 
 for (x of 3) continue/x/
                      ^------- error

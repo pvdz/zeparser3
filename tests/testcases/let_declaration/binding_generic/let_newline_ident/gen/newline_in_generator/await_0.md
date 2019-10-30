@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# NUMBER_DEC : nl=N ws=N pos=30:31 loc=8:3 curc=48 `0`#}
+  Unable to ASI, token: {# NUMBER_DEC : nl=N ws=N pos=30:31 loc=8:3 `0`#}
 
 function *f() {
   let

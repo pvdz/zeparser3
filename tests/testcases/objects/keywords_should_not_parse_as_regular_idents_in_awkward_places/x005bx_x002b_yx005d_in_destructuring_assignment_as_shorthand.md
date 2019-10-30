@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unexpected character after object literal property name {# PUNC_PLUS : nl=N ws=N pos=4:5 loc=4:1 curc=43 `+`#}
+  Unexpected character after object literal property name {# PUNC_PLUS : nl=N ws=N pos=4:5 loc=4:1 `+`#}
 
 ({x + y} = x);
     ^------- error

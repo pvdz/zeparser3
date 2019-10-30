@@ -1283,12 +1283,11 @@ function ZeTokenizer(
       wasComment = false;
 
       if (eof()) {
-        token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN, 0);
+        token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN);
         finished = true;
         return returnSolidToken(token);
       }
 
-      let cstart = _readCache();
       let start = startForError = pointer; // TODO: see if startForError makes a dent at all
       let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
 
@@ -1297,26 +1296,26 @@ function ZeTokenizer(
 
       // Non-whitespace tokens always get returned
       if (!wasWhite) {
-        token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
+        token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite);
         return returnSolidToken(token);
       }
 
       // Babel parity demands comments to be returned... Not sure whether the complexity (over checking $white) is worth
       if (wasComment) {
         if (returnTokens === RETURN_COMMENT_TOKENS) {
-          token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
+          token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite);
           returnCommentToken(token);
         }
       }
 
       // This is a whitespace token (which may be a comment) that is not yet collected.
       if (collectTokens === COLLECT_TOKENS_ALL) {
-        let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
+        let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite);
         tokenStorage.push(token);
       }
 
       if (returnTokens === RETURN_ANY_TOKENS) {
-        return createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
+        return createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite);
       }
 
       // At this point it has to be some form of whitespace and we're clearly not returning it so we can
@@ -1465,7 +1464,7 @@ function ZeTokenizer(
   }
 
   function addAsi() {
-    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken, SOLID_TOKEN, $$SEMI_3B);
+    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken, SOLID_TOKEN);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) {
@@ -1476,30 +1475,29 @@ function ZeTokenizer(
     prevTokenSolid = true;
   }
 
-  function createToken(type, start, stop, column, line, nl, ws, c) {
-    ASSERT(createToken.length === arguments.length);
+  function createToken(type, start, stop, column, line, nl, ws) {
+    ASSERT(createToken.length === arguments.length, 'arg count');
     ASSERT(
       ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext())
       , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
-    ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
     if (isStringToken(type)) {
       let len = (stop - start) - 2; // 2=quotes
       if (lastCanonizedString.length !== len) {
         // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
         // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
-        return _createToken(type, start, stop, column, line, nl, ws, c, slice(start + 1, stop - 1), lastCanonizedString);
+        return _createToken(type, start, stop, column, line, nl, ws, slice(start + 1, stop - 1), lastCanonizedString);
       }
-      return _createToken(type, start, stop, column, line, nl, ws, c, lastCanonizedString, lastCanonizedString);
+      return _createToken(type, start, stop, column, line, nl, ws, lastCanonizedString, lastCanonizedString);
     }
     if (isIdentToken(type)) {
       let len = stop - start;
       if (lastParsedIdent.length !== len) {
         // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
         // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
-        return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), lastParsedIdent);
+        return _createToken(type, start, stop, column, line, nl, ws, slice(start, stop), lastParsedIdent);
       }
-      return _createToken(type, start, stop, column, line, nl, ws, c, lastParsedIdent, lastParsedIdent);
+      return _createToken(type, start, stop, column, line, nl, ws, lastParsedIdent, lastParsedIdent);
     }
 
     if (isTickToken(type)) {
@@ -1509,13 +1507,14 @@ function ZeTokenizer(
       if (lastCanonizedString.length !== len) {
         // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
         // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
-        return _createToken(type, start, stop, column, line, nl, ws, c, slice(start + 1, stop - closeWrapperLen), lastCanonizedString);
+        return _createToken(type, start, stop, column, line, nl, ws, slice(start + 1, stop - closeWrapperLen), lastCanonizedString);
       }
-      return _createToken(type, start, stop, column, line, nl, ws, c, lastCanonizedString, lastCanonizedString);
+      return _createToken(type, start, stop, column, line, nl, ws, lastCanonizedString, lastCanonizedString);
     }
-    return _createToken(type, start, stop, column, line, nl, ws, c, slice(start, stop), '');
+    return _createToken(type, start, stop, column, line, nl, ws, slice(start, stop), '');
   }
-  function _createToken(type, start, stop, column, line, nl, ws, c, str, canon) {
+  function _createToken(type, start, stop, column, line, nl, ws, str, canon) {
+    ASSERT(_createToken.length === arguments.length, 'arg count');
 
     let token = {
       // <SCRUB DEV>
@@ -1528,7 +1527,6 @@ function ZeTokenizer(
       stop, // start of next token
       column, // of first char of token
       line, // of first char of token
-      c,
       str,
       // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
       // The ReservedWord definitions are specified as literal sequences of specific SourceCharacter elements.
@@ -1537,7 +1535,7 @@ function ZeTokenizer(
 
       // <SCRUB DEV>
       toString() {
-        return `{# ${toktypeToString(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} pos=${start}:${stop} loc=${column}:${line} curc=${c} \`${str}\`${canon&&canon!==str?' (canonical=`' + canon + '`)':''}#}`;
+        return `{# ${toktypeToString(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} pos=${start}:${stop} loc=${column}:${line} \`${str}\`${canon&&canon!==str?' (canonical=`' + canon + '`)':''}#}`;
       },
       // </SCRUB DEV>
     };

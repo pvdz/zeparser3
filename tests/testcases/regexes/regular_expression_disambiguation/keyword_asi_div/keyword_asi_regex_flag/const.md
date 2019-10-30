@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Expected identifier, or array/object destructuring, next token is: {# PUNC_DIV : nl=Y ws=N pos=6:7 loc=0:2 curc=47 `/`#}
+  Expected identifier, or array/object destructuring, next token is: {# PUNC_DIV : nl=Y ws=N pos=6:7 loc=0:2 `/`#}
 
 const
 /x/g

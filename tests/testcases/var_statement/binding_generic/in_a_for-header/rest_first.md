@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Expected identifier, or array/object destructuring, next token is: {# PUNC_DOT_DOT_DOT : nl=N ws=N pos=9:12 loc=9:1 curc=46 `...`#}
+  Expected identifier, or array/object destructuring, next token is: {# PUNC_DOT_DOT_DOT : nl=N ws=N pos=9:12 loc=9:1 `...`#}
 
 for (var ...a = 1;;);
          ^------- error

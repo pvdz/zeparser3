@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# ID_while : nl=N ws=N pos=44:49 loc=2:3 curc=119 `while`#}
+  Unable to ASI, token: {# ID_while : nl=N ws=N pos=44:49 loc=2:3 `while`#}
 
 do throw function (v, h) {
   "use strict"

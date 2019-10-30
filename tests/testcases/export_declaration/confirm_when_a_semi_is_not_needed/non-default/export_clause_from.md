@@ -44,7 +44,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N ws=N pos=23:26 loc=23:1 curc=102 `foo`#}
+  Unable to ASI, token: {# IDENT : nl=N ws=N pos=23:26 loc=23:1 `foo`#}
 
 export {x, y} from "x" foo
                        ^------- error

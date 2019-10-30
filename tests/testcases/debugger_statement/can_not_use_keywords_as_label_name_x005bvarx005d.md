@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Expected identifier, or array/object destructuring, next token is: {# PUNC_COLON : nl=N ws=N pos=3:4 loc=3:1 curc=58 `:`#}
+  Expected identifier, or array/object destructuring, next token is: {# PUNC_COLON : nl=N ws=N pos=3:4 loc=3:1 `:`#}
 
 var: x;
    ^------- error

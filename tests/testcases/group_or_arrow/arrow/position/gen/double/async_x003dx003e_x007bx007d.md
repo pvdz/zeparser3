@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# ID_async : nl=N ws=N pos=12:17 loc=12:1 curc=97 `async`#}
+  Unable to ASI, token: {# ID_async : nl=N ws=N pos=12:17 loc=12:1 `async`#}
 
 async => {} async => {}
             ^------- error

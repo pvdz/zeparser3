@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNC_CURLY_OPEN : nl=N ws=N pos=19:20 loc=9:2 curc=123 `{`#}
+  Unable to ASI, token: {# PUNC_CURLY_OPEN : nl=N ws=N pos=19:20 loc=9:2 `{`#}
 
 if (a) b;
 else let {x};

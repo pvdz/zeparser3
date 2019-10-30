@@ -1561,7 +1561,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _skip(lexerFlags | LF_FOR_REGEX);
 
     ASSERT(typeof curtok.type === 'number' && curtok.type >= 0);
-    ASSERT(typeof curtok.c === 'number' && curtok.c >= 0 && curtok.c <= 0x10ffff, 'valid c', curtok);
   }
   function skipDiv(lexerFlags) {
     // skip a token and if the next token starts with a forward slash, search for a division punctuator
@@ -1572,7 +1571,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _skip(lexerFlags);
 
     ASSERT(typeof curtok.type === 'number' && curtok.type >= 0);
-    ASSERT(typeof curtok.c === 'number' && curtok.c >= 0 && curtok.c <= 0x10ffff, 'valid c', curtok);
   }
   function skipAny(lexerFlags) {
     // skip a token and if the next token starts with a forward slash, search for a division punctuator
@@ -1583,7 +1581,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _skip(lexerFlags);
 
     ASSERT(typeof curtok.type === 'number' && curtok.type >= 0);
-    ASSERT(typeof curtok.c === 'number' && curtok.c >= 0 && curtok.c <= 0x10ffff, 'valid c', curtok);
     ASSERT_VALID(curtok.type !== $PUNC_DIV && !isRegexToken(curtok.type), 'this function should not be called if the parsed token could possibly start with a forward slash (div/regex)');
   }
   function _skip(lexerFlags) {
@@ -2824,17 +2821,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // > where the first non-whitespace, non-comment code point after a LineTerminator is U+002F (SOLIDUS) and the
     // > syntactic context allows division or division-assignment, no semicolon is inserted at the LineTerminator.
 
-    // <SCRUB ASSERTS>
-    if (curtok.c === $$FWDSLASH_2F) {
-      // [v]: `x \n /foo`                // NO ASI because it can be a division (x/foo)
-      // [x]: `x \n /foo/`               // NO ASI because the first slash can be a division. Misisng value after second
-      // [v]: `x \n /foo/g`              // NO ASI because it can be a division (x/foo/g)
-      // [v]: `debugger \n /foo/`        // ASI because it cannot be a division (regex /foo/)
-      // [v]: `debugger \n /foo/g`       // ASI because it cannot be a division (regex /foo/g)
-      ASSERT_VALID(ASSERT_ASI_REGEX_NEXT, 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
-      ASSERT_ASI_REGEX_NEXT = false;
-    }
-    // </SCRUB ASSERTS>
+    // Make sure contexts where a token may start with a forward slash are explicit in whether that's a div or a regex
+    // [v]: `x \n /foo`                // NO ASI because it can be a division (x/foo)
+    // [x]: `x \n /foo/`               // NO ASI because the first slash can be a division. Misisng value after second
+    // [v]: `x \n /foo/g`              // NO ASI because it can be a division (x/foo/g)
+    // [v]: `debugger \n /foo/`        // ASI because it cannot be a division (regex /foo/)
+    // [v]: `debugger \n /foo/g`       // ASI because it cannot be a division (regex /foo/g)
+    ASSERT_VALID(curtok.str.charCodeAt(0) !== $$FWDSLASH_2F || ASSERT_ASI_REGEX_NEXT || (ASSERT_ASI_REGEX_NEXT = false), 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
 
     if (curtok.type === $PUNC_SEMI) {
       ASSERT_skipToStatementStart(';', lexerFlags);
@@ -4943,7 +4936,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [v]: `for ({eval = 0} ;;);`     // No writing to eval going on here
       destructible = sansFlag(destructible, MUST_DESTRUCT);
     }
-    let assignable = parsePatternTailInForHeader(lexerFlags, curlyToken, $$CURLY_R_7D, ASSIGNABLE_UNDETERMINED, destructible, awaitable, astProp);
+    let assignable = parsePatternTailInForHeader(lexerFlags, curlyToken, $PUNC_CURLY_CLOSE, ASSIGNABLE_UNDETERMINED, destructible, awaitable, astProp);
     return parseForHeaderRest(lexerFlags, forToken, curlyToken, awaitable, assignable, true, astProp);
   }
   function parseForHeaderBracket(lexerFlags, forToken, awaitable, astProp) {
@@ -4975,7 +4968,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `for ([{x=y}]=x in x) ;`
       destructible = sansFlag(destructible, MUST_DESTRUCT);
     }
-    let assignable = parsePatternTailInForHeader(lexerFlags, squareToken, $$SQUARE_R_5D, ASSIGNABLE_UNDETERMINED, destructible, awaitable, astProp);
+    let assignable = parsePatternTailInForHeader(lexerFlags, squareToken, $PUNC_BRACKET_CLOSE, ASSIGNABLE_UNDETERMINED, destructible, awaitable, astProp);
     return parseForHeaderRest(lexerFlags, forToken, squareToken, awaitable, assignable, true, astProp);
   }
   function parseForHeaderOther(lexerFlags, forToken, awaitable, astProp) {
@@ -5183,7 +5176,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'update');
     }
   }
-  function parsePatternTailInForHeader(lexerFlags, patternStartToken, patternLastChar, assignable, destructible, awaitable, astProp) {
+  function parsePatternTailInForHeader(lexerFlags, patternStartToken, closingPuncType, assignable, destructible, awaitable, astProp) {
     ASSERT(parsePatternTailInForHeader.length === arguments.length, 'arg count');
 
     assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
@@ -5304,7 +5297,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // assignment, so all we have to do now is continue parsing a regular value and assert that this must be a
       // regular for-loop, so the value must be followed by a semi. Hence, we don't care about assignability here.
       // We also don't care about the yield/await piggies because we are in a for-header, never a function header.
-      parseOptionalDestructibleRestOfExpression(lexerFlags, patternStartToken, BINDING_TYPE_NONE, assignable, destructible, patternLastChar, astProp);
+      parseOptionalDestructibleRestOfExpression(lexerFlags, patternStartToken, BINDING_TYPE_NONE, assignable, destructible, closingPuncType, astProp);
 
       // [v]: `for ([] + x;;);`
       //                  ^
@@ -6487,7 +6480,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curtok.type === $PUNC_DOT_DOT_DOT) {
       if (bindingType !== BINDING_TYPE_ARG) THROW('Rest is not allowed as toplevel for var/let/const declaration binding');
-      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
+      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $PUNC_PAREN_CLOSE, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
       verifyDestructibleForBinding(subDestruct, bindingType);
       paramSimple = PARAM_WAS_COMPLEX;
     }
@@ -7354,7 +7347,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(startToken === curtok, 'anything that consumed something should return in that branch ...');
     if (maybe === PARSE_VALUE_MUST) {
       // Slow always-error path
-      if (curtok.c === $$DOT_2E) {
+      if (curtok.str.charCodeAt(0) === $$DOT_2E) {
         // basically an expression that starts with a leading (single) dot, only legal case is `new`
         // TODO: (random but kind of relevant here): add tests that put `.5` and `...` in any place here a leading-dot-token is expected
         // Note that certain cases should not reach this point:
@@ -8553,7 +8546,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.type === $PUNC_BRACKET_OPEN) {
         THROW('Block body arrows can not be immediately accessed without a group');
       }
-      if (curtok.c === $$TICK_60) {
+      if (isTemplateStart(curtok.type)) {
         THROW('Block body arrows can not be immediately tagged without a group');
       }
       if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (curtok.nl === false || curtok.type === $PUNC_DIV)) {
@@ -8748,7 +8741,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             foundSingleIdentWrap = true; // move on to the arrow
           }
 
-          // if curtok.c is a comma then the group is not assignable but that will fail through the toplevelComma flag
+          // if curtok is a comma then the group is not assignable but that will fail through the toplevelComma flag
           // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
           // If the group is not assignable then it can't become an arrow and we can skip a few related cases
           // If the arg name is eval or arguments and sloppy mode, then its assignable but not "simple"
@@ -9394,7 +9387,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - async(...{destruct}) => x
     // - async(...<expr>);            // :(
 
-    let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, BINDING_TYPE_ARG, asyncToken, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+    let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $PUNC_PAREN_CLOSE, BINDING_TYPE_ARG, asyncToken, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
     if (asyncToken === UNDEF_ASYNC) {
       if (hasAllFlags(subDestruct, CANT_DESTRUCT) || curtok.type === $PUNC_COMMA) {
         THROW('The ... argument must be destructible in an arrow header, found something that was not destructible');
@@ -9599,7 +9592,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           // This value is not destructible on its own as there is no ident+more value body that is destructible
           // The optional tail may change this if it is a member expression
-          let nowDestruct = parseOptionalDestructibleRestOfExpression(lexerFlags, identToken, bindingType, leftAssignable, CANT_DESTRUCT, $$SQUARE_R_5D, astProp);
+          let nowDestruct = parseOptionalDestructibleRestOfExpression(lexerFlags, identToken, bindingType, leftAssignable, CANT_DESTRUCT, $PUNC_BRACKET_CLOSE, astProp);
           // We can ignore assignability here because the await/yield flags from the last call will be inside the destruct
           destructible |= nowDestruct;
         }
@@ -9619,7 +9612,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `[{}.foo] = x`
         let objOpenToken = curtok;
         let objDestructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, astProp);
-        destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, objOpenToken, bindingType, hasAllFlags(objDestructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, objDestructible, $$SQUARE_R_5D, astProp);
+        destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, objOpenToken, bindingType, hasAllFlags(objDestructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, objDestructible, $PUNC_BRACKET_CLOSE, astProp);
       }
       else if (curtok.type === $PUNC_BRACKET_OPEN) {
         // - [[]]
@@ -9637,7 +9630,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // note: grouped object/array literals are never assignable
         let arrOpenToken = curtok;
         let arrDestructible = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, astProp);
-        destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, arrOpenToken, bindingType, hasAllFlags(arrDestructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, arrDestructible, $$SQUARE_R_5D, astProp);
+        destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, arrOpenToken, bindingType, hasAllFlags(arrDestructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, arrDestructible, $PUNC_BRACKET_CLOSE, astProp);
       }
       else if (curtok.type === $PUNC_DOT_DOT_DOT) {
         // TODO: > It is a Syntax Error if DestructuringAssignmentTarget is an ArrayLiteral or an ObjectLiteral.
@@ -9665,7 +9658,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `[...(x), y]`                (ok)
         // - `[...(x), y] = z`            (bad)
 
-        let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$SQUARE_R_5D, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
+        let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $PUNC_BRACKET_CLOSE, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
         destructible |= subDestruct;
         if (curtok.type !== $PUNC_COMMA && curtok.type !== $PUNC_BRACKET_CLOSE) {
           THROW('Encountered unexpected token after parsing spread/rest argument ');
@@ -10042,7 +10035,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({...x.y} = z) => z        (bad)
       // - (z = {...x.y}) => z        (ok)
       // - (z = {...x.y} = z) => z    (ok)
-      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$CURLY_R_7D, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
+      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $PUNC_CURLY_CLOSE, bindingType, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
       ASSERT(typeof subDestruct === 'number', 'should be number');
       destructible |= subDestruct;
       ASSERT(curtok.type === $EOF || (curtok.type !== $PUNC_COMMA || hasAllFlags(subDestruct, CANT_DESTRUCT)), 'if comma then cannot destruct, should be dealt with in function');
@@ -10490,7 +10483,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({key: [x].foo})`
       let arrStartToken = curtok;
       let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
-      destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, arrStartToken, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$CURLY_R_7D, 'value');
+      destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, arrStartToken, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $PUNC_CURLY_CLOSE, 'value');
     }
     else if (curtok.type === $PUNC_CURLY_OPEN) {
       // - `({ident: {})`
@@ -10507,7 +10500,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({key: {x}.foo})`
       let objStartToken = curtok;
       let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
-      destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, objStartToken, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$CURLY_R_7D, 'value');
+      destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, objStartToken, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $PUNC_CURLY_CLOSE, 'value');
     }
     else {
       // - `{x: 15}`
@@ -10531,7 +10524,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else {
         destructible |= CANT_DESTRUCT;
       }
-      destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, valueFirstToken, bindingType, nowAssignable, nowDestruct, $$CURLY_R_7D, 'value');
+      destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, valueFirstToken, bindingType, nowAssignable, nowDestruct, $PUNC_CURLY_CLOSE, 'value');
     }
 
     ASSERT(curtok.type !== $PUNC_EQ, 'assignments should be parsed as part of the rhs expression');
@@ -11752,15 +11745,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('This binding can not be used in function parameters because it is not destructible');
     }
   }
-  function parseOptionalDestructibleRestOfExpression(lexerFlags, valueStartToken, bindingType, assignable, destructible, closingCharOrd, astProp) {
+  function parseOptionalDestructibleRestOfExpression(lexerFlags, valueStartToken, bindingType, assignable, destructible, closingPuncType, astProp) {
     ASSERT(parseOptionalDestructibleRestOfExpression.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astProp str', astProp);
     ASSERT(typeof assignable === 'number', 'assignable num', assignable);
     ASSERT(typeof destructible === 'number', 'destructible num', destructible);
-    ASSERT([$$PAREN_R_29,$$SQUARE_R_5D,$$CURLY_R_7D].includes(closingCharOrd), 'closingCharOrd enum', closingCharOrd);
+    ASSERT([$PUNC_PAREN_CLOSE, $PUNC_CURLY_CLOSE, $PUNC_BRACKET_CLOSE].includes(closingPuncType), 'closingPuncType enum', closingPuncType);
     ASSERT_BINDING_TYPE(bindingType);
 
-    if (curtok.type === $PUNC_COMMA || curtok.c === closingCharOrd) {
+    if (curtok.type === $PUNC_COMMA || curtok.type === closingPuncType) {
       // this means that the value itself had no tail and is destructible as long as it is assignable
       if (notAssignable(assignable)) destructible |= CANT_DESTRUCT;
     } else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
@@ -11782,7 +11775,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       let firstOpNotAssign = curtok.type !== $PUNC_EQ;
-      if (curtok.type !== $PUNC_COMMA && curtok.c !== closingCharOrd) {
+      if (curtok.type !== $PUNC_COMMA && curtok.type !== closingPuncType) {
         // From here on out `assignable` is only used to track yield/await state for fringe cases
         assignable |= parseExpressionFromOp(lexerFlags, valueStartToken, assignable, astProp);
         if (firstOpNotAssign) {
@@ -11823,7 +11816,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `{ (x = [yield y]) }`
     return copyPiggies(destructible, assignable);
   }
-  function parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, asyncToken, exportedNames, exportedBindings, astProp) {
+  function parseArrowableSpreadOrRest(lexerFlags, scoop, closingPuncType, bindingType, asyncToken, exportedNames, exportedBindings, astProp) {
     // parseArrowableRest
     ASSERT(parseArrowableSpreadOrRest.length === arguments.length, 'want all args');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.type === $ID_async, 'async token');
@@ -11837,14 +11830,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       loc: AST_getBaseLoc(spreadToken),
       argument: undefined,
     });
-    let destructible = _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, asyncToken, exportedNames, exportedBindings, 'argument');
+    let destructible = _parseArrowableSpreadOrRest(lexerFlags, scoop, closingPuncType, bindingType, asyncToken, exportedNames, exportedBindings, 'argument');
     AST_close('SpreadElement');
 
-    if (curtok.c !== closingCharOrd && curtok.type !== $PUNC_COMMA) THROW('Encountered invalid input after spread/rest argument');
+    if (curtok.type !== closingPuncType && curtok.type !== $PUNC_COMMA) THROW('Encountered invalid input after spread/rest argument');
 
     return destructible;
   }
-  function _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, asyncToken, exportedNames, exportedBindings, astProp) {
+  function _parseArrowableSpreadOrRest(lexerFlags, scoop, closingPuncType, bindingType, asyncToken, exportedNames, exportedBindings, astProp) {
     ASSERT(_parseArrowableSpreadOrRest.length === arguments.length, 'arg count');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.type === $ID_async, 'async token');
     ASSERT_BINDING_TYPE(bindingType);
@@ -11936,7 +11929,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let identToken = curtok;
       skipIdentSafeSlowAndExpensive(lexerFlags, NOT_LHSE); // will properly deal with div/rex cases
       let assignBefore = curtok.type === $PUNC_EQ;
-      let willBeSimple = curtok.c === closingCharOrd || curtok.type === $PUNC_COMMA || assignBefore;
+      let willBeSimple = curtok.type === closingPuncType || curtok.type === $PUNC_COMMA || assignBefore;
       if (willBeSimple) {
         let assignableOrErrorMsg = nonFatalBindingIdentCheck(identToken, bindingType, lexerFlags);
         ASSERT(typeof assignableOrErrorMsg === 'string', 'func should always return string');
@@ -11958,7 +11951,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ASSIGN_EXPR_IS_OK, astProp);
       ASSERT(!assignBefore || curtok.type === $PUNC_EQ, 'parseValueAfterIdent should not consume the assignment');
       let assignAfter = curtok.type === $PUNC_EQ;
-      if (curtok.type !== $PUNC_COMMA && curtok.c !== closingCharOrd) {
+      if (curtok.type !== $PUNC_COMMA && curtok.type !== closingPuncType) {
         if (assignAfter) {
           // - `async (a, ...b=fail) => a;`
           // - `[x, y, ...z = arr]`
@@ -12024,16 +12017,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `([...[][x]] = x);`
       let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.type !== $PUNC_EQ || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
-      if (curtok.type !== $PUNC_EQ && curtok.c !== closingCharOrd && curtok.type !== $PUNC_COMMA) {
+      if (curtok.type !== $PUNC_EQ && curtok.type !== closingPuncType && curtok.type !== $PUNC_COMMA) {
         // - `({...[].x} = x);`
-        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, argStartToken, bindingType, assignable, nowDestruct, closingCharOrd, astProp);
+        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, argStartToken, bindingType, assignable, nowDestruct, closingPuncType, astProp);
       } else {
         // The rest arg of an _object_ pattern can only be a simple assignment target. The rest of an array pattern
         // has more freedom. If there is no tail for obj rest then this not destructible.
         // - `({ ...[x] }) => {}`
         // - `{...[] = c}`
         // - `[...[] = c]`
-        if (closingCharOrd === $$CURLY_R_7D && curtok.type !== $PUNC_EQ) {
+        if (closingPuncType === $PUNC_CURLY_CLOSE && curtok.type !== $PUNC_EQ) {
           destructible |= nowDestruct | CANT_DESTRUCT;
         } else {
           destructible |= nowDestruct;
@@ -12043,7 +12036,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
       // (The object rest in any binding pattern can only be a simple ident)
-      if (closingCharOrd === $$CURLY_R_7D && notAssignable(assignable)) {
+      if (closingPuncType === $PUNC_CURLY_CLOSE && notAssignable(assignable)) {
         // Note: $$CURLY_R_7D is intentional as we're checking whether this spread was at the end of an object pattern
         // - `function f({...[a, b]}){}`
         // - `[...[].x] = foo)`
@@ -12075,10 +12068,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let curlyToken = curtok;
       let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.type !== $PUNC_EQ || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
-      if (curtok.type !== $PUNC_EQ && curtok.c !== closingCharOrd && curtok.type !== $PUNC_COMMA) {
+      if (curtok.type !== $PUNC_EQ && curtok.type !== closingPuncType && curtok.type !== $PUNC_COMMA) {
         // - `({ ...{}.x } = x);`
         //          ^
-        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, curlyToken, bindingType, assignable, nowDestruct, closingCharOrd, astProp);
+        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, curlyToken, bindingType, assignable, nowDestruct, closingPuncType, astProp);
       } else {
         // The rest arg of an _object_ pattern can only be a simple assignment target. The rest of an array pattern
         // has more freedom. If there is no tail for obj rest then this not destructible.
@@ -12088,14 +12081,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `{...{}}`
         // - `[...{}]`                 // TODO: parse or runtime error? or potentially valid? What if the object is an iterable?
         destructible |= nowDestruct;
-        if (closingCharOrd === $$CURLY_R_7D && curtok.type !== $PUNC_EQ) {
+        if (closingPuncType === $PUNC_CURLY_CLOSE && curtok.type !== $PUNC_EQ) {
           destructible |= CANT_DESTRUCT;
         }
       }
       assignable = hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
       // (The object rest in any binding pattern can only be a simple ident)
-      if (closingCharOrd === $$CURLY_R_7D && notAssignable(assignable)) {
+      if (closingPuncType === $PUNC_CURLY_CLOSE && notAssignable(assignable)) {
         // Note: the check above is checking whether this rest was inside an object pattern
         // - `let {...{a,b}} = foo`
         // - `({...[].x} = foo)`
@@ -12106,7 +12099,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // THROW('The rest argument of an object binding pattern must always be a simple ident and not an object pattern');
       }
     }
-    else if (curtok.c === closingCharOrd) {
+    else if (curtok.type === closingPuncType) {
       // `[...]`
       // `(...)`
       THROW('The rest/spread operator is missing an argument');
@@ -12160,7 +12153,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       assignable = mergeAssignable(nowAssignable, assignable);
 
-      if (curtok.type === $PUNC_EQ && curtok.c !== closingCharOrd && curtok.type !== $PUNC_COMMA) {
+      if (curtok.type === $PUNC_EQ && curtok.type !== closingPuncType && curtok.type !== $PUNC_COMMA) {
         if (notAssignable(assignable)) {
           // - `[..."x"=b]`
           THROW('This `...` arg is invalid; rest only accepts idents, arrays, and objects and as spread the assignment is illegal because the lhs is not assignable');
@@ -12189,7 +12182,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // [v]: `[...(x), y]`
           destructible |= CANT_DESTRUCT;
         }
-        else if (curtok.c !== closingCharOrd) {
+        else if (curtok.type !== closingPuncType) {
           // - `[.../x//y]`
           // - `[.../x/g/y]`
           // - `[..."foo".bar]`
@@ -12217,14 +12210,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       // A param object pattern can only have a rest with ident, this was not just an ident, cant destruct to a rest
-      if (closingCharOrd === $$CURLY_R_7D && !isAssignable(assignable)) destructible |= CANT_DESTRUCT;
+      if (closingPuncType === $PUNC_CURLY_CLOSE && !isAssignable(assignable)) destructible |= CANT_DESTRUCT;
       // [v]: `[.../x/]`
       // [v]: `[.../x//yield]`
       // [v]: `function *f(){ return { ...(yield) }`
       return copyPiggies(destructible, assignable);
     }
 
-    if (curtok.c !== closingCharOrd) {
+    if (curtok.type !== closingPuncType) {
       if (bindingType === BINDING_TYPE_ARG) {
         if (asyncToken !== UNDEF_ASYNC) {
           destructible |= CANT_DESTRUCT;
@@ -12232,7 +12225,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // [v]: `f = ([...[ x ] = []]);`
           // [x]: `f = ([...[ x ] = []]) => x;`
           destructible |= DESTRUCT_ASSIGN_ONLY;
-          // $log('rest crashed, closingCharOrd='+String.fromCharCode(closingCharOrd)+', token: ' + curtok);
+          // $log('rest crashed, closingPuncType='+String.fromCharCode(closingPuncType)+', token: ' + curtok);
           // if (curtok.type === $PUNC_EQ) THROW('The rest argument can not have an initializer');
           // else if (curtok.type === $PUNC_COMMA) THROW('The rest argument was not destructible as it must be last and can not have a trailing comma');
           // else THROW('The rest argument must the be last parameter');

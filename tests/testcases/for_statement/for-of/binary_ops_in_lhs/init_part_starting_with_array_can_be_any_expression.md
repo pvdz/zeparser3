@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unknown input followed the left side of a for loop header: {# ID_of : nl=N ws=N pos=12:14 loc=12:1 curc=111 `of`#}
+  Unknown input followed the left side of a for loop header: {# ID_of : nl=N ws=N pos=12:14 loc=12:1 `of`#}
 
 for ([] + b of obj);
             ^------- error
