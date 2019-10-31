@@ -81,6 +81,7 @@ ZeParser test runner help:
  --reset       For perf, force resets baseline to whatever the current result
  --record      For perf, updates baseline if better
  --node-bin <path> Specify the path to the node binary to run, defaults to the answer of `which node`
+ --concise     Just parse and exit. No post processing, printing, or anything else.
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -197,6 +198,7 @@ ZeParser test runner help:
     --no-printer)   EXTRA='--no-printer'  ;;
     --no-fatals)    EXTRA='--no-fatals'   ;;
     --concise)      EXTRA='--concise'     ;;
+    -q)             EXTRA='-q'            ;;
     -b);&
     --build)        BUILD='-b'            ;;
     --nb)           NO_BUILDING='on'      ;;
@@ -323,7 +325,7 @@ case "${ACTION}" in
       sleep 5
       CORENUM=3; ps -e -o pid,psr,cpu,cmd | grep -E  "^[[:space:]][[:digit:]]+[[:space:]]+${CORENUM}"
 
-      sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb ${RECORD} ${RESET}
+      sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb ${RECORD} ${RESET} ${EXTRA}
       ;;
     perf3)
       sudo su -c "echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo"
@@ -349,13 +351,13 @@ case "${ACTION}" in
         if [[ ! -z "${PERFONE}" ]]; then # Regular node invokes
           STABLE_V8="--single-threaded --single-threaded-gc --predictable --predictable-gc-schedule --compilation-cache"
         fi
-        NODE_NO_WARNINGS=1 "${NODE_BIN}" ${INSPECT_NODE} ${STABLE_V8} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS} ${RESET} ${RECORD} n 1
+        NODE_NO_WARNINGS=1 "${NODE_BIN}" ${INSPECT_NODE} ${STABLE_V8} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS} ${RESET} ${RECORD} ${EXTRA} n 1
         set +x
         I=1
         while true
         do
           # The process will exit 1 when the last benchmark is executed and the n param is given. Let's hope so :D
-          NODE_NO_WARNINGS=1 "${NODE_BIN}" ${INSPECT_NODE} ${STABLE_V8} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS} --no-header ${RESET} ${RECORD} n "${I}" || I=0
+          NODE_NO_WARNINGS=1 "${NODE_BIN}" ${INSPECT_NODE} ${STABLE_V8} --experimental-modules --max-old-space-size=8192 tests/perf.mjs ${BUILD} ${INSPECT_ZEPAR} ${DEVTOOLS} ${RESET} ${RECORD} ${EXTRA} n "${I}" || I=0
           if [[ "${I}" -eq "0" ]]; then
             RESET=''
           fi

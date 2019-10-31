@@ -101,7 +101,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --min-printer Minimize a ZePrinter-failing input case
     --force-write Always write the test cases to disk, even when no change was detected
     --no-fatals   Do not treat (test) assertion errors as fatals (dev tools only, rely on git etc for recovery)
-    --concise     Do not dump AST and printer output to stdout. Only works with -i or -f
+    --concise     Do not dump AST and printer output to stdout. Parse and stop. Only works with -i or -f or -F
 `);
   process.exit();
 }
@@ -257,6 +257,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
     );
     if (INPUT_OVERRIDE || TARGET_FILE) {
       console.timeEnd('Pure ZeParser parse time');
+      if (CONCISE) return;
     }
     if (tob.shouldFail) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed';
@@ -456,6 +457,7 @@ async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "mod
     if (REDUCING) reduceAndExit(tob.inputCode, code => coreTest(tob, zeparser, testVariant, code), tob.file);
     // This is quite memory expensive but much easier to work with
     tob.parserRawOutput[testVariant] = coreTest(tob, zeparser, testVariant);
+    if (CONCISE) return;
     let rawOutput = tob.parserRawOutput[testVariant];
     if (SEARCH) {
       let e = rawOutput.e;
@@ -477,6 +479,7 @@ async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "mod
   if (!RUN_VERBOSE_IN_SERIAL) console.log('   Have', list.length, 'results, totaling', bytes, 'bytes, ok = ', ok, ', fail =', fail);
   if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('   $$ Parse time for all tests');
   if (SEARCH) return;
+  if (CONCISE) return;
 
   if (!RUN_VERBOSE_IN_SERIAL) console.log('   Processing', list.length, 'result for all tests');
   if (!RUN_VERBOSE_IN_SERIAL) console.time('   $$ Parse result post processing time');
