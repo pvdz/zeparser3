@@ -1478,8 +1478,10 @@ function ZeTokenizer(
       ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext())
       , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
 
+    ASSERT(typeof lastCanonizedString === 'string', 'euhhhh what?');
     if (isStringToken(type)) {
       let len = (stop - start) - 2; // 2=quotes
+      ASSERT(typeof len === 'number', 'ok dit ook he');
       if (lastCanonizedString.length !== len) {
         // Canonization converts escapes to actual chars so if this happens the canonized length should be smaller
         // than the original input. If it is the same, no conversion happened and we can use input. Less slicing = better
@@ -2691,6 +2693,7 @@ function ZeTokenizer(
     do {
       if (n >= len) return eofAfterPotentialKeyword(trie, n, start);
       let d = input.charCodeAt(n++);
+      ASSERT(typeof d === 'number' && d >= 0 && Number.isFinite(d), 'dont oob please');
       if (d < $$A_61 || d > $$Z_7A) return endOfPotentialKeyword(trie, d, n, start);
       // Next step in trie
       trie = trie[d - $$A_61];

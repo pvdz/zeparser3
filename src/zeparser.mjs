@@ -833,7 +833,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let parentNode = _path[_path.length - 1];
 
     let p = parentNode[astProp];
-    if (p !== undefined && p.length !== undefined) {
+    if (Array.isArray(p)) {
       p.push(node);
     }
     else {
@@ -855,7 +855,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let parentNode = _path[_path.length - 1];
 
     let p = parentNode[astProp];
-    if (p !== undefined && p.length !== undefined) {
+    if (Array.isArray(p)) {
       p.push(node);
     }
     else {
@@ -1137,7 +1137,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let parent = _path[_path.length-1];
     let p = parent[prop];
     ASSERT(p, 'the prop should exist... (and be a node)');
-    if (p.length !== undefined) {
+    if (Array.isArray(p)) {
       ASSERT(Array.isArray(p), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
       ASSERT(p.length);
       return p.pop();
@@ -1196,8 +1196,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let node = _path[_path.length-1][prop];
     ASSERT(node, 'top[' + prop + '] should be a node');
-    if (node.length !== undefined) {
-      ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+    if (Array.isArray(node)) {
       // The destruct applies to the node just closed, so last in list
       if (AST__destruct(node[node.length-1])) AST_destructReplaceAssignment(node, node.length - 1);
     }
@@ -1292,8 +1291,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (token.type === $PUNC_EQ) {
       let node = _path[_path.length - 1][astProp];
-      if (node.length !== undefined) {
-        ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+      if (Array.isArray(node)) {
         node = node[node.length - 1];
       }
       if (node.type === 'ArrayExpression' || node.type === 'ObjectExpression') {
@@ -1303,11 +1301,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_throwIfIllegalUpdateArg(astProp) {
     ASSERT(AST_throwIfIllegalUpdateArg.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop string');
 
     // Using the AST for this because in the current propagation system we can only tell whether the parsed part
     // is assignable or not, and in this reading something that can be destructured can be assigned to.
 
-    let prev = _path[_path.length - 1] && _path[_path.length - 1][astProp];
+    let head = _path[_path.length - 1];
+    let prev = head && head[astProp];
 
     // Note: the for-case is nasty because when parsing the lhs the AST is not yet populated with a `for` statement
     // because that particular node type depends on `in`, `of`, or a semi. So the AST could be an array (block body)
@@ -1377,8 +1377,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Hack: get the node we just closed and add the extra meta data to it
     let parent = _path[_path.length-1];
     let child = parent[astProp];
-    if (child.length !== undefined) {
-      ASSERT(Array.isArray(child), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
+    if (Array.isArray(child)) {
       ASSERT(child.length > 0, 'babel should not be able to wrap the closed child of an empty container');
       child = child[child.length - 1];
     }
