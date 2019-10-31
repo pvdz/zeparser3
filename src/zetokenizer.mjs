@@ -1164,6 +1164,7 @@ function ZeTokenizer(
   }
   function ASSERT_peekUncached() {
     // You can use this even if stale=true
+    ASSERT(pointer < len, 'never read oob');
     return input.charCodeAt(pointer);
   }
   function _readCache() {
@@ -1193,15 +1194,6 @@ function ZeTokenizer(
     return input.slice(from, to);
   }
 
-  function peekSkip() {
-    //ASSERT(neof(), 'pointer not oob');
-    ASSERT(!arguments.length, 'no args');
-    ASSERT(neof(), 'lexer input pointer not oob');
-
-    let t = _readCache();
-    skip();
-    return t;
-  }
   function ASSERT_skipPeek(c) {
     ASSERT(ASSERT_skipPeek.length === arguments.length, 'arg count');
     ASSERT(stale ? ASSERT_peekUncached() === c : peek() === c, 'expecting to skip a particular char', c, stale ? ASSERT_peekUncached() : peek());
@@ -1216,11 +1208,17 @@ function ZeTokenizer(
   }
 
   function skip() {
-    ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
+    ASSERT(pointer < len, 'the pointer should not be oob yet, thats a bad smell');
 
+    let p = ++pointer;
+    if (pointer >= len) {
+      ASSERT(stale = true, '(the cache is stale because we reached the end of the input. any code should check eof before reading the input)');
+      cache = 0;
+      return;
+    }
     ASSERT(!(stale = false), '(marking cache fresh so in devmode it wont throw when read)');
-    cache = input.charCodeAt(++pointer);
+    cache = input.charCodeAt(p);
   }
   function skipFastWithoutUpdatingCache() {
     // Use ASSERT_peekUncached() for peeking in dev assertions
@@ -1382,7 +1380,8 @@ function ZeTokenizer(
     // of the token that it must be, or a hint for the type of token that it may become.
     // Then either return the token type, or use the hint in a switch (the hint will be zero to n) and properly slice it
 
-    let c = peekSkip();
+    let c = peek();
+    skip();
 
     let s = getTokenStart(c);
     if (s > $_start_i) {
@@ -1454,7 +1453,7 @@ function ZeTokenizer(
     ASSERT(incrementLine.length === arguments.length, 'arg count');
 
     // Call this function AFTER consuming the newline(s) that triggered it
-    ASSERT(input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
+    ASSERT(pointer > 0 && input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
 
     consumedNewlinesThisToken = true;
     ++currentLine;
@@ -1696,7 +1695,8 @@ function ZeTokenizer(
     }
 
     // read() because we need to consume at least one char here
-    let c = peekSkip();
+    let c = peek();
+    skip();
     // note: the parser only really cares about \u and \x. it needs no extra work for \t \n etc
     // note: it _does_ need to take care of escaped digits
     switch(c) {
@@ -2583,6 +2583,7 @@ function ZeTokenizer(
       return $ERROR;
     }
 
+    ASSERT(start < len, 'start shouldnt be oob');
     let data = input.charCodeAt(start) === $$CURLY_L_7B ? slice(start + 1, pointer - 1) : slice(start, pointer);
     ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
     ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
@@ -2675,7 +2676,7 @@ function ZeTokenizer(
 
   function parsePotentialKeyword(c) {
     ASSERT(parsePotentialKeyword.length === arguments.length, 'arg count');
-    ASSERT(c === input.charCodeAt(pointer - 1), 'c should have been peekSkipped');
+    ASSERT(pointer > 0 && c === input.charCodeAt(pointer - 1), 'c should have been peekSkipped');
 
     // c = input[pointer-1]
     // Keep reading chars until;
@@ -2864,61 +2865,72 @@ function ZeTokenizer(
   }
 
   function parseFwdSlash(lexerFlags) {
-    if (eof()) {
-      // I don't think there's any way this can lead to a valid parse... but let the parser deal with that.
-      return $PUNC_DIV;
-    }
+    ASSERT(parseFwdSlash.length === arguments.length, 'arg count');
+
+    if (eof()) return $PUNC_DIV;
 
     let c = peek();
+
     if (c === $$FWDSLASH_2F) {
       // must be single comment
       ASSERT_skip($$FWDSLASH_2F); // `//`
       return parseCommentSingle();
-    } else if (c === $$STAR_2A) {
-      // must be multi comment
-      ASSERT_skip($$STAR_2A); // `/*`
-      return parseCommentMulti();
-    } else {
-      return parseSingleFwdSlash(lexerFlags, c);
     }
-  }
-  function parseSingleFwdSlash(lexerFlags, c) {
+
+    if (c === $$STAR_2A) {
+      // must be multi comment
+      return parseCommentMulti();
+    }
+
     if ((lexerFlags & LF_FOR_REGEX) === LF_FOR_REGEX) {
       // parse a regex. use the c
       return parseRegex(c);
-    } else {
-      // div
-      if (c === $$IS_3D) {
-        ASSERT_skip($$IS_3D); // /=
-        return $PUNC_DIV_EQ;
-      }
-      return $PUNC_DIV;
     }
+
+    if (c === $$IS_3D) {
+      ASSERT_skip($$IS_3D); // /=
+      return $PUNC_DIV_EQ;
+    }
+
+    return $PUNC_DIV;
   }
   function parseCommentSingle() {
+    ASSERT(parseCommentSingle.length === arguments.length, 'arg count');
+
     consumedCommentSincePrevSolid = true;
     wasWhite = true;
     wasComment = true;
+
     while (neof()) {
       let c = peek();
+
+      // $$LF_0A              1010
+      // $$CR_0D              1101
+      // $$PS_2028  10000000101000
+      // $$LS_2029  10000000101001
+      // c & 8
+
       if (c === $$CR_0D || isLfPsLs(c)) {
         // TODO: should check whether we can optimize the next token parse since we already know it to be a newline. may not be very relevant in the grand scheme of things tho. (the overhead to confirm may more expensive)
-        break;
+        return $COMMENT_SINGLE;
       }
-      skip(); // anything except those four newline chars
+      ASSERT_skip(c); // anything except those four newline chars
     }
+
     return $COMMENT_SINGLE;
   }
   function parseCommentMulti() {
-    let c;
+    ASSERT(parseCommentMulti.length === arguments.length, 'arg count');
+    ASSERT(input.charCodeAt(pointer) === $$STAR_2A, 'not yet skipped');
+    ASSERT_skip($$STAR_2A);
+    let c = 0;
     while (neof()) {
-      c = peekSkip();
+      c = peek();
+      skip();
       while (c === $$STAR_2A) {
-        if (eof()) {
-          if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unclosed multi line comment, early eof after star';
-          return $ERROR;
-        }
-        c = peekSkip();
+        if (eof()) break;
+        c = peek();
+        skip();
         if (c === $$FWDSLASH_2F) {
           consumedCommentSincePrevSolid = true;
           wasWhite = true;
@@ -2926,6 +2938,7 @@ function ZeTokenizer(
           return $COMMENT_MULTI;
         }
       }
+
       if (c === $$CR_0D) {
         // crlf is considered one line for the sake of reporting line-numbers
         if (neof() && peeky($$LF_0A)) skip();
