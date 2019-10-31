@@ -56,6 +56,7 @@ ZeParser test runner help:
  p2            My shortcut for working with p1 with sudo :p
  p3            Undo system settings applied in p3
  z             Create build
+ d             Run deoptigate (see doptie.js for file config)
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
  --module      Enable module goal mode, do not auto-enable other modes
@@ -182,6 +183,9 @@ ZeParser test runner help:
       ;;
     p3)
       ACTION='perf3'
+      ;;
+    d)
+      ACTION='doptigate'
       ;;
 
     --sloppy)       MODE='--sloppy'       ;;
@@ -379,6 +383,23 @@ case "${ACTION}" in
     hf)
       ${NODE_BIN} ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/hf.mjs ${BUILD} ${INSPECT_ZEPAR}
     ;;
+
+    doptigate)
+      ./t z --no-compat --no-min --pretty
+      set -x
+      # First generate the v8 log
+      echo "Creating log"
+      ${NODE_BIN} --experimental-modules --max-old-space-size=8192 --trace-ic --logfile='ignore/v8.log' --no-logfile-per-isolate tests/doptie.mjs
+      # Next scrub the log file because deoptigate can't handle some of the newly added information
+      echo "Scrubbing log"
+      ${NODE_BIN} tests/doptie_scrub_v8log.js
+      # Now run doptie itself from within the ignore folder
+      echo "Running deoptigate"
+      cd ignore
+      ../node_modules/.bin/deoptigate
+      rm v8.log
+      cd ..
+      ;;
 
     *)
       ${NODE_BIN} ${INSPECT_NODE} --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES} ${ANNEXB} ${BUILD} ${INSPECT_ZEPAR}
