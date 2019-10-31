@@ -1199,7 +1199,7 @@ function ZeTokenizer(
     ASSERT(neof(), 'lexer input pointer not oob');
 
     let t = _readCache();
-    cache = skipPeek();
+    skip();
     return t;
   }
   function ASSERT_skipPeek(c) {
@@ -1209,8 +1209,9 @@ function ZeTokenizer(
   }
   function skipPeek() {
     ASSERT(!arguments.length, 'no args');
-    // ASSERT(neofd(1), 'new lexer input pointer not oob');
+    ASSERT(neofd(1), 'pointer should not read oob');
 
+    ASSERT(!(stale = false), '(marking cache fresh so in devmode it wont throw when read)');
     return cache = input.charCodeAt(++pointer); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
   }
 
@@ -1218,8 +1219,8 @@ function ZeTokenizer(
     ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
-    cache = input.charCodeAt(++pointer);
     ASSERT(!(stale = false), '(marking cache fresh so in devmode it wont throw when read)');
+    cache = input.charCodeAt(++pointer);
   }
   function skipFastWithoutUpdatingCache() {
     // Use ASSERT_peekUncached() for peeking in dev assertions
@@ -1374,6 +1375,7 @@ function ZeTokenizer(
   function jumpTableLexer(lexerFlags) {
     ASSERT(jumpTableLexer.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags', lexerFlags);
+    ASSERT(pointer < len, 'pointer should not be oob here');
 
     // This creates one token of any kind that is valid in JS.
     // Take the first char, look it up in an array of 126 entries (aka jump table) and it tells you either the type
@@ -4991,6 +4993,8 @@ function ZeTokenizer(
     // Without uflag, the \p it leads to IdentityEscape where it fails for any value that is in ID_CONTINUE, inc p
     // In webcompat mode, without uflag, it leads to SourceCharacterIdentityEscape and passes without "body"
     // (Note that `\p{1}` in webcompat mode is parsed as an atom with a quantifier. Not sure about runtime semantics.)
+
+    if (eofd(1)) return regexSyntaxError('Early EOF while parsing regex property escape');
 
     // skip the p and assert it is immediately followed by a curly
     if (ASSERT_skipPeek(c === $$P_70 ? $$P_70 : $$P_UC_50) !== $$CURLY_L_7B) {
