@@ -366,7 +366,7 @@ const FROM_EXPORT_DECL = dev() ? {FROM_EXPORT_DECL: 1} : 3;
 const FROM_CATCH = dev() ? {FROM_CATCH: 1} : 4;
 const FROM_ASYNC_ARG = dev() ? {FROM_ASYNC_ARG: 1} : 5;
 const FROM_OTHER_FUNC_ARG = dev() ? {FROM_OTHER_FUNC_ARG: 1} : 6;
-const BINDING_TYPE_NONE = undefined;
+const BINDING_TYPE_NONE = dev() ? {BINDING_TYPE_NONE: 1} : 0;
 const BINDING_TYPE_ARG = dev() ? {BINDING_TYPE_ARG: 1} : 1;
 const BINDING_TYPE_VAR = dev() ? {BINDING_TYPE_VAR: 1} : 2;
 const BINDING_TYPE_LET = dev() ? {BINDING_TYPE_LET: 1} : 3;
@@ -2458,7 +2458,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let isLexBinding = SCOPE_bindingTypeIsLex(bindingType);
     let s = scoop;
     do {
-      let value = s.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : s.names.get(name);
+      let value = s.names === HAS_NO_BINDINGS || !s.names.has(name) ? BINDING_TYPE_NONE : s.names.get(name);
       if (value !== BINDING_TYPE_NONE && SCOPE_bindingTypeIsLex(value)) {
         // There already was a binding of any kind with the same name on this statement level, or a variable declaration
         // of the same name in a statement that is a descendent of the current statement parent. This is the error.
@@ -2529,7 +2529,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // Scan the lexical records for any `catch` header record, have to scan all the way up to scope-root (func/glob)
     // for any such lexical records, confirm the current name does not appear in it, or throw. :'(
-    let value = scoop.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : scoop.names.get(name);
+    let value = scoop.names === HAS_NO_BINDINGS || !scoop.names.has(name) ? BINDING_TYPE_NONE : scoop.names.get(name);
     if (value !== BINDING_TYPE_NONE) {
       if (bindingType === BINDING_TYPE_ARG) {
         // This is an error but we can't throw yet because we may be inside the not-yet-confirmed arrow header which
@@ -2550,7 +2550,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    if (scoop.type === SCOPE_LAYER_FUNC_BODY && scoop.parent.names !== HAS_NO_BINDINGS && scoop.parent.names.get(name) !== BINDING_TYPE_NONE) {
+    if (scoop.type === SCOPE_LAYER_FUNC_BODY && scoop.parent.names !== HAS_NO_BINDINGS && scoop.parent.names.has(name)) {
       THROW('Cannot create lexical binding for `' + name + '` because it shadows a function parameter');
     }
 
@@ -2582,7 +2582,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (scoop.type === SCOPE_LAYER_CATCH_BODY) {
       // A lexical binding (or any var) in the catch block cannot be shadowing a catch clause binding
       ASSERT(scoop.parent && scoop.parent.type === SCOPE_LAYER_CATCH_HEAD, 'scoop body must have head as parent', scoop);
-      let parentValue = scoop.parent.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : scoop.parent.names.get(name);
+      let parentValue = scoop.parent.names === HAS_NO_BINDINGS || !scoop.parent.names.has(name) ? BINDING_TYPE_NONE : scoop.parent.names.get(name);
       if (parentValue === BINDING_TYPE_CATCH_IDENT || parentValue === BINDING_TYPE_CATCH_OTHER) {
         THROW('Can not create a lexical binding for `' + name + '` because it shadows a catch clause binding');
       }
@@ -2590,7 +2590,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let s = scoop.parent;
     while (s && s.type !== SCOPE_LAYER_FUNC_ROOT) {
-      let value = s.names === HAS_NO_BINDINGS ? BINDING_TYPE_NONE : s.names.get(name);
+      let value = s.names === HAS_NO_BINDINGS || !s.names.has(name)  ? BINDING_TYPE_NONE : s.names.get(name);
       if (s.type === SCOPE_LAYER_ARROW_PARAMS) {
         if (bindingType === BINDING_TYPE_CATCH_IDENT || bindingType === BINDING_TYPE_CATCH_OTHER) {
           // I guess we ignore this case...
