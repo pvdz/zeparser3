@@ -326,6 +326,10 @@ import ZeTokenizer, {
   ASSERT_popCanonPoison,
 } from '../src/zetokenizer.mjs';
 
+import {
+  PERF_enforce_HasFastProperties,
+} from '../src/tools/perf.mjs';
+
 const VERSION_EXPONENTIATION = 7; // ES2016
 const VERSION_ASYNC = 8; // ES2017
 const VERSION_TRAILING_FUNC_COMMAS = 8; // ES2017
@@ -1194,10 +1198,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(node, 'top[' + prop + '] should be a node');
     if (node.length !== undefined) {
       ASSERT(Array.isArray(node), 'ast nodes do not have a `length` property so this duck type check should have sufficed');
-      node = node[node.length-1]; // the destruct applies to the node just closed, so last in list
+      // The destruct applies to the node just closed, so last in list
+      if (AST__destruct(node[node.length-1])) AST_destructReplaceAssignment(node, node.length - 1);
     }
 
-    AST__destruct(node);
+    if (AST__destruct(node)) AST_destructReplaceAssignment(_path[_path.length-1], prop);
   }
   function AST__destruct(node) {
     ASSERT(arguments.length === 1, 'arg count');
@@ -1209,9 +1214,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         for (let i = 0, n = elements.length; i < n; ++i) {
           let element = elements[i];
           // note: children can be null (elided array destruct) but not undefined
-          if (element) AST__destruct(element);
+          if (element && AST__destruct(element)) AST_destructReplaceAssignment(elements, i);
         }
-        break;
+        return false;
       case 'ObjectExpression':
         node.type = 'ObjectPattern';
         let properties = node.properties;
@@ -1222,27 +1227,36 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             ASSERT(properties[i].type === 'SpreadElement', 'expecting only properties, spreads, and assignments here');
             ASSERT(properties[i].argument, 'each property should have a value');
           }
-          AST__destruct(properties[i]);
+          if (AST__destruct(properties[i])) AST_destructReplaceAssignment(properties, i);
         }
-        break;
+        return false;
       case 'AssignmentExpression':
-        node.type = 'AssignmentPattern';
-        if (node.operator !== '=') THROW('The destruturing assignment should be a regular assignment');
-        delete node.operator; // TODO: find a better way, this action probably causes a perf DEOPT
         // walk the left of the assignment only
-
-        AST__destruct(node.left);
-        break;
+        if (AST__destruct(node.left)) AST_destructReplaceAssignment(node, 'left');
+        return true;
       case NODE_NAME_PROPERTY:
-        AST__destruct(node.value);
-        break;
+        if (AST__destruct(node.value)) AST_destructReplaceAssignment(node, 'value');
+        return false;
       case 'SpreadElement':
         // `([...x]);` vs `([...x]) => x`
         // `({...x});` vs `({...x}) => x`
         node.type = 'RestElement';
-        AST__destruct(node.argument);
-        break;
+        if (AST__destruct(node.argument)) AST_destructReplaceAssignment(node, 'argument');
+        return false;
     }
+    return false;
+  }
+  function AST_destructReplaceAssignment(parentNode, prop) {
+    let oldNode = parentNode[prop];
+    if (oldNode.operator !== '=') THROW('The destruturing assignment should be a regular assignment');
+    let newNode = {
+      type: 'AssignmentPattern',
+      loc: oldNode.loc,
+      left: oldNode.left,
+      right: oldNode.right,
+    };
+
+    parentNode[prop] = newNode;
   }
   function AST_destructArrowParams(toplevelComma, asyncToken, arrowStartToken, astProp) {
     ASSERT(AST_destructArrowParams.length === arguments.length, 'arg count');
@@ -1269,7 +1283,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(Array.isArray(top.params), 'params should now be an array in any case');
     let params = top.params;
     for (let i=0; i<params.length; ++i) {
-      AST__destruct(params[i]);
+      if (AST__destruct(params[i])) AST_destructReplaceAssignment(params, i);
     }
 
   }
