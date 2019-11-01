@@ -1,18 +1,22 @@
-// Run this through `./t d`
+// First biuld with native symbols, then run node with native symbols:
+// ```
+// ./t z --no-compat --no-min --native-symbols;
+// node --experimental-modules --max-old-space-size=8192 --trace_opt --trace_deopt --allow-natives-syntax --debug-code tests/v8internals.mjs
+// ```
 
-import zeparser from '../build/build_w_ast.mjs';
+// import zeparser from '../src/zeparser.mjs';
+import zeparser, {allFuncs, PERF_getStatus, PERF_DebugPrint} from '../build/build_w_ast.mjs';
 import {COLLECT_TOKENS_SOLID, COLLECT_TOKENS_NONE , GOAL_MODULE, GOAL_SCRIPT} from "../src/zetokenizer.mjs";
 import fs from 'fs';
 
 // let input = fs.readFileSync('ignore/perf/es5.moment-with-locales.js', 'utf8');
-// let input = fs.readFileSync('ignore/perf/es5.webkit.npm.1.0.0.js', 'utf8');
+let input = fs.readFileSync('ignore/perf/es5.webkit.npm.1.0.0.js', 'utf8');
 // let input = fs.readFileSync('ignore/perf/es3.fb.newsfeed.min.js', 'utf8');
 // let input = fs.readFileSync('ignore/perf/es5.js1k.js', 'utf8');
 // let input = fs.readFileSync('ignore/perf/es6.angular-compiler.js', 'utf8'); // module!
-let input = fs.readFileSync('ignore/perf/es6.material-ui-core.js', 'utf8');
+// let input = fs.readFileSync('ignore/perf/es6.material-ui-core.js', 'utf8');
 // let input = fs.readFileSync('ignore/perf/es6.mljs.js', 'utf8');
 // let input = fs.readFileSync('ignore/perf/es6.tiny.js', 'utf8');
-
 
 function testZeParser(zeparser, code, testVariant, enableAnnexb) {
   return zeparser(
@@ -36,3 +40,11 @@ function testZeParser(zeparser, code, testVariant, enableAnnexb) {
 console.time('Parse time');
 testZeParser(zeparser, input, 'sloppy', true);
 console.timeEnd('Parse time');
+
+console.log('allFuncs has', allFuncs.length, 'funcs');
+console.log('test:', allFuncs.map(f => {
+  let s = PERF_getStatus(f);
+  if (s) return s + ': ' + f.name;
+  return '';
+}).filter(Boolean).join('\n'));
+// allFuncs.forEach(PERF_DebugPrint); // this needs v8-debug to be useful

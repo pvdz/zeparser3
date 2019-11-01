@@ -30,6 +30,7 @@ function assert(a, b) {
 
 const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
 const SCRUB_ERRORS = process.argv.includes('--strip-errors'); // strip error message contents (wip)
+const NATIVE_SYMBOLS = process.argv.includes('--native-symbols'); // Replace `PERF_$` with `%`?
 
 let strippedAssertNames = new Set;
 let assertWhitelist = new Set([
@@ -145,6 +146,12 @@ function CallExpression(node) {
   assert(node.type, 'CallExpression');
 
   if (node.callee.type === 'Identifier') {
+
+    if (node.callee.name.startsWith('PERF_$')) {
+      if (NATIVE_SYMBOLS) return '%' + node.callee.name.slice('PERF_$'.length) + '(' + node.arguments.map($).join(', ') + ')';
+      return '0';
+    }
+
     // Terser should do this :'(
     if (node.callee.name === 'dev') {
       return 'false';
@@ -381,7 +388,10 @@ function FunctionDeclaration(node) {
   if (node.id && node.id.type === 'Identifier' && node.id.name.startsWith('ASSERT')) {
     return '';
   }
-  return (node.async ? 'async ' : '') + 'function' + (node.generator ? '*' : '') + (node.id ? ' ' + $(node.id) : '') + '(' + node.params.map($).join(', ') + ') {' + node.body.body.map($).join('\n') + '}';
+  let suffix = (NATIVE_SYMBOLS && node.id ? ';allFuncs.push('+node.id.name+');' : '');
+  return (
+    (node.async ? 'async ' : '') + 'function' + (node.generator ? '*' : '') + (node.id ? ' ' + $(node.id) : '') + '(' + node.params.map($).join(', ') + ') {' + node.body.body.map($).join('\n') + '}'
+  ) + suffix;
 }
 function FunctionExpression(node) {
   assert(node.type, 'FunctionExpression');

@@ -15,9 +15,13 @@ let dirname = path.dirname(filePath);
 
 const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
 const NO_MIN = process.argv.includes('--no-min'); // skip minifier
+const NATIVE_SYMBOLS = process.argv.includes('--native-symbols'); // Replace `PERF_$` with `%`?
+
+if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `%` prefixed native functions...!');
 
 (async() => {
   let sources = (await Promise.all([
+    await fs.promises.readFile(path.join(dirname, '../src/tools/perf.mjs')),
     await fs.promises.readFile(path.join(dirname, '../src/utils.mjs')),
     await fs.promises.readFile(path.join(dirname, '../src/zetokenizer.mjs')),
     await fs.promises.readFile(path.join(dirname, '../src/zeparser.mjs')),
@@ -30,9 +34,18 @@ const NO_MIN = process.argv.includes('--no-min'); // skip minifier
 
   async function generate(filename, keepAsserts, keepAst, keepComments) {
 
-    let [utils, zetokenizer, zeparser] = sources.map(processSource);
+    let [perf, utils, zetokenizer, zeparser] = sources.map(processSource);
+
+    let perfSetup = NATIVE_SYMBOLS ? `
+const allFuncs = [];
+// <perf.js>
+${perf}
+// </perf.js>
+    ` : '';
 
     let build = `
+
+${perfSetup}
 
 const exp = (function(){ // otherwise terser wont minify the names ...
 
@@ -63,18 +76,39 @@ export default ZeParser;
 export {
   ZeParser,
   toktypeToString,
+${NATIVE_SYMBOLS?`
+  PERF_OptimizeFunctionOnNextCall,
+  PERF_getStatus,
+  PERF_HasFastProperties,
+  PERF_HaveSameMap,
+  PERF_hasFastSmiElements,
+  PERF_hasFastObjectElements,
+  PERF_hasFastDoubleElements,
+  PERF_hasDictionaryElements,
+  PERF_hasFastHoleyElements,
+  PERF_haveSameMap,
+  PERF_isValidSmi,
+  PERF_isSmi,
+  PERF_hasFastSmiOrObjectElements,
+  PERF_hasSloppyArgumentsElements,
+  PERF_CollectGarbage,
+  PERF_DebugPrint,
+  allFuncs,
+`:''}
 };
 `;
 
-    // Sanity check
-    Par(build, GOAL_MODULE, false, {
-      webCompat: false, // Probably...
-      fullErrorContext: true,
+    // Sanity check, won't work with native symbols (obviously)
+    if (!NATIVE_SYMBOLS) {
+      Par(build, GOAL_MODULE, false, {
+        webCompat: false, // Probably...
+        fullErrorContext: true,
 
-      // $log: () => {},
-      // $warn: () => {},
-      // $error: () => {},
-    });
+        // $log: () => {},
+        // $warn: () => {},
+        // $error: () => {},
+      });
+    }
 
     let sizeBefore = build.length;
     if (NO_MIN) {

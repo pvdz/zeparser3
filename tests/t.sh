@@ -27,6 +27,7 @@ PRETTIER=''
 PERFONE=''
 RESET=''
 RECORD=''
+NATIVESYMBOLS=''
 
 while [[ $# > 0 ]] ; do
   case "$1" in
@@ -56,7 +57,7 @@ ZeParser test runner help:
  p2            My shortcut for working with p1 with sudo :p
  p3            Undo system settings applied in p3
  z             Create build
- d             Run deoptigate (see doptie.js for file config)
+ deoptigate    Run deoptigate (see doptie.js for file config)
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
  --module      Enable module goal mode, do not auto-enable other modes
@@ -77,6 +78,7 @@ ZeParser test runner help:
  --no-compat   For `z`; Replace the compat flags for Acorn and Babel to `false` so the minifier eliminates the dead code
  --no-min      For `z`; Do not run Terser (minifier) on build output
  --pretty      For `z`; Run prettier on the build afterwards (useful with `--no-min`)
+ --native-symbols For `z`; Special build step turns `PERF_$` prefixed functions into `%` to enable v8 internal functions.
  --inspect     Run with `node --inspect-brk` to debug node in the chrome devtools. Use `--devtools` to auto-profile.
  --devtools    Call `console.profile()` before and after the core parse step (not all actions support this)
  --reset       For perf, force resets baseline to whatever the current result
@@ -184,7 +186,8 @@ ZeParser test runner help:
     p3)
       ACTION='perf3'
       ;;
-    d)
+    d);&
+    deoptigate)
       ACTION='doptigate'
       ;;
 
@@ -209,6 +212,7 @@ ZeParser test runner help:
     --no-compat)    NOCOMP='--no-compat'  ;;
     --no-min)       NOMIN='--no-min'      ;;
     --pretty)       PRETTIER='yes'        ;;
+    --native-symbols) NATIVESYMBOLS='--native-symbols' ;;
     --reset)        RESET='--reset'       ;;
     --record)       RECORD='--record'     ;;
     --prefix)
@@ -259,7 +263,7 @@ if [[ "${HF}" = "yes" ]]; then
 
       if [[ -z "${NO_BUILDING}" ]]; then
         echo "Creating pretty build without compat code and without minification"
-        ./t z --no-compat --no-min --pretty --node-bin ${NODE_BIN}
+        ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
       fi
 
       # Transform the build file inline
@@ -303,14 +307,14 @@ case "${ACTION}" in
     ;;
 
     build)
-      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR} ${NATIVESYMBOLS}
       if [[ ! -z "${PRETTIER}" ]]; then
           node_modules/.bin/prettier build/build_w_ast.mjs --write
       fi
     ;;
 
     perf2)
-      ./t z --no-compat
+      ./t z --no-compat ${NATIVESYMBOLS}
       set -x
       # WARNING! DO NOT JUST USE UNLESS YOU VERIFIED THIS WORKS FOR YOU!
       # I use this to stabilize my system for perf.
@@ -342,7 +346,7 @@ case "${ACTION}" in
       if [[ ! -z "${BUILD}" ]]; then
         if [[ -z "${NO_BUILDING}" ]]; then
           echo "Creating build without compat"
-          ./t z --no-compat --node-bin ${NODE_BIN}
+          ./t z --no-compat ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
         fi
       fi
 
@@ -372,7 +376,7 @@ case "${ACTION}" in
       else
         if [[ ! -z "${BUILD}" ]]; then
           if [[ -z "${NO_BUILDING}" ]]; then
-            ./t z --no-compat --no-min --pretty --node-bin ${NODE_BIN}
+            ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
           fi
         fi
 
@@ -385,7 +389,7 @@ case "${ACTION}" in
     ;;
 
     doptigate)
-      ./t z --no-compat --no-min --pretty
+      ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS}
       set -x
       # First generate the v8 log
       echo "Creating log"

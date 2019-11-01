@@ -167,8 +167,8 @@ files.forEach((title) => {
     let t = p2(time);
     print(name, baseline, t, last);
 
-    let changedStats = IMPROVE_BASELINE;
-    if (RESET_BASELINE || t < b) {
+    let changedStats = false;
+    if (RESET_BASELINE || (IMPROVE_BASELINE && t < b)) {
       baseline[name] = Math.floor(t);
       changedStats = true;
     }
@@ -179,7 +179,7 @@ files.forEach((title) => {
     if (N >= 0) {
       if (changedStats) {
         for (let key in data) delete data[key].code;
-        fs.writeFileSync('/home/qfox/Dropbox/private/zeparser3/ignore/perf_data.json', JSON.stringify(data));
+        fs.writeFileSync('ignore/perf_data.json', JSON.stringify(data));
       }
       // Signal ./t that this script is not finished, just the current run
       process.exit(0);
