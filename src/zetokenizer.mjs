@@ -127,7 +127,6 @@ const $G_WHITE = (1 << ++__$group);
 const $G_NEWLINE = (1 << ++__$group);
 const $G_COMMENT = (1 << ++__$group);
 const $G_IDENT = (1 << ++__$group);
-const $G_IDENT_HAD_ESCAPE = (1 << ++__$group); // Used to invalidate idents which are canonical keywords but contain unicode escapes (which is not allowed)
 const $G_NUMBER = (1 << ++__$group);
 const $G_NUMBER_BIG_INT = (1 << ++__$group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
 const $G_PUNCTUATOR = (1 << ++__$group);
@@ -297,9 +296,9 @@ const $SPACE = $L_SPACE | $G_WHITE;
 const $TAB = $L_TAB | $G_WHITE;
 const $NL_SOLO = $L_NL_SINGLE | $G_WHITE | $G_NEWLINE; // Any specced line terminator that is not the combination of crlf
 const $NL_CRLF = $L_NL_CRLF | $G_WHITE | $G_NEWLINE;
-const $COMMENT_SINGLE = $L_COMMENT_SINGLE | $G_COMMENT;
-const $COMMENT_MULTI = $L_COMMENT_MULTI | $G_COMMENT;
-const $COMMENT_HTML = $L_COMMENT_HTML | $G_COMMENT;
+const $COMMENT_SINGLE = $L_COMMENT_SINGLE | $G_COMMENT | $G_WHITE;
+const $COMMENT_MULTI = $L_COMMENT_MULTI | $G_COMMENT | $G_WHITE;
+const $COMMENT_HTML = $L_COMMENT_HTML | $G_COMMENT | $G_WHITE;
 const $IDENT = $L_IDENT | $G_IDENT;
 const $ID_arguments = $L_ID_arguments | $G_IDENT;
 const $ID_as = $L_ID_as | $G_IDENT;
@@ -1131,8 +1130,6 @@ function ZeTokenizer(
   let pointer = 0;
   let len = input.length;
 
-  let wasWhite = false;
-  let wasComment = false; // for Babel, I guess...
   let consumedNewlinesThisToken = false; // whitespace newline token or string token that contained newline or multiline comment
   let consumedCommentSincePrevSolid = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
@@ -1274,9 +1271,6 @@ function ZeTokenizer(
       let startCol = pointer - currentColOffset;
       let startRow = currentLine;
 
-      wasWhite = false;
-      wasComment = false;
-
       if (eof()) {
         token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken);
         finished = true;
@@ -1290,13 +1284,13 @@ function ZeTokenizer(
       ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
 
       // Non-whitespace tokens always get returned
-      if (!wasWhite) {
+      if ((consumedTokenType & $G_WHITE) !== $G_WHITE) {
         token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
         return returnSolidToken(token);
       }
 
       // Babel parity demands comments to be returned... Not sure whether the complexity (over checking $white) is worth
-      if (wasComment) {
+      if ((consumedTokenType & $G_COMMENT) === $G_COMMENT) {
         if (returnTokens === RETURN_COMMENT_TOKENS) {
           token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
           returnCommentToken(token);
@@ -1594,11 +1588,9 @@ function ZeTokenizer(
 
   function parseSpace() {
     // For non-minified code it is very likely that a space is followed by another space
-    wasWhite = true;
     return $SPACE;
   }
   function parseCR() {
-    wasWhite = true;
     if (neof() && peeky($$LF_0A)) {
       ASSERT_skip($$LF_0A);
       incrementLine();
@@ -2905,8 +2897,6 @@ function ZeTokenizer(
     ASSERT(parseCommentSingle.length === arguments.length, 'arg count');
 
     consumedCommentSincePrevSolid = true;
-    wasWhite = true;
-    wasComment = true;
 
     while (neof()) {
       let c = peek();
@@ -2940,8 +2930,6 @@ function ZeTokenizer(
         skip();
         if (c === $$FWDSLASH_2F) {
           consumedCommentSincePrevSolid = true;
-          wasWhite = true;
-          wasComment = true;
           return $COMMENT_MULTI;
         }
       }
@@ -3051,7 +3039,6 @@ function ZeTokenizer(
   function parseNewlineSolo() {
     // One character, not crlf
     incrementLine();
-    wasWhite = true;
     return $NL_SOLO;
   }
 
@@ -5745,8 +5732,8 @@ function isPsLs(c) {
   return c === $$PS_2028 || c === $$LS_2029;
 }
 
-function toktypeToString(type, _, ignoreUnknown) {
-  ASSERT(ALL_TOKEN_TYPES.includes(type), 'should be known type', type, ALL_TOKEN_TYPES);
+function toktypeToString(type, token, ignoreUnknown) {
+  ASSERT(ALL_TOKEN_TYPES.includes(type), 'should be known type', 'type=', type, 'ALL_TOKEN_TYPES=', ALL_TOKEN_TYPES, 'token=', token);
 
   switch (type) {
     case $SPACE: return 'SPACE';
