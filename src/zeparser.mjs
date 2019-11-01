@@ -8072,7 +8072,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let arrowScoop = SCOPE_createGlobal('parseArrowParenlessFromPunc');
     let paramScoop = SCOPE_addLayer(arrowScoop, SCOPE_LAYER_ARROW_PARAMS, 'parseArrowParenlessFromPunc(arg)');
-    if (options_exposeScopes) AST_set('$scope', paramScoop);
     ASSERT(paramScoop._ = 'parenless arrow scope');
     SCOPE_addLexBinding(paramScoop, identToken.str, BINDING_TYPE_ARG, FDS_ILLEGAL);
 
@@ -8619,7 +8618,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let arrowScoop = SCOPE_createGlobal('_parseGroupToplevels');
     let paramScoop = SCOPE_addLayer(arrowScoop, SCOPE_LAYER_ARROW_PARAMS, '_parseGroupToplevels(arg)');
-    if (options_exposeScopes) AST_set('$scope', paramScoop);
     ASSERT(paramScoop._ = 'arrow scope');
 
     if (curtok.type === $PUNC_PAREN_CLOSE) {
