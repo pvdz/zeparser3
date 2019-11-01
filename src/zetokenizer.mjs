@@ -169,7 +169,6 @@ const $L_ERROR = ++__$leaf;
 
 // Important Idents
 
-// const $L_ID_none = ++__$leaf;
 const $L_ID_arguments = ++__$leaf;
 const $L_ID_as = ++__$leaf;
 const $L_ID_async = ++__$leaf;
@@ -179,7 +178,6 @@ const $L_ID_case = ++__$leaf;
 const $L_ID_catch = ++__$leaf;
 const $L_ID_class = ++__$leaf;
 const $L_ID_const = ++__$leaf;
-// const $L_ID_constructor = ++__$leaf;
 const $L_ID_continue = ++__$leaf;
 const $L_ID_debugger = ++__$leaf;
 const $L_ID_default = ++__$leaf;
@@ -309,7 +307,6 @@ const $ID_case = $L_ID_case | $G_IDENT;
 const $ID_catch = $L_ID_catch | $G_IDENT;
 const $ID_class = $L_ID_class | $G_IDENT;
 const $ID_const = $L_ID_const | $G_IDENT;
-// const $ID_constructor=  | $G_IDENT; // This is only used/special for class members, which do not consider any other ident special. Not worth the effort.
 const $ID_continue = $L_ID_continue | $G_IDENT;
 const $ID_debugger = $L_ID_debugger | $G_IDENT;
 const $ID_default = $L_ID_default | $G_IDENT;

@@ -4549,7 +4549,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curtok.type === $ID_const) {
         // export const <bindings>
         let constToken = curtok;
-        ASSERT_skipToBindingStart($ID_const , lexerFlags);
+        ASSERT_skipToBindingStart($ID_const, lexerFlags);
         parseAnyVarDeclaration(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         needsSemi = false
         AST_set('source', null);
@@ -4891,7 +4891,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //         ^
     // - `for (const x;;);`
     let constToken = curtok;
-    ASSERT_skipToBindingStart($ID_const , lexerFlags);
+    ASSERT_skipToBindingStart($ID_const, lexerFlags);
     parseAnyVarDeclaration(lexerFlags | LF_IN_FOR_LHS, constToken, scoop, BINDING_TYPE_CONST, FROM_FOR_HEADER, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
 
     // const decl is assignable
