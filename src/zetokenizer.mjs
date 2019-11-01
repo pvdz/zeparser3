@@ -1474,9 +1474,13 @@ function ZeTokenizer(
 
   function createToken(type, start, stop, column, line, nl) {
     ASSERT(createToken.length === arguments.length, 'arg count');
-    ASSERT(
-      ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext())
-      , 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
+    ASSERT(ALL_TOKEN_TYPES.includes(type) || console.log('####\n' + getErrorContext()), 'the set of generated token types is fixed. New ones combinations should be part of this set', type.toString(2));
+    ASSERT(Number.isFinite(start), 'start finite');
+    ASSERT(Number.isFinite(stop), 'stop finite');
+    ASSERT(Number.isFinite(column), 'col finite');
+    ASSERT(Number.isFinite(line), 'line finite');
+    ASSERT(typeof type === 'number', 'type is enum');
+    ASSERT(typeof nl === 'boolean', 'nl bool');
 
     ASSERT(typeof lastCanonizedString === 'string', 'euhhhh what?');
     if (isStringToken(type)) {
