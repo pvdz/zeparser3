@@ -88,6 +88,10 @@ let assertSkipWhitelist = new Set([
 ]);
 let constMap = new Map;
 
+let $g_flags = 8; // start at the 9th bit (keep in sync with tokenizer)
+let $l_flags = 0;
+let $lf_flags = 0;
+
 function ArrayExpression(node) {
   assert(node.type, 'ArrayExpression');
   return '[' + node.elements.map(n => n === null ? ',' : ($(n) + (n.type === 'RestElement' ? '' : ','))).join(' ') + ']';
@@ -642,49 +646,47 @@ function UpdateExpression(node) {
   assert(node.type, 'UpdateExpression');
   return (node.prefix ? node.operator : '') + $(node.argument) + (node.prefix ? '' : node.operator);
 }
-let $g_flags = 4; // start at the 5th bit
-let $l_flags = 0;
-let $lf_flags = 0;
+
 function VariableDeclaration(node, fromFor) {
   assert(node.type, 'VariableDeclaration');
   if (node.kind === 'const' && node.declarations.length === 1 && node.declarations[0].id.type === 'Identifier') {
     let name = node.declarations[0].id.name;
 
-    if (name.slice(0, 3) === '$G_') {
-      let val = '(' + String(1 << ++$g_flags) + ')';
-      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-        throw new Error('each constant should only appear once');
-      }
-      constMap.set(node.declarations[0].id.name, val);
-      return (fromFor ? '' : ';'); // no semi inside `for`
-    } else if (name.slice(0, 3) === '$L_') {
-      let val = '(' + String(++$l_flags) + ')';
-      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-        throw new Error('each constant should only appear once');
-      }
-      constMap.set(node.declarations[0].id.name, val);
-      return (fromFor ? '' : ';'); // no semi inside `for`
-    } else if (name.slice(0, 3) === 'LF_') {
-      let val = '(' + String(1 << ++$lf_flags) + ')';
-      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-        throw new Error('each constant should only appear once');
-      }
-      constMap.set(node.declarations[0].id.name, val);
-      return (fromFor ? '' : ';'); // no semi inside `for`
-    } else if (name[0] === '$' && name[1] === '$') {
-      if (name[1] !== '$') console.log('Replacing', name);
-
-      let val = '(' + $(node.declarations[0].init) + ')';
-      if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-        console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-        throw new Error('each constant should only appear once');
-      }
-      constMap.set(node.declarations[0].id.name, val);
-      return (fromFor ? '' : ';'); // no semi inside `for`
-    }
+    // if (name.slice(0, 3) === '$G_') {
+    //   let val = '(' + String(1 << ++$g_flags) + ')';
+    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+    //     throw new Error('each constant should only appear once');
+    //   }
+    //   constMap.set(node.declarations[0].id.name, val);
+    //   return (fromFor ? '' : ';'); // no semi inside `for`
+    // } else if (name.slice(0, 3) === '$L_') {
+    //   let val = '(' + String(++$l_flags) + ')';
+    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+    //     throw new Error('each constant should only appear once');
+    //   }
+    //   constMap.set(node.declarations[0].id.name, val);
+    //   return (fromFor ? '' : ';'); // no semi inside `for`
+    // } else if (name.slice(0, 3) === 'LF_') {
+    //   let val = '(' + String(1 << ++$lf_flags) + ')';
+    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+    //     throw new Error('each constant should only appear once');
+    //   }
+    //   constMap.set(node.declarations[0].id.name, val);
+    //   return (fromFor ? '' : ';'); // no semi inside `for`
+    // } else if (name[0] === '$' && name[1] === '$') {
+    //   if (name[1] !== '$') console.log('Replacing', name);
+    //
+    //   let val = '(' + $(node.declarations[0].init) + ')';
+    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
+    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
+    //     throw new Error('each constant should only appear once');
+    //   }
+    //   constMap.set(node.declarations[0].id.name, val);
+    //   return (fromFor ? '' : ';'); // no semi inside `for`
+    // }
   }
   return node.kind + ' ' + node.declarations.map($).join(', ') + (fromFor ? '' : ';'); // no semi inside `for`
 }
