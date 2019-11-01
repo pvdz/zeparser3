@@ -814,7 +814,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(_path[_path.length - 1].hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', _path[_path.length - 1]);
+    ASSERT(prop[0] === '$' || _path[_path.length - 1].hasOwnProperty(prop), 'all ast node members should be predefined', prop, '--->', _path[_path.length - 1]);
 
     // Set a property value and expect it to be undefined before
     ASSERT(_path[_path.length - 1][prop] === undefined, 'use AST_clobber? This func doesnt clobber, prop=' + prop + ', val=' + value);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
