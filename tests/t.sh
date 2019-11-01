@@ -57,6 +57,7 @@ ZeParser test runner help:
  p2            My shortcut for working with p1 with sudo :p
  p3            Undo system settings applied in p3
  z             Create build
+ devtools      Alias for `./t p --inspect --devtools --build` which can be used to debug the parser in chrome devtools
  deoptigate    Run deoptigate (see doptie.js for file config)
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --strict      Enable strict script mode, do not auto-enable other modes
@@ -258,7 +259,7 @@ done
 HFPID=''
 if [[ "${HF}" = "yes" ]]; then
     # Note: the build is self-hosted so we should start this before transforming with HF
-    if [[ ! -z "${BUILD}" ]]; then
+    if [[ -z "${NO_BUILDING}" ]]; then
       set -x
 
       if [[ -z "${NO_BUILDING}" ]]; then
