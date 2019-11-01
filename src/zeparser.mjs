@@ -3040,30 +3040,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
       // IfStatements always consider a func decl as if wrapped in a block, so never leak its name outward
       scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for label');
+      ASSERT(scoop.$funcName = curtok.str); // meh. just for debugggin.
 
       // TLDR: labelled functions are always statements and use same binding propagation rules as non-labelled functions
       // This rule ONLY applies to plain functions. Async / generators or other types of declarations are illegal here!
     }
-    // else if (fdState === FDS_VAR) {
-    //   // if (fdState === FDS_VAR) {
-    //   //   // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
-    //   //   // IfStatements always consider a func decl as if wrapped in a block, so never leak its name outward
-    //   //   scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for label');
-    //   // }
-    //
-    //
-    //
-    //   // in web compat mode func statements are only allowed inside `if` and `else` and label statements in sloppy mode
-    //   if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
-    //     // This is (only) relevant for webcompat function statements that are direct sub-statement of `if` and `else`.
-    //     // There exists cases where the lexical binding of the function should not clash with a var binding.
-    //     // Note that this is not the case for "labelled function statements" (`foo: function f(){}`), their name goes to parent
-    //     // [v]: `function g(){ var f; if (x) function f() {}; }`
-    //     scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for if-else');
-    //   } else {
-    //     THROW('Function declaration is only allowed as direct child of an `if` or `else` with web compat mode enabled in sloppy mode');
-    //   }
-    // }
     else if (isFuncDecl === IS_FUNC_DECL && fdState === FDS_ILLEGAL) {
       // https://tc39.es/ecma262/#prod-LabelledItem
       // A function declaration is allowed as child of a label, but that case does not allow async/star
@@ -3395,6 +3376,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //          ^
 
     let paramScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FUNC_PARAMS, 'parseFunctionFromParams(arg)');
+    ASSERT(!void(scoop._funcName = functionNameTokenToVerify && functionNameTokenToVerify.str));
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     let paramsSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, paramScoop, bindingFrom, asyncToken, starToken, getToken, setToken);
     ASSERT(curtok.type === $PUNC_CURLY_OPEN, 'the paretocurlyopen should already throw (not assert) if the next token is not a curly open');
@@ -3405,6 +3387,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     let finalFuncScope = SCOPE_addLayer(paramScoop, SCOPE_LAYER_FUNC_BODY, 'parseFunctionFromParams(body)');
+    ASSERT(!void(finalFuncScope._funcName = functionNameTokenToVerify && functionNameTokenToVerify.str));
     if (options_exposeScopes) AST_set('$scope', finalFuncScope);
     parseFunctionBody(lexerFlags, finalFuncScope, EMPTY_LABEL_SET, expressionState, paramsSimple, paramScoop.dupeParamErrorToken, functionNameTokenToVerify);
   }
@@ -4710,6 +4693,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // the for-header adds a special lex scope because there are special let/const/var rules in place we need to verify
     scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FOR_HEADER, 'parseForStatement(header)');
+    ASSERT(scoop._funcName = '(for has no name)');
 
     let forToken = curtok;
     ASSERT_skipToAwaitParenOpen($ID_for, lexerFlags);
@@ -5729,7 +5713,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.type !== $PUNC_CURLY_OPEN) THROW('Missing opening curly of `switch` body, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipToSwitchBody($PUNC_CURLY_OPEN, lexerFlagsForSwitch);
 
-    parseSwitchCases(lexerFlagsForSwitch | LF_IN_SWITCH, SCOPE_addLayer(scoop, SCOPE_LAYER_SWITCH, 'parseSwitchStatement'), labelSet, 'cases');
+    let casesScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_SWITCH, 'parseSwitchStatement');
+    ASSERT(casesScoop._funcName = '(switch has no name)');
+    parseSwitchCases(lexerFlagsForSwitch | LF_IN_SWITCH, casesScoop, labelSet, 'cases');
 
     if (curtok.type !== $PUNC_CURLY_CLOSE) THROW('Missing the closing curly of the switch body, found `' + tokenStrForError(curtok) + '` instead');
     ASSERT_skipToStatementStart($PUNC_CURLY_CLOSE, lexerFlags);
@@ -5804,6 +5790,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     });
 
     let tryScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_TRY, 'parseTryStatement(try)');
+    ASSERT(tryScoop._funcName = '(try has no name)');
     parseBlockStatement(lexerFlags, tryScoop, labelSet, 'block');
 
     let hasEither = false;
@@ -5823,9 +5810,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // record the catch var in its own scope record, we'll then move the args record to be a lexical scope level (hackish)
       let catchHeadScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_CATCH_HEAD, 'parseTryStatement(catch-var)');
+      ASSERT(catchHeadScoop._funcName = '(catch has no name)');
 
       // create a scope for the catch body. this way var decls can search for the catch scope to assert new vars
       let catchBodyScoop = SCOPE_addLayer(catchHeadScoop, SCOPE_LAYER_CATCH_BODY, 'parseTryStatement(catch-body)');
+      ASSERT(catchBodyScoop._funcName = '(catch has no name)');
 
       // Catch clause is optional since es10
 
@@ -5895,6 +5884,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       hasEither = true;
       ASSERT_skipToCurlyOpenOrDie($ID_finally, lexerFlags);
       let finallyScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FINALLY, 'parseTryStatement(finally)');
+      ASSERT(finallyScoop._funcName = '(finally has no name)');
       parseBlockStatement(lexerFlags, finallyScoop, labelSet, 'finalizer');
     } else {
       AST_set('finalizer', null);
@@ -6245,6 +6235,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtok.type === $PUNC_CURLY_OPEN) {
       let blockScoop = SCOPE_addLayer(scoop, SCOPE_LAYER_BLOCK, 'parsePunctuatorStatement.block');
+      ASSERT(blockScoop._funcName = '(block has no name)');
       // TODO: does block not have its own (fresh) label set?
       parseBlockStatement(lexerFlags, blockScoop, labelSet, astProp);
       return;
@@ -8073,6 +8064,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let arrowScoop = SCOPE_createGlobal('parseArrowParenlessFromPunc');
     let paramScoop = SCOPE_addLayer(arrowScoop, SCOPE_LAYER_ARROW_PARAMS, 'parseArrowParenlessFromPunc(arg)');
     ASSERT(paramScoop._ = 'parenless arrow scope');
+    ASSERT(paramScoop._funcName = '(arrow has no name)');
     SCOPE_addLexBinding(paramScoop, identToken.str, BINDING_TYPE_ARG, FDS_ILLEGAL);
 
     if (identToken.type === $ID_await && hasAnyFlag(lexerFlags, LF_IN_ASYNC)) {
@@ -8526,6 +8518,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (!babelCompat) AST_set('expression', false);
 
       let arrowScoop = SCOPE_addLayer(paramScoop, SCOPE_LAYER_FUNC_BODY, 'parseArrowFromPunc');
+      ASSERT(arrowScoop._funcName = '(arrow has no name)');
       parseFunctionBody(lexerFlags, arrowScoop, EMPTY_LABEL_SET, IS_EXPRESSION, paramsSimple, NO_DUPE_PARAMS, NO_ID_TO_VERIFY);
     } else {
       // Note: you cannot await in a regular arrow, so this is illegal:
@@ -8619,6 +8612,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let arrowScoop = SCOPE_createGlobal('_parseGroupToplevels');
     let paramScoop = SCOPE_addLayer(arrowScoop, SCOPE_LAYER_ARROW_PARAMS, '_parseGroupToplevels(arg)');
     ASSERT(paramScoop._ = 'arrow scope');
+    ASSERT(paramScoop._funcName = '(arrow has no name)');
 
     if (curtok.type === $PUNC_PAREN_CLOSE) {
       // special case; the `()` here must be the arrow header or (possibly) an `async()` function call
