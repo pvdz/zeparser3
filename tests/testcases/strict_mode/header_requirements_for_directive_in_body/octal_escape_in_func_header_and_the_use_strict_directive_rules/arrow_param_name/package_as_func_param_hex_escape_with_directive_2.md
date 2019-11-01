@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex: Only unicode escapes are legal in identifier names
+    Only unicode escapes are supported in identifier escapes
 
 (p\x61ckage) => { "use strict"; }
  ^------- error

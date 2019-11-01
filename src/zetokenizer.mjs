@@ -2484,77 +2484,64 @@ function ZeTokenizer(
     // Returns a token type (!). See parseRegexIdentifierRest for regexes...
     ASSERT(parseIdentifierRest.length === arguments.length, 'arg count');
     ASSERT(typeof prevStr === 'string', 'prev should be string so far or empty');
-    if (neof()) {
-      let c = peek();
-      do {
-        if (c === $$BACKSLASH_5C) {
-          // this ident is part of an identifier. if the backslash is invalid or the escaped codepoint not valid for the
-          // identifier then an $ERROR token should be yielded since the backslash cannot be valid in any other way here
-          if (eofd(1)) {
-            if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Encountered a backslash at end of input';
-            return $ERROR;
-          }
-          if (peekd(1) === $$U_75) {
-            ASSERT_skip($$BACKSLASH_5C);
-            ASSERT_skip($$U_75);
-            let errbak = lastPotentialRegexError;
-            c = parseRegexCharClassUnicodeEscape();
-            let wasDoubleQuad = c & REGEX_CHARCLASS_DOUBLE_QUAD;
-            if (wasDoubleQuad) c ^= REGEX_CHARCLASS_DOUBLE_QUAD;
-            ASSERT(c !== INVALID_IDENT_CHAR, 'dont think this can happen');
-            if (c === REGEX_CHARCLASS_BAD) {
-              regexSyntaxError('Found invalid quad unicode escape, the escape must be part of the ident so the ident is an error');
-              return $ERROR;
-            }
-            if ((c & REGEX_CHARCLASS_BAD_SANS_U_FLAG) === REGEX_CHARCLASS_BAD_SANS_U_FLAG) {
-              // There is no condition for es6 unicode escapes or double quad surrogate pairs for plain identifiers
-              c = c ^ REGEX_CHARCLASS_BAD_SANS_U_FLAG;
-              lastPotentialRegexError = errbak;
-            }
-            let wide = isIdentRestChr(c, CODEPOINT_FROM_ESCAPE);
-            if (wide === INVALID_IDENT_CHAR) {
-              regexSyntaxError('An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error');
-              return $ERROR;
-            }
-            if (wide === VALID_SINGLE_CHAR) {
-              ASSERT(!wasDoubleQuad, 'The first quad of a valid surrogate pair cannot yield a valid single ident character');
-              prevStr += String.fromCharCode(c);
-            } else {
-              ASSERT(!wasDoubleQuad || (isIdentRestChr(codePointToSurrogateHead(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR && isIdentRestChr(codePointToSurrogateTail(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR), 'The first quad of a surrogate pair cannot yield a valid single ident rest character')
-              prevStr += String.fromCodePoint(c);
-            }
-          } else {
-            regexSyntaxError('Only unicode escapes are legal in identifier names');
-            return $ERROR;
-          }
-        }
-        else {
-          let wide = isIdentRestChr(c, pointer);
-          if (wide === INVALID_IDENT_CHAR) break;
-          if (wide === VALID_DOUBLE_CHAR) {
-            prevStr += slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
-            skipFastWithoutUpdatingCache();
-            skip();
-          } else {
-            ASSERT(wide === VALID_SINGLE_CHAR, 'enum');
-            ASSERT_skip(c);
-            prevStr += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
-          }
-        }
-        if (eof()) break;
-        c = peek();
-      } while (true);
-      // slow path, dont test this inside the super hot loop above
-      if (c === $$BACKSLASH_5C) {
-        ASSERT_skip($$BACKSLASH_5C);
-        return parseIdentFromUnicodeEscape(NON_START, prevStr);
-      }
+
+    let buf = prevStr;
+    let start = pointer;
+
+    let c = 0;
+
+    // Main scan loop, [a-zA-Z0-9$_]
+    while (neof() && isIdentRestCharAscii(c = peek())) {
+      ASSERT_skip(c);
     }
-    lastParsedIdent = prevStr;
+
+    if (eof()) {
+      lastParsedIdent = buf + slice(start, pointer);
+      return $IDENT;
+    }
+
+    // Confirm this is the end of the ident, or a special case
+    let s = getTokenStart(c);
+    ASSERT(eof() || s !== START_ID && s !== START_KEY && s !== START_DECIMAL && s !== START_ZERO, 'should already have checked these in the loop');
+    if (s === START_UNICODE) {
+      // Slow unicode check
+      let wide = isIdentRestChrUnicode(c, pointer);
+
+      if (wide === INVALID_IDENT_CHAR) {
+        lastParsedIdent = buf + slice(start, pointer);
+        return $IDENT;
+      }
+
+      if (wide === VALID_DOUBLE_CHAR) {
+        skipFastWithoutUpdatingCache();
+      }
+      skip();
+
+      // Recursion ... should be okay for idents even without tail recursion?
+      return parseIdentifierRest(buf + slice(start, pointer));
+    }
+
+    if (s === START_BSLASH) {
+      // `foo\u0030bar`  (is canonical ident `foo0bar`)
+      let x = buf + slice(start, pointer);
+      ASSERT_skip($$BACKSLASH_5C);
+      return parseIdentFromUnicodeEscape(NON_START, x);
+    }
+
+    lastParsedIdent = buf + slice(start, pointer);
     return $IDENT;
+  }
+  function isIdentRestCharAscii(c) {
+    if (c >= $$A_61 && c <= $$Z_7A) return true;
+    if (c >= $$A_UC_41 && c <= $$Z_UC_5A) return true;
+    if (c >= $$0_30 && c <= $$9_39) return true;
+    if (c === $$$_24 || c === $$LODASH_5F) return true;
+    return false;
   }
   function parseIdentFromUnicodeEscape(fromStart, prev) {
     ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
+    ASSERT(input.charCodeAt(pointer-1) === $$BACKSLASH_5C, 'should have consumed the backslash');
+
     if (eof()) {
       lastParsedIdent = prev;
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Encountered a backslash at end of input';
@@ -2568,16 +2555,17 @@ function ZeTokenizer(
       THROW('Only unicode escapes are supported in identifier escapes');
     }
 
+    if (eof()) {
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Reached end of input before closing the current ident escape';
+      return $ERROR;
+    }
+
     // Note: this is a slow path. and a super edge case.
     let start = pointer;
     if (parseIdentOrStringEscapeUnicode() === BAD_ESCAPE) {
       parseIdentifierRest(prev); // keep on parsing the identifier but we will make it an error token
       lastParsedIdent = prev;
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Only _unicode_ escapes are supported in identifiers';
-      return $ERROR;
-    }
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Reached end of input before closing the current ident escape';
       return $ERROR;
     }
 
@@ -2811,7 +2799,9 @@ function ZeTokenizer(
     if (s === START_DECIMAL) return VALID_SINGLE_CHAR;
     if (s === START_ZERO) return VALID_SINGLE_CHAR;
     if (s !== START_UNICODE) return INVALID_IDENT_CHAR;
-
+    return isIdentRestChrUnicode(c, offsetOfC);
+    }
+  function isIdentRestChrUnicode(c, offsetOfC) {
     // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
     // U+200C (ZERO WIDTH NON-JOINER) and U+200D (ZERO WIDTH JOINER) are format-control characters that are used to
     // make necessary distinctions when forming words or phrases in certain languages. In ECMAScript source text
