@@ -2559,7 +2559,8 @@ function ZeTokenizer(
 
           // Tests imply that the existence rule does not need to apply in web compat mode. TBD.
           if (webCompat === WEB_COMPAT_OFF) {
-            for (let i=0,l=namedBackRefs.length;i<l;++i) {
+            let l = namedBackRefs.length;
+            for (let i=0;i<l;++i) {
               if (groupNames['#' + namedBackRefs[i]] === undefined) {
                 THROW('Named back reference \\k<' + namedBackRefs[i] +'> was not defined in this regex: ' + JSON.stringify(groupNames).replace(/"/g,''));
               }

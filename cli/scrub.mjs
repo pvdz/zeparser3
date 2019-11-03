@@ -22,10 +22,10 @@ import {
   $$U_75, $$W_77, $$X_78
 } from "../src/charcodes.mjs";
 
-function assert(a, b) {
+function assert(a, b, desc) {
   // This is an assert that can be dropped for a build... It confirms hashing assumptions
   // (Will also be an invaluable tool when adding a new node type ;)
-  if (a !== b) throw new Error('Expected `' + b + '`, got `' + a + '`');
+  if (a !== b) throw new Error('Expected `' + b + '`, got `' + a + '`; ' + (desc || ''));
 }
 
 const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
@@ -86,11 +86,16 @@ let assertSkipWhitelist = new Set([
   'ASSERT_skipToAfterNew',
   'ASSERT_skipToExpressionStartSquareCloseComma',
 ]);
-let constMap = new Map;
 
-let $g_flags = 8; // start at the 9th bit (keep in sync with tokenizer)
-let $l_flags = 0;
-let $lf_flags = 0;
+// Collect identifier names to inline
+// This should contain all constants from specific files with the values they should replace
+let constMap = new Map;
+let recordingConstants = false;
+
+let $flag_lf = 0;
+let $flag_start = 0;
+let $flag_leaf = 0;
+let $flag_group = 7; // keep in sync with tokentype.js
 
 function ArrayExpression(node) {
   assert(node.type, 'ArrayExpression');
@@ -403,12 +408,24 @@ function FunctionExpression(node) {
 }
 function Identifier(node) {
   assert(node.type, 'Identifier');
+
+  let name = node.name;
+
   if (SCRUB_OTHERS) {
-    if (node.name === 'babelCompat') return 'false';
-    if (node.name === 'acornCompat') return 'false';
+    if (name === 'babelCompat') return 'false';
+    if (name === 'acornCompat') return 'false';
   }
-  if (constMap.has(node.name)) return constMap.get(node.name); // inline constants...
-  return node.name;
+
+  switch (name) {
+    case '__$lf_flag':
+    case '__$start':
+    case '__$leaf':
+    case '__$group':
+      throw new Error('The ident `' + name + '` should only be used as part of an update expression (++x), the build script assumes this');
+  }
+
+  if (constMap.has(name)) return constMap.get(name); // inline constants...
+  return name;
 }
 function IfStatement(node) {
   assert(node.type, 'IfStatement');
@@ -644,49 +661,33 @@ function UnaryExpression(node) {
 }
 function UpdateExpression(node) {
   assert(node.type, 'UpdateExpression');
+
+  if (node.argument.type === 'Identifier') {
+    switch (node.argument.name) {
+      case '__$flag_lf':
+        return ++$flag_lf;
+      case '__$flag_start':
+        return $flag_start++;
+      case '__$flag_leaf':
+        return ++$flag_leaf;
+      case '__$flag_group':
+        return ++$flag_group;
+    }
+  }
+
   return (node.prefix ? node.operator : '') + $(node.argument) + (node.prefix ? '' : node.operator);
 }
 
 function VariableDeclaration(node, fromFor) {
   assert(node.type, 'VariableDeclaration');
-  if (node.kind === 'const' && node.declarations.length === 1 && node.declarations[0].id.type === 'Identifier') {
-    let name = node.declarations[0].id.name;
-
-    // if (name.slice(0, 3) === '$G_') {
-    //   let val = '(' + String(1 << ++$g_flags) + ')';
-    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-    //     throw new Error('each constant should only appear once');
-    //   }
-    //   constMap.set(node.declarations[0].id.name, val);
-    //   return (fromFor ? '' : ';'); // no semi inside `for`
-    // } else if (name.slice(0, 3) === '$L_') {
-    //   let val = '(' + String(++$l_flags) + ')';
-    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-    //     throw new Error('each constant should only appear once');
-    //   }
-    //   constMap.set(node.declarations[0].id.name, val);
-    //   return (fromFor ? '' : ';'); // no semi inside `for`
-    // } else if (name.slice(0, 3) === 'LF_') {
-    //   let val = '(' + String(1 << ++$lf_flags) + ')';
-    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-    //     throw new Error('each constant should only appear once');
-    //   }
-    //   constMap.set(node.declarations[0].id.name, val);
-    //   return (fromFor ? '' : ';'); // no semi inside `for`
-    // } else if (name[0] === '$' && name[1] === '$') {
-    //   if (name[1] !== '$') console.log('Replacing', name);
-    //
-    //   let val = '(' + $(node.declarations[0].init) + ')';
-    //   if (name[0] === '$' && constMap.has(name) && constMap.get(name) !== val) {
-    //     console.log('Name:', name, ', Recorded value:', constMap.get(name), ', New value:', val);
-    //     throw new Error('each constant should only appear once');
-    //   }
-    //   constMap.set(node.declarations[0].id.name, val);
-    //   return (fromFor ? '' : ';'); // no semi inside `for`
-    // }
+  assert(node.declarations.length, 1, 'coding style uses only one binding per declaration (counting a whole destructuring as one) `' + (node.declarations.length !== 1 && (node.kind + ' ' + node.declarations.map($).join(', '))) + '`');
+  let decl = node.declarations[0];
+  if (decl.id.type === 'Identifier') assert(constMap.has(decl.id.name), false, 'constants should not be redefined');
+  if (recordingConstants && node.kind === 'const' && decl.id.type === 'Identifier') {
+    assert(!fromFor, true, 'files from which constants are recorded would not use const inside a for-header');
+    let name = decl.id.name;
+    constMap.set(name, $w(decl.init)); // All constants must have an init as per spec
+    return '/* const ' + name + ' */;';
   }
   return node.kind + ' ' + node.declarations.map($).join(', ') + (fromFor ? '' : ';'); // no semi inside `for`
 }
@@ -887,7 +888,13 @@ function $(node, _, __, fromFor) {
   return jumpTable[hash](node, fromFor, type, c);
 }
 
+function scrub(node, localConstMap, recordConstants) {
+  constMap = localConstMap;
+  recordingConstants = recordConstants;
+  return $(node);
+}
+
 export {
-  $ as scrub,
+  scrub,
 };
 

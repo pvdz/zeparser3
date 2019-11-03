@@ -10,173 +10,173 @@ import {
 // (If the number of leafs exceeds LEAF_BITS bits then it'll reduce the number of available bitwise flags)
 
 const LEAF_BITS = 8;
-let __$leaf = 0;
-let __$group = LEAF_BITS - 1; // offset 0
+let __$flag_leaf = 0; // This name is hardcoded in the build script...
+let __$flag_group = LEAF_BITS - 1; // offset 0, this name is hardcoded in the build script... keep value in sync
 
 // Groups get their own bit. This makes it easier to quickly check for a set of token types (string, string | number)
 // Additionally, modifiers get their own bit. Like bigint suffix or bad escapes. Generally these should apply to more
 // than one token, otherwise it can just go below as their own leaf type.
 
-const $G_WHITE = (1 << ++__$group);
-const $G_NEWLINE = (1 << ++__$group);
-const $G_COMMENT = (1 << ++__$group);
-const $G_IDENT = (1 << ++__$group);
-const $G_NUMBER = (1 << ++__$group);
-const $G_NUMBER_BIG_INT = (1 << ++__$group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
-const $G_PUNCTUATOR = (1 << ++__$group);
-const $G_STRING = (1 << ++__$group);
-const $G_REGEX = (1 << ++__$group);
-const $G_TICK = (1 << ++__$group);
-const $G_TICK_BAD_ESCAPE = (1 << ++__$group);
-const $G_OTHER = (1 << ++__$group);
+const $G_WHITE = (1 << ++__$flag_group);
+const $G_NEWLINE = (1 << ++__$flag_group);
+const $G_COMMENT = (1 << ++__$flag_group);
+const $G_IDENT = (1 << ++__$flag_group);
+const $G_NUMBER = (1 << ++__$flag_group);
+const $G_NUMBER_BIG_INT = (1 << ++__$flag_group); // modifies certain number types, they end with `n`; https://tc39.es/proposal-bigint/#sec-grammar-change
+const $G_PUNCTUATOR = (1 << ++__$flag_group);
+const $G_STRING = (1 << ++__$flag_group);
+const $G_REGEX = (1 << ++__$flag_group);
+const $G_TICK = (1 << ++__$flag_group);
+const $G_TICK_BAD_ESCAPE = (1 << ++__$flag_group);
+const $G_OTHER = (1 << ++__$flag_group);
 let ALL_GEES;
 ASSERT(ALL_GEES = [$G_WHITE, $G_NEWLINE, $G_COMMENT, $G_IDENT, $G_NUMBER, $G_NUMBER_BIG_INT, $G_PUNCTUATOR, $G_STRING, $G_REGEX, $G_TICK, $G_TICK_BAD_ESCAPE]);
-ASSERT(__$group < 32, 'cannot use more than 32 flags but have ' + __$group);
+ASSERT(__$flag_group < 32, 'cannot use more than 32 flags but have ' + __$flag_group);
 
 // Token types that are mutually exclusive can be encoded as as a unique id within a few bits of sequential space
 // You can still have group bits to complement these but it's far more space efficient this way
 // I don't think you should ever need the $L constants outside of defining the concrete token type constants below...
-const $L_SPACE = ++__$leaf;
-const $L_TAB = ++__$leaf;
-const $L_NL_SINGLE = ++__$leaf;
-const $L_NL_CRLF = ++__$leaf;
-const $L_COMMENT_SINGLE = ++__$leaf;
-const $L_COMMENT_MULTI = ++__$leaf;
-const $L_COMMENT_HTML = ++__$leaf;
-const $L_IDENT = ++__$leaf;
-const $L_NUMBER_HEX = ++__$leaf;
-const $L_NUMBER_DEC = ++__$leaf;
-const $L_NUMBER_BIN = ++__$leaf;
-const $L_NUMBER_OCT = ++__$leaf;
-const $L_NUMBER_OLD = ++__$leaf;
-const $L_REGEXN = ++__$leaf;
-const $L_REGEXU = ++__$leaf;
-const $L_STRING_SINGLE = ++__$leaf;
-const $L_STRING_DOUBLE = ++__$leaf;
-const $L_TICK_HEAD = ++__$leaf;
-const $L_TICK_BODY = ++__$leaf;
-const $L_TICK_TAIL = ++__$leaf;
-const $L_TICK_PURE = ++__$leaf;
-const $L_EOF = ++__$leaf;
-const $L_ASI = ++__$leaf;
-const $L_ERROR = ++__$leaf;
+const $L_SPACE = ++__$flag_leaf;
+const $L_TAB = ++__$flag_leaf;
+const $L_NL_SINGLE = ++__$flag_leaf;
+const $L_NL_CRLF = ++__$flag_leaf;
+const $L_COMMENT_SINGLE = ++__$flag_leaf;
+const $L_COMMENT_MULTI = ++__$flag_leaf;
+const $L_COMMENT_HTML = ++__$flag_leaf;
+const $L_IDENT = ++__$flag_leaf;
+const $L_NUMBER_HEX = ++__$flag_leaf;
+const $L_NUMBER_DEC = ++__$flag_leaf;
+const $L_NUMBER_BIN = ++__$flag_leaf;
+const $L_NUMBER_OCT = ++__$flag_leaf;
+const $L_NUMBER_OLD = ++__$flag_leaf;
+const $L_REGEXN = ++__$flag_leaf;
+const $L_REGEXU = ++__$flag_leaf;
+const $L_STRING_SINGLE = ++__$flag_leaf;
+const $L_STRING_DOUBLE = ++__$flag_leaf;
+const $L_TICK_HEAD = ++__$flag_leaf;
+const $L_TICK_BODY = ++__$flag_leaf;
+const $L_TICK_TAIL = ++__$flag_leaf;
+const $L_TICK_PURE = ++__$flag_leaf;
+const $L_EOF = ++__$flag_leaf;
+const $L_ASI = ++__$flag_leaf;
+const $L_ERROR = ++__$flag_leaf;
 
 // Important Idents
 
-const $L_ID_arguments = ++__$leaf;
-const $L_ID_as = ++__$leaf;
-const $L_ID_async = ++__$leaf;
-const $L_ID_await = ++__$leaf;
-const $L_ID_break = ++__$leaf;
-const $L_ID_case = ++__$leaf;
-const $L_ID_catch = ++__$leaf;
-const $L_ID_class = ++__$leaf;
-const $L_ID_const = ++__$leaf;
-const $L_ID_continue = ++__$leaf;
-const $L_ID_debugger = ++__$leaf;
-const $L_ID_default = ++__$leaf;
-const $L_ID_delete = ++__$leaf;
-const $L_ID_do = ++__$leaf;
-const $L_ID_else = ++__$leaf;
-const $L_ID_enum = ++__$leaf;
-const $L_ID_eval = ++__$leaf;
-const $L_ID_export = ++__$leaf;
-const $L_ID_extends = ++__$leaf;
-const $L_ID_false = ++__$leaf;
-const $L_ID_finally = ++__$leaf;
-const $L_ID_for = ++__$leaf;
-const $L_ID_from = ++__$leaf;
-const $L_ID_function = ++__$leaf;
-const $L_ID_get = ++__$leaf;
-const $L_ID_if = ++__$leaf;
-const $L_ID_implements = ++__$leaf;
-const $L_ID_import = ++__$leaf;
-const $L_ID_in = ++__$leaf;
-const $L_ID_instanceof = ++__$leaf;
-const $L_ID_interface = ++__$leaf;
-const $L_ID_let = ++__$leaf;
-const $L_ID_new = ++__$leaf;
-const $L_ID_null = ++__$leaf;
-const $L_ID_of = ++__$leaf;
-const $L_ID_package = ++__$leaf;
-const $L_ID_private = ++__$leaf;
-const $L_ID_protected = ++__$leaf;
-const $L_ID_public = ++__$leaf;
-const $L_ID_return = ++__$leaf;
-const $L_ID_set = ++__$leaf;
-const $L_ID_static = ++__$leaf;
-const $L_ID_super = ++__$leaf;
-const $L_ID_switch = ++__$leaf;
-const $L_ID_target = ++__$leaf;
-const $L_ID_this = ++__$leaf;
-const $L_ID_throw = ++__$leaf;
-const $L_ID_true = ++__$leaf;
-const $L_ID_try = ++__$leaf;
-const $L_ID_typeof = ++__$leaf;
-const $L_ID_var = ++__$leaf;
-const $L_ID_void = ++__$leaf;
-const $L_ID_while = ++__$leaf;
-const $L_ID_with = ++__$leaf;
-const $L_ID_yield = ++__$leaf;
+const $L_ID_arguments = ++__$flag_leaf;
+const $L_ID_as = ++__$flag_leaf;
+const $L_ID_async = ++__$flag_leaf;
+const $L_ID_await = ++__$flag_leaf;
+const $L_ID_break = ++__$flag_leaf;
+const $L_ID_case = ++__$flag_leaf;
+const $L_ID_catch = ++__$flag_leaf;
+const $L_ID_class = ++__$flag_leaf;
+const $L_ID_const = ++__$flag_leaf;
+const $L_ID_continue = ++__$flag_leaf;
+const $L_ID_debugger = ++__$flag_leaf;
+const $L_ID_default = ++__$flag_leaf;
+const $L_ID_delete = ++__$flag_leaf;
+const $L_ID_do = ++__$flag_leaf;
+const $L_ID_else = ++__$flag_leaf;
+const $L_ID_enum = ++__$flag_leaf;
+const $L_ID_eval = ++__$flag_leaf;
+const $L_ID_export = ++__$flag_leaf;
+const $L_ID_extends = ++__$flag_leaf;
+const $L_ID_false = ++__$flag_leaf;
+const $L_ID_finally = ++__$flag_leaf;
+const $L_ID_for = ++__$flag_leaf;
+const $L_ID_from = ++__$flag_leaf;
+const $L_ID_function = ++__$flag_leaf;
+const $L_ID_get = ++__$flag_leaf;
+const $L_ID_if = ++__$flag_leaf;
+const $L_ID_implements = ++__$flag_leaf;
+const $L_ID_import = ++__$flag_leaf;
+const $L_ID_in = ++__$flag_leaf;
+const $L_ID_instanceof = ++__$flag_leaf;
+const $L_ID_interface = ++__$flag_leaf;
+const $L_ID_let = ++__$flag_leaf;
+const $L_ID_new = ++__$flag_leaf;
+const $L_ID_null = ++__$flag_leaf;
+const $L_ID_of = ++__$flag_leaf;
+const $L_ID_package = ++__$flag_leaf;
+const $L_ID_private = ++__$flag_leaf;
+const $L_ID_protected = ++__$flag_leaf;
+const $L_ID_public = ++__$flag_leaf;
+const $L_ID_return = ++__$flag_leaf;
+const $L_ID_set = ++__$flag_leaf;
+const $L_ID_static = ++__$flag_leaf;
+const $L_ID_super = ++__$flag_leaf;
+const $L_ID_switch = ++__$flag_leaf;
+const $L_ID_target = ++__$flag_leaf;
+const $L_ID_this = ++__$flag_leaf;
+const $L_ID_throw = ++__$flag_leaf;
+const $L_ID_true = ++__$flag_leaf;
+const $L_ID_try = ++__$flag_leaf;
+const $L_ID_typeof = ++__$flag_leaf;
+const $L_ID_var = ++__$flag_leaf;
+const $L_ID_void = ++__$flag_leaf;
+const $L_ID_while = ++__$flag_leaf;
+const $L_ID_with = ++__$flag_leaf;
+const $L_ID_yield = ++__$flag_leaf;
 
 // Punctuators
 
-const $L_EXCL =  ++__$leaf;
-const $L_EXCL_EQ =  ++__$leaf;
-const $L_EXCL_EQ_EQ =  ++__$leaf;
-const $L_PERCENT =  ++__$leaf;
-const $L_PERCENT_EQ =  ++__$leaf;
-const $L_AND =  ++__$leaf;
-const $L_AND_AND =  ++__$leaf;
-const $L_AND_EQ =  ++__$leaf;
-const $L_PAREN_OPEN =  ++__$leaf;
-const $L_PAREN_CLOSE =  ++__$leaf;
-const $L_STAR =  ++__$leaf;
-const $L_STAR_STAR =  ++__$leaf;
-const $L_STAR_EQ =  ++__$leaf;
-const $L_STAR_STAR_EQ =  ++__$leaf;
-const $L_PLUS =  ++__$leaf;
-const $L_PLUS_PLUS =  ++__$leaf;
-const $L_PLUS_EQ =  ++__$leaf;
-const $L_COMMA =  ++__$leaf;
-const $L_MIN =  ++__$leaf;
-const $L_MIN_MIN =  ++__$leaf;
-const $L_MIN_EQ =  ++__$leaf;
-const $L_MIN_MIN_GT =  ++__$leaf;
-const $L_DOT =  ++__$leaf;
-const $L_DOT_DOT_DOT =  ++__$leaf;
-const $L_DIV =  ++__$leaf;
-const $L_DIV_EQ =  ++__$leaf;
-const $L_COLON =  ++__$leaf;
-const $L_SEMI =  ++__$leaf;
-const $L_LT =  ++__$leaf;
-const $L_LT_LT =  ++__$leaf;
-const $L_LT_EQ =  ++__$leaf;
-const $L_LT_LT_EQ =  ++__$leaf;
-const $L_LT_EXCL_MIN_MIN =  ++__$leaf;
-const $L_EQ =  ++__$leaf;
-const $L_EQ_EQ =  ++__$leaf;
-const $L_EQ_EQ_EQ =  ++__$leaf;
-const $L_EQ_GT =  ++__$leaf;
-const $L_GT =  ++__$leaf;
-const $L_GT_GT =  ++__$leaf;
-const $L_GT_GT_GT =  ++__$leaf;
-const $L_GT_EQ =  ++__$leaf;
-const $L_GT_GT_EQ =  ++__$leaf;
-const $L_GT_GT_GT_EQ =  ++__$leaf;
-const $L_QMARK =  ++__$leaf;
-const $L_BRACKET_OPEN =  ++__$leaf;
-const $L_BRACKET_CLOSE =  ++__$leaf;
-const $L_CARET =  ++__$leaf;
-const $L_CARET_EQ =  ++__$leaf;
-const $L_CURLY_OPEN =  ++__$leaf;
-const $L_OR =  ++__$leaf;
-const $L_OR_OR =  ++__$leaf;
-const $L_OR_EQ =  ++__$leaf;
-const $L_CURLY_CLOSE =  ++__$leaf;
-const $L_TILDE =  ++__$leaf;
+const $L_EXCL =  ++__$flag_leaf;
+const $L_EXCL_EQ =  ++__$flag_leaf;
+const $L_EXCL_EQ_EQ =  ++__$flag_leaf;
+const $L_PERCENT =  ++__$flag_leaf;
+const $L_PERCENT_EQ =  ++__$flag_leaf;
+const $L_AND =  ++__$flag_leaf;
+const $L_AND_AND =  ++__$flag_leaf;
+const $L_AND_EQ =  ++__$flag_leaf;
+const $L_PAREN_OPEN =  ++__$flag_leaf;
+const $L_PAREN_CLOSE =  ++__$flag_leaf;
+const $L_STAR =  ++__$flag_leaf;
+const $L_STAR_STAR =  ++__$flag_leaf;
+const $L_STAR_EQ =  ++__$flag_leaf;
+const $L_STAR_STAR_EQ =  ++__$flag_leaf;
+const $L_PLUS =  ++__$flag_leaf;
+const $L_PLUS_PLUS =  ++__$flag_leaf;
+const $L_PLUS_EQ =  ++__$flag_leaf;
+const $L_COMMA =  ++__$flag_leaf;
+const $L_MIN =  ++__$flag_leaf;
+const $L_MIN_MIN =  ++__$flag_leaf;
+const $L_MIN_EQ =  ++__$flag_leaf;
+const $L_MIN_MIN_GT =  ++__$flag_leaf;
+const $L_DOT =  ++__$flag_leaf;
+const $L_DOT_DOT_DOT =  ++__$flag_leaf;
+const $L_DIV =  ++__$flag_leaf;
+const $L_DIV_EQ =  ++__$flag_leaf;
+const $L_COLON =  ++__$flag_leaf;
+const $L_SEMI =  ++__$flag_leaf;
+const $L_LT =  ++__$flag_leaf;
+const $L_LT_LT =  ++__$flag_leaf;
+const $L_LT_EQ =  ++__$flag_leaf;
+const $L_LT_LT_EQ =  ++__$flag_leaf;
+const $L_LT_EXCL_MIN_MIN =  ++__$flag_leaf;
+const $L_EQ =  ++__$flag_leaf;
+const $L_EQ_EQ =  ++__$flag_leaf;
+const $L_EQ_EQ_EQ =  ++__$flag_leaf;
+const $L_EQ_GT =  ++__$flag_leaf;
+const $L_GT =  ++__$flag_leaf;
+const $L_GT_GT =  ++__$flag_leaf;
+const $L_GT_GT_GT =  ++__$flag_leaf;
+const $L_GT_EQ =  ++__$flag_leaf;
+const $L_GT_GT_EQ =  ++__$flag_leaf;
+const $L_GT_GT_GT_EQ =  ++__$flag_leaf;
+const $L_QMARK =  ++__$flag_leaf;
+const $L_BRACKET_OPEN =  ++__$flag_leaf;
+const $L_BRACKET_CLOSE =  ++__$flag_leaf;
+const $L_CARET =  ++__$flag_leaf;
+const $L_CARET_EQ =  ++__$flag_leaf;
+const $L_CURLY_OPEN =  ++__$flag_leaf;
+const $L_OR =  ++__$flag_leaf;
+const $L_OR_OR =  ++__$flag_leaf;
+const $L_OR_EQ =  ++__$flag_leaf;
+const $L_CURLY_CLOSE =  ++__$flag_leaf;
+const $L_TILDE =  ++__$flag_leaf;
 
-ASSERT(__$leaf < (1<<LEAF_BITS), 'cannot use more than LEAF_BITS (' + LEAF_BITS + ') bits of space (' + (1<<LEAF_BITS) + ') but am requesting ' + __$leaf);
+ASSERT(__$flag_leaf < (1<<LEAF_BITS), 'cannot use more than LEAF_BITS (' + LEAF_BITS + ') bits of space (' + (1<<LEAF_BITS) + ') but am requesting ' + __$flag_leaf);
 
 // These are the token types and you should be able to do strict comparison against specific token types with
 // `curtok` or `token.type`. Every constant maps to a single number which is a combination of a bitwise field and
@@ -623,37 +623,37 @@ ASSERT(ALL_TOKEN_TYPES = [
 // </SCRUB ASSERTS TO COMMENT>
 
 let MAX_START_VALUE = 26; // For quick check difference START or token type
-let $_start_i = 0;
-const START_SPACE = $_start_i++;
-const START_ID = $_start_i++;
-const START_KEY = $_start_i++; // Any lower case (even the ones that can't start a keyword). Used to scan for keywords.
-const START_NL_SOLO = $_start_i++;
-const START_CR = $_start_i++;
-const START_STRING = $_start_i++;
-const START_DECIMAL = $_start_i++;
-const START_DOT = $_start_i++;
-const START_CURLY_CLOSE = $_start_i++;
-const START_EQ = $_start_i++;
-const START_DIV = $_start_i++;
-const START_PLUS = $_start_i++;
-const START_MIN = $_start_i++;
-const START_ZERO = $_start_i++;
-const START_TEMPLATE = $_start_i++;
-const START_EXCL = $_start_i++;
-const START_PERCENT = $_start_i++;
-const START_AND = $_start_i++;
-const START_STAR = $_start_i++;
-const START_CARET = $_start_i++;
-const START_LT = $_start_i++;
-const START_GT = $_start_i++;
-const START_OR = $_start_i++;
-const START_UNICODE = $_start_i++;
-const START_BSLASH = $_start_i++;
-const START_ERROR = $_start_i++;
+let __$flag_start = 0; // This name is hardcoded in the build script...
+const START_SPACE = __$flag_start++;
+const START_ID = __$flag_start++;
+const START_KEY = __$flag_start++; // Any lower case (even the ones that can't start a keyword). Used to scan for keywords.
+const START_NL_SOLO = __$flag_start++;
+const START_CR = __$flag_start++;
+const START_STRING = __$flag_start++;
+const START_DECIMAL = __$flag_start++;
+const START_DOT = __$flag_start++;
+const START_CURLY_CLOSE = __$flag_start++;
+const START_EQ = __$flag_start++;
+const START_DIV = __$flag_start++;
+const START_PLUS = __$flag_start++;
+const START_MIN = __$flag_start++;
+const START_ZERO = __$flag_start++;
+const START_TEMPLATE = __$flag_start++;
+const START_EXCL = __$flag_start++;
+const START_PERCENT = __$flag_start++;
+const START_AND = __$flag_start++;
+const START_STAR = __$flag_start++;
+const START_CARET = __$flag_start++;
+const START_LT = __$flag_start++;
+const START_GT = __$flag_start++;
+const START_OR = __$flag_start++;
+const START_UNICODE = __$flag_start++;
+const START_BSLASH = __$flag_start++;
+const START_ERROR = __$flag_start++;
 // <SCRUB ASSERTS TO COMMENT>
-ASSERT($_start_i === MAX_START_VALUE, 'keep in sync');
-ASSERT(ALL_GEES.every(type => type > $_start_i), 'the G start at bit 7 or whatever so should all be larger because this is how we distinct a single-char-token hit from a start-needs-refinement result');
-ASSERT(ALL_TOKEN_TYPES.every(type => type > $_start_i), 'all tokens must be higher than the start numbers because they are all combinations with at least one G. this is important so we can distinguish them when reading the token start');
+ASSERT(__$flag_start === MAX_START_VALUE, 'keep in sync');
+ASSERT(ALL_GEES.every(type => type > __$flag_start), 'the G start at bit 7 or whatever so should all be larger because this is how we distinct a single-char-token hit from a start-needs-refinement result');
+ASSERT(ALL_TOKEN_TYPES.every(type => type > __$flag_start), 'all tokens must be higher than the start numbers because they are all combinations with at least one G. this is important so we can distinguish them when reading the token start');
 // </SCRUB ASSERTS TO COMMENT>
 
 // Inspired by https://twitter.com/Ghost1240145716/status/1186595972232564736 / https://gist.github.com/KFlash/c53a2f0adb25e88ab7cdc3d77d295635
@@ -801,7 +801,7 @@ function getTokenStart(c) {
   ASSERT(Number.isInteger(c), 'all numbers should be ints, and not NaN or Infinite (subsumed)');
   if (c > 0x7e) return START_UNICODE;
   let s = tokenStartJumpTable[c];
-  ASSERT(s <= $_start_i ? ALL_START_TYPES.includes(s) : ALL_TOKEN_TYPES.includes(s), 'confirm the jump table is returning correct values');
+  ASSERT(s <= __$flag_start ? ALL_START_TYPES.includes(s) : ALL_TOKEN_TYPES.includes(s), 'confirm the jump table is returning correct values');
   ASSERT(ALL_START_TYPES.includes(s) !== ALL_TOKEN_TYPES.includes(s), 'confirm the jump table returns either a start type or a token type (and that it cant be both nor neither)');
   return s;
 }

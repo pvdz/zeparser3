@@ -3,25 +3,25 @@
 
 import {ASSERT} from "./utils.mjs";
 
-let __$lf_flag = 0;
+let __$flag_lf = 0; // This name is hardcoded in the build script...
 const LF_NO_FLAGS = 0;
-const LF_CAN_NEW_DOT_TARGET = 1 << ++__$lf_flag; // current scope is inside at least one regular (non-arrow) function
-const LF_FOR_REGEX = 1 << ++__$lf_flag;
-const LF_IN_ASYNC = 1 << ++__$lf_flag;
-const LF_IN_CONSTRUCTOR = 1 << ++__$lf_flag; // inside a class constructor (not a regular function) that is not static
-const LF_IN_FOR_LHS = 1 << ++__$lf_flag; // inside the initial part of a for-header, prevents `in` being parsed as an operator, hint for checks when destructuring pattern as lhs
-const LF_IN_FUNC_ARGS = 1 << ++__$lf_flag; // throws for await expression
-const LF_IN_GENERATOR = 1 << ++__$lf_flag;
-const LF_IN_GLOBAL = 1 << ++__$lf_flag; // unset whenever you go into any kind of function (for return)
-const LF_IN_ITERATION = 1 << ++__$lf_flag; // inside a loop (tells you whether break/continue is valid)
-const LF_IN_SWITCH = 1 << ++__$lf_flag; // inside a switch (tells you whether break is valid)
-const LF_IN_TEMPLATE = 1 << ++__$lf_flag;
-const LF_NO_ASI = 1 << ++__$lf_flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
-const LF_STRICT_MODE = 1 << ++__$lf_flag;
-const LF_SUPER_CALL = 1 << ++__$lf_flag; // can call `super()`
-const LF_SUPER_PROP = 1 << ++__$lf_flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
-const LF_NOT_KEYWORD = 1 << ++__$lf_flag; // skip keyword check for next ident parse (like member expression property)
-ASSERT(__$lf_flag < 32, 'cannot use more than 32 flags');
+const LF_CAN_NEW_DOT_TARGET = 1 << ++__$flag_lf; // current scope is inside at least one regular (non-arrow) function
+const LF_FOR_REGEX = 1 << ++__$flag_lf;
+const LF_IN_ASYNC = 1 << ++__$flag_lf;
+const LF_IN_CONSTRUCTOR = 1 << ++__$flag_lf; // inside a class constructor (not a regular function) that is not static
+const LF_IN_FOR_LHS = 1 << ++__$flag_lf; // inside the initial part of a for-header, prevents `in` being parsed as an operator, hint for checks when destructuring pattern as lhs
+const LF_IN_FUNC_ARGS = 1 << ++__$flag_lf; // throws for await expression
+const LF_IN_GENERATOR = 1 << ++__$flag_lf;
+const LF_IN_GLOBAL = 1 << ++__$flag_lf; // unset whenever you go into any kind of function (for return)
+const LF_IN_ITERATION = 1 << ++__$flag_lf; // inside a loop (tells you whether break/continue is valid)
+const LF_IN_SWITCH = 1 << ++__$flag_lf; // inside a switch (tells you whether break is valid)
+const LF_IN_TEMPLATE = 1 << ++__$flag_lf;
+const LF_NO_ASI = 1 << ++__$flag_lf; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
+const LF_STRICT_MODE = 1 << ++__$flag_lf;
+const LF_SUPER_CALL = 1 << ++__$flag_lf; // can call `super()`
+const LF_SUPER_PROP = 1 << ++__$flag_lf; // can read `super.foo` (there are cases where you can doo this but not `super()`)
+const LF_NOT_KEYWORD = 1 << ++__$flag_lf; // skip keyword check for next ident parse (like member expression property)
+ASSERT(__$flag_lf < 32, 'cannot use more than 32 flags');
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)

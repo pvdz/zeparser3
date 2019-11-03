@@ -6,9 +6,6 @@ import {GOAL_MODULE} from "../src/zetokenizer.mjs";
 import {scrub} from './scrub.mjs';
 import Terser from 'terser';
 
-const ASSERTS = false;
-const COMMENTS = true;
-
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
 let dirname = path.dirname(filePath);
@@ -19,71 +16,73 @@ const NO_MIN = NATIVE_SYMBOLS || process.argv.includes('--no-min'); // skip mini
 
 if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `%` prefixed native functions...!');
 
-(async() => {
-  let sources = (await Promise.all([
-    await fs.promises.readFile(path.join(dirname, '../src/tools/perf.mjs')),
-    await fs.promises.readFile(path.join(dirname, '../src/charcodes.mjs')),
-    await fs.promises.readFile(path.join(dirname, '../src/utils.mjs')),
-    await fs.promises.readFile(path.join(dirname, '../src/tokentype.mjs')),
-    await fs.promises.readFile(path.join(dirname, '../src/lexerflags.mjs')),
-    await fs.promises.readFile(path.join(dirname, '../src/zetokenizer.mjs')),
-    await fs.promises.readFile(path.join(dirname, '../src/zeparser.mjs')),
-  ]));
+// The list of sources should form an ordered acyclic dependency graph
+// All constants that get inlined should be lexicographically declared before usage. This build script assumes it.
+let sources = [
+  {name: 'perf',       recordConstants: true,  path: '../src/tools/perf.mjs'},
+  {name: 'charcodes',  recordConstants: true,  path: '../src/charcodes.mjs'},
+  {name: 'utils',      recordConstants: false, path: '../src/utils.mjs'}, // Things in here should be droppable ... should probably just not process it here at all
+  {name: 'tokentype',  recordConstants: true,  path: '../src/tokentype.mjs'},
+  {name: 'lexerflags', recordConstants: true,  path: '../src/lexerflags.mjs'},
+  // Constants in these files should not be unconditionally inlined (not necessarily primitives)
+  {name: 'lexer',      recordConstants: false, path: '../src/zetokenizer.mjs'},
+  {name: 'parser',     recordConstants: false, path: '../src/zeparser.mjs'},
+];
 
-  Promise.all([
-    generate('build_w_ast.mjs', ASSERTS, true, COMMENTS),
-    // generate('build_no_ast.js', ASSERTS, false, COMMENTS),
-  ]);
+if (NATIVE_SYMBOLS) {
+  sources = sources.filter(obj => obj.name !== 'perf');
+}
 
-  async function generate(filename, keepAsserts, keepAst, keepComments) {
+function processSource(source, constMap, recordConstants, keepAsserts) {
+  source = source
+  .toString('utf-8')
+  .replace(/\/\/ <SCRUB DEV>([\s\S]*?)\/\/ <\/SCRUB DEV>/g, '// scrubbed dev\n')
+  ;
+  if (!keepAsserts) {
+    source = source
+    .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '"003 assert scrubbed"')
+    .replace(/\/\/ <SCRUB ASSERTS TO COMMENT>([\s\S]*?)\/\/ <\/SCRUB ASSERTS TO COMMENT>/g, '/* 004 assert scrubbed */')
+    ;
+  }
 
-    let [perf, charcodes, utils, tokentype, lexerflags, zetokenizer, zeparser] = sources.map(processSource);
+  let z = Par(source, GOAL_MODULE, true, {
+    webCompat: false, // Probably...
+    // astRoot: ast,
+    // tokenStorage: tokens,
+    // getTokenizer: tok => tokenizer = tok,
+    // targetEsVersion: ES || Infinity,
+    fullErrorContext: true,
+    exposeScopes: true, // constant inlining
 
-    let build = `
+    $log: () => {},
+    $warn: () => {},
+    $error: () => {},
+  });
 
-${!NATIVE_SYMBOLS ? '' : `
+  source = scrub(z.ast, constMap, recordConstants);
+
+  return source;
+}
+
+function generate(filename, keepAsserts) {
+  let builds = {};
+  const constMap = new Map;
+
+  // Read all (targeted) src files from disk
+  sources.forEach(obj => {
+    obj.code = fs.readFileSync(path.join(dirname, obj.path), 'utf8');
+    builds[obj.name] = processSource(obj.code, constMap, obj.recordConstants, keepAsserts);
+  });
+
+  let build = `
+
+${NATIVE_SYMBOLS ? `
 const allFuncs = [];
-// <perf.js>
-${perf}
-// </perf.js>
-`}
+` : ''}
 
-const exp = (function(){ // otherwise terser wont minify the names ...
-
-// <charcodes.js>
-${charcodes}
-// </charcodes.js>
-
-// <utils.js>
-${utils}
-// </utils.js>
-
-// <tokentype.js>
-${tokentype}
-// </tokentype.js>
-
-// <lexerflags.js>
-${lexerflags}
-// </lexerflags.js>
-
-// <zetokenizer.js>
-${zetokenizer}
-// </zetokenizer.js>
-
-// <zeparser.js>
-${zeparser}
-// </zeparser.js>
-
-return {
-  ZeParser,
-  toktypeToString,
-};
-})();
-
-const {
-  ZeParser,
-  toktypeToString,
-} = exp;
+${Object.getOwnPropertyNames(builds).map(name => {
+  return '// <' + name + '>\n' + builds[name] + '\n // </' + name + '>\n';
+}).join('\n')}
 
 export default ZeParser;
 export {
@@ -109,73 +108,49 @@ ${NATIVE_SYMBOLS?`
   allFuncs,
 `:''}
 };
-`;
+  `;
 
-    // Sanity check, won't work with native symbols (obviously)
-    if (!NATIVE_SYMBOLS) {
-      Par(build, GOAL_MODULE, false, {
-        webCompat: false, // Probably...
-        fullErrorContext: true,
+  // Sanity check, won't work with native symbols (obviously)
+  if (!NATIVE_SYMBOLS) {
+    Par(build, GOAL_MODULE, false, {
+      webCompat: false, // Probably...
+      fullErrorContext: true,
 
-        // $log: () => {},
-        // $warn: () => {},
-        // $error: () => {},
-      });
-    }
-
-    let sizeBefore = build.length;
-    if (NO_MIN) {
-      console.log('Skipping minification step');
-    } else {
-      console.time('Terser time');
-      console.log('Minification through Terser...');
-      let t = Terser.minify(build, {
-        mangle: true,
-        compress: true,
-        module: true
-      });
-      if (t.error) console.log('Terser threw an error:'),console.log(t.error);
-      build = t.code;
-      console.timeEnd('Terser time');
-    }
-
-    let outDir = path.join(dirname, '../build/');
-    if (!fs.existsSync(outDir)) await fs.promises.mkdir(outDir);
-    let outPath = path.join(outDir, filename);
-    await fs.promises.writeFile(outPath, build);
-
-    function processSource(source) {
-      source = source
-      .toString('utf-8')
-      .replace(/\/\/ <SCRUB DEV>([\s\S]*?)\/\/ <\/SCRUB DEV>/g, '// scrubbed dev\n')
-      ;
-      if (!keepAsserts) {
-        source = source
-        .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '"003 assert scrubbed"')
-        .replace(/\/\/ <SCRUB ASSERTS TO COMMENT>([\s\S]*?)\/\/ <\/SCRUB ASSERTS TO COMMENT>/g, '/* 004 assert scrubbed */')
-        ;
-      }
-
-      let z = Par(source, GOAL_MODULE, true, {
-        webCompat: false, // Probably...
-        // astRoot: ast,
-        // tokenStorage: tokens,
-        // getTokenizer: tok => tokenizer = tok,
-        // targetEsVersion: ES || Infinity,
-        fullErrorContext: true,
-
-        $log: () => {},
-        $warn: () => {},
-        $error: () => {},
-      });
-
-      source = scrub(z.ast);
-
-      return source;
-    }
-
-    console.log('Wrote', outPath, '(' + sizeBefore + ' -> ' + build.length + ' bytes)');
+      // $log: () => {},
+      // $warn: () => {},
+      // $error: () => {},
+    });
   }
 
-  console.log('finished');
-})();
+  let sizeBefore = build.length;
+  if (NO_MIN) {
+    console.log('Skipping minification step');
+  } else {
+    console.time('Terser time');
+    console.log('Minification through Terser...');
+    let t = Terser.minify(build, {
+      mangle: true,
+      compress: {
+        inline: false, // do not inline functions. this just kills perf :/
+      },
+      module: true,
+      sourceMap: {
+        url: 'inline',
+      },
+    });
+    if (t.error) console.log('Terser threw an error:'),console.log(t.error);
+    build = t.code;
+    console.timeEnd('Terser time');
+  }
+
+  let outDir = path.join(dirname, '../build/');
+  if (!fs.existsSync(outDir)) fs.promises.mkdir(outDir);
+  let outPath = path.join(outDir, filename);
+  fs.writeFileSync(outPath, build);
+
+  console.log('Wrote', outPath, '(' + sizeBefore + ' -> ' + build.length + ' bytes)');
+}
+
+generate('build_w_ast.mjs', false);
+
+console.log('finished');

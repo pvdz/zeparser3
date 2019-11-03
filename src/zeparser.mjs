@@ -1232,7 +1232,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'ArrayExpression':
         node.type = 'ArrayPattern';
         let elements = node.elements;
-        for (let i = 0, n = elements.length; i < n; ++i) {
+        let e = elements.length;
+        for (let i = 0; i < e; ++i) {
           let element = elements[i];
           // note: children can be null (elided array destruct) but not undefined
           if (element && AST__destruct(element)) AST_destructReplaceAssignment(elements, i);
@@ -1241,7 +1242,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'ObjectExpression':
         node.type = 'ObjectPattern';
         let properties = node.properties;
-        for (let i = 0, n = properties.length; i < n; ++i) {
+        let n = properties.length;
+        for (let i = 0; i < n; ++i) {
           if (properties[i].type === NODE_NAME_PROPERTY) {
             ASSERT(properties[i].value, 'each property should have a value');
           } else {
