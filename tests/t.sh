@@ -191,6 +191,14 @@ ZeParser test runner help:
     deoptigate)
       ACTION='doptigate'
       ;;
+    devtools)
+      # ./t p --inspect --devtools --build
+      ACTION='perf'
+      INSPECT_NODE='--inspect-brk'
+      INSPECT_ZEPAR='--devtools'
+      DEVTOOLS='--devtools'
+      BUILD='-b'
+    ;;
 
     --sloppy)       MODE='--sloppy'       ;;
     --strict)       MODE='--strict'       ;;
@@ -230,7 +238,8 @@ ZeParser test runner help:
         INSPECT_NODE='--inspect-brk'
         INSPECT_ZEPAR='--devtools'
         ;;
-    --devtools)     DEVTOOLS='--devtools' ;;
+    --devtools)
+        DEVTOOLS='--devtools' ;;
     --node-bin)
         shift
         NODE_BIN=$1
@@ -315,7 +324,9 @@ case "${ACTION}" in
     ;;
 
     perf2)
-      ./t z --no-compat ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+      if [[ -z "${NO_BUILDING}" ]]; then
+        ./t z --no-compat ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+      fi
       set -x
       # WARNING! DO NOT JUST USE UNLESS YOU VERIFIED THIS WORKS FOR YOU!
       # I use this to stabilize my system for perf.
@@ -390,7 +401,9 @@ case "${ACTION}" in
     ;;
 
     doptigate)
-      ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+      if [[ -z "${NO_BUILDING}" ]]; then
+        ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+      fi
       set -x
       # First generate the v8 log
       echo "Creating log"
@@ -402,7 +415,7 @@ case "${ACTION}" in
       echo "Running deoptigate"
       cd ignore
       ../node_modules/.bin/deoptigate
-      rm v8.log
+      #rm v8.log
       cd ..
       ;;
 
