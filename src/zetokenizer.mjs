@@ -396,23 +396,30 @@ const VALID_SINGLE_CHAR = -2;
 const VALID_DOUBLE_CHAR = -3;
 
 // TODO: instantiate these lazily; most inputs won't need them so we can skip on the startup overhead and init in a slow path
-const ID_START_REGEX = (function(){
-  try {
-    return new RegExp('^\\p{ID_Start}$','u');
-  } catch(e) {
-    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
-    return /|/;
-  }
-})();
-const ID_CONTINUE_REGEX = (function(){
-  try {
-    return new RegExp('^\\p{ID_Continue}$','u');
-  } catch(e) {
-    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
-    return /|/;
-  }
-})();
+let ID_START_REGEX = undefined;
+function getIdStartRegexSuperSlow() {
+  if (ID_START_REGEX) return ID_START_REGEX;
 
+  try {
+    return ID_START_REGEX = new RegExp('^\\p{ID_Start}$','u');
+  } catch(e) {
+    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
+    return ID_START_REGEX = /|/;
+  }
+}
+let ID_CONTINUE_REGEX = undefined;
+function getIdRestRegexSuperSlow() {
+  if (ID_CONTINUE_REGEX) return ID_CONTINUE_REGEX;
+
+  try {
+    return ID_CONTINUE_REGEX = new RegExp('^\\p{ID_Continue}$','u');
+  } catch(e) {
+    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
+    return ID_CONTINUE_REGEX = /|/;
+  }
+}
+
+// <SCRUB ASSERTS TO COMMENT>
 let disableCanonPoison = [false]; // reversed stack; always check disableCanonPoison[0] for the current state
 function ASSERT_pushCanonPoison(disabled) {
   disableCanonPoison.unshift(disabled);
@@ -423,6 +430,7 @@ function ASSERT_popCanonPoison() {
   // console.log('popped', disableCanonPoison)
 }
 ASSERT(!void (typeof window !== 'undefined' && ASSERT_pushCanonPoison(window.disableCanonPoison)), '(suppress this warning in web env and known cases)');
+// </SCRUB ASSERTS TO COMMENT>
 
 function ZeTokenizer(
   input,
@@ -2120,7 +2128,7 @@ function ZeTokenizer(
     if (s === START_ID || s === START_KEY) return VALID_SINGLE_CHAR;
     if (s !== START_UNICODE) return INVALID_IDENT_CHAR;
     // now we have to do an expensive... but proper unicode check
-    return veryExpensiveUnicodeCheck(c, offsetOfC, ID_START_REGEX);
+    return veryExpensiveUnicodeCheck(c, offsetOfC, getIdStartRegexSuperSlow());
   }
   function isIdentRestChr(c, offsetOfC) {
     ASSERT(isIdentRestChr.length === arguments.length, 'all args');
@@ -2139,7 +2147,7 @@ function ZeTokenizer(
     if (c === $$ZWNJ_200C || c === $$ZWJ_200D) return VALID_SINGLE_CHAR;
 
     // now we have to do an expensive... but proper unicode check
-    return veryExpensiveUnicodeCheck(c, offsetOfC, ID_CONTINUE_REGEX);
+    return veryExpensiveUnicodeCheck(c, offsetOfC, getIdRestRegexSuperSlow());
   }
   function veryExpensiveUnicodeCheck(c, offset, regexScanner) {
     ASSERT(veryExpensiveUnicodeCheck.length === arguments.length, 'arg count');
@@ -5272,6 +5280,9 @@ export {
   tokenStrForError,
   toktypeToString,
   T,
+
+  // <SCRUB ASSERTS TO COMMENT>
   ASSERT_pushCanonPoison,
   ASSERT_popCanonPoison,
+  // </SCRUB ASSERTS TO COMMENT>
 };
