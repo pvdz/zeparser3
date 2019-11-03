@@ -4,6 +4,14 @@
 // Functions that start with `PERF_` are susceptible to this transform. Calls to `PERF_$` are unconditionally converted to `%`
 
 // Node flags to work with this: --trace_opt --trace_deopt --allow-natives-syntax
+/*
+Test:
+```
+./t z --no-compat --native-symbols;
+node --experimental-modules --max-old-space-size=8192 --trace_opt --trace_deopt --allow-natives-syntax --debug-code tests/v8internals.mjs
+```
+See v8internals for more information, and on how to do debug node build for even more information output
+*/
 
 // https://github.com/hilongjw/v8-RuntimeFunctions-list
 // https://github.com/v8/v8/blob/master/src/runtime/runtime.h

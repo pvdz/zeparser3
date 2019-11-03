@@ -258,7 +258,7 @@ done
 
 HFPID=''
 if [[ "${HF}" = "yes" ]]; then
-    # Note: the build is self-hosted so we should start this before transforming with HF
+    # Note: the build is self-hosted so we should start this before transforming with HF. Use actual dev source with --nb
     if [[ -z "${NO_BUILDING}" ]]; then
       set -x
 
@@ -315,7 +315,7 @@ case "${ACTION}" in
     ;;
 
     perf2)
-      ./t z --no-compat ${NATIVESYMBOLS}
+      ./t z --no-compat ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
       set -x
       # WARNING! DO NOT JUST USE UNLESS YOU VERIFIED THIS WORKS FOR YOU!
       # I use this to stabilize my system for perf.
@@ -390,7 +390,7 @@ case "${ACTION}" in
     ;;
 
     doptigate)
-      ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS}
+      ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
       set -x
       # First generate the v8 log
       echo "Creating log"

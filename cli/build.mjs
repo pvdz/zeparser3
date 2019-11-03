@@ -14,8 +14,8 @@ let filePath = import.meta.url.replace(/^file:\/\//,'');
 let dirname = path.dirname(filePath);
 
 const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
-const NO_MIN = process.argv.includes('--no-min'); // skip minifier
 const NATIVE_SYMBOLS = process.argv.includes('--native-symbols'); // Replace `PERF_$` with `%`?
+const NO_MIN = NATIVE_SYMBOLS || process.argv.includes('--no-min'); // skip minifier (cant use minifier with native symbols regardless)
 
 if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `%` prefixed native functions...!');
 
@@ -39,16 +39,14 @@ if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `
 
     let [perf, charcodes, utils, tokentype, lexerflags, zetokenizer, zeparser] = sources.map(processSource);
 
-    let perfSetup = NATIVE_SYMBOLS ? `
+    let build = `
+
+${!NATIVE_SYMBOLS ? '' : `
 const allFuncs = [];
 // <perf.js>
 ${perf}
 // </perf.js>
-    ` : '';
-
-    let build = `
-
-${perfSetup}
+`}
 
 const exp = (function(){ // otherwise terser wont minify the names ...
 
