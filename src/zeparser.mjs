@@ -1,6 +1,5 @@
+// Char codes aren't really used in the parser (only in the lexer), except for asserts. Inlined for builds.
 import {
-  inspect,
-
   $$A_61,
   $$A_UC_41,
   $$B_62,
@@ -64,6 +63,8 @@ import {
   $$8_38,
   $$9_39,
 
+  $$NULL_00,
+  $$BACKSPACE_08,
   $$TAB_09,
   $$LF_0A,
   $$VTAB_0B,
@@ -108,12 +109,40 @@ import {
   $$LS_2029,
   $$PS_2028,
   $$BOM_FEFF,
+} from './charcodes.mjs';
+// Lexerflags are used to signal state from parser to lexer. And organically grew into a wider signaling system.
+import {
+  INITIAL_LEXER_FLAGS,
 
+  LF_NO_FLAGS,
+  LF_CAN_NEW_DOT_TARGET,
+  LF_FOR_REGEX,
+  LF_IN_ASYNC,
+  LF_IN_CONSTRUCTOR,
+  LF_IN_FOR_LHS,
+  LF_IN_FUNC_ARGS,
+  LF_IN_GENERATOR,
+  LF_IN_GLOBAL,
+  LF_IN_ITERATION,
+  LF_IN_SWITCH,
+  LF_IN_TEMPLATE,
+  LF_NO_ASI,
+  LF_STRICT_MODE,
+  LF_SUPER_CALL,
+  LF_SUPER_PROP,
+  LF_NOT_KEYWORD,
+
+  L,
+} from './lexerflags.mjs';
+// Most of these aren't used, except for a few at ASSERT time. Auto-imported for convenience. Auto stripped from a build
+import {
+  inspect,
   ASSERT,
   THROW as _THROW,
 } from './utils.mjs';
-
-import ZeTokenizer, {
+// These define most of the token type manipulation things
+import {
+  getTokenStart,
   isWhiteToken,
   isNewlineToken,
   isCommentToken,
@@ -125,9 +154,13 @@ import ZeTokenizer, {
   isRegexToken,
   isTickToken,
   isBadTickToken,
-  isNumberStringRegex,
   isNumberStringToken,
+  isNumberStringRegex,
 
+  KEYWORD_TRIE,
+
+  // <SCRUB ASSERTS TO COMMENT>
+  // (These are only used to assert a token type group when skipping. For all other use cases use the `isXXXtoken()` funcs
   $G_WHITE,
   $G_NEWLINE,
   $G_COMMENT,
@@ -139,6 +172,8 @@ import ZeTokenizer, {
   $G_REGEX,
   $G_TICK,
   $G_TICK_BAD_ESCAPE,
+  $G_OTHER,
+  // </SCRUB ASSERTS TO COMMENT>
 
   $SPACE,
   $TAB,
@@ -281,9 +316,16 @@ import ZeTokenizer, {
   $EOF,
   $ASI,
   $ERROR,
+
+  // <SCRUB ASSERTS TO COMMENT>
+  ALL_START_TYPES,
+  ALL_GEES,
   ALL_TOKEN_GROUPS,
   ALL_TOKEN_TYPES,
-
+  // </SCRUB ASSERTS TO COMMENT>
+} from './tokentype.mjs';
+// This contains some flags and the actual lexer
+import ZeTokenizer, {
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
@@ -293,25 +335,6 @@ import ZeTokenizer, {
   GOAL_MODULE,
   GOAL_SCRIPT,
 
-  LF_CAN_NEW_DOT_TARGET,
-  LF_FOR_REGEX,
-  LF_IN_ASYNC,
-  LF_IN_CONSTRUCTOR,
-  LF_IN_FOR_LHS,
-  LF_IN_FUNC_ARGS,
-  LF_IN_GENERATOR,
-  LF_IN_GLOBAL,
-  LF_IN_ITERATION,
-  LF_IN_SWITCH,
-  LF_IN_TEMPLATE,
-  LF_NO_ASI,
-  LF_NO_FLAGS,
-  LF_STRICT_MODE,
-  LF_SUPER_CALL,
-  LF_SUPER_PROP,
-  LF_NOT_KEYWORD,
-  INITIAL_LEXER_FLAGS,
-
   RETURN_ANY_TOKENS,
   RETURN_COMMENT_TOKENS,
   RETURN_SOLID_TOKENS,
@@ -320,12 +343,11 @@ import ZeTokenizer, {
   WEB_COMPAT_ON,
 
   tokenStrForError,
-  L,
   T,
   ASSERT_pushCanonPoison,
   ASSERT_popCanonPoison,
 } from '../src/zetokenizer.mjs';
-
+// This is only used in dev mode for perf analysis, auto-imported for convenience, auto dropped from a build
 import {
   PERF_enforce_HasFastProperties,
 } from '../src/tools/perf.mjs';

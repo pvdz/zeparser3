@@ -16,7 +16,7 @@ import {
   $$R_72,
   $$S_73, $$S_UC_53, $$T_74,
   $$U_75, $$W_77, $$X_78
-} from "../utils.mjs";
+} from "../charcodes.mjs";
 
 function assert(a, b) {
   // This is an assert that can be dropped for a build... It confirms hashing assumptions

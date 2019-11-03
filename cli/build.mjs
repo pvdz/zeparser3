@@ -22,7 +22,10 @@ if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `
 (async() => {
   let sources = (await Promise.all([
     await fs.promises.readFile(path.join(dirname, '../src/tools/perf.mjs')),
+    await fs.promises.readFile(path.join(dirname, '../src/charcodes.mjs')),
     await fs.promises.readFile(path.join(dirname, '../src/utils.mjs')),
+    await fs.promises.readFile(path.join(dirname, '../src/tokentype.mjs')),
+    await fs.promises.readFile(path.join(dirname, '../src/lexerflags.mjs')),
     await fs.promises.readFile(path.join(dirname, '../src/zetokenizer.mjs')),
     await fs.promises.readFile(path.join(dirname, '../src/zeparser.mjs')),
   ]));
@@ -34,7 +37,7 @@ if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `
 
   async function generate(filename, keepAsserts, keepAst, keepComments) {
 
-    let [perf, utils, zetokenizer, zeparser] = sources.map(processSource);
+    let [perf, charcodes, utils, tokentype, lexerflags, zetokenizer, zeparser] = sources.map(processSource);
 
     let perfSetup = NATIVE_SYMBOLS ? `
 const allFuncs = [];
@@ -49,9 +52,21 @@ ${perfSetup}
 
 const exp = (function(){ // otherwise terser wont minify the names ...
 
+// <charcodes.js>
+${charcodes}
+// </charcodes.js>
+
 // <utils.js>
 ${utils}
 // </utils.js>
+
+// <tokentype.js>
+${tokentype}
+// </tokentype.js>
+
+// <lexerflags.js>
+${lexerflags}
+// </lexerflags.js>
 
 // <zetokenizer.js>
 ${zetokenizer}
@@ -139,6 +154,7 @@ ${NATIVE_SYMBOLS?`
       if (!keepAsserts) {
         source = source
         .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '"003 assert scrubbed"')
+        .replace(/\/\/ <SCRUB ASSERTS TO COMMENT>([\s\S]*?)\/\/ <\/SCRUB ASSERTS TO COMMENT>/g, '/* 004 assert scrubbed */')
         ;
       }
 
