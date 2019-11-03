@@ -134,9 +134,9 @@ ${NATIVE_SYMBOLS?`
         inline: false, // do not inline functions. this just kills perf :/
       },
       module: true,
-      sourceMap: {
-        url: 'inline',
-      },
+      // sourceMap: {
+      //   url: 'inline',
+      // },
     });
     if (t.error) console.log('Terser threw an error:'),console.log(t.error);
     build = t.code;
