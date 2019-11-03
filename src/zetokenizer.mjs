@@ -343,57 +343,45 @@ const TABLE56 = ',Cased_Letter,LC,Close_Punctuation,Pe,Connector_Punctuation,Pc,
 // Note: Added Elym instead of a duplicate Elymaic to table 57 because I think that's a typo in the spec
 const TABLE57 = ',Adlam,Adlm,Ahom,Anatolian_Hieroglyphs,Hluw,Arabic,Arab,Armenian,Armn,Avestan,Avst,Balinese,Bali,Bamum,Bamu,Bassa_Vah,Bass,Batak,Batk,Bengali,Beng,Bhaiksuki,Bhks,Bopomofo,Bopo,Brahmi,Brah,Braille,Brai,Buginese,Bugi,Buhid,Buhd,Canadian_Aboriginal,Cans,Carian,Cari,Caucasian_Albanian,Aghb,Chakma,Cakm,Cham,Cherokee,Cher,Common,Zyyy,Coptic,Copt,Qaac,Cuneiform,Xsux,Cypriot,Cprt,Cyrillic,Cyrl,Deseret,Dsrt,Devanagari,Deva,Dogra,Dogr,Duployan,Dupl,Egyptian_Hieroglyphs,Egyp,Elbasan,Elba,Elymaic,Elym,Ethiopic,Ethi,Georgian,Geor,Glagolitic,Glag,Gothic,Goth,Grantha,Gran,Greek,Grek,Gujarati,Gujr,Gunjala_Gondi,Gong,Gurmukhi,Guru,Han,Hani,Hangul,Hang,Hanifi_Rohingya,Rohg,Hanunoo,Hano,Hatran,Hatr,Hebrew,Hebr,Hiragana,Hira,Imperial_Aramaic,Armi,Inherited,Zinh,Qaai,Inscriptional_Pahlavi,Phli,Inscriptional_Parthian,Prti,Javanese,Java,Kaithi,Kthi,Kannada,Knda,Katakana,Kana,Kayah_Li,Kali,Kharoshthi,Khar,Khmer,Khmr,Khojki,Khoj,Khudawadi,Sind,Lao,Laoo,Latin,Latn,Lepcha,Lepc,Limbu,Limb,Linear_A,Lina,Linear_B,Linb,Lisu,Lycian,Lyci,Lydian,Lydi,Mahajani,Mahj,Makasar,Maka,Malayalam,Mlym,Mandaic,Mand,Manichaean,Mani,Marchen,Marc,Medefaidrin,Medf,Masaram_Gondi,Gonm,Meetei_Mayek,Mtei,Mende_Kikakui,Mend,Meroitic_Cursive,Merc,Meroitic_Hieroglyphs,Mero,Miao,Plrd,Modi,Mongolian,Mong,Mro,Mroo,Multani,Mult,Myanmar,Mymr,Nabataean,Nbat,Nandinagari,Nand,New_Tai_Lue,Talu,Newa,Nko,Nkoo,Nushu,Nshu,Nyiakeng_Puachue_Hmong,Hmnp,Ogham,Ogam,Ol_Chiki,Olck,Old_Hungarian,Hung,Old_Italic,Ital,Old_North_Arabian,Narb,Old_Permic,Perm,Old_Persian,Xpeo,Old_Sogdian,Sogo,Old_South_Arabian,Sarb,Old_Turkic,Orkh,Oriya,Orya,Osage,Osge,Osmanya,Osma,Pahawh_Hmong,Hmng,Palmyrene,Palm,Pau_Cin_Hau,Pauc,Phags_Pa,Phag,Phoenician,Phnx,Psalter_Pahlavi,Phlp,Rejang,Rjng,Runic,Runr,Samaritan,Samr,Saurashtra,Saur,Sharada,Shrd,Shavian,Shaw,Siddham,Sidd,SignWriting,Sgnw,Sinhala,Sinh,Sogdian,Sogd,Sora_Sompeng,Sora,Soyombo,Soyo,Sundanese,Sund,Syloti_Nagri,Sylo,Syriac,Syrc,Tagalog,Tglg,Tagbanwa,Tagb,Tai_Le,Tale,Tai_Tham,Lana,Tai_Viet,Tavt,Takri,Takr,Tamil,Taml,Tangut,Tang,Telugu,Telu,Thaana,Thaa,Thai,Tibetan,Tibt,Tifinagh,Tfng,Tirhuta,Tirh,Ugaritic,Ugar,Vai,Vaii,Wancho,Wcho,Warang_Citi,Wara,Yi,Yiii,Zanabazar_Square,Zanb,';
 
-const BAD_ESCAPE = true;
-const GOOD_ESCAPE = false;
-
-const GOAL_MODULE = true;
-const GOAL_SCRIPT = false;
-
-const REGEX_ALWAYS_GOOD = 0;
-const REGEX_GOOD_WITH_U_FLAG = 1;
-const REGEX_GOOD_SANS_U_FLAG = 2;
-const REGEX_ALWAYS_BAD = 4;
-
-const FIRST_CHAR = true;
-const NON_START = false;
-
-const REGEX_CHARCLASS_BAD = 0x110000; // Note: max valid unicode value is <0x110000 so we can use high flags as side channels!
-const REGEX_CHARCLASS_ESCAPED_UC_B = 0x110001;
-const REGEX_CHARCLASS_ESCAPED_C = 0x110002;
-const REGEX_CHARCLASS_BAD_SANS_U_FLAG = 1<<23;
-const REGEX_CHARCLASS_BAD_WITH_U_FLAG = 1<<24;
-const REGEX_CHARCLASS_CLASS_ESCAPE = 1<<25; // \d \w \s etc, for webcompat checks in ranges
-const REGEX_CHARCLASS_DOUBLE_QUAD = 1<<26; // The returned code point was a double quad (matters for ranges and u-flag disambiguation)
-
-const COLLECT_TOKENS_NONE = 0;
-const COLLECT_TOKENS_SOLID = 1; // non-whitespace
-const COLLECT_TOKENS_ALL = 2;
-
-const WEB_COMPAT_OFF = false;
-const WEB_COMPAT_ON = true;
-
-const RETURN_ANY_TOKENS = 1;
-const RETURN_COMMENT_TOKENS = 2;
-const RETURN_SOLID_TOKENS = 3;
-
-const WHITESPACE_TOKEN = true;
-const SOLID_TOKEN = false;
-
-const PARSING_FROM_TICK = true;
-const PARSING_SANS_TICK = false;
-
-const FAIL_GRACEFULLY = true;
-const FAIL_HARD = false;
-
-const FOR_TEMPLATE = true; // templates are never not allowed to have octal escapes except when tagged
-const NOT_TEMPLATE = false;
-
-const CODEPOINT_FROM_ESCAPE = -1;
-
-// These error codes must be negative as not to be ambiguous with decoded escape values
-const INVALID_IDENT_CHAR = -1;
-const VALID_SINGLE_CHAR = -2;
-const VALID_DOUBLE_CHAR = -3;
+import {
+  BAD_ESCAPE,
+  GOOD_ESCAPE,
+  GOAL_MODULE,
+  GOAL_SCRIPT,
+  REGEX_ALWAYS_GOOD,
+  REGEX_GOOD_WITH_U_FLAG,
+  REGEX_GOOD_SANS_U_FLAG,
+  REGEX_ALWAYS_BAD,
+  FIRST_CHAR,
+  NON_START,
+  REGEX_CHARCLASS_BAD,
+  REGEX_CHARCLASS_ESCAPED_UC_B,
+  REGEX_CHARCLASS_ESCAPED_C,
+  REGEX_CHARCLASS_BAD_SANS_U_FLAG,
+  REGEX_CHARCLASS_BAD_WITH_U_FLAG,
+  REGEX_CHARCLASS_CLASS_ESCAPE,
+  REGEX_CHARCLASS_DOUBLE_QUAD,
+  COLLECT_TOKENS_NONE,
+  COLLECT_TOKENS_SOLID,
+  COLLECT_TOKENS_ALL,
+  WEB_COMPAT_OFF,
+  WEB_COMPAT_ON,
+  RETURN_ANY_TOKENS,
+  RETURN_COMMENT_TOKENS,
+  RETURN_SOLID_TOKENS,
+  WHITESPACE_TOKEN,
+  SOLID_TOKEN,
+  PARSING_FROM_TICK,
+  PARSING_SANS_TICK,
+  FAIL_GRACEFULLY,
+  FAIL_HARD,
+  FOR_TEMPLATE,
+  NOT_TEMPLATE,
+  CODEPOINT_FROM_ESCAPE,
+  INVALID_IDENT_CHAR,
+  VALID_SINGLE_CHAR,
+  VALID_DOUBLE_CHAR,
+} from './enum_zetok.mjs';
 
 // TODO: instantiate these lazily; most inputs won't need them so we can skip on the startup overhead and init in a slow path
 let ID_START_REGEX = undefined;

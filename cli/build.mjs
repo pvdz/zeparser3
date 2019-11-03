@@ -24,6 +24,8 @@ let sources = [
   {name: 'utils',      recordConstants: false, path: '../src/utils.mjs'}, // Things in here should be droppable ... should probably just not process it here at all
   {name: 'tokentype',  recordConstants: true,  path: '../src/tokentype.mjs'},
   {name: 'lexerflags', recordConstants: true,  path: '../src/lexerflags.mjs'},
+  {name: 'enum_zetok', recordConstants: true,  path: '../src/enum_zetok.mjs'},
+  {name: 'enum_zepar', recordConstants: true,  path: '../src/enum_zepar.mjs'},
   // Constants in these files should not be unconditionally inlined (not necessarily primitives)
   {name: 'lexer',      recordConstants: false, path: '../src/zetokenizer.mjs'},
   {name: 'parser',     recordConstants: false, path: '../src/zeparser.mjs'},
