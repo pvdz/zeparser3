@@ -183,9 +183,13 @@ ZeParser test runner help:
       ;;
     p2)
       ACTION='perf2'
+      PERFONE='yes'
       ;;
     p3)
       ACTION='perf3'
+      ;;
+    p4)
+      ACTION='perf2'
       ;;
     d);&
     deoptigate)
@@ -345,7 +349,15 @@ case "${ACTION}" in
       sleep 5
       CORENUM=3; ps -e -o pid,psr,cpu,cmd | grep -E  "^[[:space:]][[:digit:]]+[[:space:]]+${CORENUM}"
 
-      sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb ${RECORD} ${RESET} ${EXTRA}
+      if [[ -z "${PERFONE}" ]]; then
+        # Do not pass on params to node which disables JIT etc.
+        # Gives it a more real world comparison which is less reliable.
+        # Just don't trust the absolute numbers because the cpu is intentionally slowed down.
+        sudo cset shield --exec -- chrt --rr 99 ./t p --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb ${RECORD} ${RESET} ${EXTRA}
+      else
+        # This will disable jit etc and attempts to stabilize the v8 runtime as much as possible (perf wise)
+        sudo cset shield --exec -- chrt --rr 99 ./t p1 --build --node-bin '/home/qfox/.nvm/versions/node/v12.13.0/bin/node' --nb ${RECORD} ${RESET} ${EXTRA}
+      fi
       ;;
     perf3)
       sudo su -c "echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo"
