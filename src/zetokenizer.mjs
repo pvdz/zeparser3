@@ -578,8 +578,6 @@ function ZeTokenizer(
     ASSERT(nextToken.length === arguments.length, 'arg count');
     ASSERT(!finished, 'should not next() after eof token');
 
-    let token;
-
     if (prevTokenSolid) {
       // Do this at the start because otherwise something like `a \n b` would reset this when forward parsing `b` and
       // would cause `a` to be set to the wrong column data.
@@ -598,7 +596,7 @@ function ZeTokenizer(
       let startRow = currentLine;
 
       if (eof()) {
-        token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken);
+        let token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken);
         finished = true;
         return returnSolidToken(token);
       }
@@ -612,15 +610,15 @@ function ZeTokenizer(
 
       // Non-whitespace tokens always get returned
       if (!isWhiteToken(consumedTokenType)) {
-        token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
+        let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
         return returnSolidToken(token);
       }
 
       // Babel parity demands comments to be returned... Not sure whether the complexity (over checking $white) is worth
       if (isCommentToken(consumedTokenType)) {
         if (returnTokens === RETURN_COMMENT_TOKENS) {
-          token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
-          returnCommentToken(token);
+          let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
+          return returnCommentToken(token);
         }
       }
 
@@ -672,7 +670,7 @@ function ZeTokenizer(
         skip();
         // parseSpace();
       } else {
-        break;
+        return;
       }
     }
   }
@@ -686,7 +684,7 @@ function ZeTokenizer(
         skip();
         parseCR(); // crlf is relevant so skip carefully
       } else {
-        break;
+        return;
       }
     }
   }
