@@ -6081,6 +6081,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         assignable = parseExpressionFromOp(lexerFlags, openParenToken, assignable, astProp);
         if (curtok.type === $PUNC_COMMA) assignable = _parseExpressions(lexerFlags, openParenToken, assignable, astProp);
         canBeErrorCase = false;
+        if (curtok.type !== $PUNC_PAREN_CLOSE) {
+          return THROW('Expecting at least one more closing paren, found `' + curtok.str + '` instead');
+        }
       }
       // at least one rhs paren must appear now
       ASSERT_skipDiv($PUNC_PAREN_CLOSE, outerLexerflags);
