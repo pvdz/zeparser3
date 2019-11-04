@@ -20,6 +20,7 @@ NO_BUILDING=''
 PSFIX=''
 HF=''
 NOCOMP=''
+NOAST=''
 NOMIN=''
 INSPECT=''
 DEVTOOLS=''
@@ -77,6 +78,7 @@ ZeParser test runner help:
  --build       Use the build (./t z) instead of dev sources for ZeParser in this call
  --nb          Don't actually create a build for cases where this otherwise would happen (prevents sudo trouble :)
  --no-compat   For `z`; Replace the compat flags for Acorn and Babel to `false` so the minifier eliminates the dead code
+ --no-ast      For `z`; Strip all AST code when creating a build
  --no-min      For `z`; Do not run Terser (minifier) on build output
  --pretty      For `z`; Run prettier on the build afterwards (useful with `--no-min`)
  --native-symbols For `z`; Special build step turns `PERF_$` prefixed functions into `%` to enable v8 internal functions.
@@ -223,6 +225,7 @@ ZeParser test runner help:
     --build)        BUILD='-b'            ;;
     --nb)           NO_BUILDING='on'      ;;
     --no-compat)    NOCOMP='--no-compat'  ;;
+    --no-ast)       NOAST='--no-ast'      ;;
     --no-min)       NOMIN='--no-min'      ;;
     --pretty)       PRETTIER='yes'        ;;
     --native-symbols) NATIVESYMBOLS='--native-symbols' ;;
@@ -278,7 +281,7 @@ if [[ "${HF}" = "yes" ]]; then
 
       if [[ -z "${NO_BUILDING}" ]]; then
         echo "Creating pretty build without compat code and without minification"
-        ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+        ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} ${NOAST} --node-bin ${NODE_BIN}
       fi
 
       # Transform the build file inline
@@ -323,7 +326,7 @@ case "${ACTION}" in
     ;;
 
     build)
-      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOMIN} ${INSPECT_ZEPAR} ${NATIVESYMBOLS}
+      ${NODE_BIN} ${INSPECT_NODE} --experimental-modules cli/build.mjs ${NOCOMP} ${NOAST} ${NOMIN} ${INSPECT_ZEPAR} ${NATIVESYMBOLS}
       if [[ ! -z "${PRETTIER}" ]]; then
           node_modules/.bin/prettier build/build_w_ast.mjs --write
       fi
@@ -331,7 +334,7 @@ case "${ACTION}" in
 
     perf2)
       if [[ -z "${NO_BUILDING}" ]]; then
-        ./t z --no-compat ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+        ./t z --no-compat ${NATIVESYMBOLS} ${NOAST} --node-bin ${NODE_BIN}
       fi
       set -x
       # WARNING! DO NOT JUST USE UNLESS YOU VERIFIED THIS WORKS FOR YOU!
@@ -372,7 +375,7 @@ case "${ACTION}" in
       if [[ ! -z "${BUILD}" ]]; then
         if [[ -z "${NO_BUILDING}" ]]; then
           echo "Creating build without compat"
-          ./t z --no-compat ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+          ./t z --no-compat ${NATIVESYMBOLS} ${NOAST} --node-bin ${NODE_BIN}
         fi
       fi
 
@@ -402,7 +405,7 @@ case "${ACTION}" in
       else
         if [[ ! -z "${BUILD}" ]]; then
           if [[ -z "${NO_BUILDING}" ]]; then
-            ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+            ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} ${NOAST} --node-bin ${NODE_BIN}
           fi
         fi
 
@@ -416,7 +419,7 @@ case "${ACTION}" in
 
     doptigate)
       if [[ -z "${NO_BUILDING}" ]]; then
-        ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} --node-bin ${NODE_BIN}
+        ./t z --no-compat --no-min --pretty ${NATIVESYMBOLS} ${NOAST} --node-bin ${NODE_BIN}
       fi
       set -x
       # First generate the v8 log

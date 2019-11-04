@@ -13,6 +13,7 @@ let dirname = path.dirname(filePath);
 const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
 const NATIVE_SYMBOLS = process.argv.includes('--native-symbols'); // Replace `PERF_$` with `%`?
 const NO_MIN = NATIVE_SYMBOLS || process.argv.includes('--no-min'); // skip minifier (cant use minifier with native symbols regardless)
+const NO_AST = process.argv.includes('--no-ast'); // drop ast related code from the parser (`AST_*`)
 
 if (NATIVE_SYMBOLS) console.log('Will convert `PERF_$` prefixed functions into `%` prefixed native functions...!');
 
@@ -44,6 +45,11 @@ function processSource(source, constMap, recordConstants, keepAsserts) {
     source = source
     .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '"003 assert scrubbed"')
     .replace(/\/\/ <SCRUB ASSERTS TO COMMENT>([\s\S]*?)\/\/ <\/SCRUB ASSERTS TO COMMENT>/g, '/* 004 assert scrubbed */')
+    ;
+  }
+  if (NO_AST) {
+    source = source
+    .replace(/\/\/ <SCRUB AST>([\s\S]*?)\/\/ <\/SCRUB AST>/g, '/* 005 ast scrubbed */')
     ;
   }
 

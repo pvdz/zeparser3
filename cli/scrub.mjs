@@ -31,6 +31,7 @@ function assert(a, b, desc) {
 const SCRUB_OTHERS = process.argv.includes('--no-compat'); // force all occurrences of compatAcorn and compatBabel to false
 const SCRUB_ERRORS = process.argv.includes('--strip-errors'); // strip error message contents (wip)
 const NATIVE_SYMBOLS = process.argv.includes('--native-symbols'); // Replace `PERF_$` with `%`?
+const NO_AST = process.argv.includes('--no-ast'); // drop ast related code from the parser (`AST_*`)
 
 let strippedAssertNames = new Set;
 let assertWhitelist = new Set([
@@ -161,6 +162,14 @@ function CallExpression(node) {
         return '%' + node.callee.name.slice('PERF_$'.length) + '(' + node.arguments.map($).join(', ') + ')';
       }
       return '0';
+    }
+    if (NO_AST) {
+      if (node.callee.name.startsWith('AST_')) {
+        return '0';
+      }
+      if (node.callee.name.startsWith('_AST_')) {
+        return '0';
+      }
     }
 
     // Terser should do this :'(
@@ -402,6 +411,9 @@ function FunctionDeclaration(node) {
     }
     if (!NATIVE_SYMBOLS && node.id.name.startsWith('PERF_')) {
       return '';
+    }
+    if (NO_AST && (node.id.name.startsWith('AST_') || node.id.name.startsWith('_AST_'))) {
+      return '0';
     }
   }
   let suffix = (NATIVE_SYMBOLS && node.id ? ';allFuncs.push('+node.id.name+');' : '');
