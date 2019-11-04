@@ -11495,7 +11495,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(starToken === UNDEF_STAR || starToken.type === $PUNC_STAR, 'gen token');
     ASSERT(getToken === UNDEF_GET || getToken.type === $ID_get, 'get token');
     ASSERT(setToken === UNDEF_SET || setToken.type === $ID_set, 'set token');
-    ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
+    ASSERT(keyToken === undefined || keyToken.type !== undefined, 'keyToken is a token', keyToken);
     ASSERT(!bracketOpenToken || bracketOpenToken.type === $PUNC_BRACKET_OPEN, 'bracketOpenToken should be [', bracketOpenToken);
     ASSERT(keyToken === undefined || (isIdentToken(keyToken.type) || isNumberStringToken(keyToken.type)), 'keyToken is a number, string or ident', ''+keyToken);
     ASSERT_VALID(curtok.type === $PUNC_PAREN_OPEN, 'Should be at the start of the method parameter definition');

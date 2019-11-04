@@ -607,6 +607,7 @@ function ZeTokenizer(
       let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
 
       let consumedTokenType = jumpTableLexer(lexerFlags);
+      ASSERT(consumedTokenType !== undefined, 'should not return undefined');
       ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
 
       // Non-whitespace tokens always get returned
@@ -2048,6 +2049,9 @@ function ZeTokenizer(
       if (wide === INVALID_IDENT_CHAR) {
         // This ends the ident and it is a keyword
         lastParsedIdent = slice(start, n - 1);
+        if (trie.hit === undefined) {
+          return $IDENT;
+        }
         return trie.hit;
       }
       return parseIdentifierRest(slice(start, n - 1));
