@@ -83,7 +83,7 @@ const allFuncs = [];
 ` : ''}
 
 ${Object.getOwnPropertyNames(builds).map(name => {
-  return '// <' + name + '>\n' + builds[name] + '\n // </' + name + '>\n';
+  return '// <' + name + '>\n' + builds[name] + '\n// </' + name + '>\n';
 }).join('\n')}
 
 export default ZeParser;

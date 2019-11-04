@@ -156,8 +156,10 @@ function CallExpression(node) {
 
   if (node.callee.type === 'Identifier') {
 
-    if (node.callee.name.startsWith('PERF_$')) {
-      if (NATIVE_SYMBOLS) return '%' + node.callee.name.slice('PERF_$'.length) + '(' + node.arguments.map($).join(', ') + ')';
+    if (node.callee.name.startsWith('PERF_')) {
+      if (NATIVE_SYMBOLS && node.callee.name.startsWith('PERF_$')) {
+        return '%' + node.callee.name.slice('PERF_$'.length) + '(' + node.arguments.map($).join(', ') + ')';
+      }
       return '0';
     }
 
@@ -394,8 +396,13 @@ function ForStatement(node) {
 }
 function FunctionDeclaration(node) {
   assert(node.type, 'FunctionDeclaration');
-  if (node.id && node.id.type === 'Identifier' && node.id.name.startsWith('ASSERT')) {
-    return '';
+  if (node.id && node.id.type === 'Identifier') {
+    if (node.id.name.startsWith('ASSERT')) {
+      return '';
+    }
+    if (!NATIVE_SYMBOLS && node.id.name.startsWith('PERF_')) {
+      return '';
+    }
   }
   let suffix = (NATIVE_SYMBOLS && node.id ? ';allFuncs.push('+node.id.name+');' : '');
   return (
@@ -687,7 +694,7 @@ function VariableDeclaration(node, fromFor) {
     assert(!fromFor, true, 'files from which constants are recorded would not use const inside a for-header');
     let name = decl.id.name;
     constMap.set(name, $w(decl.init)); // All constants must have an init as per spec
-    return '/* const ' + name + ' */;';
+    return '/* const ' + name + ' */;\n';
   }
   return node.kind + ' ' + node.declarations.map($).join(', ') + (fromFor ? '' : ';'); // no semi inside `for`
 }
