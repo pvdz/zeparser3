@@ -168,6 +168,8 @@ import {
   $G_NUMBER,
   $G_NUMBER_BIG_INT,
   $G_PUNCTUATOR,
+  $G_BINOP_ASSIGN,
+  $G_BINOP_NONASSIGN,
   $G_STRING,
   $G_REGEX,
   $G_TICK,
@@ -5187,15 +5189,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
 
     // Have to make sure this is not a compound assignment to a pattern. And have to do it before the tail (`[].x+=y`)
-    if (isAssignBinOp()) {
-      if (curtok.type !== $PUNC_EQ) {
-        // - `for ([] += x;;);`
-        // - `for ([] /= x in y);`
-        THROW('Cannot compound assign to an object or array pattern');
-      }
-      // - `for ([] = x;;);`
-      // - `for ([] = x in y);`
-      // TODO: optimize this branch. Prevent redundant checks.
+    // - `for ([] = x;;);`
+    // - `for ([] = x in y);`
+    if (curtok.type !== $PUNC_EQ && isCompoundAssignment(curtok.type)) {
+      // - `for ([] += x;;);`
+      // - `for ([] /= x in y);`
+      return THROW('Cannot compound assign to an object or array pattern');
     }
 
     // - `for ({}`
@@ -6970,7 +6969,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
     ASSERT(typeof assignable === 'number', 'assignable num');
 
-    if (isAssignBinOp()) {
+    if (isCompoundAssignment(curtok.type)) {
       if (notAssignable(assignable)) {
         THROW('Cannot assign to lhs (starting with `'+firstExprToken.str+'`) because it is not a valid assignment target');
       }
@@ -7013,7 +7012,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(assignable, PIGGY_BACK_WAS_ARROW)) return assignable;
 
     let first = true;
-    while (isNonAssignBinOp(lexerFlags) || curtok.type === $PUNC_QMARK) {
+    while (isNonAssignBinOp(curtok.type, lexerFlags) || curtok.type === $PUNC_QMARK) {
       if (curtok.type === $PUNC_QMARK) {
         let nowAssignable = parseExpressionFromTernaryOp(lexerFlags, firstExprToken, astProp);
         assignable = setNotAssignable(nowAssignable | assignable);
@@ -7029,7 +7028,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       first = false;
     }
-    if (isAssignBinOp()) {
+    if (isCompoundAssignment(curtok.type)) {
       // [x]: `[]=n/f>>=v`
       THROW('Can not have an assignment after a non-assignment operator');
     }
@@ -7059,7 +7058,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // If the next op is stronger than this one go deeper now. Only the `**` non-assign binary op also does this
     // for if the previous op was also `**` (and we don't need other checks because it is the strongest binary op).
     // TODO: dedupe the op check which now happens here and at the higher level again
-    while ((isNonAssignBinOp(lexerFlags) && getStrength(curtok) > getStrength(opToken)) || curtok.type === $PUNC_STAR_STAR) {
+    while ((isNonAssignBinOp(curtok.type, lexerFlags) && getStrength(curtok) > getStrength(opToken)) || curtok.type === $PUNC_STAR_STAR) {
       let nowAssignable = parseExpressionFromBinaryOpOnlyStronger(lexerFlags, rightExprStartToken,'right');
       assignable = mergeAssignable(nowAssignable, assignable);
     }
@@ -7144,92 +7143,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return setNotAssignable(assignableForPiggies);
   }
 
-  function isAssignBinOp() {
-    // Find compound ops but ignore comparison ops
-    switch (curtok.type) {
-      case $PUNC_EQ:
-      case $PUNC_STAR_EQ:
-      case $PUNC_DIV_EQ:
-      case $PUNC_PERCENT_EQ:
-      case $PUNC_PLUS_EQ:
-      case $PUNC_MIN_EQ:
-      case $PUNC_LT_LT_EQ:
-      case $PUNC_GT_GT_EQ:
-      case $PUNC_GT_GT_GT_EQ:
-      case $PUNC_AND_EQ:
-      case $PUNC_CARET_EQ:
-      case $PUNC_OR_EQ:
-      case $PUNC_STAR_STAR_EQ:
-        return true;
-    }
-    return false;
-  }
   function isCompoundAssignment(type) {
-    // find compound ops but ignore comparison ops
-    switch (type) {
-      case $PUNC_STAR_EQ:
-      case $PUNC_DIV_EQ:
-      case $PUNC_PERCENT_EQ:
-      case $PUNC_PLUS_EQ:
-      case $PUNC_MIN_EQ:
-      case $PUNC_LT_LT_EQ:
-      case $PUNC_GT_GT_EQ:
-      case $PUNC_GT_GT_GT_EQ:
-      case $PUNC_AND_EQ:
-      case $PUNC_CARET_EQ:
-      case $PUNC_OR_EQ:
-        return true;
-      case $PUNC_STAR_STAR_EQ:
-        if (targetEsVersion < VERSION_EXPONENTIATION && targetEsVersion !== VERSION_WHATEVER) {
-          // TODO: test case
-          THROW('`**` is not supported in ES' + targetEsVersion);
-        }
-        return true;
+    ASSERT(isCompoundAssignment.length === arguments.length, 'arg count');
+
+    // Find compound ops but ignore comparison ops
+
+    if (!hasAllFlags(type, $G_BINOP_ASSIGN)) return false;
+    if (type !== $PUNC_STAR_STAR_EQ) return true;
+
+    if (targetEsVersion < VERSION_EXPONENTIATION && targetEsVersion !== VERSION_WHATEVER) {
+      // TODO: test case
+      return THROW('`**` is not supported in ES' + targetEsVersion);
     }
-    return false;
+    return true;
   }
-  function isNonAssignBinOp(lexerFlags) {
+  function isNonAssignBinOp(type, lexerFlags) {
     ASSERT(isNonAssignBinOp.length === arguments.length, 'arg count');
 
-    switch (curtok.type) {
-      case $PUNC_AND_AND:
-      case $PUNC_OR_OR:
-      case $PUNC_PLUS:
-      case $PUNC_MIN:
-      case $PUNC_STAR:
-      case $PUNC_DIV:
-      case $PUNC_AND:
-      case $PUNC_OR:
-      case $PUNC_CARET:
-      case $PUNC_EQ_EQ:
-      case $PUNC_EXCL_EQ:
-      case $PUNC_EQ_EQ_EQ:
-      case $PUNC_EXCL_EQ_EQ:
-      case $PUNC_LT:
-      case $PUNC_LT_EQ:
-      case $PUNC_GT:
-      case $PUNC_GT_EQ:
-      case $PUNC_LT_LT:
-      case $PUNC_GT_GT:
-      case $PUNC_GT_GT_GT:
-      case $PUNC_PERCENT:
-        return true;
-      case $PUNC_STAR_STAR:
-        if (targetEsVersion < VERSION_EXPONENTIATION && targetEsVersion !== VERSION_WHATEVER) {
-          THROW('`**` is not supported in ES' + targetEsVersion);
-        }
-        return true;
+    if (!hasAllFlags(type, $G_BINOP_NONASSIGN)) return false;
+
+    if (type === $PUNC_STAR_STAR) {
+      if (targetEsVersion < VERSION_EXPONENTIATION && targetEsVersion !== VERSION_WHATEVER) {
+        // TODO: test case
+        return THROW('`**` is not supported in ES' + targetEsVersion);
+      }
+      return true;
     }
 
     if (curtok.type === $ID_in) {
       return hasNoFlag(lexerFlags, LF_IN_FOR_LHS);
     }
 
-    if (curtok.type === $ID_instanceof) {
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   function getStrength(token) {
@@ -7585,7 +7530,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function verifyEvalArgumentsVar(lexerFlags) {
     if (hasNoFlag(lexerFlags, LF_STRICT_MODE)) return IS_ASSIGNABLE;
 
-    if (isAssignBinOp()) {
+    if (isCompoundAssignment(curtok.type)) {
       THROW('Cannot assign to `eval` and `arguments` in strict mode');
     }
 
@@ -8562,7 +8507,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (isTemplateStart(curtok.type)) {
         THROW('Block body arrows can not be immediately tagged without a group');
       }
-      if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (curtok.nl === false || curtok.type === $PUNC_DIV)) {
+      if ((isCompoundAssignment(curtok.type) || isNonAssignBinOp(curtok.type, lexerFlags)) && (curtok.nl === false || curtok.type === $PUNC_DIV)) {
         // - `()=>{}+a'
         THROW('An arrow function can not be part of an operator to the right');
       }
