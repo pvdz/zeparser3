@@ -2850,7 +2850,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // [v]: `x \n /foo/g`              // NO ASI because it can be a division (x/foo/g)
     // [v]: `debugger \n /foo/`        // ASI because it cannot be a division (regex /foo/)
     // [v]: `debugger \n /foo/g`       // ASI because it cannot be a division (regex /foo/g)
-    ASSERT_VALID(curtok.str.charCodeAt(0) !== $$FWDSLASH_2F || ASSERT_ASI_REGEX_NEXT || (ASSERT_ASI_REGEX_NEXT = false), 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
+    ASSERT_VALID((!isRegexToken(curtok.type) && curtok.type !== $PUNC_DIV && curtok.type !== $PUNC_DIV_EQ) || ASSERT_ASI_REGEX_NEXT || (ASSERT_ASI_REGEX_NEXT = false), 'The next token starts with a forward slash but neither a division nor a regular expression is legal here. This should be handled elsewhere.');
 
     if (curtok.type === $PUNC_SEMI) {
       ASSERT_skipToStatementStart(';', lexerFlags);
