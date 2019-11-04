@@ -34,6 +34,9 @@ const RESET = '\x1b[0m';
     // // A million corner cases
     // await read({path: 'ignore/perf/es5.js1k.js', mode: 'web'}),
     //
+    // // Large js file rom fb (es3, minified build output, 3+ y/o)
+    // await read({path: 'ignore/perf/es3.fb.newsfeed.min.js', mode: 'web'}),
+    //
     // // From babel repo
     await read({path: 'ignore/perf/es6.material-ui-core.js', mode: 'web'}),
     // await read({path: 'ignore/perf/es6.angular-compiler.js', mode: 'module'}),
