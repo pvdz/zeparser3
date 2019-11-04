@@ -5642,7 +5642,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(identToken !== curtok, 'the `let` token should have been skipped');
     ASSERT(hasNoFlag(lexerFlags, LF_STRICT_MODE), 'sloppy mode should be asserted at call site');
     ASSERT_LABELSET(labelSet);
-    ASSERT(curtok.type !== $PUNC_BRACKET_CLOSE, 'should invalidate expr stmt starting with `let [` before calling this func');
+    ASSERT(curtok.type !== $PUNC_BRACKET_OPEN, 'should invalidate expr stmt starting with `let [` before calling this func');
 
     if (curtok.type === $EOF) {
       parseSemiOrAsi(lexerFlags);
