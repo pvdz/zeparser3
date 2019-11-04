@@ -131,9 +131,13 @@ ${NATIVE_SYMBOLS?`
     console.time('Terser time');
     console.log('Minification through Terser...');
     let t = Terser.minify(build, {
-      mangle: true,
+      mangle: {
+        module: true,
+      },
       compress: {
-        inline: false, // do not inline functions. this just kills perf :/
+        inline: 0, // do not inline functions. this just kills perf :/
+        keep_infinity: true, // keep `Infinity` instead of `1/0`
+        module: true,
       },
       module: true,
       // sourceMap: {
