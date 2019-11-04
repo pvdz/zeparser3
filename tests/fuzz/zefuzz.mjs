@@ -4,7 +4,7 @@ console.log('\n---------------\n');
 
 import {performance} from 'perf_hooks';
 
-import {GOAL_MODULE, GOAL_SCRIPT} from "../../src/zetokenizer.mjs";
+import {GOAL_MODULE, GOAL_SCRIPT} from "../../src/zeparser.mjs";
 
 import {
   dumpFuzzOutput,
@@ -199,9 +199,9 @@ function cycle(input) {
   if (z && !NO_PRINTER) {
     // Note: this is a very slow test. Easily cuts down efficiency to a third.
     try {
-      testZePrinter(input, 'web', true, z.ast, false, false, false);
+      testZePrinter(input, 'web', true, z.ast, false, false, false, false);
     } catch (e) {
-      dumpFuzzOutput(input, input, zefailed, 'zeprinter failed');
+      dumpFuzzOutput(input, input, zefailed, 'zeprinter failed;\n' + e.stack);
       warnOsd('zeparser assertion');
       process.exit();
     }

@@ -272,7 +272,8 @@ done
 HFPID=''
 if [[ "${HF}" = "yes" ]]; then
     # Note: the build is self-hosted so we should start this before transforming with HF. Use actual dev source with --nb
-    if [[ -z "${NO_BUILDING}" ]]; then
+    if [[ ! -z "${BUILD}" ]]; then
+      echo "Running on build"
       set -x
 
       if [[ -z "${NO_BUILDING}" ]]; then
@@ -283,6 +284,7 @@ if [[ "${HF}" = "yes" ]]; then
       # Transform the build file inline
       ${NODE_BIN} --experimental-modules ../heatfiler/bin/cli.mjs --file ../zeparser3/build/build_w_ast.mjs --inline --post-node --interval-sync 1000000
     else
+      echo "Running on src"
       HAS_SRC_CHANGES=$(git diff src)
       if [[ ! -z "${HAS_SRC_CHANGES}" ]]; then
           git status -s src

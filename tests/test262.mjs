@@ -7,9 +7,10 @@ import {
   GOAL_MODULE,
   GOAL_SCRIPT,
   COLLECT_TOKENS_ALL,
-
-  isCommentToken,
 } from "../src/zetokenizer.mjs";
+import {
+  isCommentToken,
+} from '../src/tokentype.mjs';
 import {
   ASSERT,
   astToString,
