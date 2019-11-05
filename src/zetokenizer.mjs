@@ -456,7 +456,7 @@ function ZeTokenizer(
   let pointer = 0;
   let len = input.length;
 
-  let consumedNewlinesThisToken = false; // whitespace newline token or string token that contained newline or multiline comment
+  let consumedNewlinesBeforeSolid = false; // whitespace newline token or string token that contained newline or multiline comment
   let consumedMultiCommentSinceLastSolid = false; // one of two possible conditions which allows --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
@@ -596,13 +596,13 @@ function ZeTokenizer(
       let startRow = currentLine;
 
       if (eof()) {
-        let token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken);
+        let token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesBeforeSolid);
         finished = true;
         return returnSolidToken(token);
       }
 
       let start = startForError = pointer; // TODO: see if startForError makes a dent at all
-      let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
+      let nlwas = consumedNewlinesBeforeSolid; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
 
       let consumedTokenType = jumpTableLexer(lexerFlags);
       ASSERT(consumedTokenType !== undefined, 'should not return undefined');
@@ -657,7 +657,7 @@ function ZeTokenizer(
     if (collectTokens === COLLECT_TOKENS_SOLID) {
       tokenStorage.push(token);
     }
-    consumedNewlinesThisToken = false;
+    consumedNewlinesBeforeSolid = false;
     consumedMultiCommentSinceLastSolid = false;
     prevTokenSolid = true;
     return token;
@@ -774,13 +774,13 @@ function ZeTokenizer(
     // Call this function AFTER consuming the newline(s) that triggered it
     ASSERT(pointer > 0 && input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
 
-    consumedNewlinesThisToken = true;
+    consumedNewlinesBeforeSolid = true;
     ++currentLine;
     currentColOffset = pointer;
   }
 
   function addAsi() {
-    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken);
+    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesBeforeSolid);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) {
@@ -1374,7 +1374,7 @@ function ZeTokenizer(
       // - <a multi-line comment that contains at least one newline> <space>* <html close>
       // - <newline> <space>* <html close>
       // TODO: and properly parse this, not like the duplicate hack it is now
-      if (consumedNewlinesThisToken === true || consumedMultiCommentSinceLastSolid) {
+      if (consumedNewlinesBeforeSolid === true || consumedMultiCommentSinceLastSolid) {
         return parseCommentHtmlClose();
       } else {
         // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
