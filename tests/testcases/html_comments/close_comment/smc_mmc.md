@@ -1,21 +1,20 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_close_comment_can_have_multiple_multiline_comment_on_a_single_line_before_it.md
+- Path: tests/testcases/html_comments/closing_comment/smc_mmc.md
 
-> :: whitespace : html comments
+> :: html comments : closing comment
 >
-> ::> html close comment can have multiple multiline comment on a single line before it
+> ::> smc mmc
 >
-> https://tc39.github.io/ecma262/#sec-html-like-comments
+> An "html closing comment" after a multi-line comment containing a newline is legal in web compat
 >
-> Similar to a MultiLineComment that contains a line terminator code point, a SingleLineHTMLCloseComment is considered to be a LineTerminator for purposes of parsing by the syntactic grammar.
->
-> note: the SingleLineHTMLCloseComment is not "just" `-->` and so arbitrary occurrences of that token do not yield a pseudo-newline (in particular, I don't think it closes an html open...)
+> This should pass in web
 
 ## Input
 
 `````js
-/* a b c */ /* a b c */ /* a b c */ --> foo bar baz
+/* new newlines */ /* new
+line */ --> a b
 `````
 
 ## Output
@@ -34,8 +33,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Expected to parse a value
 
-/* a b c */ /* a b c */ /* a b c */ --> foo bar baz
-                                      ^------- error
+/* new newlines */ /* new
+line */ --> a b
+          ^------- error
 `````
 
 ### Strict mode
@@ -57,7 +57,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:51},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:15},source:''},
   body: []
 }
 

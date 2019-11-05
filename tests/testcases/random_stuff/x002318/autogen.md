@@ -42,10 +42,6 @@ Each case is applied to each test by simply replacing `#` with the actual case.
 > `````
 
 > `````js
-> /**/ --> comment
-> `````
-
-> `````js
 > while(true) let[a] = 0
 > `````
 

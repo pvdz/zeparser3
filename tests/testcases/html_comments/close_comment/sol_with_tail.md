@@ -1,26 +1,19 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_close_comment_can_not_go_after_code.md
+- Path: tests/testcases/html_comments/closing_comment/sol_with_tail.md
 
-> :: whitespace : html comments
+> :: html comments : closing comment
 >
-> ::> html close comment can not go after code
+> ::> sol with tail
 >
-> because "foo()--" is illegal
->
-> will also parse "foo()--" and fail
->
-> https://tc39.github.io/ecma262/#sec-html-like-comments
->
-> Similar to a MultiLineComment that contains a line terminator code point, a SingleLineHTMLCloseComment is considered to be a LineTerminator for purposes of parsing by the syntactic grammar.
->
-> note: the SingleLineHTMLCloseComment is not "just" `-->` and so arbitrary occurrences of that token do not yield a pseudo-newline (in particular, I don't think it closes an html open...)
+> An "html closing comment" at start of input is always illegal
+
+## FAIL
 
 ## Input
 
-
 `````js
-foo() --> foo
+--> a b
 `````
 
 ## Output
@@ -37,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot inc/dec a non-assignable value as postfix
+  Expected to parse a value
 
-foo() --> foo
-      ^------- error
+--> a b
+  ^------- error
 `````
 
 ### Strict mode

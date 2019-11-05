@@ -1,15 +1,22 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/random_stuff/x002318/bx002f1.md
+- Path: tests/testcases/html_comments/closing_comment/semi_mc_with_nl_id.md
 
-> :: random stuff : x002318
+> :: html comments : closing comment
 >
-> ::> bx002f1
+> ::> semi mc with nl id
+>
+> An "html closing comment" after a multi-line comment containing a newline is legal in web compat but only when the closing comment has no solids between it.
+>
+> That's not the case here so it should fail.
+
+## FAIL
 
 ## Input
 
 `````js
-/**/ --> comment
+xyz; /* foo
+bar */ fail; --> a b
 `````
 
 ## Output
@@ -28,8 +35,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Expected to parse a value
 
-/**/ --> comment
-       ^------- error
+xyz; /* foo
+bar */ fail; --> a b
+               ^------- error
 `````
 
 ### Strict mode
@@ -48,24 +56,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
-  body: []
-}
-
-tokens (1x):
-
-`````
-
-
-## AST Printer
-
-Printer output different from input [web]:
-
-````js
-
-````
-
-Produces same AST
+_Output same as sloppy mode._

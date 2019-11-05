@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_close_must_have_newline_before_it_so_cannot_be_at_start_of_program.md
+- Path: tests/testcases/whitespace/html_comments/html_close_comment_can_have_multiple_multiline_comment_on_a_single_line_before_it.md
 
 > :: whitespace : html comments
 >
-> ::> html close must have newline before it so cannot be at start of program
+> ::> html close comment can have multiple multiline comment on a single line before it
 >
 > https://tc39.github.io/ecma262/#sec-html-like-comments
 >
@@ -12,12 +12,10 @@
 >
 > note: the SingleLineHTMLCloseComment is not "just" `-->` and so arbitrary occurrences of that token do not yield a pseudo-newline (in particular, I don't think it closes an html open...)
 
-
 ## Input
 
-
 `````js
--->
+/* a b c */ /* a b c */ /* a b c */ --> foo bar baz
 `````
 
 ## Output
@@ -36,8 +34,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Expected to parse a value
 
--->
-  ^------- error
+/* a b c */ /* a b c */ /* a b c */ --> foo bar baz
+                                      ^------- error
 `````
 
 ### Strict mode

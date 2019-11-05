@@ -1,23 +1,18 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_comment_ok_except_in_module_goal.md
+- Path: tests/testcases/html_comments/closing_comment/after_slc.md
 
-> :: whitespace : html comments
+> :: html comments : closing comment
 >
-> ::> html comment ok except in module goal
+> ::> after slc
 >
-> because you cant start an expression with `<`
->
-> https://tc39.github.io/ecma262/#sec-html-like-comments
->
-> Similar to a MultiLineComment that contains a line terminator code point, a SingleLineHTMLCloseComment is considered to be a LineTerminator for purposes of parsing by the syntactic grammar.
->
-> note: the SingleLineHTMLCloseComment is not "just" `-->` and so arbitrary occurrences of that token do not yield a pseudo-newline (in particular, I don't think it closes an html open...)
+> An "html closing comment" after a newline is legal in web compat
 
 ## Input
 
 `````js
-<!-- foo -->
+// stuff
+-->
 `````
 
 ## Output
@@ -36,8 +31,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Expected to parse a value
 
-<!-- foo -->
-^------- error
+// stuff
+-->
+  ^------- error
 `````
 
 ### Strict mode
@@ -59,7 +55,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:3},source:''},
   body: []
 }
 

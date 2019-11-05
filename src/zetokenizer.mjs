@@ -457,7 +457,6 @@ function ZeTokenizer(
   let len = input.length;
 
   let consumedNewlinesBeforeSolid = false; // whitespace newline token or string token that contained newline or multiline comment
-  let consumedMultiCommentSinceLastSolid = false; // one of two possible conditions which allows --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
   let lastCanonizedString = ''; // updated while parsing a string token. escapes will be unescaped. Used for .value in AST.
@@ -658,7 +657,6 @@ function ZeTokenizer(
       tokenStorage.push(token);
     }
     consumedNewlinesBeforeSolid = false;
-    consumedMultiCommentSinceLastSolid = false;
     prevTokenSolid = true;
     return token;
   }
@@ -1374,7 +1372,7 @@ function ZeTokenizer(
       // - <a multi-line comment that contains at least one newline> <space>* <html close>
       // - <newline> <space>* <html close>
       // TODO: and properly parse this, not like the duplicate hack it is now
-      if (consumedNewlinesBeforeSolid === true || consumedMultiCommentSinceLastSolid) {
+      if (consumedNewlinesBeforeSolid === true) {
         return parseCommentHtmlClose();
       } else {
         // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
@@ -2244,7 +2242,6 @@ function ZeTokenizer(
         c = peek();
         skip();
         if (c === $$FWDSLASH_2F) {
-          consumedMultiCommentSinceLastSolid = true;
           return $COMMENT_MULTI;
         }
       }
