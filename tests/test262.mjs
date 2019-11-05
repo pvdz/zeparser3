@@ -306,7 +306,7 @@ function onRead(file, content) {
       let noCommentContent = content;
       if (z) {
         // Strip comment nodes because that's the only expected difference between the two ASTs
-        noCommentContent = z.tokens.map(token => (token.type & $COMMENT) !== $COMMENT ? token.str : token.str.includes('\n') ? '\n' : '').join('');
+        noCommentContent = z.tokens.map(token => isCommentToken(token.type) ? token.str : token.str.includes('\n') ? '\n' : '').join('');
       }
 
       let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'module', true, file);

@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/html_comments/closing_comment/semi_nl.md
+- Path: tests/testcases/html_comments/close_comment/semi_nl.md
 
-> :: html comments : closing comment
+> :: html comments : close comment
 >
 > ::> semi nl
 >

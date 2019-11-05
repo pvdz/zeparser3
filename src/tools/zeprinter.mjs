@@ -34,7 +34,8 @@ function ArrayPattern(node) {
 }
 function ArrowFunctionExpression(node) {
   assert(node.type, 'ArrowFunctionExpression');
-  let body = node.expression ? $w(node.body) : $(node.body);
+  // Babel has no .expressions: https://github.com/babel/babel/issues/6772#issuecomment-342935685
+  let body = node.expression === undefined ? (node.body.type === 'BlockStatement' ? $(node.body) : $w(node.body)) : (node.expression ? $w(node.body) : $(node.body));
   if (
     node.params.length === 1 &&
     node.params[0].type !== 'AssignmentPattern' &&
@@ -106,6 +107,21 @@ function ClassExpression(node) {
 }
 function ClassMethod(node) {
   assert(node.type, 'ClassMethod');
+  if (node.value === undefined) {
+    assert('value' in node, false);
+    // Babel does not have .value and merges the method node with the function node, different from the estree spec
+    return (
+      (node.static ? 'static ' : '') +
+      (node.kind === 'get' ? 'get ' : '') +
+      (node.kind === 'set' ? 'set ' : '') +
+      (node.async ? 'async ' : '') +
+      (node.generator ? '* ' : '') +
+      (node.computed ? '[' + $(node.key) + ']' : $(node.key)) +
+      '(' + node.params.map($).join(', ') + ')' +
+      $(node.body) +
+      ';'
+    );
+  }
   return (
     (node.static ? 'static ' : '') +
     (node.kind === 'get' ? 'get ' : '') +
@@ -183,7 +199,7 @@ function ExpressionStatement(node) {
     node.expression.type === 'Identifier' ||
     node.expression.type === 'UnaryExpression' ||
     node.expression.type === 'CallExpression' ||
-    (!node.directive && node.expression.type === 'Literal' && typeof node.expression.value === 'string') || // Prevent grouped strings of being promoted to directives
+    (!node.directive && (node.expression.type === 'Literal' || node.expression.type === 'StringLiteral') && typeof node.expression.value === 'string') || // Prevent grouped strings of being promoted to directives
     node.expression.type === 'AssignmentExpression'
   )) {
     // :'(
@@ -285,7 +301,7 @@ function MemberExpression(node) {
     node.object.type === 'UnaryExpression' || // `(!t).y`
     node.object.type === 'ArrowFunctionExpression' ||
     node.object.type === 'UpdateExpression' || // `(++x)[x]`
-    (node.object.type === 'Literal' && typeof node.object.value === 'number') || // `4 .p`
+    ((node.object.type === 'Literal' || node.object.type === 'NumericLiteral') && typeof node.object.value === 'number') || // `4 .p`
     node.object.type === 'AssignmentExpression'
   ) {
     return $w(node.object) + (node.computed ? '[' + $(node.property) + ']' : ('.' + $(node.property)));
@@ -329,6 +345,21 @@ function ObjectExpression(node) {
 }
 function ObjectMethod(node) {
   assert(node.type, 'ObjectMethod');
+  if (node.value === undefined) {
+    assert('value' in node, false);
+    // Babel does not have .value and merges the method node with the function node, different from the estree spec
+    return (
+      (node.static ? 'static ' : '') +
+      (node.kind === 'get' ? 'get ' : '') +
+      (node.kind === 'set' ? 'set ' : '') +
+      (node.async ? 'async ' : '') +
+      (node.generator ? '* ' : '') +
+      (node.computed ? '[' + $(node.key) + ']' : $(node.key)) +
+      '(' + node.params.map($).join(', ') + ')' +
+      $(node.body)
+    );
+  }
+
   return (
     (node.static ? 'static ' : '') +
     (node.kind === 'get' ? 'get ' : '') +
@@ -336,9 +367,8 @@ function ObjectMethod(node) {
     (node.value.async ? 'async ' : '') +
     (node.value.generator ? '* ' : '') +
     (node.computed ? '[' + $(node.value.id) + ']' : $(node.value.id)) +
-    '(' + $(node.value.params).join(', ') + ')' +
-    $(node.value.body) +
-    ','
+    '(' + node.value.params($).join(', ') + ')' +
+    $(node.value.body)
   );
 }
 function ObjectPattern(node) {
@@ -347,14 +377,16 @@ function ObjectPattern(node) {
 }
 function ObjectProperty(node) {
   assert(node.type, 'ObjectProperty');
-  return node.body.map($).join('\n');
+  if (node.body) return node.body.map($).join('\n');
+  // Babel
+  return Property(node);
 }
 function Program(node) {
   assert(node.type, 'Program');
   return node.body.map($).join('\n');
 }
 function Property(node) {
-  assert(node.type, 'Property');
+  assert(node.type === 'Property' || node.type === 'ObjectProperty', true);
   return (
     (node.kind === 'get' || node.kind === 'set' || node.method) ?
       (
@@ -374,7 +406,7 @@ function Property(node) {
 }
 function RegExpLiteral(node) {
   assert(node.type, 'RegExpLiteral');
-  return node.raw;
+  return node.extra.raw;
 }
 function RestElement(node) {
   assert(node.type, 'RestElement');
@@ -394,7 +426,7 @@ function SpreadElement(node) {
 }
 function StringLiteral(node) {
   assert(node.type, 'StringLiteral');
-  return node.raw;
+  return node.extra.raw;
 }
 function Super(node) {
   assert(node.type, 'Super');

@@ -1,10 +1,10 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/random_stuff/x002318/bx002f1.md
+- Path: tests/testcases/html_comments/close_comment/after_empty_mlc.md
 
-> :: random stuff : x002318
+> :: html comments : close comment
 >
-> ::> bx002f1
+> ::> after empty mlc
 >
 > An "html closing comment" after a mult-line comment without newlines is illegal
 

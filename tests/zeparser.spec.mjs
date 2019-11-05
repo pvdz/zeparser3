@@ -292,7 +292,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
 
   if (tob.continuePrint) {
     if (!NO_FATALS && AUTO_UPDATE && tob.continuePrint && !CONFIRMED_UPDATE && !INPUT_OVERRIDE && !TARGET_FILE) {
-      console.error(BOLD + 'Test Assertion fail' + RESET + ': test ' + BOLD + tob.file + RESET + ' was explicitly marked to pass, but it failed somehow;');
+      console.error(BOLD + 'Test Assertion fail' + RESET + ': testVariant=' + testVariant + ', test ' + BOLD + tob.file + RESET + ' was explicitly marked to pass, but it failed somehow;\n' + RED + tob.continuePrint + RESET);
       process.exit();
     } else {
       console.error(tob.continuePrint);

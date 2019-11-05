@@ -22,7 +22,7 @@ function testBabel(code, mode) {
     // https://babeljs.io/docs/en/babel-parser
     // It explicitly mentions a strictMode option, but when running it this fails :(
     // strictMode: mode === 'strict',
-    plugins: ['dynamicImport'],
+    plugins: ['dynamicImport', 'bigInt'],
   });
 }
 
@@ -60,7 +60,7 @@ function compareBabel(code, zeparserPassed, testVariant, enableAnnexb, file, tim
   return [babelOk, babelFail, zasb];
 }
 
-function normalizeAst(ast, parentProp) {
+function normalizeAst(ast, parentProp, parentAst) {
   // Given an object model, re-assign properties in lexicographical order except put `type` first
 
   let names = Object.getOwnPropertyNames(ast);
@@ -84,12 +84,20 @@ function normalizeAst(ast, parentProp) {
     } else if (prop === 'start' || prop === 'end') {
       delete ast[prop];
       return;
+    } else if (parentProp === 'extra' && prop === 'trailingComma') {
+      // temp
+      // the trailingComma prop is used in a bunch of places and its value should be the start pos of the comma: https://github.com/babel/babel/blob/87feda7c2a33b7bde6dc926ced4dd741a90cc860/packages/babel-parser/src/parser/expression.js#L831
+      delete ast[prop];
+    }
+    // temp
+    if (parentProp === 'extra' && Object.getOwnPropertyNames(parentAst[parentProp]).length === 0) {
+      delete parentAst[parentProp];
     }
     // Work around a poisoned getter/setter on .canon in non-ident tokens in dev mode
     let opd = Object.getOwnPropertyDescriptor(ast, prop);
     if (opd && 'value' in opd) {
       if (ast[prop] && typeof ast[prop] === 'object') {
-        normalizeAst(ast[prop], prop);
+        normalizeAst(ast[prop], prop, ast);
       }
       let v = ast[prop];
       // Have to delete the prop in some cases, or re-ordering won't work
@@ -155,16 +163,9 @@ function ignoreZeparserTestForBabel(file) {
   return [
     // Double paren wrapped delete arg; babel uses outer-most paren for location, zeparser uses inner-most
     // (Neither is wrong, inner is just easier for us)
-    'tests/testcases/assigns/assign_to_double_wrapped_group.md',
-    'tests/testcases/assigns/assign_with_dud_group.md',
-    'tests/testcases/assigns/destruct_assignment_to_noop-groups_ident.md',
-    'tests/testcases/assigns/double_wrapped_group_in_the_middle.md',
-    'tests/testcases/delete/for_header_ternary_flag.md',
     'tests/testcases/delete/single_ident_cases/multi_wrap_property.md',
     'tests/testcases/delete/single_ident_cases/wrapped_arrow_wrapped_prop.md',
     'tests/testcases/delete/single_ident_cases/wrapped_assign_outer_prop.md',
-    'tests/testcases/destructuring/destructuring_assignments_of_groups/noop_parens/many_paren_base_case.md',
-    'tests/testcases/destructuring/destructuring_assignments_of_groups/noop_parens/many_paren_properties_are_simple_assignments.md',
 
     // Bug in babel; regex on new line after typeof statement
     //     https://github.com/babel/babel/issues/10410
@@ -207,20 +208,9 @@ function ignoreZeparserTestForBabel(file) {
     "tests/testcases/directive_prologues/into_Directive_node/regular_function/multi_directive_with_multi_comment_sans_asi.md",
     "tests/testcases/directive_prologues/into_Directive_node/regular_function/multi_directive_with_single_comment.md",
     "tests/testcases/var_statement/html_comment_close_marks_start_of_single_line_comment.md",
-    'tests/testcases/whitespace/html_comments/html_close_comment_should_cause_asi.md',
-    'tests/testcases/whitespace/html_comments/html_open_actually_has_no_close.md',
-    'tests/testcases/whitespace/html_comments/html_open_on_its_own_line.md',
-    'tests/testcases/whitespace/html_comments/html_open_without_close_1.md',
-    'tests/testcases/whitespace/html_comments/html_open_without_close_2.md',
-    'tests/testcases/whitespace/html_comments/same_test_with_newline.md',
 
     // Bug: Babel getting tricked by "use strict" as a tagged template
     'tests/testcases/directive_prologues/octals/strict_mode_directive_as_tag_directive_test.md',
-
-    // Bug in Babel is generating invalid location
-    //    https://github.com/babel/babel/issues/10435
-    'tests/testcases/string/2028_is_ok.md',
-    'tests/testcases/string/2029_is_ok.md',
 
     // This is just a weird sloppy/strict thing in Babel. Meh
     //    https://github.com/babel/babel/issues/10413
@@ -272,18 +262,10 @@ function ignoreZeparserTestForBabel(file) {
     'tests/testcases/functions/declaration/block_scoped/gen/switch_default_block/async_function_x002afx0028x0029x007bx007d.md',
     'tests/testcases/functions/declaration/block_scoped/gen/switch_default_block/function_x002afx0028x0029x007bx007d.md',
 
-    // To investigate: range difference in html comment
-    'tests/testcases/random_stuff/x002318/bx002f1.md',
-    'tests/testcases/random_stuff/x002318/gen/ax002f_case/x002fx002ax002ax002f_--x003e_comment.md',
-    'tests/testcases/whitespace/html_comments/html_close_comment_can_have_multiline_comment_on_a_multiple_lines_before_it.md',
-    'tests/testcases/whitespace/html_comments/html_close_comment_can_have_multiline_comment_on_a_single_line_before_it_without_needing_a_newline.md',
-    'tests/testcases/whitespace/html_comments/html_close_comment_can_have_multiple_multiline_comment_on_a_single_line_before_it.md',
-
     // Location bug in grouped sequence
     //    https://github.com/babel/babel/issues/10436
     'tests/testcases/classes/extending/multi-line.md',
     'tests/testcases/group_or_arrow/group/multi_line_location.md',
-    'tests/testcases/comma/toplevel_statement_expression/multiline.md',
 
     // Location of 2028/2029
     //    https://github.com/babel/babel/issues/10435
@@ -303,14 +285,67 @@ function ignoreZeparserTestForBabel(file) {
     'tests/testcases/tagged_templates/escapes/octal/escape_8.md',
     'tests/testcases/tagged_templates/escapes/octal/escape_9.md',
 
-    // Ignore: Babel applies strict mode octal exception (is it incorectly?)
+    // Ignore: Babel applies strict mode octal exception (is it incorrectly?)
     'tests/testcases/classes/class_octal.md',
     'tests/testcases/lexer_cases/numbers/legacy_octal/class_02.md',
-
-    // Ignore: template encoding where I don't normalize newlines.
+    //
+    // // Ignore: template encoding where I don't normalize newlines.
     'tests/testcases/directive_prologues/octals/strict_mode_directive_as_tag.md',
     'tests/testcases/zeprinter/template_with_cr.md',
 
+    // bigint as objkey
+    'tests/testcases/objects/number_key/bin_bigint_method.md',
+    'tests/testcases/objects/number_key/bin_bigint_prop.md',
+    'tests/testcases/objects/number_key/dec_bigint_method.md',
+    'tests/testcases/objects/number_key/dec_bigint_prop.md',
+    'tests/testcases/objects/number_key/hex_bigint_method.md',
+    'tests/testcases/objects/number_key/hex_bigint_prop.md',
+    'tests/testcases/objects/number_key/oct_bigint_method.md',
+    'tests/testcases/objects/number_key/oct_bigint_prop.md',
+
+    // await inside generator
+    'tests/testcases/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_VALUE_keyword_inside_delete_in_param_default/await.md',
+    'tests/testcases/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_VALUE_var_inside_delete_in_param_default/await.md',
+    'tests/testcases/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_keyword_in_arrow_param_default/await.md',
+    'tests/testcases/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_keyword_in_generator_param_default/await.md',
+    'tests/testcases/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_keyword_var_in_param_default/await.md',
+    'tests/testcases/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_keyword_var_inside_delete_in_param_default/await.md',
+    'tests/testcases/assigns/assigning_to_keyword/x0060awaitx0060_is_only_but_always_an_illegal_var_name_with_the__module__goal/assign_to_paren-wrapped_await_var_in_param_default.md',
+    'tests/testcases/assigns/assigning_to_keyword/x0060awaitx0060_is_only_but_always_an_illegal_var_name_with_the__module__goal/assign_to_paren-wrapped_await_var_inside_delete_in_param_default.md',
+    'tests/testcases/async_keyword/await_as_param_name_of_an_arrow_that_is_a_param_default_of_an_async_call.md',
+    'tests/testcases/await/async_call_subarrow_rest_await.md',
+    'tests/testcases/await/await_as_arg_default/await_with_arg/in_async/arrow_complex_await/class_with_computed_method_containing_await_expr_followed_by_a_simple_ident_method_that_should_not_clobber_the_state.md',
+    'tests/testcases/await/await_as_arg_name/arrow/plain_arrow_in_generator.md',
+    'tests/testcases/await/await_as_arg_name/arrow/plain_arrow_in_global.md',
+    'tests/testcases/await/await_in_group_in_param_default/group_await_piggy_test_in_arrow_param_default_1.md',
+    'tests/testcases/await/await_in_group_in_param_default/group_await_piggy_test_in_func_param_default_1.md',
+    'tests/testcases/await/await_in_group_in_param_default/group_bad_await_piggy_test_in_func_param_default.md',
+    'tests/testcases/classes/piggies_in_classes/await/unwrapped/nested_no_arg.md',
+    'tests/testcases/classes/piggies_in_classes/await/wrapped_in_async_func/nested_no_arg.md',
+    'tests/testcases/classes/piggies_in_classes/await/wrapped_in_plain_func/nested_no_arg.md',
+    'tests/testcases/group_or_arrow/group/invalid_arrow_header_things_that_are_valid_in_a_group/gen/in_arrow/await.md',
+    'tests/testcases/objects/destructuring/identifier_properties/ax003ab_identifier_check/strict-mode_only_arrow_keywordx003dawait.md',
+    'tests/testcases/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/arrow_ident_key/await.md',
+    'tests/testcases/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/arrow_number_key/await.md',
+    'tests/testcases/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/arrow_string_key/await.md',
+    'tests/testcases/objects/destructuring/identifier_properties/shorthand_identifiers_check/strict-mode_only_keywordx003dawait.md',
+    'tests/testcases/objects/literals/cannot_use_as_arrow_header_x005bawaitx005d.md',
+    'tests/testcases/objects/literals/cannot_use_as_arrow_header_x005bx0060awaitx0060x005d.md',
+    'tests/testcases/objects/literals/keywords_in_object_shorthand/gen/cannot_use_as_arrow_header/await.md',
+
+    // (html) comments
+    'tests/testcases/html_comments/close_comment/after_slc.md',
+    'tests/testcases/html_comments/close_comment/after_slc_tail.md',
+    'tests/testcases/html_comments/close_comment/html_close_comment_should_cause_asi.md',
+    'tests/testcases/html_comments/close_comment/mc_with_nl.md',
+    'tests/testcases/html_comments/close_comment/mmc_smc.md',
+    'tests/testcases/html_comments/close_comment/semi_mc_with_nl.md',
+    'tests/testcases/html_comments/close_comment/semi_nl.md',
+    'tests/testcases/html_comments/close_comment/smc_mmc.md',
+    'tests/testcases/html_comments/open_comment/html_open_actually_has_no_close.md',
+    'tests/testcases/html_comments/open_comment/html_open_on_its_own_line.md',
+    'tests/testcases/html_comments/open_comment/html_open_without_close_1.md',
+    'tests/testcases/html_comments/open_comment/html_open_without_close_2.md',
   ].includes(file.slice(PROJECT_ROOT_DIR.length + 1));
 }
 

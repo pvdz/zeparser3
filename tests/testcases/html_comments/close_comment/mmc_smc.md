@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/html_comments/closing_comment/mmc_smc.md
+- Path: tests/testcases/html_comments/close_comment/mmc_smc.md
 
-> :: html comments : closing comment
+> :: html comments : close comment
 >
 > ::> mmc smc
 >

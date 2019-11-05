@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_close_comment_should_cause_asi.md
+- Path: tests/testcases/html_comments/close_comment/html_close_comment_should_cause_asi.md
 
-> :: whitespace : html comments
+> :: html comments : close comment
 >
 > ::> html close comment should cause asi
 >

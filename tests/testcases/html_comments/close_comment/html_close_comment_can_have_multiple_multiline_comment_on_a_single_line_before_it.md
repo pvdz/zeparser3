@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_close_comment_can_have_multiple_multiline_comment_on_a_single_line_before_it.md
+- Path: tests/testcases/html_comments/close_comment/html_close_comment_can_have_multiple_multiline_comment_on_a_single_line_before_it.md
 
-> :: whitespace : html comments
+> :: html comments : close comment
 >
 > ::> html close comment can have multiple multiline comment on a single line before it
 >

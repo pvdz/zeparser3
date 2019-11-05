@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_open_on_its_own_line.md
+- Path: tests/testcases/html_comments/open_comment/html_open_on_its_own_line.md
 
-> :: whitespace : html comments
+> :: html comments : open comment
 >
 > ::> html open on its own line
 >

@@ -1,8 +1,8 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/whitespace/html_comments/html_open_actually_has_no_close.md
+- Path: tests/testcases/html_comments/open_comment/html_open_actually_has_no_close.md
 
-> :: whitespace : html comments
+> :: html comments : open comment
 >
 > ::> html open actually has no close
 >
