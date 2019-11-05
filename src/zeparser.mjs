@@ -995,7 +995,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let type = token.type;
     if (isBigintToken(type)) return AST_getBigIntNode(token);
-    if (babelCompat) return AST_babelgetNumberNode(token);
+    if (babelCompat) return AST_babelGetNumberNode(token);
 
     // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
 
@@ -1012,7 +1012,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ? parseFloat(str.slice(1))
         : parseInt(str.slice(1), 8)
       );
-    if (acornCompat && value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
 
     return {
       type: 'Literal',
@@ -1055,6 +1054,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // TODO: is a destructuring more efficient pref-wise? `let {canon, str, ...} = token`. It may be :)
 
+    if (acornCompat) return AST_acornGetBigIntNode(token);
     if (babelCompat) return AST_babelGetBigIntNode(token);
 
     return {
@@ -1086,6 +1086,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function AST_getRegexNode(token) {
     ASSERT(AST_getRegexNode.length === arguments.length, 'arg count');
 
+    if (acornCompat) return AST_acornGetRegexNode(token);
     if (babelCompat) return AST_babelGetRegexNode(token);
 
     // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
@@ -1113,7 +1114,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         },
         source: sourceField, // File containing the code being parsed. Source maps may use this.
       },
-      value: acornCompat ? {} : null,
+      value: null,
       regex: {
         pattern: body,
         flags: tail,
@@ -1499,8 +1500,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       },
     };
   }
-  function AST_babelgetNumberNode(token) {
-    ASSERT(AST_babelgetNumberNode.length === arguments.length, 'arg count');
+  function AST_babelGetNumberNode(token) {
+    ASSERT(AST_babelGetNumberNode.length === arguments.length, 'arg count');
     ASSERT(typeof token === 'object' && token && typeof token.type === 'number', 'should receive token', [token, typeof token === 'object', token && typeof token.type === 'number']);
 
     // Open a node and immediately close it. Only works if the column offsets do not depend on something being consumed
@@ -1591,6 +1592,56 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       pattern: body,
       flags: tail,
       extra: {raw: str},
+    };
+  }
+  function AST_acornGetBigIntNode(token) {
+    return {
+      type: 'Literal',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      raw: token.str,
+      bigint: token.str.slice(0, -1),
+      value: BigInt(token.str.slice(0, -1)), // Ironically it doesn't accept bigint notation
+    };
+  }
+  function AST_acornGetRegexNode(token) {
+
+    let str = token.str;
+    let pos = str.lastIndexOf('/');
+    let body = str.slice(1, pos);
+    let tail = str.slice(pos + 1);
+
+    // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
+    // This node for Acorn is almost identical to estree ...
+
+    return {
+      type: 'Literal',
+      loc: {
+        start: {
+          line: token.line, // offset 1
+          column: token.column, // offset 0
+        },
+        end: {
+          line: tok_prevEndLine(),
+          column: tok_prevEndColumn(),
+        },
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
+      },
+      value: new RegExp(body, tail), // Only difference
+      regex: {
+        pattern: body,
+        flags: tail,
+      },
+      raw: str,
     };
   }
 
@@ -3219,6 +3270,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // Babel extends the Function node to be an ObjectMethod /  ClassMethod, rather than .value
       AST_set('generator', starToken !== UNDEF_STAR);
       AST_set('async', asyncToken !== UNDEF_ASYNC);
+    } else if (acornCompat) {
+      AST_open(astProp, {
+        type: isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression',
+        loc: AST_getBaseLoc(firstToken),
+        // name value doesn't seem to be specced in estree but it makes sense to use the canonical name here
+        generator: starToken !== UNDEF_STAR,
+        async: asyncToken !== UNDEF_ASYNC,
+        expression: false,
+        id: undefined,
+        params: [],
+        body: undefined,
+      });
     } else {
       AST_open(astProp, {
         type: isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression',
@@ -3231,7 +3294,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         body: undefined,
       });
     }
-    if (acornCompat) AST_set('expression', false);
 
     if (asyncToken !== UNDEF_ASYNC) {
       if (!allowAsyncFunctions) {

@@ -3,6 +3,7 @@ import {
   ASSERT,
   astToString,
   encodeUnicode,
+  smash,
   PROJECT_ROOT_DIR,
 } from "./utils.mjs";
 import {execSync} from 'child_process';
@@ -111,11 +112,8 @@ function normalizeAst(ast, parentProp) {
 function acornScrub(ast) {
   return (
     astToString(
-      JSON.parse(
-        JSON.stringify(
-          ast, null, 2
-        )
-      )
+      // Acorn puts bigint literals in the structures and that trips up json.stringify :(
+      smash(ast)
     )
   );
 }
@@ -162,8 +160,6 @@ function ignoreZeparserTestForAcorn(file) {
   return [
     // Bug: Parens in assignment pattern
     //    https://github.com/acornjs/acorn/issues/872
-    'tests/testcases/assigns/destruct_assign_of_obj/gen/case/x0028x007bx002ex002ex002ex0028objx0029x007d_x003d_foox0029.md',
-    'tests/testcases/assigns/good_destruct_assign_of_obj_case.md',
     'tests/testcases/assigns/destruct/good_destruct_assign_of_obj_case.md',
     'tests/testcases/assigns/obj_destruct_rest/gen/case/x0028x007bx002ex002ex002ex0028objx0029x007d_x003d_foox0029.md',
 
@@ -204,17 +200,6 @@ function ignoreZeparserTestForAcorn(file) {
     //     https://github.com/acornjs/acorn/issues/879
     'tests/testcases/regexes/property_escapes/uflag/gen/Valid_binary/u.md',
     'tests/testcases/regexes/property_escapes/uflag/gen/Valid_binary_in_character_class/u.md',
-
-    // Bug: incorectly seeing eval/arguments as keyword for reading it.
-    //    https://github.com/acornjs/acorn/issues/876
-    //    (Babel issue: https://github.com/babel/babel/issues/10411 )
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00280x0029.md',
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00281x0029.md',
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00282x0029.md',
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00283x0029.md',
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00284x0029.md',
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00285x0029.md',
-    'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00286x0029.md',
 
     // Bug (?): Not incrementing line for 2028/2029
     //    https://github.com/acornjs/acorn/issues/877

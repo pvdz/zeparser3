@@ -3,6 +3,7 @@ import {
   ASSERT,
   astToString,
   encodeUnicode,
+  smash,
   PROJECT_ROOT_DIR,
 } from "./utils.mjs";
 import {execSync} from 'child_process';
@@ -112,11 +113,7 @@ function normalizeAst(ast, parentProp, parentAst) {
 function babelScrub(ast) {
   return (
     astToString(
-      JSON.parse(
-        JSON.stringify(
-          ast, null, 2
-        )
-      )
+      smash(ast)
     )
   );
 }

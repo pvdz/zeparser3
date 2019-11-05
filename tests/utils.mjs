@@ -312,9 +312,31 @@ async function yn(msg = 'Answer?') {
   return true;
 }
 
+function smash(node, x) {
+  // This function recursively turns objects whose __proto__ is not Object into cloned objects whose __proto__ is Object
+  // (It used to be JSON.parse(JSON.stringify(node)) but that can't handle bigints gracefully :@ )
+  if (node == null) return node; // null or undefined, yes
+  let nnode = {};
+  Object.getOwnPropertyNames(node).forEach(prop => {
+    let p = node[prop];
+    if (p !== null && typeof p === 'object' && !(p instanceof RegExp)) {
+      if (Array.isArray(p)) {
+        nnode[prop] = p.map(v => smash(v, prop));
+      }
+      else {
+        nnode[prop] = smash(p, prop);
+      }
+    } else {
+      nnode[prop] = p;
+    }
+  });
+  return nnode;
+}
+
 function astToString(ast) {
   return util
   .inspect(ast, false, null)
+
   // Flatten location tracking objects to a single line
   /*
   loc: {
@@ -366,6 +388,7 @@ export {
   promiseToReadFile,
   promiseToWriteFile,
   readFiles,
+  smash,
   toPrint,
   THROW,
   yn,
