@@ -377,6 +377,7 @@ import {
   VERSION_TAGGED_TEMPLATE_BAD_ESCAPES,
   VERSION_OPTIONAL_CATCH,
   VERSION_DYNAMIC_IMPORT,
+  VERSION_EXPORT_STAR_AS,
   VERSION_WHATEVER,
   IS_ASYNC_PREFIXED,
   NOT_ASYNC_PREFIXED,
@@ -622,6 +623,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let allowBadEscapesInTaggedTemplates = targetEsVersion >= VERSION_TAGGED_TEMPLATE_BAD_ESCAPES || targetEsVersion === VERSION_WHATEVER;
   let allowOptionalCatchBinding = targetEsVersion >= VERSION_OPTIONAL_CATCH || targetEsVersion === VERSION_WHATEVER;
   let allowDynamicImport = (targetEsVersion >= VERSION_DYNAMIC_IMPORT || targetEsVersion === VERSION_WHATEVER);
+  let allowExportStarAs = (targetEsVersion >= VERSION_EXPORT_STAR_AS || targetEsVersion === VERSION_WHATEVER);
 
   ASSERT(goalMode === GOAL_SCRIPT || goalMode === GOAL_MODULE);
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 11) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 10 11 or infin');
@@ -4427,6 +4429,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // export default generator function
     // export default async generator function
     // export default assignment ;
+    // ES2020 / ES11:
+    // export * as bar from 'foo';
 
     // https://tc39.github.io/ecma262/#sec-module-semantics-static-semantics-early-errors
     // > It is a Syntax Error if the ExportedNames of ModuleItemList contains any duplicate entries.
@@ -4561,11 +4565,63 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('ExportDefaultDeclaration');
     }
     else if (curtok.type === $PUNC_STAR) {
-      // export * from "x"
-      //        ^
+      // - `export * from "x"`
+      //           ^
+      // - `export * as y from "x"`
+      //           ^
 
-      ASSERT_skipToFromOrDie($PUNC_STAR, lexerFlags); // Will throw if next token is not "from"
+      // Must skip `as` or `from`, but we'll check for those explicitly here, so just skipAny
+      ASSERT_skipAny($PUNC_STAR, lexerFlags);
+
+      if (curtok.type === $ID_as) {
+        // - `export * as y from "x"`
+        //           ^
+
+        if (!allowExportStarAs) {
+          return THROW('The `export * as x from src`, syntax was introduced in ES2020 but currently targeted version is lower');
+        }
+
+        ASSERT_skipToIdentOrDie($ID_as, lexerFlags);
+        // note: the exported _name_ can be any identifier, keywords included
+        let exportedNameToken = curtok;
+
+        addNameToExports(exportedNames, exportedNameToken.str);
+
+        // Must skip `from` but we'll check for that explicitly next, so just skipAny
+        ASSERT_skipAny(curtok.str, lexerFlags);
+
+        if (curtok.type !== $ID_from) {
+          return THROW('Expected to find `as` or `from`, found `' + curtok.str + '` instead');
+        }
+
+        ASSERT_skipToStringOrDie($ID_from, lexerFlags); // Will throw if next token is not a string
+
+        let sourceToken = curtok;
+        ASSERT_skipToStatementStart($G_STRING, lexerFlags);
+
+        parseSemiOrAsi(lexerFlags);
+
+        AST_setNode(astProp, {
+          type: 'ExportNamedDeclaration',
+          loc: AST_getClosedLoc(exportToken),
+          specifiers: [{
+            type: 'ExportNamespaceSpecifier',
+            loc: AST_getClosedLoc(exportToken),
+            exported: AST_getIdentNode(exportedNameToken),
+          }],
+          declaration: null,
+          source: AST_getStringNode(sourceToken, false),
+        });
+
+        return;
+      }
+
+      if (curtok.type !== $ID_from) {
+        return THROW('Expected to find `as` or `from`, found `' + curtok.str + '` instead');
+      }
+
       ASSERT_skipToStringOrDie($ID_from, lexerFlags); // Will throw if next token is not a string
+
       let sourceToken = curtok;
       ASSERT_skipToStatementStart($G_STRING, lexerFlags);
 

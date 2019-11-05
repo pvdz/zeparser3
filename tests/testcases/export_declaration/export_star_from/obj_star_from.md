@@ -1,17 +1,19 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/export_declaration/confirm_when_a_semi_is_not_needed/non-default/export_namespaced_star.md
+- Path: tests/testcases/export_declaration/export_star_from/obj_star_from.md
 
-> :: export declaration : confirm when a semi is not needed : non-default
+> :: export declaration : export star from
 >
-> ::> export namespaced star
+> ::> obj star from
 >
-> Not stage 4
+> Can not combine the namespace export with another export type
+
+## FAIL
 
 ## Input
 
 `````js
-export * as x from "x" foo
+export {bar}, * from 'bar';
 `````
 
 ## Output
@@ -30,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-export * as x from "x" foo
+export {bar}, * from 'bar';
 ^------- error
 `````
 
@@ -46,10 +48,10 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N pos=23:26 loc=23:1 `foo`#}
+  Unable to ASI, token: {# PUNC_COMMA : nl=N pos=12:13 loc=12:1 `,`#}
 
-export * as x from "x" foo
-                       ^------- error
+export {bar}, * from 'bar';
+            ^------- error
 `````
 
 

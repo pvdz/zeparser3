@@ -353,9 +353,19 @@ function ExportDefaultDeclaration(node) {
   return '/*1004*/;'; // Still scrub all exports :)
   return 'export default ' + $(node.declaration) + (node.declaration.type === 'ClassDeclaration' || node.declaration.type === 'FunctionDeclaration' ? '' : ';');
 }
+function ExportNamespaceSpecifier(node) {
+  assert(node.type, 'ExportNamespaceSpecifier');
+  return '* as ' + $(node.exported)
+}
 function ExportNamedDeclaration(node) {
   assert(node.type, 'ExportNamedDeclaration');
   return '/*1003*/;'; // Drop all exports from the build
+  if (node.specifiers.length === 1 && node.specifiers[0].type === 'ExportNamespaceSpecifier') {
+    // This is specifically `export * as foo from 'bar'` syntax
+    assert(!!node.source, true, 'spec dictates this syntax requires the source');
+    return 'export ' + $(node.specifiers[0]) + ' from ' + $(node.source) + ';';
+  }
+  assert(node.specifiers.length !== 1 || (node.specifiers.length > 0 && node.specifiers[0].type !== 'ExportNamespaceSpecifier'). true, 'the ExportNamespaceSpecifier node has restrictions');
   return 'export ' + (node.declaration ? $(node.declaration) : ('{' + node.specifiers.map($).join(', ') + '}')) + (node.source ? ' from ' + $(node.source) : '');
 }
 function ExportSpecifier(node) {

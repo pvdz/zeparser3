@@ -1,17 +1,19 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/export_declaration/confirm_when_a_semi_is_not_needed/non-default/export_namespaced_star.md
+- Path: tests/testcases/export_declaration/export_star_from/star_from_es11.md
 
-> :: export declaration : confirm when a semi is not needed : non-default
+> :: export declaration : export star from
 >
-> ::> export namespaced star
+> ::> star from es11
 >
-> Not stage 4
+> This (without the `as`) was available since ES6 so it should be fine
 
 ## Input
 
+- `es = 11`
+
 `````js
-export * as x from "x" foo
+export * from 'bar';
 `````
 
 ## Output
@@ -30,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-export * as x from "x" foo
+export * from 'bar';
 ^------- error
 `````
 
@@ -45,11 +47,25 @@ _Output same as sloppy mode._
 Parsed with the module goal.
 
 `````
-throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N pos=23:26 loc=23:1 `foo`#}
+ast: {
+  type: 'Program',
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
+  body: [
+    {
+      type: 'ExportAllDeclaration',
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
+      source: {
+        type: 'Literal',
+        loc:{start:{line:1,column:14},end:{line:1,column:20},source:''},
+        value: 'bar',
+        raw: "'bar'"
+      }
+    }
+  ]
+}
 
-export * as x from "x" foo
-                       ^------- error
+tokens (6x):
+       ID_export PUNC_STAR ID_from STRING_SINGLE PUNC_SEMI
 `````
 
 
@@ -58,3 +74,7 @@ export * as x from "x" foo
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 _Output same as sloppy mode._
+
+## AST Printer
+
+Printer output was same as input [module]

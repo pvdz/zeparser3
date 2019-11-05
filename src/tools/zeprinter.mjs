@@ -178,8 +178,18 @@ function ExportDefaultDeclaration(node) {
   assert(node.type, 'ExportDefaultDeclaration');
   return 'export default ' + $(node.declaration) + (node.declaration.type === 'ClassDeclaration' || node.declaration.type === 'FunctionDeclaration' ? '' : ';');
 }
+function ExportNamespaceSpecifier(node) {
+  assert(node.type, 'ExportNamespaceSpecifier');
+  return '* as ' + $(node.exported)
+}
 function ExportNamedDeclaration(node) {
   assert(node.type, 'ExportNamedDeclaration');
+  if (node.specifiers.length === 1 && node.specifiers[0].type === 'ExportNamespaceSpecifier') {
+    // This is specifically `export * as foo from 'bar'` syntax
+    assert(!!node.source, true, 'spec dictates this syntax requires the source');
+    return 'export ' + $(node.specifiers[0]) + ' from ' + $(node.source) + ';';
+  }
+  assert(node.specifiers.length !== 1 || (node.specifiers.length > 0 && node.specifiers[0].type !== 'ExportNamespaceSpecifier'), true, 'the ExportNamespaceSpecifier node has restrictions');
   return 'export ' + (node.declaration ? $(node.declaration) : ('{' + node.specifiers.map($).join(', ') + '}')) + (node.source ? ' from ' + $(node.source) : '');
 }
 function ExportSpecifier(node) {
@@ -499,7 +509,11 @@ function $w(node) {
 let jumpTable = [
   (node, fromFor, type, c) => {
     if (c === $$I_69) return Directive(node);
-    if (c === $$X_78) return ExportDefaultDeclaration(node);
+    if (c === $$X_78) {
+      c = type.charCodeAt(6);
+      if (c === $$D_UC_44) return ExportDefaultDeclaration(node);
+      return ExportNamespaceSpecifier(node);
+    }
     return UpdateExpression(node);
   },
   (node, fromFor, type, c) => {

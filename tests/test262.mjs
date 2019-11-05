@@ -148,8 +148,6 @@ function onRead(file, content) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage 3: import.meta)');
   } else if (features.includes('numeric-separator-literal')) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage 3: numeric-separator-literal)');
-  } else if (features.includes('export-star-as-namespace-from-module')) {
-    return console.log(BOLD, 'SKIP', RESET, '(Stage 1?: export-star-as-namespace-from-module)');
   } else if (features.includes('optional-chaining')) {
     return console.log(BOLD, 'SKIP', RESET, '(Stage 3: optional-chaining)');
   } else if (features.includes('top-level-await')) {

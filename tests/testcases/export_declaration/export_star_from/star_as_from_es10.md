@@ -1,17 +1,23 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/export_declaration/confirm_when_a_semi_is_not_needed/non-default/export_namespaced_star.md
+- Path: tests/testcases/export_declaration/export_star_from/star_as_from_es10.md
 
-> :: export declaration : confirm when a semi is not needed : non-default
+> :: export declaration : export star from
 >
-> ::> export namespaced star
+> ::> star as from es10
 >
-> Not stage 4
+> As per https://github.com/tc39/ecma262/pull/1174
+>
+> Introduced in ES2020 / ES11 so throw an error if targeting lower
+
+## FAIL
 
 ## Input
 
+- `es = 10`
+
 `````js
-export * as x from "x" foo
+export * as woo from 'bar';
 `````
 
 ## Output
@@ -30,7 +36,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-export * as x from "x" foo
+export * as woo from 'bar';
 ^------- error
 `````
 
@@ -46,10 +52,10 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# IDENT : nl=N pos=23:26 loc=23:1 `foo`#}
+  The `export * as x from src`, syntax was introduced in ES2020 but currently targeted version is lower
 
-export * as x from "x" foo
-                       ^------- error
+export * as woo from 'bar';
+         ^------- error
 `````
 
 
