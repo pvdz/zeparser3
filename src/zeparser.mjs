@@ -365,7 +365,7 @@ function ASSERT_BINDING_TYPE(bindingType) {
   ASSERT([BINDING_TYPE_NONE,BINDING_TYPE_ARG,BINDING_TYPE_VAR,BINDING_TYPE_LET,BINDING_TYPE_CONST,BINDING_TYPE_CLASS,BINDING_TYPE_FUNC_VAR,BINDING_TYPE_FUNC_LEX,BINDING_TYPE_FUNC_STMT,BINDING_TYPE_CATCH_IDENT,BINDING_TYPE_CATCH_OTHER].includes(bindingType), 'bindingType is an enum', bindingType);
 }
 function ASSERT_BINDING_ORIGIN(bindingOrigin) {
-  ASSERT([FROM_STATEMENT_START, FROM_FOR_HEADER, FROM_EXPORT_DECL, FROM_CATCH, FROM_ASYNC_ARG, FROM_OTHER_FUNC_ARG].includes(bindingOrigin), 'binding origin enum');
+  ASSERT([FROM_STATEMENT_START, FROM_FOR_HEADER, FROM_CATCH, FROM_EXPORT_DECL, FROM_ASYNC_ARG, FROM_OTHER_FUNC_ARG].includes(bindingOrigin), 'binding origin enum');
 }
 
 import {
@@ -3636,7 +3636,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case $ID_export:
-        parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, isGlobalToplevel, fdState, astProp);
+        parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, isGlobalToplevel, astProp);
         return;
 
       case $ID_for:
@@ -4410,8 +4410,302 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('DoWhileStatement');
   }
 
-  function parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, isGlobalToplevel, fdState, astProp) {
+  function parseExportDefaultAsync(lexerFlags, scoop, exportedNames, exportedBindings) {
+    ASSERT(parseExportDefaultAsync.length === arguments.length, 'arg count');
+
+    // `export default async function f(){}`
+    // `export default async function(){}`
+    // `export default async () => y`
+    // `export default async (x) => y`
+    // `export default async x => y`
+    // `export default async(x);`
+    // `export default async.x;`
+
+    let identToken = curtok;
+    ASSERT_skipRex($ID_async, lexerFlags); // function, arrow, or value-tail (for it can be a legacy async)
+
+    // note: default export doesnt care as much about function type
+    if (curtok.type === $ID_function) {
+      // `export default async function f(){}`
+      // `export default async function(){}`
+      return parseAsyncStatement(lexerFlags, scoop, identToken, IS_EXPORT, exportedBindings, NOT_LABELLED, FDS_VAR, 'declaration');
+      // no semi
+    }
+
+    // [v] `export default async () => y`
+    // [v] `export default async (x) => y`
+    // [v] `export default async x => y`
+    // [v] `export default async(x);`
+    // [v] `export default async.x;`
+
+    // https://tc39.github.io/ecma262/#prod-ExportDeclaration
+    // > export default [lookahead ∉ { function, async [no LineTerminator here] function, class }] AssignmentExpression [+In, ~Yield, ~Await] ;
+    // > AssignmentExpression[In, Yield, Await] : AsyncArrowFunction [?In, ?Yield, ?Await]
+    // so `export default async () => {};` should be fine
+    parseAsyncExpression(lexerFlags, identToken, NOT_NEW_ARG, IS_EXPORT, ASSIGN_EXPR_IS_OK, NOT_LHSE, 'declaration');
+
+    // (this won't have any other name than "default")
+    // bound names: "*default*"
+    // exported binding: "*default*"
+    // exported names: "default"
+    parseSemiOrAsi(lexerFlags);
+  }
+  function parseExportDefault(lexerFlags, scoop, exportToken, exportedNames, exportedBindings, astProp) {
+    ASSERT(parseExportDefault.length === arguments.length, 'arg count');
+
+    AST_open(astProp, {
+      type: 'ExportDefaultDeclaration',
+      loc: AST_getBaseLoc(exportToken),
+      declaration: undefined,
+    });
+
+    ASSERT_skipToExpressionStart($ID_default, lexerFlags); // Note: or a declaration, but that would start with ident, so is subsumed here... (footgun in 3... 2... 1...)
+
+    // https://tc39.github.io/ecma262/#sec-exports-static-semantics-exportednames
+    // https://tc39.github.io/ecma262/#sec-exports-static-semantics-exportedbindings
+
+    // First record the `default` export name, which happens for any tail. If the tail is a declaration with
+    // one or more names, those will also be recorded by sub parsers by passing on the binding objects.
+    SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
+    addNameToExports(exportedNames, 'default');
+    addBindingToExports(exportedBindings, '*default*');
+
+    if (curtok.type === $ID_class) {
+      // - `export default class {}`
+      // - `export default class x{}`
+
+      let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_OPTIONAL, NOT_LABELLED, FDS_LEX, 'declaration');
+      addBindingToExports(exportedBindings, exportedName);
+      // no semi
+    }
+    else if (curtok.type === $ID_function) {
+      // - `export default function f(){}`
+      // - `export default function* f(){}`
+      // - `export default function(){}`
+      // - `export default function* (){}`
+
+      let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_OPTIONAL, NOT_LABELLED, FDS_VAR, 'declaration');
+      addBindingToExports(exportedBindings, exportedName);
+      // no semi
+    }
+    else if (curtok.type === $ID_async) {
+      parseExportDefaultAsync(lexerFlags, scoop, exportedNames, exportedBindings);
+    }
+    else {
+      // - `export default 15`
+
+      // any expression is exported as is (but is not a live binding)
+      parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'declaration');
+      parseSemiOrAsi(lexerFlags);
+    }
+
+    AST_close('ExportDefaultDeclaration');
+  }
+  function parseExportStar(lexerFlags, exportToken, exportedNames, astProp) {
+    ASSERT(parseExportStar.length === arguments.length, 'arg count');
+
+    // - `export * from "x"`
+    //           ^
+    // - `export * as y from "x"`
+    //           ^
+
+    // Must skip `as` or `from`, but we'll check for those explicitly here, so just skipAny
+    ASSERT_skipAny($PUNC_STAR, lexerFlags);
+
+    if (curtok.type === $ID_as) {
+      // - `export * as y from "x"`
+      //           ^
+
+      if (!allowExportStarAs) {
+        return THROW('The `export * as x from src`, syntax was introduced in ES2020 but currently targeted version is lower');
+      }
+
+      ASSERT_skipToIdentOrDie($ID_as, lexerFlags);
+      // note: the exported _name_ can be any identifier, keywords included
+      let exportedNameToken = curtok;
+
+      addNameToExports(exportedNames, exportedNameToken.str);
+
+      // Must skip `from` but we'll check for that explicitly next, so just skipAny
+      ASSERT_skipAny(curtok.str, lexerFlags);
+
+      if (curtok.type !== $ID_from) {
+        return THROW('Expected to find `as` or `from`, found `' + curtok.str + '` instead');
+      }
+
+      ASSERT_skipToStringOrDie($ID_from, lexerFlags); // Will throw if next token is not a string
+
+      let sourceToken = curtok;
+      ASSERT_skipToStatementStart($G_STRING, lexerFlags);
+
+      parseSemiOrAsi(lexerFlags);
+
+      AST_setNode(astProp, {
+        type: 'ExportNamedDeclaration',
+        loc: AST_getClosedLoc(exportToken),
+        specifiers: [{
+          type: 'ExportNamespaceSpecifier',
+          loc: AST_getClosedLoc(exportToken),
+          exported: AST_getIdentNode(exportedNameToken),
+        }],
+        declaration: null,
+        source: AST_getStringNode(sourceToken, false),
+      });
+
+      return;
+    }
+
+    if (curtok.type !== $ID_from) {
+      return THROW('Expected to find `as` or `from`, found `' + curtok.str + '` instead');
+    }
+
+    ASSERT_skipToStringOrDie($ID_from, lexerFlags); // Will throw if next token is not a string
+
+    let sourceToken = curtok;
+    ASSERT_skipToStatementStart($G_STRING, lexerFlags);
+
+    parseSemiOrAsi(lexerFlags);
+
+    AST_setNode(astProp, {
+      type: 'ExportAllDeclaration',
+      loc: AST_getClosedLoc(exportToken),
+      source: AST_getStringNode(sourceToken, false),
+    });
+  }
+  function parseExportNamed(lexerFlags, scoop, exportToken, exportedNames, exportedBindings, astProp) {
+    ASSERT(parseExportNamed.length === arguments.length, 'arg count');
+
+    AST_open(astProp, {
+      type: 'ExportNamedDeclaration',
+      loc: AST_getBaseLoc(exportToken),
+      specifiers: [],
+      declaration: undefined,
+      source: undefined,
+    });
+
+    let needsSemi = true;
+
+    if (curtok.type === $PUNC_CURLY_OPEN) {
+      AST_set('declaration', null);
+      // export {}
+      // export {} from "x"
+
+      // We don't know whether we need to use the names for exportBindings/exportNames until we see the token after
+      // the closing curly. If that's "from" then we don't use the list, otherwise we do. So collect the names in
+      // arrays :'( and act accordingly after the fact.
+      let tmpExportedNames = new Set;
+      ASSERT(tmpExportedNames._ = 'exported names');
+      ASSERT(tmpExportedNames._i = ++uid_counter);
+      let tmpExportedBindings = new Set;
+      ASSERT(tmpExportedBindings._ = 'exported bindings');
+      ASSERT(tmpExportedBindings._i = ++uid_counter);
+      parseExportObject(lexerFlags, tmpExportedNames, tmpExportedBindings);
+
+      if (curtok.type === $ID_from) {
+        // drop the tmp lists
+        ASSERT_skipToStringOrDie($ID_from, lexerFlags);
+        // TODO: what happens to dupe exported bindings or exported names here?
+        let fromToken = curtok;
+
+        ASSERT_skipToStatementStart($G_STRING, lexerFlags);
+        AST_setStringLiteral('source', fromToken, false);
+      } else {
+        AST_set('source', null);
+        // pump the names into the real sets now
+        tmpExportedNames.forEach(name => addNameToExports(exportedNames, name));
+        tmpExportedBindings.forEach(name => addBindingToExports(exportedBindings, name));
+      }
+    }
+    else if (curtok.type === $ID_var) {
+      // export var <bindings>
+      let varToken = curtok;
+      ASSERT_skipToBindingStart($ID_var , lexerFlags);
+      parseAnyVarDeclaration(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
+      AST_set('source', null);
+      needsSemi = false; // Note: If we parse the semi below then the loc will be incorrect
+    }
+    else if (curtok.type === $ID_let) {
+      // export let <bindings>
+      let letToken = curtok;
+      ASSERT_skipToBindingStart($ID_let, lexerFlags);
+      parseAnyVarDeclaration(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
+      AST_set('source', null);
+      needsSemi = false; // Note: If we parse the semi below then the loc will be incorrect
+    }
+    else if (curtok.type === $ID_const) {
+      // export const <bindings>
+      let constToken = curtok;
+      ASSERT_skipToBindingStart($ID_const, lexerFlags);
+      parseAnyVarDeclaration(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
+      AST_set('source', null);
+      needsSemi = false; // Note: If we parse the semi below then the loc will be incorrect
+    }
+    else if (curtok.type === $ID_class) {
+      // export class ...
+      let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX,'declaration');
+      addNameToExports(exportedNames, exportedName);
+      addBindingToExports(exportedBindings, exportedName);
+      needsSemi = false;
+      AST_set('source', null);
+    }
+    else if (curtok.type === $ID_function) {
+      // - `export function f(){}`
+      //           ^^^^^^^^
+      // - `export function* f(){}`
+      //           ^^^^^^^^
+      // (anonymous should not be allowed but parsers seem to do it anyways)
+      let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX, 'declaration');
+      addNameToExports(exportedNames, exportedName);
+      addBindingToExports(exportedBindings, exportedName);
+      AST_set('source', null);
+      needsSemi = false;
+    }
+    else if (curtok.type === $ID_async) {
+      // - `export async function f(){}`
+      //           ^^^^^
+      // - `export async function *f(){}`
+      //           ^^^^^
+      // (note: no arrows here because we require a name)
+      let asyncToken = curtok;
+      // TODO: test case to this change
+      ASSERT_skipDiv($ID_async, lexerFlags); // TODO: async could be ident, so `async/b` is a division
+
+      if (curtok.type !== $ID_function) {
+        // - `export async \n a => b`
+        THROW('Can only export async functions (not arrows), did not find a function');
+      }
+      if (curtok.nl === true) {
+        // - `export async \n function(){}`
+        THROW('Async can not be followed by a newline as it results in `export async;`, which is not valid (and probably not what you wanted)');
+      }
+
+      let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, asyncToken, curtok, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX, 'declaration');
+      addNameToExports(exportedNames, exportedName);
+      addBindingToExports(exportedBindings, exportedName);
+      AST_set('source', null);
+      needsSemi = false;
+    }
+    else {
+      // `export foo;`
+      THROW('Unknown export type `' + tokenStrForError(curtok) + '` (note: you can only export individual vars through `export {foo};`)');
+    }
+
+    if (needsSemi) {
+      // The variable (let/const/var) decls will consume the semi for us
+      if (curtok.nl === true && isRegexToken(curtok.type)) {
+        ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI), 'Export cases can only appear on the toplevel as a statement so ASI is always valid here');
+        // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
+        // `export {} \n /foo/`
+        tok_asi();
+      } else {
+        parseSemiOrAsi(lexerFlags);
+      }
+    }
+    AST_close('ExportNamedDeclaration');
+  }
+  function parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, isGlobalToplevel, astProp) {
     ASSERT(parseExportStatement.length === arguments.length, 'arg count');
+
     // export * FromClause ;
     // export ExportClause FromClause ;
     // export ExportClause ;
@@ -4451,311 +4745,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let exportToken = curtok;
     ASSERT_skipToIdentStarCurlyOpen($ID_export, lexerFlags);
 
-    let needsSemi = true; // only classes and function decls don't get this. var/let/const semi's are parsed elsewhere
-
     if (curtok.type === $ID_default) {
-      AST_open(astProp, {
-        type: 'ExportDefaultDeclaration',
-        loc: AST_getBaseLoc(exportToken),
-        declaration: undefined,
-      });
-      ASSERT_skipToExpressionStart($ID_default, lexerFlags); // Note: or a declaration, but that would start with ident, so is subsumed here... (footgun in 3... 2... 1...)
-
-      // https://tc39.github.io/ecma262/#sec-exports-static-semantics-exportednames
-      // https://tc39.github.io/ecma262/#sec-exports-static-semantics-exportedbindings
-
-      if (curtok.type === $ID_class) {
-        // `export default class {}`
-        // `export default class x{}`
-
-        let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_OPTIONAL, NOT_LABELLED, FDS_LEX, 'declaration');
-
-        // bound names: class name and "*default*"
-        // exported binding: class name and "*default*"
-        // exported names: "default"
-        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
-        addNameToExports(exportedNames, 'default');
-        addBindingToExports(exportedBindings, '*default*');
-        addBindingToExports(exportedBindings, exportedName);
-
-        needsSemi = false;
-      }
-      else if (curtok.type === $ID_function) {
-        // `export default function f(){}`
-        // `export default function* f(){}`
-        // `export default function(){}`
-        // `export default function* (){}`
-
-        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_OPTIONAL, NOT_LABELLED, FDS_VAR, 'declaration');
-
-        // bound names: func name and "*default*"
-        // exported binding: func name and "*default*"
-        // exported names: "default"
-        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
-        addNameToExports(exportedNames, 'default');
-        addBindingToExports(exportedBindings, '*default*');
-        addBindingToExports(exportedBindings, exportedName);
-
-        needsSemi = false;
-      }
-      else if (curtok.type === $ID_async) {
-        // `export default async function f(){}`
-        // `export default async function(){}`
-        // `export default async () => y`
-        // `export default async (x) => y`
-        // `export default async x => y`
-
-        let identToken = curtok;
-        ASSERT_skipRex($ID_async, lexerFlags); // function, arrow, or value-tail (for it can be a legacy async)
-        // note: can be any expression, function or legacy. default export doesnt care as much
-        if (curtok.type === $ID_function) {
-          // `export default async function f(){}`
-          // `export default async function(){}`
-
-          parseAsyncStatement(lexerFlags, scoop, identToken, IS_EXPORT, exportedBindings, NOT_LABELLED, FDS_VAR, 'declaration');
-
-          // bound names: func name and "*default*"
-          // exported binding: func name (already recorded if present) and "*default*"
-          // exported names: "default"
-          SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
-          addNameToExports(exportedNames, 'default');
-          addBindingToExports(exportedBindings, '*default*');
-
-          needsSemi = false;
-        } else {
-          // [v] `export default async () => y`
-          // [v] `export default async (x) => y`
-          // [v] `export default async x => y`
-          // [v] `export default async(x);`
-          // [v] `export default async.x;`
-
-          // https://tc39.github.io/ecma262/#prod-ExportDeclaration
-          // > export default [lookahead ∉ { function, async [no LineTerminator here] function, class }] AssignmentExpression [+In, ~Yield, ~Await] ;
-          // > AssignmentExpression[In, Yield, Await] : AsyncArrowFunction [?In, ?Yield, ?Await]
-          // so `export default async () => {};` should be fine
-          parseAsyncExpression(lexerFlags, identToken, NOT_NEW_ARG, IS_EXPORT, ASSIGN_EXPR_IS_OK, NOT_LHSE, 'declaration');
-
-          // (this won't have any other name than "default")
-          // bound names: "*default*"
-          // exported binding: "*default*"
-          // exported names: "default"
-          SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
-          addNameToExports(exportedNames, 'default');
-          addBindingToExports(exportedBindings, '*default*');
-        }
-      }
-      else {
-        // `export default 15`
-
-        // any expression is exported as is (but is not a live binding)
-        parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'declaration');
-
-        // bound names: "*default*"
-        // exported binding: "*default*"
-        // exported names: "default"
-        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
-        addNameToExports(exportedNames, 'default');
-        addBindingToExports(exportedBindings, '*default*');
-      }
-
-      if (needsSemi) {
-        // function decls and classes do not need asi
-        parseSemiOrAsi(lexerFlags);
-      }
-      AST_close('ExportDefaultDeclaration');
+      return parseExportDefault(lexerFlags, scoop, exportToken, exportedNames, exportedBindings, astProp);
     }
-    else if (curtok.type === $PUNC_STAR) {
-      // - `export * from "x"`
-      //           ^
-      // - `export * as y from "x"`
-      //           ^
 
-      // Must skip `as` or `from`, but we'll check for those explicitly here, so just skipAny
-      ASSERT_skipAny($PUNC_STAR, lexerFlags);
-
-      if (curtok.type === $ID_as) {
-        // - `export * as y from "x"`
-        //           ^
-
-        if (!allowExportStarAs) {
-          return THROW('The `export * as x from src`, syntax was introduced in ES2020 but currently targeted version is lower');
-        }
-
-        ASSERT_skipToIdentOrDie($ID_as, lexerFlags);
-        // note: the exported _name_ can be any identifier, keywords included
-        let exportedNameToken = curtok;
-
-        addNameToExports(exportedNames, exportedNameToken.str);
-
-        // Must skip `from` but we'll check for that explicitly next, so just skipAny
-        ASSERT_skipAny(curtok.str, lexerFlags);
-
-        if (curtok.type !== $ID_from) {
-          return THROW('Expected to find `as` or `from`, found `' + curtok.str + '` instead');
-        }
-
-        ASSERT_skipToStringOrDie($ID_from, lexerFlags); // Will throw if next token is not a string
-
-        let sourceToken = curtok;
-        ASSERT_skipToStatementStart($G_STRING, lexerFlags);
-
-        parseSemiOrAsi(lexerFlags);
-
-        AST_setNode(astProp, {
-          type: 'ExportNamedDeclaration',
-          loc: AST_getClosedLoc(exportToken),
-          specifiers: [{
-            type: 'ExportNamespaceSpecifier',
-            loc: AST_getClosedLoc(exportToken),
-            exported: AST_getIdentNode(exportedNameToken),
-          }],
-          declaration: null,
-          source: AST_getStringNode(sourceToken, false),
-        });
-
-        return;
-      }
-
-      if (curtok.type !== $ID_from) {
-        return THROW('Expected to find `as` or `from`, found `' + curtok.str + '` instead');
-      }
-
-      ASSERT_skipToStringOrDie($ID_from, lexerFlags); // Will throw if next token is not a string
-
-      let sourceToken = curtok;
-      ASSERT_skipToStatementStart($G_STRING, lexerFlags);
-
-      parseSemiOrAsi(lexerFlags);
-
-      AST_setNode(astProp, {
-        type: 'ExportAllDeclaration',
-        loc: AST_getClosedLoc(exportToken),
-        source: AST_getStringNode(sourceToken, false),
-      });
+    if (curtok.type === $PUNC_STAR) {
+      return parseExportStar(lexerFlags, exportToken, exportedNames, astProp);
     }
-    else {
-      AST_open(astProp, {
-        type: 'ExportNamedDeclaration',
-        loc: AST_getBaseLoc(exportToken),
-        specifiers: [],
-        declaration: undefined,
-        source: undefined,
-      });
-      if (curtok.type === $PUNC_CURLY_OPEN) {
-        AST_set('declaration', null);
-        // export {}
-        // export {} from "x"
 
-        // We don't know whether we need to use the names for exportBindings/exportNames until we see the token after
-        // the closing curly. If that's "from" then we don't use the list, otherwise we do. So collect the names in
-        // arrays :'( and act accordingly after the fact.
-        let tmpExportedNames = new Set;
-        ASSERT(tmpExportedNames._ = 'exported names');
-        ASSERT(tmpExportedNames._i = ++uid_counter);
-        let tmpExportedBindings = new Set;
-        ASSERT(tmpExportedBindings._ = 'exported bindings');
-        ASSERT(tmpExportedBindings._i = ++uid_counter);
-        parseExportObject(lexerFlags, tmpExportedNames, tmpExportedBindings);
-
-        if (curtok.type === $ID_from) {
-          // drop the tmp lists
-          ASSERT_skipToStringOrDie($ID_from, lexerFlags);
-          // TODO: what happens to dupe exported bindings or exported names here?
-          let fromToken = curtok;
-
-          ASSERT_skipToStatementStart($G_STRING, lexerFlags);
-          AST_setStringLiteral('source', fromToken, false);
-        } else {
-          AST_set('source', null);
-          // pump the names into the real sets now
-          tmpExportedNames.forEach(name => addNameToExports(exportedNames, name));
-          tmpExportedBindings.forEach(name => addBindingToExports(exportedBindings, name));
-        }
-      }
-      else if (curtok.type === $ID_var) {
-        // export var <bindings>
-        let varToken = curtok;
-        ASSERT_skipToBindingStart($ID_var , lexerFlags);
-        parseAnyVarDeclaration(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
-        AST_set('source', null);
-        needsSemi = false
-      }
-      else if (curtok.type === $ID_let) {
-        // export let <bindings>
-        let letToken = curtok;
-        ASSERT_skipToBindingStart($ID_let, lexerFlags);
-        parseAnyVarDeclaration(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
-        AST_set('source', null);
-        needsSemi = false
-      }
-      else if (curtok.type === $ID_const) {
-        // export const <bindings>
-        let constToken = curtok;
-        ASSERT_skipToBindingStart($ID_const, lexerFlags);
-        parseAnyVarDeclaration(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
-        needsSemi = false
-        AST_set('source', null);
-      }
-      else if (curtok.type === $ID_class) {
-        // export class ...
-        let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX,'declaration');
-        addNameToExports(exportedNames, exportedName);
-        addBindingToExports(exportedBindings, exportedName);
-        needsSemi = false;
-        AST_set('source', null);
-      }
-      else if (curtok.type === $ID_function) {
-        // - `export function f(){}`
-        // - `export function* f(){}`
-        // (anonymous should not be allowed but parsers seem to do it anyways)
-        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX, 'declaration');
-        addNameToExports(exportedNames, exportedName);
-        addBindingToExports(exportedBindings, exportedName);
-        AST_set('source', null);
-        needsSemi = false;
-      }
-      else if (curtok.type === $ID_async) {
-        // - `export async function f(){}`
-        // - `export async function *f(){}`
-        // (note: no arrows here because we require a name)
-        let asyncToken = curtok;
-        // TODO: test case to this change
-        ASSERT_skipDiv($ID_async, lexerFlags); // TODO: async could be ident, so `async/b` is a division
-
-        if (curtok.type !== $ID_function) {
-          // `export async \n a => b`
-          THROW('Can only export async functions (not arrows), did not find a function');
-        }
-        if (curtok.nl === true) {
-          // `export async \n function(){}`
-          THROW('Async can not be followed by a newline as it results in `export async;`, which is not valid (and probably not what you wanted)');
-        }
-
-        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, asyncToken, curtok, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX, 'declaration');
-        addNameToExports(exportedNames, exportedName);
-        addBindingToExports(exportedBindings, exportedName);
-        AST_set('source', null);
-        needsSemi = false;
-      }
-      else {
-        // `export foo;`
-        THROW('Unknown export type `' + tokenStrForError(curtok) + '` (note: you can only export individual vars through `export {foo};`)');
-      }
-
-      // ASSERT(needsSemi, 'only certain `export default ...` cases could omit a semi, not this one');
-      if (needsSemi) {
-        // function decls and classes do not need asi
-        if (curtok.nl === true && isRegexToken(curtok.type)) {
-          ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI), 'Export cases can only appear on the toplevel as a statement so ASI is always valid here');
-          // This is an edge case where there is a newline and the next token is regex. In this case we inject ASI.
-          // `export {} \n /foo/`
-          tok_asi();
-        } else {
-          parseSemiOrAsi(lexerFlags);
-        }
-      }
-      AST_close('ExportNamedDeclaration');
-    }
+    return parseExportNamed(lexerFlags, scoop, exportToken, exportedNames, exportedBindings, astProp);
   }
   function addNameToExports(exportedNames, exportedName) {
     ASSERT(exportedNames !== DO_NOT_BIND, 'use UNDEF_EXPORTS for exportedNames, not DO_NOT_BIND');
