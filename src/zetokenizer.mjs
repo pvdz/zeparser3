@@ -4998,16 +4998,15 @@ function ZeTokenizer(
     let indent = offset - (nl1);
 
     return (
-      usedInput.slice(0, nl2) + '\n' +
+      (nl2 > 400 ? '...\n' : '') +
+      usedInput.slice(nl2 > 400 ? nl2 - 400 : 0, nl2) + '\n' +
       ' '.repeat(Math.max(0, indent)) +
       '^'.repeat(Math.max(0, arrows)) +
       '------- error'+(msg?': '+msg:offset>=usedInput.length?' at EOF':'') + '\n' +
-      usedInput.slice(nl2) +
+      usedInput.slice(nl2, Math.min(nl2 + 100, usedInput.length)) +
+      (usedInput.length > 500 ? '\n...' : '') +
       ''
     );
-
-    // if (input.length < 100) return '```\n' + slice(0, pointer) + sep + slice(pointer, input.length) + '\n```';
-    // return '```\n' + slice(Math.max(0, pointer - 20), pointer) + sep + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
   }
 
   return {
