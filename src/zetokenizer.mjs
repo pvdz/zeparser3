@@ -624,6 +624,7 @@ function ZeTokenizer(
       // This is a whitespace token (which may be a comment) that is not yet collected.
       if (collectTokens === COLLECT_TOKENS_ALL) {
         let token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas);
+        ASSERT(!tokenStorage.includes(token), 'should not have added token to the list of tokens yet');
         tokenStorage.push(token);
       }
 
@@ -647,13 +648,16 @@ function ZeTokenizer(
   }
   function returnCommentToken(token) {
     if (collectTokens === COLLECT_TOKENS_ALL) {
+      ASSERT(!tokenStorage.includes(token), 'should not have added token to the list of tokens yet');
       tokenStorage.push(token);
     }
     return token;
   }
   function returnSolidToken(token) {
     ++solidTokenCount;
-    if (collectTokens === COLLECT_TOKENS_SOLID) {
+    if (collectTokens !== COLLECT_TOKENS_NONE) {
+      ASSERT(collectTokens === COLLECT_TOKENS_ALL || collectTokens === COLLECT_TOKENS_SOLID, 'enum', collectTokens);
+      ASSERT(!tokenStorage.includes(token), 'should not have added token to the list of tokens yet');
       tokenStorage.push(token);
     }
     consumedNewlinesBeforeSolid = false;
@@ -782,6 +786,7 @@ function ZeTokenizer(
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) {
+      ASSERT(!tokenStorage.includes(token), 'should not have added token to the list of tokens yet');
       tokenStorage.push(token, tokenStorage.pop());
     }
     ++anyTokenCount;
