@@ -345,6 +345,7 @@ import ZeTokenizer, {
   WEB_COMPAT_ON,
 
   tokenStrForError,
+  toktypeToString,
   T,
   ASSERT_pushCanonPoison,
   ASSERT_popCanonPoison,
@@ -12859,8 +12860,12 @@ function F(fdState) {
 
 export default ZeParser;
 export {
+  ZeParser,
+  ZeTokenizer,
   // this is a re-export but prevents external scripts from also needing to require zetokenizer
-  // (okay and in the build it all falls apart, anyways)
+  // (Try to keep non-dev artifacts in sync with the build)
+  toktypeToString,
+
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
@@ -12868,13 +12873,20 @@ export {
   GOAL_MODULE,
   GOAL_SCRIPT,
 
-  RETURN_ANY_TOKENS,
-  RETURN_COMMENT_TOKENS,
-  RETURN_SOLID_TOKENS,
-
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
-  VERSION_EXPONENTIATION,
-  VERSION_WHATEVER,
+  isWhiteToken,
+  isNewlineToken,
+  isCommentToken,
+  isIdentToken,
+  isNumberToken,
+  isBigintToken,
+  isStringToken,
+  isPunctuatorToken,
+  isRegexToken,
+  isTickToken,
+  isBadTickToken,
+  isNumberStringToken,
+  isNumberStringRegex,
 };

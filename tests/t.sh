@@ -58,6 +58,7 @@ ZeParser test runner help:
  p2            My shortcut for working with p1 with sudo :p
  p3            Undo system settings applied in p3
  z             Create build
+ tb            Test build (checks whether exports work as intended for parameters etc)
  devtools      Alias for `./t p --inspect --devtools --build` which can be used to debug the parser in chrome devtools
  deoptigate    Run deoptigate (see doptie.js for file config)
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
@@ -174,6 +175,9 @@ ZeParser test runner help:
     z)
       # Calls the build script
       ACTION='build'
+      ;;
+    tb)
+      ACTION='test-build'
       ;;
     p)
       ACTION='perf'
@@ -331,6 +335,13 @@ case "${ACTION}" in
           node_modules/.bin/prettier build/build_w_ast.mjs --write
       fi
     ;;
+
+    test-build)
+      if [[ -z "${NO_BUILDING}" ]]; then
+        ./t z --node-bin ${NODE_BIN}
+      fi
+      ${NODE_BIN} --experimental-modules --max-old-space-size=8192 tests/build.mjs
+      ;;
 
     perf2)
       if [[ -z "${NO_BUILDING}" ]]; then

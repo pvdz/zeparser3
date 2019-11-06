@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import Par from '../src/zeparser.mjs';
+import Par, {COLLECT_TOKENS_NONE} from '../src/zeparser.mjs';
 import {GOAL_MODULE} from "../src/zetokenizer.mjs";
 import {scrub} from './scrub.mjs';
 import Terser from 'terser';
@@ -53,7 +53,7 @@ function processSource(source, constMap, recordConstants, keepAsserts) {
     ;
   }
 
-  let z = Par(source, GOAL_MODULE, true, {
+  let z = Par(source, GOAL_MODULE, COLLECT_TOKENS_NONE, {
     webCompat: false, // Probably...
     // astRoot: ast,
     // tokenStorage: tokens,
@@ -92,9 +92,37 @@ ${Object.getOwnPropertyNames(builds).map(name => {
   return '// <' + name + '>\n' + builds[name] + '\n// </' + name + '>\n';
 }).join('\n')}
 
-export default ZeParser;
 export {
   ZeParser,
+  ZeTokenizer,
+
+  COLLECT_TOKENS_NONE,
+  COLLECT_TOKENS_SOLID,
+  COLLECT_TOKENS_ALL,
+
+  GOAL_MODULE,
+  GOAL_SCRIPT,
+
+  WEB_COMPAT_OFF,
+  WEB_COMPAT_ON,
+
+  VERSION_EXPONENTIATION,
+  VERSION_WHATEVER,
+
+  isWhiteToken,
+  isNewlineToken,
+  isCommentToken,
+  isIdentToken,
+  isNumberToken,
+  isBigintToken,
+  isStringToken,
+  isPunctuatorToken,
+  isRegexToken,
+  isTickToken,
+  isBadTickToken,
+  isNumberStringToken,
+  isNumberStringRegex,
+
   toktypeToString,
 ${NATIVE_SYMBOLS?`
   PERF_OptimizeFunctionOnNextCall,
@@ -120,7 +148,7 @@ ${NATIVE_SYMBOLS?`
 
   // Sanity check, won't work with native symbols (obviously)
   if (!NATIVE_SYMBOLS) {
-    Par(build, GOAL_MODULE, false, {
+    Par(build, GOAL_MODULE, COLLECT_TOKENS_NONE, {
       webCompat: false, // Probably...
       fullErrorContext: true,
 

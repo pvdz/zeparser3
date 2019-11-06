@@ -88,6 +88,21 @@ let assertSkipWhitelist = new Set([
   'ASSERT_skipToExpressionStartSquareCloseComma',
 ]);
 
+let exportedSymbols = [
+  'COLLECT_TOKENS_NONE',
+  'COLLECT_TOKENS_SOLID',
+  'COLLECT_TOKENS_ALL',
+
+  'GOAL_MODULE',
+  'GOAL_SCRIPT',
+
+  'WEB_COMPAT_OFF',
+  'WEB_COMPAT_ON',
+
+  'VERSION_EXPONENTIATION',
+  'VERSION_WHATEVER',
+];
+
 // Collect identifier names to inline
 // This should contain all constants from specific files with the values they should replace
 let constMap = new Map;
@@ -716,7 +731,9 @@ function VariableDeclaration(node, fromFor) {
     assert(!fromFor, true, 'files from which constants are recorded would not use const inside a for-header');
     let name = decl.id.name;
     constMap.set(name, $w(decl.init)); // All constants must have an init as per spec
-    return '/* const ' + name + ' */;\n';
+    if (!exportedSymbols.includes(name)) return '/* const ' + name + ' */;\n';
+    // Return the constant because it is also exported in the build
+    return node.kind + ' ' + name + ' = ' + $w(node.declarations[0].init) + ';';
   }
   return node.kind + ' ' + node.declarations.map($).join(', ') + (fromFor ? '' : ';'); // no semi inside `for`
 }
