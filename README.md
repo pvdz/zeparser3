@@ -1,4 +1,10 @@
-# ZeParser 3
+# THIS PROJECT HAS BEEN RENAMED TO TENKO
+
+--> https://github.com/pvdz/tenko
+
+Archiving this repo for legacy (and git history)
+
+## ZeParser 3
 
 A "pixel perfect" 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES11.
 
